@@ -35,23 +35,114 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
  1) 48.5180  51.2800  1 1  #  position x, y 					- Light curve center coordinates
  3) 20.0890     1          #  Integrated magnitude 				- Brightness parameter
  4) 50.1160      1          #  R_e (half-light radius)   [pix] 			- Size of the light curve at half brightness, in pixels
- 5) 1.0000      1          #  Sersic index n (de Vaucouleurs n=4)	 	- The Sersic exponent (deVauc=4, expdisk/spirals=1)
+ 5) 2.0000      1          #  Sersic index n (de Vaucouleurs n=4)	 	- The Sersic exponent (deVauc=4, expdisk/spirals=1)
  6) 0.0000      0          #     ----- 
  7) 0.0000      0          #     ----- 
  8) 0.0000      0          #     ----- 
- 9) 0.7570      1          #  axis ratio (b/a)  				- Semiminoraxis/semimajor axis ratio
+ 9) 1.0      1          #  axis ratio (b/a)  				- Semiminoraxis/semimajor axis ratio
 10) -60.3690    1          #  position angle (PA) [deg: Up=0, Left=90] 		- Orientation of the ellipse
  Z) 0                      #  output option (0 = resid., 1 = Don't subtract) 
+#  Bending modes
+#B1)  0.75      1       # Bending mode 1 (shear)
+#B2)  0.75      1       # Bending mode 2 (banana shape)
+#B3)  0.2      1       # Bending mode 3 (S-shape)
 
-R0) powerlaw	       # PA rotation function (power, log, none)
-R1) 15.        1       # bar radius  [pixels] 					- Inner radius,  rotation start
-R2) 50.       1       # 96% asymptotic radius (i.e. at 96% of tanh rotation) 	- Outer radius, rotation end
-R3) 360.       1       # cumul. coord. rotation out to asymp. radius [degrees] 	- Total amount of rotation
-R4) 0.5	       1       # asymptotic spiral arm powerlaw 		  
-R9) 0.5	       1       # inclination to L.o.S. (controls projected axis ratio)	
-R10) 30.       1       # sky position angle
+#  Azimuthal fourier modes
+# Fourier modes modify the shape of the ellipse by applying the pertubation re*Sum(1+am*cos(m(theta+phi))) for m=1 to N, N being the fourier mode in FN, phi being the phase angle (where the pertubation starts), re being the radius of the ellipse being modified at the current point, and the theta being the arctan(y/x) of the ellipse at the current point.
+#F1)  0.07  30.1  1  1  # Az. Fourier mode 1, amplitude and phase angle
+#F2)  0.10  0.0  1  1  # Az. Fourier mode 2, amplitude and phase angle
+#F6)  0.03  10.5  1  1  # Az. Fourier mode 6, amplitude and phase angle
+#F10)  0.08  20.5  1  1  # Az. Fourier mode 10, amplitude and phase angle
+#F20)  0.01  23.5  1  1  # Az. Fourier mode 20, amplitude and phase angle
+
+#  Traditional Diskyness/Boxyness parameter c
+#C0) 0.1         1      # traditional diskyness(-)/boxyness(+)
+
+#R0) powerlaw	       # PA rotation function (power, log, none)
+#R1) 15.        1       # bar radius  [pixels] 					- Inner radius,  rotation start
+#R2) 50.       1       # 96% asymptotic radius (i.e. at 96% of tanh rotation) 	- Outer radius, rotation end
+#R3) 360.       1       # cumul. coord. rotation out to asymp. radius [degrees] 	- Total amount of rotation
+#R4) 0.5	       1       # asymptotic spiral arm powerlaw 		  
+#R9) 0.5	       1       # inclination to L.o.S. (controls projected axis ratio)	
+#R10) 30.       1       # sky position angle
+#  Create a truncation by multiplying a profile function with a
+#  hyperbolic tangent transition.  The break radius, r_break, is defined
+#  as the radius which has 99% the flux of an original function, whereas
+#  the softening radius, r_soft, is where the function has only 1% of the 
+#  flux of the original.  Under normal circumstances, r_break < r_soft.  
+#  On the other hand, r_break > r_soft is also possible.  This happens,
+#  for instance, if one wants to generate a ring model with a hyperbolic
+#  tangent truncation in the inner region.
+#
+#  When multiple profiles are linked, mathematically they are linked by:
+#    f_net(r) = Sum{f_inner(r)} * (1-s(r)) + Sum{f_outer(r)} * s(r).
+#  The transition radii are shared by the inner & outer functions in the
+#  sense that r_break is where inner profiles reaches 99% of their normal 
+#  flux; it is also the radius where the outer functions reaches 1% of their 
+#  own normal flux, and vice versa.  When this happens, be careful that the 
+#  sense of the break vs. asymptotic radius are in the correct sense, or 
+#  else things can get very confusing very quickly.  So as to minimize 
+#  confusion when linking, consistently use r_break < r_soft.
+#  
+#  When linking two profiles, the flux parameter for the inner component 
+#  is the surface brightness at the original (untruncated) effective 
+#  radius "Re" for the Sersic profile instead of the total flux, or central
+#  surface brightness for all other profiles (gaussian, moffat, etc.).
+#  The outer component flux normalization is the surface brightness
+#  at the **break** radius.  
+#
+#  Note that the Fourier and bending modes can operate on the truncation
+#  parameters independently of the light component that the truncation 
+#  parameters are modifying.
+#  
+#        
+#        v---  r_break ---v
+#        
+#        ____           ___
+#       /                  \
+#   ___/                    \___
+#
+#      ^----   r_soft   ----^
+#
+#  There are 4 kinds of truncation modes, designated by, "radial", "radial-b",
+#  for Type 1, versus "radial2", and "radial2-b" for Type 2.  
+#
+#  The difference between Type 1 and Type 2 is in the definition of 
+#  parameters T3 and T4.  For Type 1, T3 is "Break radius", and T4 is
+#  the "Softening length", i.e. (R_break) and (Delta R).  For Type 2, T3 is 
+#  still the "Break radius", but T4 is the "Softening radius", i.e. 
+#  inner and outer break radius.  
+#
+#  As for Type "b" versus Type "a" (i.e. non-b), the difference is that
+#  "Type a" is intended for spiral structures, i.e. the truncation shape 
+#  (axis ratio and PA) are tilted and rotated by the same angles as the 
+#  spiral arms.  Whereas for "Type b" truncations, the shape parameters
+#  refer to how they appear in projection, i.e. in the plane of the sky.
+#  For non-spiral models, there's no difference between "Type a" and
+#  "Type b".
+
+# Object number: 2
+# Truncated Sersic function
+ 0) sersic             # Object type
+ 1) 48.  50.  1 1    # position x, y        [pixel]
+ 3) 20.00      1       # total magnitude    
+ 4) 50.30       1       #     R_e              [Pixels]
+ 5) 1.0       1       # Sersic exponent (deVauc=4, expdisk=1)  
+ 9) 0.30       1       # axis ratio (b/a)   
+10) 10.0       1       # position angle (PA)  [Degrees: Up=0, Left=90]
+Ti) 3                  # Inner truncation by component 3
+ Z) 0                  # leave in [1] or subtract [0] this comp from data?
 
 # Object number: 3
+T0) radial                 #  truncation			 
+T1) 48.  50.  1 1        #  Centroid of truncation function (optional)
+T4) 25      1          #  Break radius (99% normal flux)    [pixels]		-Radius of truncation
+T5) 9.1777      1          #  Softening length (1% normal flux) [pixels]	-Smoothing radius
+T9)  0.7        1          #  Axis ratio (optional)
+T10)  -32.      1          #  Position angle (optional)
+F1) 0.1  30     1          #  Fourier mode1 (now modifying truncation)
+
+# Object number: 4
  0) sky                    #  object type
  1) 1.3920      1          #  sky background at center of fitting region [ADUs]
  2) 0.0000      0          #  dsky/dx (sky gradient in x)
