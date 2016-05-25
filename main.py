@@ -1,24 +1,13 @@
-from sys import argv
-from spiralgalaxy import SpiralGalaxy
-from sparcfire2galfit import Sparcfire2Galfit
-
-
-def file_input():
-	with open(argv[1]) as f:
-		tsv_headers = f.readline().strip().split('\t')
-		needed_headers = ["name","bulgeAxisRatio","bulgeAvgBrightness","diskAxisRatio","diskMajAxisAngle","totalNumArcs"]
-		col_num = [tsv_headers.index(i) for i in needed_headers]
-		for line in f:
-			line = line.strip().split('\t')
-			params = [line(i) for i in len(line) if i in col_num]
-			S2G = Sparcfire2Galfit(SpiralGalaxy(params(0),float(params(1)),float(params(2)),float(params(3)),float(params(4))))
-			S2G.output_galfit()
-
-def single_input():
-	Sparcfire2Galfit(SpiralGalaxy("Default",1.0,1.0,1.0,45.0,0)).output_galfit()
+import csv
+import sys
 
 if __name__ == "__main__":
-	if len(argv) == 2:
-		tsv_input()
-	else:
-		single_input()
+	with open(sys.argv[1], "rt") as fin:
+		reader = csv.reader(fin)
+		sfdict = {rows[0].strip():rows[1].strip() for rows in reader}
+		headers = ["name", "bulgeAvgBrt", "standardizedCenterR", "standardizedCenterC", "diskMinAxsLen", "diskAxisRatio", "diskMajAxsAngleRadians"]
+
+	with open(sfdict[headers[0]] + ".feedme", "wt") as fout:
+		with open("template.feedme", "rt") as fin:
+			for line in fin:
+				fout.write(line.replace('$name', sfdict[headers[0]]).replace('$integratedmagnitude', str(float(sfdict[headers[1]]) * 10)).replace('$centerx', sfdict[headers[2]]).replace('$centery', sfdict[headers[3]]).replace('$radius', str(float(sfdict[headers[4]]) / 2)).replace('$axisratio', sfdict[headers[5]]).replace('$positionangle', str(float(sfdict[headers[6]]) * 180 / 3.14592)))

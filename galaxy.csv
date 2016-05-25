@@ -1,0 +1,156 @@
+name,1237651752944205838_r
+ fit_state, OK
+ warnings, lgspFitting:highErrPerLenForLongArc:2249.21|
+ star_mask_used,unavailable 
+ noise_mask_used,unavailable 
+ chirality_maj,S-wise
+ chirality_alenWtd, S-wise
+ chirality_wtdPangSum, S-wise
+ chirality_longestArc, EQ
+ badBulgeFitFlag, true
+ bulgeAxisRatio,5.14E-08
+ bulgeMajAxsLen,5.084336079
+ bulgeMajAxsAngle,-1.15072094
+ bulgeAvgBrt,0.921568628
+ bulgeDiskBrtRatio,4.567279033
+ numElpsRefits,7
+ diskAxisRatio,0.823344454
+ diskMinAxsLen,107.7903845
+ diskMajAxsLen,130.917727
+ diskMajAxsAngleRadians,-0.33143706
+ inputCenterR,128.7342255
+ inputCenterC,128.8812884
+ iptSz, [256 256]
+ muDist,0.44748457
+ muDistProp,0.003495973
+ covarFit, [147.2550398 -15.10962617;-15.10962617 108.5481646]
+ wtdLik,0.434295164
+ likOfCtr,0.001267495
+ brtUnifScore,0.28627451
+ gaussLogLik,-3342573.426
+ contourBrtRatio,1.242416785
+ standardizedCenterR,128.9896933
+ standardizedCenterC,128.8252532
+ hasDeletedCtrClus, false
+ failed2revDuringMergeCheck, false
+ failed2revDuringSecondaryMerging, false
+ failed2revInOutput, false
+ cpu_time,40.17
+ wall_time,59.311268
+ bar_candidate_available, true
+ bar_used, true
+ alenAt25pct,340.8015597
+ alenAt50pct,193.7285724
+ alenAt75pct,193.7285724
+ rankAt25pct,1
+ rankAt50pct,2
+ rankAt75pct,2
+ avgArcLength,117.1917313
+ minArcLength,26.47954828
+ lowerQuartileArcLength,33.5642385
+ medianArcLength,54.28823435
+ upperQuartileArcLength,193.7285724
+ maxArcLength,340.8015597
+ totalArcLength,703.1503875
+ totalNumArcs,6
+ chirality_votes_maj, [4 1]
+ chirality_votes_alenWtd, [328.7845894 33.5642385]
+ alenWtdPangSum,4555.696725
+ top2_chirality_agreement, 'disagree'
+ pa_longest,0
+ pa_avg,10.13677042
+ pa_avg_abs,13.56281648
+ pa_avg_domChiralityOnly,17.77469017
+ pa_alenWtd_avg,6.478979186
+ paErr_alenWtd_stdev,8.694773996
+ pa_alenWtd_avg_abs,7.460214175
+ paErr_alenWtd_stdev_abs,7.869019672
+ pa_alenWtd_avg_domChiralityOnly,14.90542673
+ paErr_alenWtd_stdev_domChiralityOnly,4.300775665
+ pa_totBrtWtd,14.49472774
+ pa_avgBrtWtd,17.1104798
+ pa_alenWtd_median,0
+ pa_alenWtd_lowQuartile,0
+ pa_alenWtd_highQuartile,13.42141795
+ pa_alenWtd_lowDecile,0
+ pa_alenWtd_highDecile,13.73199452
+ pa_alenWtd_median_domChiralityOnly,13.42141795
+ pa_alenWtd_lowQuartile_domChiralityOnly,13.42141795
+ pa_alenWtd_highQuartile_domChiralityOnly,13.73199452
+ pa_alenWtd_lowDecile_domChiralityOnly,13.42141795
+ pa_alenWtd_highDecile_domChiralityOnly,14.5584933
+ sorted_agreeing_pangs, [13.42141795 13.73199452 14.5584933 29.38685491]
+ sorted_agreeing_arclengths, [193.7285724 70.53606097 38.04040773 26.47954828]
+ numArcs_largest_length_gap,1
+ numDcoArcs_largest_length_gap,1
+ numArcs_arclength_function_flattening,3
+ numDcoArcs_arclength_function_flattening,0
+ bar_score_img,4.5446
+ bar_cand_score_orifld,9.8254
+ bar_angle_input_img,33.5101
+ bar_half_length_input_img,10.3906
+ bar_angle_standardized_img,142.5
+ bar_half_length_standardized_img,35
+ numArcsGE000,6
+ numArcsGE010,6
+ numArcsGE020,6
+ numArcsGE040,3
+ numArcsGE050,3
+ numArcsGE055,3
+ numArcsGE060,3
+ numArcsGE065,3
+ numArcsGE070,3
+ numArcsGE075,2
+ numArcsGE080,2
+ numArcsGE085,2
+ numArcsGE090,2
+ numArcsGE095,2
+ numArcsGE100,2
+ numArcsGE120,2
+ numArcsGE140,2
+ numArcsGE160,2
+ numArcsGE180,2
+ numArcsGE200,1
+ numArcsGE220,1
+ numArcsGE240,1
+ numArcsGE260,1
+ numArcsGE280,1
+ numArcsGE300,1
+ numArcsGE350,0
+ numArcsGE400,0
+ numArcsGE450,0
+ numArcsGE500,0
+ numArcsGE550,0
+ numArcsGE600,0
+ numDcoArcsGE000,4
+ numDcoArcsGE010,4
+ numDcoArcsGE020,4
+ numDcoArcsGE040,2
+ numDcoArcsGE050,2
+ numDcoArcsGE055,2
+ numDcoArcsGE060,2
+ numDcoArcsGE065,2
+ numDcoArcsGE070,2
+ numDcoArcsGE075,1
+ numDcoArcsGE080,1
+ numDcoArcsGE085,1
+ numDcoArcsGE090,1
+ numDcoArcsGE095,1
+ numDcoArcsGE100,1
+ numDcoArcsGE120,1
+ numDcoArcsGE140,1
+ numDcoArcsGE160,1
+ numDcoArcsGE180,1
+ numDcoArcsGE200,0
+ numDcoArcsGE220,0
+ numDcoArcsGE240,0
+ numDcoArcsGE260,0
+ numDcoArcsGE280,0
+ numDcoArcsGE300,0
+ numDcoArcsGE350,0
+ numDcoArcsGE400,0
+ numDcoArcsGE450,0
+ numDcoArcsGE500,0
+ numDcoArcsGE550,0
+ numDcoArcsGE600,0
+ , 
