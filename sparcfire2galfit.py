@@ -1,4 +1,5 @@
 import sys
+import math
 from spiralgalaxy import SpiralGalaxy
 
 class Sparcfire2Galfit:
@@ -53,7 +54,7 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 		print("""
 # Object number: 2
 0) sky                    #  object type
-1) 1.3920      1          #  sky background at center of fitting region [ADUs]
+1) 5.49		1          #  sky background at center of fitting region [ADUs]
 2) 0.0000      0          #  dsky/dx (sky gradient in x)
 3) 0.0000      0          #  dsky/dy (sky gradient in y)
 Z) 0                      #  output option (0 = resid., 1 = Don't subtract)
@@ -66,7 +67,12 @@ Z) 0                      #  output option (0 = resid., 1 = Don't subtract)
 		return "1)\t48.5180\t51.2800\t1\t1"
 
 	def integrated_magnitude(self):
-		return "3)\t20.0890\t1"
+		# m = u - 5log(a) - 2.5log[(2n)!(pi)]
+		u = 0 # surface brightness
+		n = 2 # sersic index
+		a = 0 # scale length
+		m = u - (5 * math.log(a,10)) - (2.5 * log(math.factorial(2 * n) * math.pi))
+		return "3)\tstr(m)\t1"
 
 	def half_light_radius(self):
 		return "4)\t4.5160\t1"
@@ -106,49 +112,3 @@ Z) 0                      #  output option (0 = resid., 1 = Don't subtract)
 
 	def Z(self):
 		return "Z)\t0"
-
-
-
-# IMAGE and GALFIT CONTROL PARAMETERS
-# A) gal.fits            # Input data image (FITS file)
-# B) imgblock.fits       # Output data image block
-# C) none                # Sigma image name (made from data if blank or "none") 
-# D) psf.fits   #        # Input PSF image and (optional) diffusion kernel
-# E) 1                   # PSF fine sampling factor relative to data 
-# F) none                # Bad pixel mask (FITS image or ASCII coord list)
-# G) none                # File with parameter constraints (ASCII file) 
-# H) 1    93   1    93   # Image region to fit (xmin xmax ymin ymax)
-# I) 100    100          # Size of the convolution box (x y)
-# J) 26.563              # Magnitude photometric zeropoint 
-# K) 0.038  0.038        # Plate scale (dx dy)    [arcsec per pixel]
-# O) regular             # Display type (regular, curses, both)
-# P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
-
-
-# Object number: 1
-#  0) sersic                 #  object type
-#  1) 48.5180  51.2800  1 1  #  position x, y
-#  3) 20.0890     1          #  Integrated magnitude	
-#  4) 4.5160      1          #  R_e (half-light radius)   [pix]
-#  5) 8.2490      1          #  Sersic index n (de Vaucouleurs n=4) 
-#  6) 0.0000      0          #  
-#  7) 0.0000      0          #     ----- 
-#  8) 0.0000      0          #     ----- 
-#  9) 0.7570      1          #  axis ratio (b/a)
-# 10) 60.3690    1          #  position angle (PA) [deg: Up=0, Left=90]
-# R0) powerlaw	       # PA rotation function (power, log, none)
-# R1) 30.        1       # bar radius  [pixels]
-# R2) 100.       1       # 96% asymptotic radius (i.e. at 96% of tanh rotation)
-# R3) 275.       1       # cumul. coord. rotation out to asymp. radius [degrees] 
-# R4) 0.5	       1       # asymptotic spiral arm powerlaw 
-# R9) 0.5	       1       # inclination to L.o.S. (controls projected axis ratio)
-# R10) 30.       1       # sky position angle
-# B3)  0.03      1       # Bending mode 3 (S-shape)
-#  Z) 0                      	#output option (0 = resid., 1 = Don't subtract)
-
-# Object number: 2
-# 0) sky                    #  object type
-# 1) 1.3920      1          #  sky background at center of fitting region [ADUs]
-# 2) 0.0000      0          #  dsky/dx (sky gradient in x)
-# 3) 0.0000      0          #  dsky/dy (sky gradient in y)
-# Z) 0                      #  output option (0 = resid., 1 = Don't subtract)
