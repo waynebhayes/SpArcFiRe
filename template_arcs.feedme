@@ -16,7 +16,7 @@ R1) $r_start     1          #  Bar radius [pixels]
 R2) $r_end     1          #  Spiral outer (i.e. asymptotic) radius [pixels]
 R3) $relative_theta_end     1          #  Cumul. rotation out to outer radius [degrees]
 R4) 1.6000      1          #  Asymptotic spiral powerlaw 
-R9) 0.0000     1          #  Inclination to L.o.S. [degrees]
+R9) $inclination     1          #  Inclination to L.o.S. [degrees]
 R10) $pitch_angle    1          #  Sky position angle
 F1) 0.0689   0 1 1  #  Azim. Fourier mode 1, amplitude, & phase angle
 #F3) 0.0526   28.7927  1 1  #  Azim. Fourier mode 3, amplitude, & phase angle

@@ -5,6 +5,7 @@
 
 import csv
 import sys
+import math
 
 if __name__ == "__main__":
 	with open(sys.argv[1], "rt") as fin:
@@ -21,13 +22,14 @@ if __name__ == "__main__":
 	with open(sfdict[headers[0]] + ".feedme", "wt") as fout:
 		with open("template.feedme", "rt") as fin:
 			for line in fin:
-				fout.write(line.replace('$name', sfdict[headers[0]]).replace('$integratedmagnitude', str(float(sfdict[headers[1]]) * 10)).replace('$centerx', sfdict[headers[2]]).replace('$centery', sfdict[headers[3]]).replace('$radius', str(float(sfdict[headers[4]]) / 2)).replace('$axisratio', sfdict[headers[5]]).replace('$positionangle', str(float(sfdict[headers[6]]) * 180 / 3.14592)))
+				fout.write(line.replace('$name', sfdict[headers[0]]).replace('$integratedmagnitude', str(float(sfdict[headers[1]]) * 10)).replace('$centerx', sfdict[headers[2]]).replace('$centery', sfdict[headers[3]]).replace('$radius', str(float(sfdict[headers[4]]) / 2)).replace('$axisratio', sfdict[headers[5]]).replace('$positionangle', str(float(sfdict[headers[6]]) * 180 / 3.14592 + 90)))
 		with open("template_arcs.feedme", "rt") as fin_arcs:
 			template_arcs = fin_arcs.readlines();
 			object_number = 3 #1: disk, 2: sky
 			for key in sfarcsdict:
 				arc_headers = sfarcsdict[key]
-				if key.isdigit() and (float(arc_headers[6]) * 180 / 3.14592) > 90: #if header is not column labels and arc has rotation greater than 90, add to feedme
+				if key.isdigit() and (float(arc_headers[6]) * 180 / 3.14592 + 90) > 90: #if header is not column labels and arc has rotation greater than 90, add to feedme
 					for line in template_arcs:
-						fout.write(line.replace('$name', sfdict[headers[0]]).replace('$integratedmagnitude', str(float(sfdict[headers[1]]) * 10)).replace('$centerx', sfdict[headers[2]]).replace('$centery', sfdict[headers[3]]).replace('$radius', str(float(sfdict[headers[4]]) / 2)).replace('$axisratio', sfdict[headers[5]]).replace('$positionangle', str(float(sfdict[headers[6]]) * 180 / 3.14592)).replace('$alenRank', str(object_number)).replace('$pitch_angle', arc_headers[3]).replace('$relative_theta_end', str(float(arc_headers[6]) * 180 / 3.14592)).replace('$r_start', arc_headers[7]).replace('$r_end', arc_headers[8]))
+						fout.write(line.replace('$name', sfdict[headers[0]]).replace('$integratedmagnitude', str(float(sfdict[headers[1]]) * 10)).replace('$centerx', sfdict[headers[2]]).replace('$centery', sfdict[headers[3]]).replace('$radius', str(float(sfdict[headers[4]]) / 2)).replace('$axisratio', sfdict[headers[5]]).replace('$positionangle', str(float(sfdict[headers[6]]) * 180 / 3.14592 + 90)).replace('$alenRank', str(object_number)).replace('$pitch_angle', str(float(sfdict[headers[6]]) * 180 / 3.14592 + 90 + float(arc_headers[3]))).replace('$inclination', str(math.atan(math.log1p(float(sfdict[headers[5]]))) * 180 / 3.14592)).replace('$relative_theta_end', str(float(arc_headers[6]) * 180 / 3.14592 + 90)).replace('$r_start', arc_headers[7]).replace('$r_end', arc_headers[8]))
 				object_number += 1
+				break
