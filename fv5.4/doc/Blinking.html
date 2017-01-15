@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+<head>
+<title>Blink Images/Graphs</title>
+</head>
+
+<body>
+<h1>Blink Images/Graphs</h1>
+
+Within POW, multiple images can be examined for differences by the
+common technique of overlaying them and blinking them in rapid
+succession.  Pow provides two methods for doing this.
+
+<h2>Blink Images...</h2>
+
+Multiple images can be placed within a single POW graph.  This can be
+achieved by merging the contents of several graphs into a single one
+(via POW's Merge Graphs or Edit Graphs menu items), or, if the data is
+part of a 3-D data cube, by using an outside tool (eg, fv) to produce
+a graph with each 2-D slice of the cube treated as a separate image.
+After the graph containing all the desired images has been created and
+selected, select <B>Blink Images</B> from the <a href="Edit.html">Edit
+menu</A>.  A dialog box containing information about the current graph
+and controls for the blinking behavior will be displayed. <p>
+
+At the top of the dialog box is the name of the selected graph
+followed by the number of images in the graph and the image number
+currently in the foreground.  The <B>Prev</B> and <B>Next</B> buttons
+immediately below this information step through the images, bringing
+each one to the foreground in turn.  It is possible to either blink
+all the images in order or in a specified sequence.  The <B>Add to
+List</B> button appends to this sequence list the image currently in
+the foreground.  The sequence <B>List</B> entry box consists of a
+comma-separated list of image numbers and/or ranges (e.g.,
+1-3,5,8-10,14).  A pair of radio buttons determines with the sequence
+list is used or all the images are blinked in order.  Two checkbuttons
+control whether blinking is <B>Loop</B>ed--repeated indefinitely--or
+stopped after the last image is displayed, or blinked in
+<B>Reverse</B> order.  A slidebar controls the <B>Speed</B> at which
+blinking occurs.  All these controls can be
+modified while images are being blinked and will take effect
+immediately.  To have a new list of frames take effect, though, one must
+reselect the <B>List</B> radio button. <P>
+
+When the controls are set to their desired values, press the <B>Blink
+Images</B> button to begin blinking.  The button changes to <B>Stop
+Blinking</B>.  <P>
+
+If the selected graph is changed while the dialog box is open, press
+the <B>Reload Info</B> button to update the dialog with the new
+information.<P>
+
+<h2>Blink Graphs...</h2>
+
+It is not always possible to put all one's images into a single
+graph--images may lack a common
+coordinate system for automatic alignment--preventing the previous
+blinking method from being used.  The <B>Blink Graphs</B> menu item
+allows individual graphs to be blinked.  There is no "natural order"
+with which to blink graphs, so the user is presented with a list of
+all <B>Available Graphs</B> and must specify which graphs to blink and
+in which order.  The <B>Add</B> and <B>Insert</B> buttons append to
+the end or insert at the current selection point of the <B>Blink
+Order</B> list the highlighted graphs from the Available Graphs list.
+A graph may appear multiple times in the Blink Order list.  The
+<B>Delete</B> button removes all highlighted entries from the Blink
+Order list.  As in the Blink Images method, a slidebar controls the
+speed of the blinking.  <P>
+
+Blink begins when the <B>Blink Graphs</B> button is
+pressed.  Blinking is always in the specified order (no reverse
+option) and will repeat indefinitely until the <B>Stop Blinking</B>
+button (same as the Blink Graphs button) is pressed. <P>
+
+As graphs normally don't initially overlap and will likely need to be
+repositioned, the graphs in the Blink Order list can be moved from
+within the dialog box.  A compass labeled <B>Shift &amp; Align
+Graphs</B> is present in the center of the dialog box.  Clicking on
+the center of the compass aligns all the graphs in the list according
+to the top right corner of the first graph.  Clicking on any of the
+arrows shifts the highlighted graphs 10 pixels in that direction.
+Shift-clicking an arrow shifts the graphs 1 pixel at a time.  The
+graphs continue to move in these increments until the mouse button is
+released or the cursor leaves the compass arrow. (Note: if an
+individual graph is present several times in the Blink Order list,
+each instance of it in the highlighted selection will experience the
+shift.)  Graphs can be repositioned with the compass while
+blinking. <P>
+
+If graphs are added to the POW canvas while the dialog box is open,
+press the <B>Reload Info</B> button to create a new list of Available
+Graphs.<P>
+</body>
+</html>

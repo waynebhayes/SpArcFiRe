@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>The POW edit menu</title>
+  </head>
+
+  <body>
+      <h1>The POW edit menu</h1>
+      
+      <ul>
+	<li> <a href="EditGraphs.html"><b>Edit Graph:</b></a> 
+        This sequence of dialogues allows you to change the curves and images
+        displayed on a graph, and to define new curves and new images from 
+	existing data.  The ability to read in new data will be available soon.
+
+	<li> <a href="Labels.html"><b>Add Text Label:</b></a> 
+	You can add an arbitrary text label to
+        a graph.  One can control the font used for each label.  Labels can be
+	attached either to the graph's geometry (eg, legends) or to its
+	coordinate system (eg, labeling objects).
+
+        <li> <b>Choose Graph Size:</b> You can resize the currently selected 
+        graph to given dimensions (in pixels).</li>
+
+        <li> <b>Duplicate Graph:</b> Make an exact duplicate of the current
+	graph.</li>
+
+        <li> <b>Delete Graph:</b> Permanantly remove a graph.  The objects within
+	the graph are not destroyed, however, and are still available from the
+	Edit Graph window.</li>
+
+	<li> <b>Merge Graphs:</b> Selecting a graph from the hierarchical
+        menu will cause the contents of that graph to be copied into the
+        currently selected graph.
+
+	<li> <b>Hide Graph:</b> This allows you to remove any graph from 
+               display on the POW canvas.  The graph may be replotted
+               later. </li>
+
+	<li> <b>Replot Graph:</b> This allows you to restore a previously
+               hidden graph to the POW canvas. Replotting a graph will
+               cause POW to recalculate the x and y limits of the graph
+               to allow you to see all of the defined items on that graph;
+               that is all the points of all the curves and all of the
+               images will be visible.</li>
+
+        <li> <b>Axes Transforms:</b> Select the type of logarithmic/linear
+        axes to use for the current graph.  Any curves present will be remapped
+        to the appropriate axes.  POW will attempt to maintain the current
+        axes bounds.
+
+	<li> <b>Tick Labels:</b> You may choose decimal or Base
+        60/degree (WCS) formats for the axis labels on your graphs and
+        for what shows up in the Coordinate tracker.  "Base 60" axes
+        only apply to graphs which contain images or curves with WCS
+        coordinate information.
+
+	<li> <b>Grid Line Options:</b> You can toggle the grid on or
+        off and choose dashed and colored grid styles for the
+        currently selected graph.  More options are available from the
+        <a href="EditGraphs.html">Edit Graphs</A> dialog box.</li>
+
+        <li> <B>Preferences:</B> Set default behaviors and appearance
+            for POW, curves, images, and graphs.  See
+            <a href="DefaultOptions.html">Preferences</a>.
+      </ul>
+
+</body>
+</html>

@@ -1,0 +1,214 @@
+<html>
+  <head>
+    <title>FITS table file calculator</title>
+  </head>
+<body>
+
+<h3>FITS Table Calculator</h3>
+
+[See also the 
+<a href="expressions.html">Calculator Expressions</A> help file for more
+details on the expression syntax].
+
+<P>The calculator tool can be used to perform spread-sheet type
+calculations on columns in a FITS table.  The expression is
+evaluated on each row of the table and the result is written either
+to an existing column in the table (overwriting the previous values),
+or to a new column. If "Apply only to selected rows" is checked, then the
+calculation will only be 
+applied to the selected rows that have the row number (in the first
+column) highlighted.
+</P>
+
+<h4>Results Column</h4>
+
+<P>The entry field on the left hand side of the "=" sign is used to
+specify the name of the column to which the results will be written.
+Click on the the 'down arrow' icon to  bring up a selection menu with a
+list of all the existing columns in the table.  Otherwise, a new column
+name may be entered, in which case a new column with that name will be
+created when the calculation is performed.  </P>
+
+<P>Normally, when creating a new column, the column's data type will be
+the same as that of the expression.  That is, an integer
+expression will create a 4-byte integer column (TFORM = 1J) and
+a real expression will create an 8-byte double column (TFORM =
+1D).  This can be overridden by placing the desired TFORM value
+within parentheses after the column's name.  For example, specifying
+a column name NewCol(1E) will create a new column named 'NewCol'
+with a TFORM of '1E'.  (The numerical value is optional and will
+be filled in with the vector size of the expression.)  The expression's
+results will thus be converted to a 4-byte real when written to the
+column, even though the result could be of type integer or double.</P>
+
+<h4>Formula</h4>
+
+<P>The entry field on the right hand side of the "=" sign is
+for entering the expression for calculation. You can either type
+in the expression or use the buttons. To use a column in the
+calculation, one just inserts the column's name.  Below are some
+sample expressions.</P>
+
+<ol>
+     
+<li> Add 100.0 to column TIME and save it as a new column with
+     name NEWCOL:
+     <p>
+     NEWCOL = 100.0 + TIME
+<p>
+<LI> 
+     Multiply the RATE column by 2.0, overwriting the old RATE
+     column value:
+     <p>
+     <tt>RATE = 2.0 * RATE</tt>
+<p>
+<LI> 
+     Create a new column with all the element value = 0.0 and
+     save it in the table. This can also be used to create a new ASCII 
+     column with a initial value, e.g. <tt>NEWSCOL = "string value"</tt>.
+     Be sure the string has the quote characters around it.
+     <p>
+     <tt>NEWCOL = 0.0</tt>
+<p>
+<LI> Conditional operations ( &gt; , &lt; , == , &gt;= , &lt;= , &amp;&amp; ,
+     || )
+     are also allowed. You can perform conditional evaluations, such as 
+     <p>     <tt>NEWCOL = (COLUMN1 &gt; 3.0) ? expr1 : expr2</TT> 
+     <p> The result of the above expression is expr1
+     if values in COLUMN1 is greater than 3.0, otherwise, expr2.
+<p>     
+<LI> Individual elements of a vector column may be referenced by specifying
+     the element number within square brackets, as in:
+     <p> <tt>NEWCOL = COUNTS[1] + COUNTS[3] </tt>
+     <p>
+     which will create a new scalar column equal to the sum of the 1st and
+     3rd elements of the COUNTS vector column.
+
+<p>
+<LI> The value in an ASCII character column (TFORMn = 'A') may be used
+     in conditional calculation using the '==', '!=', '&gt;', and
+     '&lt;' operators.  e.g. if a table lists the declination of a set
+     of objects in 3 separate columns, one for the sign ('+' or '-')
+     and 2 integer columns giving the degrees and minutes values, the
+     the declination value in decimal degree can be calculated by:
+
+     <p> <tt>Dec = (deg_sign != "-") * (degree + minute/60.) - 
+          (deg_sign == "-") * (degree + minute/60.) </tt> </p>
+
+     <p> In effect, the conditional expressions evaluate to 1 if true
+     and 0 if false when multiplied by a numerical value.
+
+<p>
+<LI> The calculator can also be used to copy one column to a new column.
+     e.g. 
+     <p> <tt> NEWCOL = ASCIICOL </tt> </p>
+     <p> <tt> NEWCOL = TIME     </tt> </p>
+
+</UL>
+
+Illegal operations such as divide by zero will result in a Null value.
+
+<P>
+To access a table entry in a row other than the current one, follow
+the  column's name  with a row  offset within  curly  braces.  For
+example, 'PHA{-3}' will evaluate to the value of column PHA, 3 rows
+above  the  row currently  being processed.  One cannot specify an
+absolute row number, only a relative offset. Rows that fall outside
+the table will be treated as undefined, or NULLs.
+
+<P>If a calculation involves a column with Nulls or NaNs for certain
+rows, then these rows in the result column will be Nulls.  An
+exception is if the Null is encountered within an &amp;&amp; or ||
+construction whose value is determined by the nonNull value.  For example,
+"TRUE || NULL" evaluates to TRUE.  The calculator has several special
+functions which can be used to test for Null values in columns.</P>
+
+<h4>Calculator pad </h4>
+
+The expression to be calculated may be constructed by clicking on the
+calculator function buttons in the left 1/3 of the the window.
+Alternatively, the expression may be typed in directly
+in the formula window.
+
+<h4>Column name listing </h4>
+
+<P>All the column names are listed as buttons. Clicking on any of them
+will insert (replacing any selected text) the column name in the
+formula window. If the number of columns is greater than 24, the "Up"
+and "Down" buttons can be used to scroll through the column name list.</P>
+
+
+<H4>Functions </H4>
+
+Below are lists of all the functions supported by the calculator.
+For detailed descriptions of its operations, see the 
+<a href="expressions.html">Calculator Expressions</A> help file.
+
+<p> Arithmetic functions supported:</P>
+<UL>
+   <LI> abs(x)
+   <LI> cos(x)
+   <LI> sin(x)
+   <LI> tan(x)
+   <LI> acos(x) 
+   <LI> asin(x)
+   <LI> atan(x)
+   <LI> atan2(y,x)
+   <LI> cosh(x)
+   <LI> sinh(x)
+   <LI> tanh(x)
+   <LI> round(x) - round to nearest integer
+   <LI> ceil(x) - round up to nearest integer
+   <LI> floor(x) - round down to nearest integer
+   <LI> exp(x)
+   <LI> sqrt(x)
+   <LI> log(x)
+   <LI> log10(x)
+   <LI> min(x,y)
+   <LI> max(x,y)
+   <LI> i % j - modulus operator
+   <LI> random() - random number in range [0.0, 1.0)
+   <LI> b?x:y - if 'b' then 'x', else 'y'
+
+</UL>
+
+<P> Vector functions supported:</P>
+<UL>
+   <LI> min(x)
+   <LI> max(x)
+   <LI> average(x)
+   <LI> median(x)
+   <LI> stddev(x) - Standard Deviation
+   <LI> sum(x)
+   <LI> nelem(x) - size of the vector
+   <LI> nvalid(x) - No. of non-null elements
+</UL>
+
+<P> Boolean functions supported:</P>
+<UL>
+   <LI> circle(x0,y0,R,rot,X,Y)
+   <LI> ellipse(x0,y0,Rx,Ry,rot,X,Y)
+   <LI> box(x0,y0,Rx,Ry,rot,X,Y)
+   <LI> near(x,y,delta)
+   <LI> gtifilter("file",time,"start","stop")
+   <LI> regfilter("file",X,Y,"wcs")
+</UL>
+
+<P> NULL functions supported:</P>
+<UL>
+   <LI> isnull(x)
+   <LI> defnull(x,y)
+</UL>
+
+<P> Type conversions supported:</P>
+<UL>
+   <LI> (double)x or (float)x
+   <LI> (int)x
+</UL>
+
+<hr> 
+
+Go to <a href="aboutFv.html">About fv</a>.
+
+</body>
+</html>

@@ -1,0 +1,130 @@
+<html>
+  <head>
+    <title>Connect to Skyview </title>
+  </head>
+<body>
+
+<h3>Connect to SkyView </h3>
+
+<UL>
+   SkyView is a Virtual Observatory on the Net(at skyview.gsfc.nasa.gov)
+generating images of any part of the sky at wavelengths in all regimes 
+from Radio to Gamma-Ray. This panel is used to select, download and store 
+the images. The temporary image Fits files are nameed as skyview.tmp[n], 
+where n is a integer. Users may rename and save these images later.   
+</UL>
+
+<LI> <B>Coordinate or Source</B>
+
+<UL>
+<P>  This field is used to determine the center of the field to be retrieved.
+If you specify coordinates these are used as the center. When equatorial 
+coordinates are being used the RA may be specified as either hh mm ss or 
+ddd.fff, i.e., in hours or in decimal degrees. The coordinate fields must 
+be separated by a comma or sign of the declination. 
+
+<P>  If any letter is used in this field the field is assumed to be an object 
+name and is sent to the SIMBAD name resolver to be resolved. 
+
+<P>  Examples: 
+
+<P>  6 45 10.76  -16 41 57.82
+<P>  6 45 10.76, -16 41 57.82
+<P>  101.2948411 -16.6993947
+<P>  101.2948411, -16.6993947
+<P>  sirius
+</UL>
+
+
+<LI> <B>Choose desired survey:</B>
+
+<UL>
+<P>  This selection box allows you to select data from a survey. The
+details of each individual survey can be found in the web site
+<P>       http://skyview.gsfc.nasa.gov/cgi-bin/survey.pl
+</UL>
+
+
+
+<LI> <B>Coordinate System </B>
+
+<UL>
+<P>  Click on this field to choose among equatorial, galactic and
+ecliptic coordinates. The default is equatorial.
+
+<P>  You may select the equinox year to be used in Equatorial or Ecliptic
+coordinates. Any equinox year within about two centuries of the
+present may be used. The default is 2000. 
+</UL>
+
+<LI> <B> Image width </B>
+
+<UL>
+<P>  This field sets the size of the image in degrees. Enter
+the size of the sides of the image in the projected coordinates. 
+Since there are distortions in the projection, the actual distance 
+between corners of the image can be more or less than the specified size. 
+
+<P>  Note that the default size for an image is 300 times the intrinsic pixel 
+size of an image. 
+</UL>
+
+<LI> <B> Image dimensions </B>
+
+<UL>
+<P>  You may select the dimensions of the image to be produced in pixels. 
+By default an 300x300 image is produced. In conjunction with the image-size 
+field you can control the resolution of the image. 
+</UL>
+
+<LI> <B> Retrive catalog of objects within image </B>
+
+<UL>
+<P> If this checkbox is set, a listing of objects in the image will be
+retrieved and returned as an additional FITS table.    
+</UL>
+
+<LI> <B>Catalogs </B>
+
+<UL>
+<P>  This selection box allows you to select catalog(s) from which 
+the objects are retrieved. This is only valid when <B> Retrive catalog
+</B> is set. Use the left mouse button and click the desired catalog
+on the list box to select it. To deselect it, click it again. Multiple
+catalogs may be selected in this way.
+</UL>
+
+<LI> <B>Display image after retriving </B>
+
+<UL>
+<P>  Determine whether to make a plot of image and objects after
+retrieving them.
+</UL>
+
+<LI> <B> Submit  </B>
+<UL>
+<P>  Pressing this button submits the request to be processed by SkyView. 
+This button will be disabled during the HTTP transaction.
+</UL>
+
+<LI> <B> Reset  </B>
+<UL>
+<P>  Pressing this button resets the entries.
+</UL>
+
+<LI> <B> Cancel  </B>
+<UL>
+<P>  Pressing this button closes the dialog box. This button will be disabled 
+during the HTTP transaction.
+</UL>
+
+<LI> <B> Help  </B>
+<UL>
+<P>  Pressing this button opens the help file. 
+</UL>
+<hr> 
+
+Go to <a href="aboutFv.html">About fv</a>.
+
+</body>
+</html>

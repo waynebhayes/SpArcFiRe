@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+<head>
+<title>Image probe </title>
+</head>
+
+<body>
+<h1>Image Probe </h1>
+
+<h2>Overview</h2>
+Given a probe, this tool calculates the its centroid coordinates  
+and region statistics such as total number of pixels, 
+total sum of the pixel values (flux) and mean pixel value (mean flux).  
+When the image probe dialog box is open, POW is in the "probe" mode. 
+To go back to the normal mode, user can just simply press the 
+<B>Exit</B> button and return to the normal mode.
+
+<h2>Creating and manipulating probe</h2>
+
+<p>A probe basically is a region. Its shape can be selected by  
+clicking the <B>Probe Shape </B> button. The available shapes 
+are Circle, Box, Ellipse, and Polygon. To create a new probe, 
+place the mouse at the desired location in the graph and 
+click-and-drag with the right mouse button down (Command-Click on 
+Mac-OS). For Circle and Ellipses, the initial mouse location is 
+the center of the probe and the final location is its radius or 
+width and/or height. For Boxes, the mouse movements traces out 
+opposite corner of the rectangle. For Polygon, the mouse locations
+determines its verteces. To add extra segments to the Polygon,
+let up on the mouse button, press it again without moving, and 
+drag it to the next vertex. </p>
+
+<p> To move a probe, simply put cursor inside the probe, and click-and-
+drag it to the new position with the left mouse. The left mouse is 
+also used for changing and rotating probe. To change the shape, click-
+and-drag the "change" handle (a small green box) on the probe. 
+To rotate the probe, click-and-drag the "rotation" handle (a small 
+green triangle). The rotation only applies to the shape of ellipse
+and box. </p>
+
+<p>For details of creating and manipulating the probe, please refer
+to the Regions help file. </p> 
+
+<h2>Calculating the coordinates of centroid and statistics </h2>
+<p>Whenever the probe is created, changed, moved or rotated, the
+coordinates of centroid and statistics are calculated and  
+shown in the Image Probe dialog box. </p>
+
+<p>The coordinates of centroid are presented in two ways, in 
+pixel in the <B> Pixel </B> field, and in the graphical coordinate
+in the <B> Coordinate </B> field. The format of graphical coordinate 
+is either in decimal or hms, determined by the <B> Coord. Format </B>
+button. </p> 
+
+<p>The statistics of a probe includes total number of pixels ( the <B> N
+Pixels </B> field), total flux (the <B> Total Flux </B> field) and mean 
+flux (the <B> Mean Flux </B> field). The mean flux is defined as the 
+average flux per pixel inside the probe. </p> 
+
+<h2>Saving the coordinates of centroid and statistics </h2>
+<p>To save the coordinates of centroid and statistics of current probe
+to a disk log file, click the <B> Record </B> button. For the first recording
+or after closing the current log file, you have chance to enter the log
+file name through a opened file dialog box. To close the current log
+file, press the <B> Close Log </B> button.</p>
+</body>
+</html>

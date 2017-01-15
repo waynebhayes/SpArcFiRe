@@ -1,0 +1,87 @@
+<html>
+  <head>
+    <title>File Browser</title>
+  </head>
+<body>
+
+<h3>File Browser</h3>
+
+
+<h4>Directory Navigation</h4>
+
+<P>The top of the window consists of 3 buttons with which you can change
+the current directory.  The first button displays the current
+directory name.  Clicking on the button brings up a popup menu showing
+the entire directory hierarchy with the current directory at the
+bottom.  Select one of the other directories to jump to that position
+in the hierarchy.</P>
+
+<P>The next button, showing a folder icon with an arrow, will move you up
+one directory level.</P>
+
+<P>The final button, initially reading "FTP...", will allow you to
+connect to an FTP server and browse its files.  You will be prompted
+to enter a host name, user name, and password.  If no user name is
+entered, fv will open an anonymous ftp connection.  When connected,
+the button text will change to "Local...".  Clicking it will return
+you to your local computer.</P>
+
+<h4>File list box</h4>
+
+<P>The file listing shows the names of all files which have the form
+specified in "File of type" field, their file sizes, and last
+modification dates. When the "List Fits files only" is selected, only
+FITS files are shown as well as all the compressed files. Double click
+a file name to open that file. Directories are listed with "/" (":" on
+MacOS).  Double click a directory name to move to that directory.</P>
+
+
+<h4>File name </h4>
+
+<P>In the "File Name" field, the currently selected file name is shown.
+One can type a partial filename and press TAB to invoke automatic
+filename completion.  One can also type a directory path to move
+quickly to another location without having to navigate all the
+intervening directories.</P>
+
+
+<h4>File of type</h4>
+
+<P>The file list will be filtered using the wildcard string
+contained in this entry field.</P>
+
+
+<h4>Open as read-only </h4>
+
+<P>To open the current file as read-only, enable the check button.
+If a file is opened as read-only, you will not be able to save any
+changes you make to the file.  You will still be able to edit
+the file and save the modifications to a new file, though.</P>
+
+
+<h4>List Fits files only </h4>
+
+To show only the FITS files in the "Files" list, enable the
+check button.  Also, compressed files are listed.
+
+
+<h4>Open (or Save)</h4>
+
+<P>Click this button to open the currently selected FITS file and
+bring up a overview of the FITS file. This button will instead read
+"Save" after selecting the "Save As" command.</P>
+
+<h4>Cancel </h4>
+
+Quit from the file selection dialog.
+
+<h4>Help </h4>
+
+Bring up this help file.
+
+<hr> 
+
+Go to <a href="aboutFv.html">About fv</a>.
+
+</body>
+</html>

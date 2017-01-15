@@ -1,0 +1,164 @@
+<html>
+<head>
+  <title>Preferences</title>
+</head>
+<body>
+
+<h1>Preferences</h1>
+
+<P> The <B>Preferences...</B> item in the <B>Edit</B> menu,
+brings up a dialog box in which one can set the default display
+behavior for new graphs.  One can control the tick frequency, grid
+line colors, and scaling for graph axes; color, point styles, and line
+types for scatter plots; and colormaps and scaling of images.  The
+window has a paned format in which the options affecting each part of
+the graph has a pane which can be brought forward by clicking the
+appropriately labeled tab.</P>
+
+<UL>
+
+<LI> <B>POW</B><pre>
+
+     This pane sets the application level preferences for how POW
+     looks and behaves.  <b>Cursor</b> sets the image to use as the
+     mouse cursor when in POW's main window.  POW's "GUI" consists of
+     the 3 pixel readouts, the Scopebox, and the Zoom In/Out buttons
+     usually located at the top of the window.  The <b>GUI
+     Position</b> option allows you to move these to any side of the
+     window or turn them off altogether.  <b>Scopebox Size</b> alters
+     the size of the scopebox -- the window showing a small overview
+     of the current graph -- or hides it altogether.  <b>Resize
+     Window</b> determines whether the POW window will get bigger or
+     smaller (as far as possible) whenever you change the objects in
+     the main POW window, so as to show you everything currently
+     displayed in the main POW window without scrolling.
+     Using the color grid or button, <b>Background Color</b> will set
+     the color to use for the background of all of POW's windows.</pre>
+
+<LI> <B>Graph</B><pre>
+
+     This pane has been modified, containing a pair of entry
+     boxes labeled <B>Size</B>, a set of buttons labeled
+     <B>Scaling</B> and new control to choose functionality for
+     right or left mouse buttons [More options are available when 
+     editting a real graph (see <a href="EditGraphs.html">Edit Graphs</a>).]  Enter
+     into the <B>Size</B> boxes, the default width and height to use
+     when creating a new graph.  When a graph is created by another
+     program (such as fv), it determines the size of the graph, so
+     these options are usually overridden.  The <B>Scaling</B> buttons
+     activate logarithmic graphs.  The first row of <B>linear</B> and
+     <B>log</B> buttons cause each axis to be drawn in either linear
+     or logarithmic format.  This does not affect the data, just how
+     the graph coordinates are interpretted and labeled.  You can
+     control the logarithmic conversion of individual curve data from
+     the Points and Lines panes.
+
+     The mouse control button can be clicked to switch the functionality
+     of mouse buttons. Default will be left mouse button to control image
+     zoom factor, and right mouse button to control brightness/contrast.</pre>
+
+<LI> <B>Fonts</B><pre>
+
+     This pane controls the appearance of text in the graph.  One can
+     independently set the font, size, style, and color of the <B>Title</B>,
+     <B>Axis Labels</B>, <B>Tick Labels</B>, and default <B>Text Labels</B>.
+     The Text Label value is used only for the initial text label.  All
+     subsequent labels inherit their values from the previous label.</pre>
+
+<LI> <B>Ticks</B><pre>
+
+     This pane controls the appearance of the tick marks and
+     associated grid lines.  Use the slidebars to indicate
+     approximately how many tick marks should be drawn (and labeled)
+     on each axis of the graph.  At the far left, no tickmarks will be
+     drawn on each axis.  At the far right, about 30 may be drawn.
+     The <B>X Ticks</B> and <B>Y Ticks</B> options control whether the
+     X and Y tickmarks are drawn inside or outside the graph's box and
+     whether they are labeled on the left and bottom axes.  The
+     <B>Tick Labels</B> option selects between Decimal and Base 60
+     (degrees minutes seconds) numerical formats.  Base 60 is only used
+     when a graph contains WCS information.  If the <B>Grid Lines</B>
+     checkbox is selected, lines will drawn on the graph, tracing the
+     path of each tick mark coordinate.  One can control the
+     <B>Color</B> and line <B>Style</B> (solid, dashed, etc) of these
+     lines.</pre>
+
+<LI> <B>Points</B><pre>
+
+     The checkbox at the top of this item indicates whether the
+     individual points of the curve should be drawn.  The points can
+     be drawn as any of the 7 listed <B>shapes</B>.  The <B>size</B>
+     of the points (except Dot which is always 1 point) can either be
+     <B>fixed</B> at a constant size indicated by the slidebar, or
+     drawn with widths/heights indicating the X and Y <B>error
+     bars</B>.  If there are X/Y error bars but the points are drawn
+     in a fixed style, the error bars will be indicated by
+     horizontal/vertical lines centered on the point.  Points can be
+     <B>Fill</B>ed or just drawn in outline.  Finally, select the
+     desired <B>color</B> from the displayed colorbar.  This can be a
+     different color than selected in the Lines pane.
+
+     At the bottom are a pair of LogX/logY checkbuttons labeled
+     <B>Transform</B> (This is the same option as in the Lines pane).
+     Checking these will cause curves to have the logarithm of their
+     data plotted instead of the data itself.  This does not
+     automatically result in logarithmic axes, which are turned on
+     from the Graph pane.  Unless you will always want your data to be
+     converted to a certain logarithm format, these options should be
+     left unset.</pre>
+
+<LI> <B>Lines</B><pre>
+
+     The checkbox at the top of this pane indicates whether data
+     points will be connected with a continuous line.  The line can be
+     of several patterned <B>styles</B> or <B>widths</B>.  The points
+     can also be <B>connect</B>ed directly (<B>Normal</B>) or in a
+     stair-step pattern (<B>Histogram</B>).  In the latter mode, the
+     <B>Fill Boxes</B> option draws the histogram as a series of solid
+     boxes instead of an outline.  Finally, select the desired <B>color</B>
+     from the displayed colorbar.  This can be a different color than
+     selected in the Points pane.
+
+     At the bottom are a pair of LogX/logY checkbuttons labeled
+     <B>Transform</B> (This is the same option as in the Points pane).
+     Checking these will cause curves to have the logarithm of their
+     data plotted instead of the data itself.  This does not
+     automatically result in logarithmic axes, which are turned on
+     from the Graph pane.  Unless you will always want your data to be
+     converted to a certain logarithm format, these options should be
+     left unset.</pre>
+
+<LI> <B>Image</B><pre>
+
+     This pane controls the appearance of images.  Most of the pane
+     consists of a bunch of different colormaps.  They are grouped in
+     the same sequence as listed in the <a
+     href="Color.html"><b>Color</b></a> menu: smooth, continuous
+     colormaps, followed by ramps, then the step functions.  The
+     <B>Invert</B> option will reverse the order of the colormap when
+     turned on.  The <B>Scaling</B> option controls how the colormap
+     is applied to the image.  For <B>Linear</B> scaling, each
+     colormap level corresponds to a constant intensity range in the
+     image.  <B>Square-Root</B> scaling changes the mapping such that
+     the intensity range covered by each color level increases as the
+     square-root function, producing higher contrast at lower
+     intesities.  <B>Logarithmic</B> scaling uses the logarithmic
+     function for colormapping, giving even more contrast at low
+     intensities than sqrt.  <B>Histo Equalize</B> scaling computes
+     a histogram of the image and tries to distribute colors equally
+     over the number of pixels.</pre>
+
+</UL>
+
+<P> Clicking the <B>Reset</B> button will revert the options to their
+values when the dialog box was initially opened, undoing any
+modifications.  Clicking the <B>Save</B> button will make the current
+settings the defaults for new graphs and save them in your .powrc
+file.  The <B>Get Current</B> button grabs any available options from
+the current graph.  Its current image (if present) will be used for
+the default image options and its first curve (if present) for the
+default curve options.  <B>Exit</B>ting will also make the new
+settings the current defaults, but won't save them.</P>
+
+</body>
+</html>

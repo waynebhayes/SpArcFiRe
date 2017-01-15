@@ -1,0 +1,91 @@
+<html>
+  <head>
+    <title>Fv Desktop Manager</title>
+  </head>
+<body>
+
+<h3>fv Desktop Manager</h3>
+
+<p>The Desktop Manager is a window created at the top left of the
+screen that lets you manage all the fv windows on your desktop. All the
+"File Summary", "Header display", "Table display", "Image table
+display", and "Vector table display" windows of all the FITS files
+which are currently opened can be hidden/activated from the list under
+each category. Also, you have direct access to the "File Dialog",
+"Clipboard", and "Help" windows.</p>
+
+<P>Closing the Desktop Manager's window will cause fv to exit.  You
+will be given the opportunity to save any modified files, or cancel.
+The desk top manager window can optionally be hidden/turned off from the <a
+href="preferences.html">Preferences</a> window.</P>
+
+<P><B>Note:</B> The Desktop Manager is not implemented for MacOS.  All
+its features are available from the menubar. In particular, the window
+management items reside in the Mac-only Windows menu.</P>
+
+<P>The commands in the Desktop Manager are:</P>
+
+<UL>
+
+   <LI> <B>New File:</B> Allows the creation of a <a
+href="createNewFITS.html">new FITS file</a>.
+
+   <LI> <B>Open File:</B> Bring up the <a href="fileSelection.html">file
+selection</a> dialog.
+
+   <LI> <B>SkyView:</B> Retrieve images of sky at all wavelengths
+(from Radio to Gamma-Ray) from the NASA <a href="SkyView.html"> SkyView
+</a> server. 
+
+   <LI> <B>Catalog:</B> Retrieve a list of objects in a region of sky from
+selected <a href="catalog.html">catalogs </a> at the NASA SkyView server. 
+
+   <LI> <B>VizieR:</B> Retrieve tables from the Strasbourg <a href="VizieR.html">VizieR</a> or mirror servers.
+
+   <LI> <B>Run Ftool:</B> Run a <a href="ftool.html">Ftool</a> program if
+the HEASOFT or FTOOL packages are installed.  
+
+   <LI> <B>Connect to Hera:</B> Run <a href="connectToHera.html">Hera</a> module.
+
+   <LI> <B>Display Device:</B> Select default display device (currently available choices are DS9 and POW).
+
+   <LI> <B>Hide All Windows:</B> When activated, all fv windows will be
+hidden. To get them back, go through each category ("File Summary",
+"Header" ... ).
+
+   <LI> <B>File Summary:</B> Lists the summary windows of all the files which
+are currently opened. Selecting the menu item will hide/activate the
+indicated summary window.
+
+   <LI> <B>Header:</B> List of all the opened header windows.
+
+   <LI> <B>Table:</B> List of all the opened table windows.
+
+   <LI> <B>Image Table:</B> List of all the opened image table windows.
+
+   <LI> <B>Vector Table:</B> List of all the opened vector table windows.
+
+   <LI> <B>Preference:</B> Open <a href="preferences.html">Preference Edit</a> window.
+
+   <LI> <B>Clipboard:</B> Brings up the clipboard window, which shows the
+information on its contents.
+<UL>
+   <LI> Type: <b>table</b> - block of data from a table;
+              <b>keyword</b> - a single keyword record;
+              <b>HDUs</b> - HDUs from a FITS file
+   <LI> info: the number of elements in the content or keyword name.
+   <LI> Source: file name of the file the content is from.
+</UL>
+
+   <LI> <B>Help:</B> Bring up this help file.
+
+   <LI> <B>Quit:</B> Will quit fv.
+
+</UL>
+
+<hr> 
+
+Go to <a href="aboutFv.html">About fv</a>.
+
+</body>
+</html>

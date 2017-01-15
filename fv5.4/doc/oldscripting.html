@@ -1,0 +1,91 @@
+<html>
+  <head>
+    <title>fv scripting</title>
+  </head>
+<body>
+
+<h3>fv scripting </h3>
+
+<h4>What for? </h4>
+
+With an fv script, one can automate some of the interactive
+procedures in fv. e.g. using an fv script file, one can open a
+FITS file, and display the header of the third extension, or
+plot X and Y column in the table on the fourth extension, or do
+them both.
+
+<h4>Writing an fv script </h4>
+
+Fv scripting is designed in an object-oriented fashion. But
+you don't have to know much about OO to use it. The only thing
+you need to know is that you have to create a FITS object first,
+and then ask the FITS object to do the things you want it to do.
+All the commands need to be saved in an ASCII file with the
+".fv" extension.
+
+<h4>Creating a FITS object </h4>
+
+To create a FITS object, use the command:
+
+<pre>
+	FVFile <I>object_name</I>
+</pre>
+
+where <I>object_name</I> is of your choice. The first two things
+you need to do after that are:
+
+<UL>
+   <LI> <I>object_name</I> setFileName <I>file_name</I> 
+   <LI> <I>object_name</I> setFileMode <I>file_mode</I> 
+</UL>
+
+where <I>file_name</I> is the name of the file and
+<I>file_mode</I> is an integer flag specifying how to open the
+file.  The file name can be a simple path on your local machine,
+or a URL of a file on a remote host (see <A
+HREF=fileSelection.html>File Selection</A>).  To access files on
+a remote ftp site, you need to write <I>file_name</I> in the
+form of
+
+<pre>
+      ftp://username:password@host.domain/directory/filename
+</pre>
+
+If the remote host is an anonymous ftp site, one can replace the
+username and password with "anonymous" and one's email
+address.
+
+     <P>The values and meaning of <I>file_mode</I> are as follows:</P>
+
+<UL>
+   <LI> 0: open pre-existing file as read/write
+   <LI> 1: open pre-existing file as read only
+   <LI> 2: create a new FITS file
+</UL>
+
+
+<h4>Available actions</h4>
+
+The scripting capability is currently rather limited and is deprecated
+in preference to a <a href="fv_scripting.html">newer, more powerful
+interface</a>. Right now, you can only do the following
+
+<UL>
+<LI> <I>object_name</I> setExtension <I>ext_number</I>
+<LI> <I>object_name</I> displayTable 
+<LI> <I>object_name</I> displayImage
+<LI> <I>object_name</I> setXColumn <I>column_name</I> 
+<LI> <I>object_name</I> setYColumn <I>column_name</I> 
+<LI> <I>object_name</I> setXErrorColumn <I>column_name</I> 
+<LI> <I>object_name</I> setYErrorColumn <I>column_name</I> 
+<LI> <I>object_name</I> plotTable   # do the above four commands
+	  first (Only setXColumn and setYColumn are required).
+</UL>
+
+
+<hr> 
+
+Go to <a href="aboutFv.html">About fv</a>.
+
+</body>
+</html>

@@ -1,0 +1,76 @@
+------------------------------------------------------------------------
+--
+-- Sample AppleScript script for fv 2.6
+--
+-- This script will open 2 sample files (available online and distributed
+-- with the fv executables) and displays their contents in several forms...
+-- header keyword list, a curve, and an image.
+--
+-- USAGE:
+--
+--   Load this file into Apple's "Script Editor" (or similar product) and
+--   either run it from there or compile it into an application then run it
+--   from the Finder.  fv does not have to be running before running this
+--   script. 
+--
+-- Another version of this script (TclScript.tcl) uses the XPA TCL interface
+-- which allows other Tcl programs to control fv remotely.
+--
+------------------------------------------------------------------------
+
+(* 
+   IMPORTANT NOTE:  Unlike the other script interfaces to fv,
+   AppleScript commands get executed in the global namespace
+   instead of within the particular namespace which holds
+   fv's scripting commands.  Because of this, all of fv's
+   commands must be explicitly run inside the "fvCmds"
+   namespace.  For individual commands, this just means
+   prefixing the command with the string "fvCmds::".  Or,
+   if you have several commands to be run in sequence, you
+   can do "namespace eval fvCmds { put commands here }".
+*)
+
+--
+-- Start fv and bring it to the front
+--
+
+tell application "fv"
+	activate
+	
+	--
+	-- Set a variable here which points to the fits files to be opened.
+	-- This is just to make it easier to specify files later.
+	--
+	
+	set fitsDir to "ftp://heasarc.gsfc.nasa.gov/software/ftools/release/other/pdw/"
+	
+	--
+	-- Open 2 sample files
+	--
+	
+	do script "fvCmds::open " & fitsDir & "ngc1316r.fit " & fitsDir & "rate.fit"
+	
+	--
+	-- Select one of the files and open a header window of extension #1
+	--
+	
+	do script "fvCmds::select rate.fit"
+	do script "fvCmds::display header 1"
+	
+	--
+	-- Plot a curve of Time vs Rate in POW and alter the graph's appearance
+	--
+	
+	do script "fvCmds::display curve 1 time rate"
+	do script "fvCmds::pow bounds 770 -30 1070 300"
+	do script "fvCmds::pow curve pDisp No lDisp Yes lColor Blue"
+	
+	--
+	-- Select the other file and plot an image, setting its colormap to histogram
+	--
+	
+	do script "fvCmds::select ngc1316r.fit"
+	do script "fvCmds::display image 0"
+	do script "fvCmds::pow colormap scale histo"
+	
+end tell

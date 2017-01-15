@@ -1,0 +1,349 @@
+<html>
+  <head>
+    <title>About fv -- FITS Viewer</title>
+  </head>
+<body>
+
+<h3>fv: FITS Viewer and Editor (Version 5.4)</h3>
+
+<P>
+<b>fv</b> is a FITS file viewer and editor developed at <EM>the High Energy Astrophysics
+Science Archive Research Center (HEASARC) </EM> at <B>NASA / GSFC</B>.
+</P>
+<DL>
+<DT> Project Scientist:
+<DD> Dr. William D. Pence (William.Pence@nasa.gov)
+</DL>
+<DL>
+<DT> Project Engineer:
+<DD> Pan Chai (Pan.S.Chai@nasa.gov)
+</DL>
+
+<P>To learn of new releases and bug fixes, visit the fv web page at:</P>
+
+<PRE>
+    <B>http://heasarc.gsfc.nasa.gov/ftools/fv</b>
+</PRE>
+
+Please send your comments, questions or feedback via the
+ftools help desk web page at:
+<pre>
+    <B>http://heasarc.gsfc.nasa.gov/cgi-bin/ftoolshelp</B>
+</pre>
+
+<hr>
+Version 5.4 August 2015
+<P>
+New features/Bug fixes since V5.3 include:
+<UL>
+    <LI><B>Bug fixed:</B> Displaying vector columns with ds9 generated a large temporary data file.</LI>
+    <LI><B>Bug fixed:</B> Error after exiting Hera.</LI>
+    <LI><B>Bug fixed:</B> Text dump of vector column was changing NULLs to non-zero values.</LI>
+    <LI><B>Bug fixed:</B> Retain fv graph preference size.</LI>
+    <LI><B>Bug fixed:</B> Adding arithmetic function in expression when plotting resulted in seg fault.</LI>
+    <LI><B>Bug fixed:</B> fv summary information of primary extension name changed after closing header view.</LI>
+    <LI><B>Bug fixed:</B> Print preview panel did not resize correctly.</LI>
+    <LI><B>Bug fixed:</B> HDU export from fv was not working.</LI>
+    <LI><B>Bug fixed:</B> Problems in graph options editing.</LI>
+    <LI><B>Bug fixed:</B> Error messages about "missing rootx and rooty" and regarding Editing Objects initialization.</LI>
+    <LI><B>Bug fixed:</B> WCS projection for vector image column.</LI>
+    <LI><B>Bug fixed:</B> Errors when displaying or exporting slices of a data cube.</LI>
+    <LI><B>Bug fixed:</B> For logical columns of a binary table, display 'U' (undefined) for illegal values (anything other than 'T', 'F', or 0) rather than interpreting the values as 'F'.</LI>
+    <LI><B>Bug fixed:</B> Memory faults when trying to open a FITS file that has a binary table with non-zero variable length array columns but has no rows.</LI>
+    <LI><B>Bug fixed:</B> Extra columns and incorrect row selections in ASCII output when saving from a binary table.</LI>
+    <LI><B>Bug fixed:</B> Exported text file from vector columns in a binary table (was only showing the first element).</LI>
+    <LI><B>Bug fixed:</B> Table "Edit Cell" function on x86_64.</LI>
+    <LI><B>Bug fixed:</B> Plotting in ds9 was not correctly handling lower case column names.</LI>
+    <LI><B>Bug fixed:</B> Scripting error in which the existence of a $HOME/.fv directory was assumed.</LI>
+    <LI><B>Bug fixed:</B> Allow directory paths that contain parentheses.</LI>
+    <LI><B>Enhancement:</B> Allow user to specify and store image size.</LI>
+    <LI><B>Enhancement:</B> Allow user to increase/decrease font size.</LI>
+    <LI><B>Enhancement:</B> New preferences menu for using or ignoring WCS keywords when displaying an image.</LI>
+    <LI><B>Enhancement:</B> Increased precision in output ASCII file values and displayed table cells.</LI>
+</UL>
+
+<hr>
+Version 5.3 July 2009 
+<P>
+New features/Bug fixes since V5.2.1 include:
+<UL>
+    <LI><B>Bug fixed:</B> Fix large FITS file crashing and displaying summary/header issue.</LI>
+    <LI><B>Bug fixed:</B> Fix opening FITS files in read-only mode issue.</LI>
+    <LI><B>Bug fixed:</B> Fix scale error on colorbar.</LI>
+    <LI><B>Bug fixed:</B> Fix axial label and scale issue for image constructed from image table cells.</LI>
+    <LI><B>Bug fixed:</B> Fix no plot in pow scope area when displaying/flipping contour map (on separate graph.)</LI>
+    <LI><B>Bug fixed:</B> Fix grid displaying issue when flipping a plot.</LI>
+    <LI><B>Bug fixed:</B> Fix crashing issue when Zoom and then Reset zoom of images constructed from an image table.</LI>
+    <LI><B>Bug fixed:</B> Fix information missing when displaying movie from a 3-D image table.</LI>
+    <LI><B>Enhancement:</B> Adding wcsfix routine to handle non-standard WCS keywords values in FITS header.</LI>
+</UL>
+
+<hr>
+Version 5.2.1 July 2008
+<P>
+New features/Bug fixes since V5.2 include:
+<UL>
+    <LI><B>Bug fixed:</B> correct FITS Header string to WCSLib overflow 80 characters limit per card.</LI>
+    <LI><B>Enhancement:</B> denote -SIP projection to its counter-part (i.e. -TAN-SIP to -TAN projection.)</LI> 
+</UL>
+
+<hr>
+Version 5.2 June 2008
+<P>
+New features/Bug fixes since V5.1 include:
+<UL>
+    <LI><B>Bug fixed:</B> file selection panel not been displayed during exiting fv/pow application when the FITS file is modified during the session. </LI>
+    <LI><B>Bug fixed:</B> when editing plot/image information, new title string is not been updated in the graph bug. </LI> 
+    <LI><B>Bug fixed:</B> zoom/unzoom of plot/image cause labels and units of the graph disappeared.</LI>
+    <LI><B>Bug fixed:</B> fv/pow crashes during rendering of graph/image if the FITS file consists of inconsistence coordinates or unsupported coordinates system.</LI>
+    <LI><B>Bug fixed:</B> un-necessary X and Y labels displayed in POW window (no image/plot created yet) when xspec is invoked. </LI>
+    <LI><B>Enhancement:</B> allow the selection of columns panel to remain visible during plotting.</LI>
+    <LI><B>Enhancement:</B> allow renaming capability of created region files when running special analysis tools in Hera. </LI> 
+</UL>
+
+<hr>
+Version 5.1 December 2007
+<P>
+New features/Bug fixes since V5.0 include:
+<UL>
+    <LI>Passing Fits Header string and cnt to client to display wcs info correctly for Hera and POWplot operation.</LI>
+    <LI>Fix zoom in and out bugs on POW image.</LI>
+    <LI>Support displaying images that straddle the 24h = 00h boundary on the sky with WCSLIB.</LI>
+    <LI>Horizontal scrolling bug of 0 rows table.</LI>
+    <LI>Release memory when deleting/closing an image in POW (on-going).</LI>
+    <LI>Fix editing graph parameter values bug.</LI>
+    <LI>Fix "Duplicate Graph" casuing seg-fault bug.</LI>
+    <LI>Fix two identical file names from two directories overwrite each other in POW bug.</LI>
+    <LI>Fix image flipping bug with FITS keyword CDn_n.</LI>
+    <LI>Fix displaying linear WCS projection and coordinates image.</LI>
+    <LI>Add 2 new icons: Hera and Student Hera during installation for Microsoft Windows and Apple Mac OS X.</LI>
+</UL>
+
+<hr>
+Version 5.0 September 2007
+<P>
+New features/Bug fixes since V4.4 include:
+<UL>
+   <LI>Overhauling POW world coordination calculation logics. Now fV/POW use standard WCSLIB library to generate world coordinates/pixel positions. </LI>
+   <LI>Allow generating of plots that retains its world coordinate projection information. </LI>
+   <LI>Allow limited editing capability on the property of graph objects (projection, rotation, etc) of a graph/image on the fly. </LI>
+   <LI>Allow switching between multiply world coordination system (i.e. WCSa, WCSx, etc.) on the fly. </LI>
+   <LI>Allow the flipping of image/plot of direction on X or Y or Both axes. </LI>
+   <LI>Allow display of 64 bits integers in fv data table and in POW imagery. </LI>
+   <LI>Fix white-wash grey-out POW imagery on Scientific Linux platform bug. </LI>
+   <LI>Fix saving 64 bits integer data to a text file bug. </LI>
+   <LI>"Run Ftools..." option is no long available. Users are encouraged to use the new "fgui" task that is distributed with ftools. </LI>
+   <LI>"Skyview..." catalog selection is now only available via "Catalog..." option. </LI>
+</UL>
+
+<hr>
+Version 4.4 July 2006
+<P>
+New features/Bug fixes since V4.3.1 include:
+<UL>
+   <LI>Adding capability to re-order the display of FITS columns.</LI>
+   <LI>Expand capability to sorting/modification of FITS columns parameters.</LI>
+   <LI>Tracking parent window view via vector columns in "Expand"ed view .</LI>
+   <LI>Allow user to specify path for DS9 and XPA in Windows.</LI>
+   <LI>Fix Windows platform of printing countor map on image problem.</LI>
+   <LI>Modified how the rotation angle in region files is interpreted to be consistent with DS9 
+      (angle is w.r.t. the North direction in the image).</LI>
+</UL>
+
+<hr>
+Version 4.3.1 May 2006
+<P>
+New features/Bug fixes since V4.3 include:
+<UL>
+   <LI>Expand capability to run fv with more than 9 parameters.</LI>
+</UL>
+
+<hr>
+Version 4.3 April 2006
+<P>
+New features/Bug fixes since V4.2 include:
+<UL>
+   <LI>Add capability to invoke future HERA modules.</LI>
+   <LI>Add capablity to calculate Flux on region.</LI>
+   <LI>Add capability to handle "Physical" attribute in region file.</LI>
+   <LI>Add capability to center (and resize) of ROI (region of interest)
+       when the image is zoomed. </LI>
+   <LI>Add capability to allow parameters editor to stay until user decided
+       to cancel.</LI>
+   <LI>Fix running FTOOLS tools not copying physical par file problem.</LI>
+   <LI>Fix sorting Fits table but displaying wrong slice image problem.</LI>
+   <LI>Fix rotation of coordinates results in wrong region specification problem.</LI>
+   <LI>Fix plotting of selected rows from FITS table problem. </LI>
+   <LI>Fix ploygon region handle placement and dragging mechanisms problem.</LI>
+</UL>
+
+<hr>
+Version 4.2 April 2005
+<P>
+New features/Bug fixes since V4.1.4 include:
+<UL>
+   <LI>Add X axis range selection utility in POW.</LI>
+   <LI>Add capablity to display 4D table and image (movie).</LI>
+   <LI>Add capablity to create/display region on image.</LI>
+   <LI>Add XPA entry points for X axis range selection and region display.</LI>
+   <LI>Fix one dimension plot/image label problem.</LI>
+   <LI>Update logic for display CAR projection.</LI>
+   <LI>Rework background backup directory cleanup logics.</LI>
+   <LI>Fix ploygon creation problem, allow right mouse button to drag the existing vertex,
+       left mouse button for creation and move the region.</LI>
+   <LI>Add color changes capability in Edit Region Panel.</LI>
+   <LI>Change vizier/skyview/catalog file naming scheme.</LI>
+</UL>
+
+<hr>
+Version 4.1.4 September 2004
+<P>
+New features/Bug fixes since V4.1.3 include:
+<UL>
+   <LI> Correct background backup directory cleanup process.</LI>
+   <LI> Add capability to plot to existing graph in DS9. </LI>
+</UL>
+
+<hr>
+Version 4.1.3 July 2004
+<P>
+New features/Bug fixes since V4.1.2 include:
+<UL>
+   <LI> Update calculator, calculator expression help files.</LI>
+   <LI> Add licence.</LI>
+   <LI> Fix interface to VizieR.</LI>
+   <LI> Add A4 paper size.</LI>
+   <LI> Rework print interfac.</LI>
+   <LI> Fix preview orientation.</LI>
+   <LI> Fix preview page layout.</LI>
+   <LI> Add XPA entry points to print/save image on POW.</LI>
+   <LI> Update profile help files</LI>
+</UL>
+
+<hr>
+Version 4.1.2 May 2004
+<P>
+New features since V4.1.1 include:
+<UL>
+   <LI> Adding support for Cartesian projection.</LI>
+   <LI> Adding record capability for profile of FITS image.</LI>
+   <LI> Enhanced capabilities for printing and saving FITS image or plot, including the
+        ability to preview the image before printing.</LI>
+   <LI> A row selection function was added to fv. User can select/deselect row(s) by 
+        clicking on the row index in the table with the mouse's left button (or 
+        clicking left button then right button to select row range). Row(s)  also can 
+        be selected using selection condition and expression. </LI>
+   <LI> fv's plot, calculator, histogram and statistics tools now can perform on the 
+        selected rows.</LI>
+   <LI> Export command can export the selected rows and columns from a table to
+        fits file or text file.</LI>
+   <LI> Delete command will now delete the selected rows and cols.</LI>
+</UL>
+
+<hr>
+Version 4.1.1 January 2004
+<P>
+New features since V3.2 include:
+<UL>
+   <LI> Enhanced support for ds9 image display <pre>
+        User can choose to display images or plots using either 
+        DS9 or POW as the primary display tool.  </pre></LI>
+   <LI> Added more XPA points for controlling fv from external processes, including<pre>
+        <b>create</b>: create an image or table file or extension.
+        <b>export</b>: export hdu(s) to a Fits file or a text file.
+        <b>opentool</b>: open <a href="SkyView.html">skyview</a>, <a href="catalog.html">catalog</a>, <a href="VizieR.html">vizier</a>, or <a href="ftool.html">ftools</a> dialog panel.
+        <b>preference</b>: set up FV preferences.
+        See <a href="fv_scripting.html">Scripting</a> for more information </pre></LI>
+   <LI> Allow user to reverse the functionality of the left and right mouse 
+        buttons within the POW display via pow's <a href="../../pow/DefaultOptions.html">preferences</a> setting<pre> 
+        default: Left mouse button  - control zoom
+                 right mouse button - control brightness/contrast</pre></LI>
+        
+</UL>
+
+<hr>
+Version 3.2 October 2002
+<P>
+New features since V3.1 include:
+<UL>
+   <LI> New function buttons have been added to the File Summary window to provide
+        short cuts to common operations: <pre>
+        - 'Hist' - displays a histogram image of 1 or 2 columns in a table 
+        - 'Plot' - plots table columns 
+        - 'Table All' and 'Table Select'
+                 - The first button displays all the columns in a table, whereas the 
+                   second button allows the user to select which columns to display.  </pre>
+   <LI> Vectors or images contained within a single binary table cell may be
+        plotted.
+   <LI> When displaying Hierarchical grouping tables, a new 'OPEN' button is
+        available at the beginning of each row which can be used to open the
+        corresponding group member file.
+   <LI> Can display and edit images that are compressed with the new FITS 'Tile
+        Compression' algorithm.
+</UL>
+
+<hr>
+Version 3.1 July 2002
+<P>
+New features since v3.0 include:
+<UL>
+   <LI> Hundreds of tables available in VizieR can be queried to retrieve
+        objects near a given position
+   <LI> Column histogram tool can be limited to a specified row range
+   <LI> New tool for editing the name, units and display format of columns
+   <LI> 'Export as text' options can  print row numbers, and print a
+        user-specified character string between each columns value
+   <LI> Double Right-clicking inside a pow graph redraws the graph with
+        the default 1:1 zoom factor
+   <LI> If an HDU contains a 1-D image, the 'PLOT' button on the summary
+        window plots the pixel value vs. pixel  coordinate instead of
+        displaying a long, thin image
+   <LI> The Zoom/in Zoom/out and replot buttons have been moved from the
+        POW canvas and up into the menu bar
+   <LI> Integer columns with the TSCAL and TZERO keywords are treated
+        as doubles to prevent data truncation
+   <LI> Rows of a vector table, either fixed or variable length, can be
+        plotted
+</UL>
+
+<hr>
+Version 3.0 November 2000
+<P>
+New features since v2.6 include:
+<UL>
+   <LI> Search online SkyView database for images or objects located
+        in a given region of the sky
+   <LI> Execute an Ftool from within fv (Unix only)
+   <LI> Plot vector columns and subsets of rows
+   <LI> Smooth image extensions with a boxcar filter
+   <LI> Symlinks to files supported
+   <LI> Copy/Paste works in all table views
+   <LI> More scripting commands
+   <LI> New image analysis tools: Ruler (measure distances in an image),
+        Profile (plot a cross-section of an image), Probe (calculate
+        flux and centroid data of image region)
+   <LI> New DS9 region files supported
+</UL>
+
+<hr>
+Version 2.6 
+<p>
+New features since v2.5 include:
+<UL>
+   <LI> Ported to MacOS
+   <LI> Improved window management and improved design of some windows
+   <LI> Replaced Options menu with a Preferences window which brings together
+        and categorizes all of fv's user-controlled options
+   <LI> New Auto-Plot preference
+   <LI> Can turn off the Desktop Manager
+   <LI> Expanded scripting capabilities via XPA mechanism
+   <LI> File Selection window shows file sizes and modification dates
+   <LI> POW's information/scope windows can be positioned on any side of
+        the window or turned off altogether
+   <LI> New Histogram Equalization color table for images
+   <LI> New Text Label handling on graphs
+   <LI> Full font control over graph labels
+</UL>
+
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+<head>
+<title>Pow Region Manipulation</title>
+</head>
+
+<body>
+<h1>Pow Region Manipulation</h1>
+
+<h2>Overview</h2>
+
+POW provides the user with the ability to create and edit standard
+region files through the <B>Region File</B> menu item under POW's <a
+href="Tools.html">Tools menu</A>.  The Region File dialog window
+consists of a list of regions available for manipulation; a set of
+buttons and an entry box which are used to modify the currently
+selected region; and, at the bottom, buttons which open/save regions
+in a file and delete all the regions.  Region types supported are Box,
+Circle, Ellipse, Polygon, Line, and Point. <p>
+
+<h2>Creating Regions</h2>
+
+When the region dialog box is open, a new region can be created by
+placing the mouse at the desired location in the graph and
+click-and-drag with the left mouse button down (Command-Click on Mac&nbsp;OS). 
+The shape of the
+region created is determined by the current shape button in the dialog
+box.  For Circles, and Ellipses, the initial mouse location will be
+the center of the region and the final location its radius or width
+and/or height, as appropriate.  For Boxes, the mouse movement traces
+out opposite corners of the rectangle.  For Polygons and Lines, the
+mouse movement locations define the start and end of a line segment.
+To add extra segments to the Polygon, let up on the mouse button then
+press it again, without moving, then drag out the next side of the
+polygon, repeating as necessary.  For a Point shape, the final mouse
+position defines its location.  When the mouse button is released, the
+new region is appended to the list of available regions and made the
+current region. <p>
+
+<h2>Current Region and Manipulation</h2>
+
+The current region is the one highlighted in the dialog's list of
+regions and "tagged" on the graph (see below).  Upon selection
+(clicking the left mouse button on a region in the list or on the
+graph itself) or creation, the definition of the current region is
+placed in the current region portion of the dialog box. <p>
+
+A region consists of 3 parts: a sign indicating whether it defines a
+region to be added (source) or subtracted (background) from the data
+(these are indicated on the graph with blue or red region outlines,
+respectively); a shape; and the parameters defining its location,
+size, and possible rotation.  The sign and shape of the current region
+are represented by a pair of buttons.  The <B>sign</B> button toggles
+between "+" and "-" and the <B>shape</B> button brings up a popup menu
+of the 6 available shapes to choose from.  The region
+<B>parameters</B> are placed in a final text entry box and can be
+modified by hand.  When changing shapes, POW does its best to
+translate the current parameters into appropriate values and format
+for the new shape.  For example, in going from a circle to polygon,
+the parameters change from a circle's (X,Y,R) format to a list of
+points tracing out the circle's outline.  Changing the current region
+information in the dialog box does not actually affect the current
+region until the <B>Apply</B> button is pressed.  Prior to pressing
+Apply, the region information can be restored by reselecting the
+current region.  (Note: the values initially placed in the entry box
+are rounded off after 6 significant digits, so pressing Apply may
+result in minor changes in the shape's size and location even though
+the values were not modified.) <p>
+
+Although the sign and shape of a region can only be modified via the
+dialog box, the location, size, and rotation of regions can be changed
+either in the dialog box (yuck!) or through direct manipulation of the
+region on the graph with the mouse.  The current region is "tagged"
+with 2 types of handles: a <B>rotation</B> handle (green triangle) and
+one or more <B>resize</B> handles (green squares).  Circles, Polygons,
+and Lines cannot be rotated, so they have only one or more (as
+appropriate) resize handles.  Boxes and Ellipses have one of each
+type, but Points have neither.  A shape is rotated or resized (for
+Polygons and Lines, it is more a matter of repositioning points) by
+clicking the relevant handle with the left mouse button and dragging
+it to a new location.  When the mouse cursor is over one of the
+handles, the cursor changes to a double-arrow, indicating that point
+can be dragged.  When the mouse button is released the dialog's list
+of regions and current region information are updated with the new
+information. On the polygon, to drag a vertex, use Shife-Left Mouse
+button to drag the intended vertex to new location.<p>
+
+To <B>move a region</B>, simply click the left mouse button inside the
+region and drag it to the new location.  Because clicking on a region
+makes it the current region, moving a region can be performed on any
+region, not just the current one.  When inside a region, the cursor
+changes to a 4-sided arrow and the region's outline thickens.  The
+current region can also be moved via the keyboard.  When the POW
+window is in the foreground, <B>shift-arrow</B> will move the current
+shape one screen pixel in the arrow's direction. <B>Control-arrow</B>
+moves the shape 10 pixels. <p>
+
+Polygons can be modified in two additional ways.  Points can be
+deleted by dragging a point onto one of its adjacent points.  A point
+can also be inserted by clicking and dragging one of the handles with
+the left mouse button (Command-Click on Mac&nbsp;OS).  This inserts the new 
+point before the one clicked.  If this is incorrect, immediately drag the new point back
+onto the first to delete it (no need to release the mouse button) and
+then click and drag on the next point. Vertex can be dragged by
+click and drag with right mouse button. <p>
+
+The <B>Delete</B> button in the Region dialog deletes the current
+region, and the next region in the list (or previous region if
+deleting the last region) becomes the current region.  All the regions
+can be deleted with the <B>Clear All</B> button. <p>
+
+<h2>Coordinate Systems</h2>
+
+Region parameters can be displayed in one of several formats
+selectable by a popup menu just below the list of regions in the
+Region dialog.  The first is <B>Image</B> format wherein positions and
+size parameters are reported in the pixel coordinates of the image.
+If the image has a linear scaling, the <B>Linear</B> format will
+report coordinates in this scaled coordinate system instead of pixels.
+If WCS information is available for the graph, region parameters can
+be displayed in celestial coordinates as degrees.  The formats 
+<B>FK4</B>, <B>FK5</B>, <B>Galactic</B>, <B>Ecliptic</B>, and 
+<B>ICRS</B> each report region positions and sizes as degrees, but POW
+currently does not convert between these formats; the user must
+specify the appropriate system which will then be written to the
+region file when saved.  Finally, the <B>Degrees</B> format signifies
+a mixed style used by SAOtng wherein positions are in degrees, but
+sizes are in pixels.<p>
+
+The final 2 elements of the popup menu select the formatting to use
+when displaying degree values.  <B>Decimal Degrees</B> format shows
+values as ordinary decimals with RA ranging over 0-360 and Declination
+over -90 to +90. <B>HHMMSS Degrees</B> instead displays decimals in
+hour:minute:second format. <p>
+
+<h2>Statistics Calculation</h2>
+
+3 entries indicate the statistics of a region selected (or combine
+of regions). The statistics include number of pixel enclosed, total
+flux and mean flux in the region(s). <p>
+
+For statistic of 2 or more regions on the image, number of pixels 
+is determined by several factors, such as if a region intersects with
+one another, the sign of region (+: include, -: exclude). Pow calls
+CFITSIO routine and pass the region(s) descriptions to determine if
+a given pixel is part of the ROI (region of interests). And if so,
+that pixel's value is been recorded to be part of calculation of 
+total flux and mean flux of the ROI. <p>
+
+<h2>Saving/Opening Region Files</h2>
+
+At the bottom of the Region dialog are a pair of <B>Open</B> and 
+<B>Save</B> buttons which will read and write region files in the
+standard format, compatible with SAOtng.  If regions already exist
+when opening a region file, the user will have the option of deleting
+the old regions or appending the new ones to the list.  When saving
+regions, the parameters will be written in the coordinate system
+currently selected in the Region dialog. <p>
+      
+</body>
+</html>

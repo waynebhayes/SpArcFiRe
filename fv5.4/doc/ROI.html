@@ -1,0 +1,41 @@
+<html>
+<head>
+<title>Pow ROI Zooming</title>
+</head>
+<body>
+<h1>Pow ROI Zooming</h1>
+<p>
+To look more closely at a section of a graph, you need to pick a region
+of interest (ROI) for that graph.  The current region of interest is shown
+by a blue box in the <i>scope</i> window.  If there is no blue box, the
+ROI is an area large enough to display all of the elements (curves and 
+images) of the selected graph and coincides with the enclosing black box
+in the <i>scope</i>.
+</p>
+<p>
+There are four ways to change your region of interest:
+</p>
+<ul>Right click (Command-click on MacOS) and drag in the scope to create a new ROI.</ul>
+<ul>Left clicking and dragging in the <i>scope</i> will "drag" the current ROI box.  The main graph 
+will be replotted using the new ROI when you release the left mouse button.</ul>
+<ul>Use the <b>Zoom</b> option buttons (see <a href="#zoomoption"> Zoom</a>).</ul>
+<ul>Right click (Command-click on MacOS) and drag in the main POW window.</ul>
+If the ROI does not overlap the current graph (ie, you are dragging out an ROI
+on an unselected graph), the ROI selection will be applied to the top graph 
+overlapping the ROI.  If the ROI does not overlap any graph, the ROI will
+be applied to the current graph.<p>
+Right double click (Command-double click on MacOS) in the main POW window or scope window. 
+This will replot the graph and undo any previous zooming.
+<hr>
+<a name=zoomoption><b>Zoom</b> Option<p>
+Allow user to zoom in/out on the image/plot.</p>
+<ul><b>Zoom in  (2x)</b>: Zoom in on the current perspective of the image by factor of 2.</ul>
+<ul><b>Zoom out (2x)</b>: Zoom out on the current perspective of the image by factor of 2.</ul>
+<ul><b>Zoom in 1x (2x, 4x, 8x, 16x, 32x)</b>: Zoom in on the original image size by factor of 1 (2, 4, 8, 16 or 32).</ul>
+<ul><b>Invert X Axis</b>: Flip the image on its X axis.</ul>
+<ul><b>Invert Y Axis</b>: Flip the image on its Y axis.</ul>
+<ul><b>Invert Both</b>: Flip the image on its X and Y axis.</ul>
+<ul><b>Undo Invert</b>: Un-flip the image.</ul>
+</hr>
+</body>
+</html>

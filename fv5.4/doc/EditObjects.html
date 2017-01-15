@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+<head>
+  <title>Edit Objects</title>
+</head>
+
+<body>
+
+<h1>Edit Objects</h1>
+
+<P> The <B>Edit Objects</B> dialog box has much the same layout as the <a
+href="EditGraphs.html"><B>Edit Graphs</B></A> dialog box.  It is
+divided into 3 regions...</P>
+
+<P> At the top of the dialog box are two list boxes.  The box on the
+left lists all known display objects (curves and images).  The box on
+the right lists all known data objects.  The number following the data
+objects' names indicates the number of values contained within each
+object.  (The <B>NULL</B> data object is used to specify no data for
+certain elements of Curve objects.)  The name of the display object
+being editted is indicated by the entry box below the left box.  New
+objects are editted by simply entering a unique name.  (Note that
+curves and images are treated separately, so one can have both a curve
+and image with the same name.)  The <B>Edit Data</B> button on the
+right currently does nothing.  In a future release, one will be able
+to edit old and create new data objects.</P>
+
+<P> The middle portion of the dialog box lists the parameters defining
+the selected object.  Using the pair of radio buttons at the top of
+this region one can alternate (or convert) between editting the object
+as a Curve or Image...</P>
+
+<UL>
+
+<LI> <B>Curve:</B>
+
+<P> A POW Curve is formed by specifying up to 4 data objects: X, Y,
+X-error, and Y-error.  To assign data to the curve, highlight one of
+the data objects in the top right box and then click on the
+appropriate button in the curve parameter list.  Either X or Y
+<B>must</B> be specified, but the others are all optional. If an X or
+Y data object is given as "NULL", POW will generate a simple integer
+count instead.</P>
+
+<P>A curve can contain WCS information which allows it to be
+plotted in celestial coordinates instead of pixels.  Enter (or edit)
+the values at the bottom of the parameter list and select the <B>WCS
+Info</B> check box.</p>
+
+<LI> <B>Image:</B>
+
+<P> A POW Image is created from a single data object; highlight the
+desired data object and click on the <B>Data</B> button.  The NULL
+data object cannot be used for an image.  The <B>Units</B> entry box
+lists the units of the array values (not the X/Y coordinates).  A data
+object is one-dimensional, so the image needs to know how to convert
+the data into a 2-D array.  This is done by entering the X and Y
+<B>Dimensions</B> of the image in the first pair of entry boxes.
+Below them are the 3 image scale parameters. <B>Origin</B> specifies the
+coordinates of the <em>center</em> of the bottom left pixel of the
+image.  By convention, FITS images have an origin of (1,1) when
+specified in pixels.  The <B>Pixel Size</B> specifies the linear scale
+of the pixels (in units/pixel) and <B>Units</B> specify the physical
+units used for the Orign and Pixel Size.</P>
+
+<P>An image can contain WCS information which allows it to be
+labeled in celestial coordinates instead of pixels.  Enter (or edit)
+the values at the bottom of the parameter list and select the <B>WCS
+Info</B> check box.  WCS information <em>overrides</em> the image
+scale parameters (origin, pixel size, and units).</P>
+
+</UL>
+
+<P> At the bottom of the dialog box are 3 buttons.  <B>Create
+Object</B> creates the indicated object.  If the Object Name is
+unique, a new object will be created otherwise, it will replace the
+old version. (Note than a curve and image can have the same name and
+but will still be considered unique.)  Creating/Editting an object
+does not immediately affect the graphs in which that object already
+exists, so it is necessary to update them manual from the <a
+href="EditGraphs.html"><B>Edit Graphs</B></A> dialog box.  <B>Reload
+Info</B> will reset the parameter list and update the object/data
+boxes with the current list of known objects.  The <B>Exit</B> button
+closes the dialog box.  Any changes will be lost if an object wasn't
+created before exitting.</P>
+
+</body>
+</html>

@@ -1,0 +1,86 @@
+<html>
+  <head>
+    <title>Header Display/Edit</title>
+  </head>
+<body>
+
+<h3>Header window</h3>
+
+<P>This window lists all the header information.</P>
+
+<p>To edit a keyword entry, single click that keyword using the left
+mouse button.  The entry will be copied into an entry box at the bottom
+of the window.  Make your modifications there and then press &lt;Return&gt;
+to make the changes.</P>
+
+<p>After selecting a keyword, the right mouse button (Control-Click on
+MacOS) will bring up a menu for editing.  You can insert a new keyword
+in front of the selected keyword or delete it.  An Undo function is
+also available.  These functions are also listed in the Edit menu.</p>
+
+<p>If the highlight for a keyword is brown, you have selected a
+mandatory keyword and can only edit its comment.  You also cannot
+insert a new keyword within the initial set of mandatory keywords.
+This keyword protection can be deactivated from the <a
+href="preferences.html">Preferences</a> window.  <B>Warning</B>:
+modifying mandatory keywords can corrupt your FITS file and may cause
+fv to crash.</p>
+
+<p>The "Search for" entry box allows you to search for strings in the
+header.  Type the string in the entry box and click "Find".  Click the
+"Case sensitive" button to toggle between case sensitive and case
+insensitive searching mode.</p>
+
+<H3>Menus</H3>
+
+<LI> <B>File</B>
+
+   <UL>
+   <LI> <B>Save</B>: Save current FITS file.  If the current extension
+        has not been modified, this menu item is disabled.
+   <LI> <B>Export as Text</B>:  The contents of the header will
+        be dumped to an ASCII file.
+   <LI> <B>Close</B>: Close the header window.
+   </UL>
+
+If the "Write History Keyword" option is on (see <a
+href="preferences.html">Preferences</a> help), then a HISTORY
+keyword is added to the file, listing the user name and date, when
+a modified extension is closed/saved.
+
+<p></p>
+
+<LI> <B>Edit</B>
+
+   <UL>
+   <LI> <B>Undo</B>: Undo an action.  Unlimited undos are available.
+
+   <LI> <B>Cut</B>: Delete the current keyword and copy it to the clipboard.
+   <LI> <B>Copy</B>: Copy the current keyword to the clipboard.
+   <LI> <B>Paste</B>: Insert the contents of the clipboard at the current
+         position.
+   <LI> <B>Clear</B>: Delete the current keyword and insert a new one.
+
+   <LI> <B>Clipboard</B>: Display the contents of the clipboard.
+   <LI> <B>Insert Key</B>: Insert a new keyword before the currently
+        selected one
+   <LI> <B>Delete Key</B>: Delete the currently selected keyword
+
+   <LI> <B>Preferences</B>: Open fv's preferences dialog box
+   </UL>
+
+<LI> <B>Tools</B>
+   <UL>
+   <LI> <B>Create Checksum</B>: Create new checksum keywords
+   <LI> <B>Verify Checksum</B>: Check the validity of the checksum keywords,
+        if they exist.  If incorrect or nonexistant, correct values can be
+        calculated.
+   </UL>
+</UL>
+
+<hr> 
+
+Go to <a href="aboutFv.html">About fv</a>.
+
+</body>
+</html>

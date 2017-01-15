@@ -1,0 +1,59 @@
+<html>
+  <head>
+    <title>Histogram</title>
+  </head>
+<body>
+
+<h3>Making Histogram</h3>
+
+<h4>Making a 1D or 2D histogram from a table:</h4>
+
+Any type of numerical column can be used to make a histogram. In
+   this window, X and Y are column names from which one makes
+   histogram. If a "Weight" column is selected, then the value of
+   each cell is incremented by the value of "Weight" column, otherwise
+   by 1.
+
+   <p>TLMIN and TLMAX are the keywords usually used in an event file
+   and are critical to making correct histograms. "Data Min" and "Data
+   Max" are minimum and maximum values of the selected column and are
+   dynamically calculated.</p>
+
+   <p>One needs to supply Min, Max, Bin Sizes for both X and Y column
+   (for 2D histogram, X only for 1D histogram). By default, TLMin and
+   TLMax values are used for Min and Max.</p>
+
+   <p>One can select a range of rows in the table for making histogram by
+   providing a "Row Range".</p>
+
+   <p>Or one can use selected rows in the table window for making histogram by
+   checking "Use selected rows" checkbox.</p>
+
+<p>"Make" button does the following procedures:
+
+<UL>
+   <LI>Create the histogram and save it in a temporary file as an image.
+   <LI>Write CTYPEn, CRPIXn, CRVALn, and CDELTn keywords to the image,
+       for use in plotting the image with original axes.
+   <LI>Summary of the temporary file is then opened automatically.
+</UL>
+
+<p>
+
+<h4>1D histogram:</h4>
+
+<p>By selecting only the X column and/or Weight column, one can
+   make a 1D histogram.
+
+<h4>Note:</h4>
+
+<P>To retain the histogram, one must Save the file before closing it.
+fv will warn the user of this if the file has not been saved when
+closing it or exitting the program.</P>
+
+<hr> 
+
+Go to <a href="aboutFv.html">About fv</a>.
+
+</body>
+</html>

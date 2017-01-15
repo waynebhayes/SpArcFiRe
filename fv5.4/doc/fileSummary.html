@@ -1,0 +1,144 @@
+<html>
+  <head>
+    <title>Fits File Summary</title>
+  </head>
+<body>
+
+<h3>Summary of a FITS file</h3>
+
+This window lists information about all the HDUs (Header Data Units) 
+in the opened FITS file.  It includes:
+
+<OL>
+  <LI> Index    : Extension number (0 is Primary Image)
+  <LI> Extension: Name of the extension.
+  <LI> Type     : Type of the extension.
+  <UL> 
+    <LI>Binary  -- Binary table extension.
+    <LI>ASCII   -- ASCII table extension.
+    <LI>Image   -- Primary array or Image extension.
+  </UL> 
+  <LI> Dimension: Size of each extension.
+  <LI> View     : 
+  <UL> 
+    <LI> Header -- Display/Edit  header.
+    <LI> Hist -- Displays a histogram image of 1 or 2 columns in a table
+
+    <LI> Image/Plot  -- Display image or plot table column values.
+         The default image
+         display device (POW or ds9) may be selected under the
+         Edit->Preferences->Graphs menu item.  
+    <LI> Table  -- Display a table. (If the extension is an image, then
+         numerical values of the image are displayed as a table).  <p>
+             All - displays all the columns in a table</br>
+             Select -  allows the user to select which columns to display.  </p></LI>
+
+<p> By clicking each button, users are allowed to display and edit
+    the FITS file.  </P>
+
+  </UL> 
+</OL>
+
+<H4>Menus</H4>
+
+Several menu items operate on "selected" HDUs. One selects HDU's by
+clicking on the checkbutton next to the HDUs' index.
+
+<UL>
+
+<LI> <B>File</B>
+
+<UL>
+
+   <LI> <B>New File...</B>: Create a new FITS file.
+   <LI> <B>Open File...</B>: Open another FITS file.
+        See <a href="fileSelection.html">File Selection</a> for details.
+   <LI> <B>Save</B>: Save any changes to the original file.
+   <LI> <B>Save As...</B>: Save file (with modifications) to a new file.
+   <LI> <B>Export HDUs...</B>: Save the selected HDUs into a new file.
+   <LI> <B>Make HDU Listing...</B>: Save Extension Name, Type and Dimension 
+        in an ASCII file.
+   <LI> <B>Revert</B>: Throw away any unsaved modifications and reopen the
+        last-saved version of the file.
+   <LI> <B>Close</B>: Close the current Summary window and the opened file. 
+        If file has been modified, you will be given the opportunity to save
+        the file before closing.
+   <LI> <B>Quit</B>: Quit fv.  If any open file has been modified, you
+        will be given the opportunity to save it before exitting.
+
+</UL>
+
+
+<LI> <B>Edit</B>
+
+<UL>
+   <LI> <B>Undo</B>: Not support in summary windows.
+
+   <LI> <B>Cut HDUs</B>:
+        Delete the selected HDUs. The deleted HDUs go to the
+        clipboard.
+
+   <LI> <B>Copy HDUs</B>:
+        Copy the selected HDUs to the clipboard.
+        Only one item (could be a list of
+        HDUs though, as long as multiple HDUs are cut/copied at once
+        from a file) is kept in the clipboard.
+
+   <LI> <B>Paste HDUs</B>:
+        All the HDUs in the clipboard are appended to the current file. 
+
+   <LI> <B>Clear</B>: Not supported in summary windows.
+
+   <LI> <B>Clipboard</B>: Show the contents of the clipboard.
+
+   <LI> <B>New Extension</B>:
+        A new empty extension will be appended to the current file.  You
+        can select whether to append an image, ascii table, or binary table.
+
+   <LI> <B>Preferences</B>:
+        Bring up a window from which fv's behavior and appearance can be
+        modified.  See the <a href="preferences.html">Preferences</a>
+        help file for details.
+
+</UL>
+
+<LI> <B>Tools</B>
+
+<UL>
+
+
+   <LI> <B>Plot </B>:
+        Plot all the selected valid HDUs(images and tables).
+
+   <LI> <B>Smooth Images</B>:
+        Smooth all the selected image HDUs. The two parameters, width and 
+        the height of the smoothing box, will be entered by users. 
+
+   <LI> <B>SkyView:</B> Retrieve images of sky at all wavelengths
+        (from Radio to Gamma-Ray) from the NASA <a
+        href="SkyView.html"> SkyView </a> server.
+
+   <LI> <B>Catalog:</B> Retrieve a list of objects in a region of sky
+        from selected <a href="catalog.html">catalogs </a> at the NASA
+        SkyView server.
+
+   <LI> <B>VizieR:</B> Retrieve a list of objects in a region of sky
+        from selected catalogs at the Strasbourg VizieR web site.
+
+   <LI> <B>Run Ftool:</B> Run <a href="ftool.html">a Ftool program </a> if
+the HEASOFT or FTOOL packages are installed.  
+
+</UL>
+
+<UL>
+
+<LI> <B>Help</B>: A listing of all available help files.
+
+</UL>
+
+<hr> 
+
+Go to <a href="aboutFv.html">About fv</a>.
+
+</body>
+</html>

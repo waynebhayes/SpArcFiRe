@@ -1,0 +1,57 @@
+<html>
+  <head>
+    <title>fv Help: starting FV</title>
+  </head>
+<body>
+
+<h3>Starting FV</h3>
+
+<P>
+To start up fv on Unix workstations, enter 'fv' in a command window. You may
+optionally append the name of a FITS file, or multiple files, to be opened.
+For example, 'fv ngc1316o.fit' opens a single file, and 'fv ngc*' opens all
+the FITS files in the current directory whose names match the string.  On PCs
+running MS Windows you may start fv either by double clicking on the fv desktop
+icon, or by dragging a FITS file from e.g. Windows Explorer onto the fv icon.
+It is also possible to set up your Windows or Unix environment so that you can
+just double click (in the File Manager or on an e-mail attachment) on a FITS
+file that has a standard extension like '.fit' or '.fits' and then have fv
+automatically start up and open that file.</p>
+
+<h3>Environment Variable <I>FVTMP</I></h3>
+
+<P>The environment variable <B>FVTMP</B> defines the directory that fv will use
+to create temporary files.  On Unix machines, you may set this variable in your
+.login file, or in a .[t]cshrc file as
+    <UL>setenv FVTMP <I>/temporary/directory/path</I></UL>
+or in a .bashrc as
+    <UL>export FVTMP=<I>/temporary/directory/path</I></UL>
+
+Under MS Windows, open the Control Panel and click on System and Environment tabs,
+and type "FVTMP" in Variable entry box and <I>disk:\temporary\directory\path</I>
+in the Value entry box.</P>
+
+<h3><I>cmap</I> Option</h3>
+
+<P>Fv usually chooses an appropriate color map value by default, but it sometimes fails to recognize architectures supporting TrueColor mode and fails with a "X Error: BadMatch" message.  The solution to this is to restart fv with the -cmap 2 option.</P>
+
+<P>Here is a list of available cmap options when starting fv  (e.g., 'fv -cmap 2': </P>
+<pre>
+ cmap 0 - Default behavior.  I.e. choose the "best" colormap.</dt>
+ cmap 1 - Force POW to setup a new private pseudocolor colormap (very safe)
+ cmap 2 - Force POW to use truecolor mode (very safe, but looks bad on low 
+          color displays and runs slower than pseudocolor).  Note: this will
+          cause powSetupColormap to look for a truecolor visual; if it can't
+          find one, it will allow the main Tk code to pick a visual, but POW
+          will still use "truecolor mode" (i.e. the Tk photo widget) to 
+          display images.
+ cmap 3 - Force use of the screen default colormap. This should be
+          reasonably safe now, but often won't be what you want.
+</pre>
+
+<hr> 
+
+Go to <a href="aboutFv.html">About fv</a>.
+
+</body>
+</html>

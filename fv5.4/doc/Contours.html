@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+<head>
+<title>Contour Creation</title>
+</head>
+<body>
+
+<h1>Contour Maps</h1>
+
+<P> Selecting <B>Make Contour Map</B> from the <B>Edit</B> menu brings
+up a dialog box which allows one to specify how the contour map will
+be created for the current image in the current graph (indicated by
+the green bounding box)...</P>
+
+<BLOCKQUOTE>
+
+<P> <B>Image Range</B>: Minimum and maximum pixel values of the
+selected image.</P>
+
+<P> <B>Contour Range</B>: Minimum and maximum values to contour over.
+The values are initially taken from a "clean" approximation of the min
+and max pixel values of the image, but the user can change these
+values to whatever is desired. (Note that the min value need not be
+less than the max value.)</P>
+
+<P> <B># Contours</B>: Number of contour levels to produce between the
+range points.  One can either click on the <B>&lt;</B> or <B>&gt;</B>
+buttons to decrease/increase the number or type in a new number
+directly.</P>
+
+<P> <B>Scale</B>: Scaling method for interpolating contour levels.
+The <B>linear</B> method will space the contours over a constant
+interval from the min and max range.  The other two options -- sqrt
+and log -- do much the same thing but based on the square root or
+logarithm of the min and max values.  These latter options bring out
+the finer details at the lower contour levels in images with a large
+dynamic range. </P>
+
+<P> <B>Contours</B>: This is the actual list of contours to draw.  The
+previous contour items update this list each time they are clicked,
+but the list may be customized prior to clicking the <B>Make Contours</B>
+button.
+
+<P> <B>Resolution</B>: This determines how detailed (and accurate) the
+contours will be.  At high resolution, contours will be produced based
+on the value from each pixel of the image.  Low resolution will
+produce contours using the average pixel value in 3x3 sections,
+resulting in a lot few points to be plotted and, therefore, faster
+performance.  Medium resolution uses 2x2 sections.  Using high
+resolution when the contour intervals are similar in size to the image
+noise will create an enormous number of points, significantly slowing
+down POW.</P>
+
+<P> <B>Separate Graph</B>: If this box is checked, when the contours
+are created, the contours will be placed in a separate graph by
+itself.  Otherwise, the contours will be placed on top of the current
+graph along with the original image.</P>
+
+</BLOCKQUOTE>
+
+<P> Click on the <B>Make Contours</B> button to build and draw the
+contours.  After a set of contours is created, its parameters can
+still be modified in this dialog box and the contours recreated
+(replacing the previous version) with the <B>Make Contours</B> button.
+Contours are created as a POW curve, so one can control its display
+features (color, line style, etc) from the <A
+href="EditGraphs.html">Edit Graphs</A> dialog box.</P>
+
+<P> If the original image contains <B>WCS</B> information, the
+contours will be created in terms of celestial coordinates.  (Without WCS
+information, contours will be drawn in pixel coordinates.)  As a
+result, one can place the contours made from one image into a graph
+containing another image (with its own, possibly different, WCS
+information) and the contours will be positioned appropriately for the
+new graph.  This can be used to compare observations of the same
+object at different wavelengths (eg, radio and optical).</P>
+
+</body>
+</html>

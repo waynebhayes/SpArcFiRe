@@ -1,0 +1,228 @@
+<html>
+  <head>
+    <title>Fits Table</title>
+  </head>
+<body>
+
+<h3>Table display</h3>
+
+The table window presents a spreadsheet-like display of the
+contents of the given FITS table extension.  Row numbers run along the
+left side of the window and column names run along the top (below the
+menubar).  Single click on a data cell to copy the value to the "Edit
+cell" entry at the bottom of the window, where one can immediately edit the
+value. Press &lt;Return&gt; in that entry to finalize the changes.
+
+<p>Below the column names are listed the data formats and (if
+present) the units labels for the columns.  If an "Expand" button
+appears below the column information, the column is a vector
+column. Clicking on the "Expand" button will bring up a 2-D table,
+displaying all the vector elements.</p>
+
+
+<H4>Menus</H4>
+
+<P>Not all of the following menu items are supported in all table
+windows.  Many apply only to tables of real table extensions, but not
+to vector tables.</P>
+
+<UL>
+
+<LI> <B>File</B>
+
+<UL>
+<LI> <B>Save</B>: Save current FITS file.  If the current extension
+     has not been modified, this menu item is disabled.
+<LI> <B>Export HDU</B>: The whole or partial table will be saved as
+     a new fits file.
+<LI> <B>Export as Text</B>: You will be able to specify which rows and columns to list,
+     as well as any special separater character(s) to be inserted in between the values
+     on each row. You may optionally choose which rows to be listed by highlighting the
+     desired row numbers in the first column of the table or by using "Select Rows from
+     Expr" under the Edit munu.
+<LI> <B>Close</B>: Close the table window.
+</UL>
+
+
+<LI> <B>Edit</B>
+
+<UL>
+
+<LI> <B>Undo</B>: Not supported in table windows.
+
+<LI> <B>Cut</B>: Not supported in table windows.
+
+<LI> <B>Copy</B>: To highlight a rectangular region of a table, first left-click on the
+     table cell in one corner of the rectangle, then right-click on the cell in the 
+     opposite corner (Shift-Click on MacOS).
+
+<LI> <B>Paste</B>: Paste the contents of the clipboard at the
+     location of the current selection/region.
+
+<LI> <B>Clear</B>: Not supported in table windows.
+
+<LI> <B>Clipboard</B>: Bring up contents of the clipboards. If the type is
+     listed as "table", its contents can be pasted into the table.  Data
+     types could conflict and give incorrect results or errors.
+
+<LI> <B>Insert -&gt;</B>
+
+<UL>
+<LI> <B>Row</B>: A new row information window will appear in which the
+      number of rows and their insertion point are entered. Enter "end" as
+      the insertion point to append rows to the table.
+<LI> <B>Column</B>: You will be presented with a new column information
+      window in which you can specify the column's name, its data format,
+      its optional units label and display format, and where to place
+      the new column. The name and format are required.  Sample legal
+      format for a binary table are 15A (string of 15 characters), 1L,
+      1X, 1B, 1I, 1J, 1E, 1D, 1C, 1M. A bintable column of type Xn is
+      a vector of n elements).  For ASCII tables, sample format types
+      are A15, I10, E12.5, D20.10, F14.6, etc.  Allowed formats for
+      each table type are selectable in a popup menu.
+</UL>
+
+<LI> <B>Delete  -&gt;</B>
+
+<UL> 
+
+<LI> <B>Selected Rows</B>: Delete all the selected row(s). Rows can be
+      selected (unselected) by clicking mouse on the rows or by clicking 
+      <a href=selectRows.html>Selected Rows From Expr</a> button in Edit menu. 
+
+<LI> <B>Selected Columns</B>: Delete all the selected column(s).  To
+      select (or unselect) a column, click on the checkbox next to the
+      column's name in the main window.
+</UL>
+
+<LI> <B>Select Rows From Expr...</B>: Select rows from the table, provide
+      either a list of row range or a conditional expression (see <a href="selectRows.html">
+      Selected Rows From Expr</a>).
+
+<p></p>
+
+<LI> <B>Column Parameters...</B>: Change the display format of a column
+      by adding/modifying the column's TDISP keyword.  Select the
+      column from the popup menu then type in a new TDISP value and
+      click the "Apply" button.  Leave the entry box blank to delete
+      the TDISP keyword.  Legal TDISP keywords have the format of: Aw
+      Lw Iw.m Bw.m Ow.m Zw.m Fw.d Ew.dEe ENw.d ESw.d Gw.dEe Dw.dEe
+      (see <a href="displayFormat.html">Column Parameter</A> help file and
+      FITS documentation for details). Example formats:
+
+      <UL>
+      <LI> I6  : display as integers of width 6
+      <LI> F5.2: display as floating points of width 5 with 2 digits after
+           decimal point. 
+      </UL>
+
+<LI> <B>Preferences</B>: Bring up the <a
+        href="preferences.html">Preferences</a> window.
+
+</UL>
+
+<P></P>
+
+<LI> <B>Tools</B>
+
+<UL>
+<LI> <B>Plot</B>
+
+<P> Create a scatter plot of table data.  A column selection window will
+appear, from which you can select the columns to plot.  You can also enter
+arithmetic expressions.  See <a href="plotDialog.html">Plot Dialog</a> for
+details.</P>
+
+<p></p>
+
+<LI> <B>Sort Rows</B>
+
+<P> Sort the table. You can select from the dialog box, at most, three
+columns to sort on.  The sorted table will replace the original table,
+so the FITS file must be opened as read/write. A "delete duplicates"
+option can be given to eliminate extra rows with identical sort keys.
+(See <a href="sortColumn.html">Sort Columns</a> for more details.)</P>
+
+<p></p>
+
+<LI> <B>Calculator</B>
+
+<P> Perform a calculation with the table.  You will be presented with a
+calculator-like dialog box in which you can enter an arithmetic expression
+to evaluate for each row of the table.  You can store the results in either
+a new column or a pre-existing one. See the 
+<a href="calculator.html">Calculator</a> help file for more details.</P>
+
+<p></p>
+
+<LI> <B>Histogram</B>
+
+<P> Make a 1D or 2D histograms from column(s).  The histogram dialog box
+gives you control over the histogram size, binning, and row range to use.
+See <a href="2D-Histogram.html">Histogram</a> help file for details.</P>
+
+<p></p>
+
+<LI> <B>Statistics</B>
+
+<P> Calculate statistical information (mean, std. dev, etc) on a table's
+columns.  See <a href="columnStatistics.html">Column Statistics</a> 
+for details.</P>
+
+<p></p>
+
+</UL>
+
+<LI> <B>Help</B>
+
+<P>List of all the available help files.</P>
+
+</UL>
+
+<H4>User entries</H4>
+
+Two entry boxes are located at the bottom of the Table window:
+
+<UL>
+   <LI> <B>Go to</B>: Scroll the window to display the row specified in the
+        entry field.  Either click the "Go To" button or hit
+        &lt;Return&gt; to move to the indicated row.
+
+   <LI> <B>Edit cell</B>: Highlighting a cell in the table will copy
+        the value to this entry, in which the value can be edited.  To
+        set a table element as undefined, one can enter "NULL" as the
+        value (TNULLn keyword must be present in the header).  Press
+        &lt;Return&gt; to copy the new value into the table.  </UL>
+</UL>
+
+<H4>Column Entries</H4>
+<B>Select</B><p>
+Selection will be highlighted in yellow.</p>
+<UL>
+	<LI><B>All</B>: Select all rows. </LI>
+	<LI><B>Invert</B>: Counter-select of selected (if any) row(s). If no selection has been made, 
+        previously, all rows will be selected when this button is pressed.</LI>
+</UL>
+        
+<B>Modify</B>
+<UL>
+	<LI> <B>Expand</B>: Expanding the column. This button only exists if the column is a 2-D array.</LI>
+	<LI> <B>Sort</B>:   Sorting the column (thus the whole table) via two pull-down menu tabs (Ascending 
+                     and Decdending), </LI>
+	<LI> <B>Move Before</B>: Moving the selected column to before one of the other columns, or end of 
+                     the table. </LI>
+	<LI> <B>Show Col</B>: Show hidden column(s). It will be greyed out if there is no hidden column. </LI>
+	<LI> <B>Hide Column</B>: Hide current column.</LI>
+	<LI> <B>Insert New Column</B>: Open the insertion dialog panel for creating a new column on the right
+                                       to current column. </LI>
+	<LI> <B>Delete</B>: Delete current column. </LI>
+	<LI> <B>Parameter</B>: Open column parameter editting panel. </LI>
+
+</UL>
+
+<HR>
+
+Go to <a href="aboutFv.html">About fv</a>.
+
+</body>
+</html>

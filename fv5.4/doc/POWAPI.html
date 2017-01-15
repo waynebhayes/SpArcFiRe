@@ -1,0 +1,748 @@
+<html>
+<body>
+<pre>
+
+POW works in terms of objects (although at the moment, it's not written 
+using object-oriented TCL).  Each of these objects has a name (just an 
+ASCII string).  Once an object is "constructed", you use the name
+to refer to it in the various things you want to do to it ("methods").
+The main objects are:
+
+PowData - this object is an array (in the C sense) in memory somewhere
+          along with info on data type and the length of the array.
+          At creation, you can specify that POW should make it's own copy
+          of the data, allowing you to "free" your copy, or you can save
+          space by allowing POW to use your copy of the data, just don't
+          free or change it unless you destroy the PowData object first.
+
+PowVector, PowImage - these are your choices for what you can create using
+          your PowData, they give "physical" meaning to the data by specifying
+          units and, for images, dimensions.  You can make any number of 
+          Images and Vectors from one chunk of Data, and you can specify 
+          offsets so as to use only part of the Data.
+
+PowCurve - This is a collection of 1 to 6 vectors which represent a curve in
+           space and its associated errors. Currently, nothing is done
+           with the z and z-error vectors, but suggestions are welcome.
+
+PowGraph - This is the only *displayed* object in POW.  I.e. you can display
+           your Images and Curves only by creating a Graph with them as 
+           members, or by plotting them on an existing Graph (at which
+           point they become part of that Graph).  One Image or vector
+           can, of course, appear in any number of Graphs.  
+
+
+The TCL interface:
+
+*arguments in angle brackets are optional
+
+
+"Constructors"
+powSetupColormap  toplevel free_cells ?force_cmap? ?options? -
+	You should call this to create the first toplevel window for your
+	application unless you really want to do your own colormap 
+	management.  This proc will use the default colormap if it can
+        allocate enough colors or will allocate a Private pseudocolor colormap
+        with an	attempt to minimize flashing.  If this fails to find any
+	pseudocolor visuals, it will use the default colormap and disable
+        pseudocolor images in POW.
+
+	toplevel - this is the name of the toplevel you want to create.
+	           it should probably be the first toplevel your application
+                   creates (e.g. .mytop)  and all subsequent toplevel creation
+                   statements should include a "-colormap .mytop" option.
+
+	free_cells - the number of colors your application will need in 
+	             addition to what POW allocates for itself.  If you get
+	             BadColor errors (or the like) in your application, try 
+	             making this number bigger.  If you keep getting a Private
+                     colormap when your Default colormap is full, try making 
+	             this number smaller.
+	
+	force_cmap - Forces different colormap behaviors.  You might want 
+                     to give your users a way to set this themselves.: 
+	           0 - Default behavior.  I.e. choose the "best" colormap.
+	           1 - Force POW to setup a new private pseudocolor colormap 
+                       (very safe)
+                   2 - Force POW to use truecolor mode (very safe, but 
+                       looks bad on low color displays and runs slower than
+                       pseudocolor).  Note: this will cause powSetupColormap
+                       to look for a truecolor visual; if it can't find one,
+                       it will allow the main Tk code to pick a visual,
+                       but POW will still use "truecolor mode" (i.e. the
+                       Tk photo widget) to display images.
+                   3 - Force use of the screen default colormap. This should
+                       be reasonably safe now, but often won't be what you
+                       want.
+                       
+ 
+	options - a string of extra options to hand to the toplevel creation
+                  command, if you need them.
+	
+	See comments under powInit for more details.
+
+
+powInit ?XColormapWindow? ?container? ?powGUI? - creates the .pow toplevel 
+	window, all the user interface buttons and the .pow.pow
+        canvas.  The second optional argument is the pathname of a 
+	container window for POW if you want to embed POW in your own
+        toplevel (only works for Tcl/Tk8.0 and later versions). 
+	The first optional argument is the name of a window in your
+	application and tells POW to use the same X colormap as that
+        window;  this will allow your user to reliably see both POW
+        and your application in the proper colors at the same time.
+        Note, if you give an argument to powInit, that window should 
+	have a pseudocolor visual with at least 60 free read-write 
+	colorcells (call powSetupColormap first) or POW will disable 
+        pseudocolor images.  The third argument indicates wether you 
+        want POW to wrap its main canvas in an enduser GUI. Unless
+        you're embedding POW in a specialized application, you'll
+        want to leave this at the default of 1; a value of 0 removes
+        the GUI.
+
+	If you call 'powInit none' (or with no argument) pow will handle 
+	its own colormap needs, but if it creates a private colormap, you 
+	will see serious flashing between your application's windows and 
+	the POW window.
+
+	Usually, the window you specify for powInit would be the toplevel
+        window for your application and you should use powSetupColormap
+        to avoid excessive flashing and Xlib induced crashes.  Make sure 
+	you create any other toplevels with the same colormap. Unfortunately,
+        Tk has a stupid default behavior for picking the visual of a 
+        new toplevel when it's colormap is specified, so it's recommended
+        that you use powToplevel to create all your toplevels (sorry folks,
+        this one's not my fault). Ok, since this is probably confusing, 
+  	here's an example.
+
+	Suppose (for argument) your application uses 10 colors (for 
+	backgrounds highlights, etc) and your application's main window
+	is '.mytop'.  And you want the background of your application to
+        be pink and you want it to be 100 pixels wide.  
+	When you create .mytop instead of calling 'toplevel', instead do:
+
+	powSetupColormap .mytop 10 0 "-background pink -width 100"
+         
+        Invoke POW with:
+
+	powInit .mytop
+
+        If you create any other toplevel windows, be sure to create
+	them with:
+
+        powToplevel .mydialogbox .mytop
+
+	If you need to pass other options to "toplevel", put them 
+        all in one string like:
+
+        powToplevel .mydialogbox .mytop "-class \"My Extra Window\" -bg blue"
+
+powToplevel topwin refwin ?option_string? -
+	This is a replacement for the Tk toplevel command.  The Tk toplevel
+        command with a "-colormap" argument but no "-visual" argument 
+        *doesn't* use the visual of the given colormap to create the new 
+        window; instead it uses the screen default visual and then dies
+        if they're not compatible.  Why? Who knows? 
+
+  topwin  The name of the toplevel you want to create.
+
+  refwin  The window whose colormap you want to use.
+
+  option_string  Any other options you want to pass to the "toplevel" command.
+          This needs to be a single string.
+
+        If you don't want to call powToplevel, doing this yourself is simple.
+        Here's the code for the powToplevel proc:
+
+proc powToplevel {topwin refwin {options ""}} {
+#this implements what *should* be default behavior.  Apparently the evil
+#of Xlib colormap handling is contagious.
+
+    eval "toplevel $topwin -colormap $refwin -visual \"[winfo visual $refwin] [winfo depth $refwin]\" $options"
+
+}
+       
+
+
+powCreateData data_name data_pointer data_type length ?copy? -
+           This "constructs" a PowData object.  The other ways
+           to create PowData at present are with the powCreateVectorEN
+           or the powCreateDataFromList commands, see below.
+
+  data_pointer  This argument will probably be the return value from either:
+                $fitsfile load image
+                   or
+                $fitsfile load column
+                See fitsTcl documentation for details.  Or you can write your
+                own TCL command to make data.  Just have it return a void
+                pointer formatted with:
+                sprintf(interp->result,rstring,"%p",(void *)dataptr);
+
+  data_type     This is one of the strings (or an integer):
+                  "BYTE"     or  0  or   8                   1 byte
+                  "SHORTINT" or  1  or  16                   2 bytes
+                  "INT"      or  2  or  32                   4 bytes
+                  "REAL" or "FLOAT" or 3 or -32              4 bytes
+                  "DOUBLE"   or  4  or -64                   8 bytes
+
+                Note: 8 byte integers are not supported at this time
+
+     
+  copy          If copy is a positive integer, POW makes its own copy of the 
+                data array and uses that, freeing it when the object gets
+                destroyed.  If copy is zero, POW uses the supplied
+                data_pointer directly (no copy), but does not try to free
+                it when destroyed.  If copy is negative, POW takes ownership
+                of the data_pointer, using it directly and freeing it when
+                the object gets destroyed.  In this last case, the
+                data_pointer *must* have been allocated using TCL's
+                ckalloc() function (always true for data from fitsTcl). 
+                The default value is 0.
+
+
+powCloneData new_data_name old_data_name ?offset? ?length? ?copy?
+        This creates a new PowData object from an existing PowData object.
+        !!Use this function with caution unless you are specifying 
+        a copy flag > 0 or you could wind up with POW Data objects that
+        point to invalid areas of memory if you destroy one of the 
+        partners of the clone but not the other!! 
+       
+        Returns the length of the new POW Data object.
+
+  offset    Specifies an offset to the starting point of the data
+            in memory. Default is 0.
+
+  length    How much of the old data do you want to use?  If you specify
+            "NULL" the new data will have the same endpoint as the
+            old data.  If you specify a length that ends beyond the end 
+            of the previous data, the length will be adjusted to match
+            the endpoint of the old data. Default is "NULL".
+
+  copy      If copy is a positive integer, POW makes a new copy of the 
+            old data array and uses that, freeing it when the object gets
+            destroyed.  If copy is zero, POW uses the old data pointer
+            (plus offset) directly (no copy), and does not try to free
+            the memory when the new data object is destroyed.  If copy is 
+            negative, POW will flag the new_data_name as the "owner" of
+            the data array so destroying the old_data_name will not
+            free the associated memory, but destroying the new_data_name
+            will.  If you specify copy &lt; 0 and offset != 0, powCloneData
+            will return an error.  The default value of copy is 0.
+
+powCreateDataFromList data_name list_o_data ?stringflag? -
+	This creates a PowData object using the contents of a TCL list.
+        The data object will be of type DOUBLE unless stringflag is
+        is Yes.  String data should only be used as the "z" vector
+        of a PowCurve object, in which case, the specified string will
+        be plotted at the position given by the corresponding x and y
+        values.
+
+powRegisterData powdata_pointer
+        If you have an application that creates it's own PowData objects (like
+        the LHEA orbit library or the internal routines in TAKO), you must
+        "register" them in the main PowData hash table in order to use
+        them in plotting functions.  Naturally, if the PowData objects
+        aren't properly or fully created, you could run into trouble.
+        The pointer is a string created the same way as described above for 
+        the data_pointer argument to powCreateData, except that it should
+        be a pointer to a PowData structure rather than to a simple array.
+
+powCreateVector vector_name data_name offset length units - 
+           Creates a PowVector. If length is "NULL" uses the length
+           of the Data.
+
+powCreateVectorEN vector_name data_name length start increment units -
+           Creates a vector and the data to go with it.  This is nice
+           for generating test data among other things.  You *can*
+           make a PowImage using the data this generates, by the way.
+           (EN stands for Ex Nihilo)
+
+powCreateImage image_name data_name xoffset yoffset width height xorigin \
+xinc yorigin yinc xunits yunits zunits - 
+           Creates a PowImage.  The xorigin and xinc arguments are the origin
+           and pixel size in the units specified in the xunits and yunits 
+           arguments.
+
+powCreateCurve curve_name x_vector x_error y_vector y_error ?z_vector z_error?
+         - Creates a PowCurve (displayable).  All but one of the component
+           vector arguments can be the string "NULL" and POW will deal with 
+           it in a hopefully sensible default manner. The length of the 
+           curve will be the length of the first non-null vector (I might
+           change this to be length of the shortest vector present).
+           I'm also thinking of allowing scalar errors indicated by an 
+           "=" sign in the argument (but this isn't done yet).
+
+	   POW curves are now implemented with a new canvas item type.
+	   For a curve named ACURVE displayed on a graph named BGRAPH,
+           the powCurve item has a tag "ACURVEBGRAPH".  powCurve supports
+           most of the options available for the Tk native "line" type.
+           So to change the fill color of ACURVE to blue and make it a dashed
+           line (5 pixel dashes) do:
+
+           .pow.pow itemconfigure ACURVEBGRAPH -fill blue -dash 5
+
+           The only use of z_vector so far is if the z_vector is
+           created from STRING type data (e.g. using powCreateDataFromList),
+           then the strings will be printed at the positions given by the
+           corresponding x and y elements.
+
+
+powCreateGraph graph_name curves images xunits yunits xlabel\
+         ylabel ?xdimdisp ydimdisp xmin ymin xmax ymax?	 -
+	 This is the main one that actually draws on the .pow.pow canvas. 
+	 See discussion of powStartNewRow below to see how POW decides 
+	 where to place incoming graphs.  Some details (hopefully the
+	 rest is self-explanatory):
+
+  curves, images - these are Tcl "lists" of PowImages and PowCurves to plot
+  
+  xunits, yunits - These are the physical units associated with an axis
+         and will be printed next to the label.
+
+  xlabel, ylabel - An optional label for each axis.  The y-axis label will
+         be printed horizontally at the top of the y-axis since the Tk 
+         canvas does not allow rotated text at this time.
+  
+  xdimdisp, ydimdisp - the "maximum size" for the display of the graph in
+          screen pixels. The graph will be shrunk or expanded from its
+          "natural" size to fit into an area of the canvas of this requested
+          size.  If "NULL" is passed, a default value will be used.
+
+  xmin ymin xmax ymax - the bounding region for the displayed area of a 
+          graph.  These are in the units of each respective axis.  Parts
+          of images or curves falling outside this box will not be plotted.
+          Each of these arguments can be a list if more than one y or x axis is
+          present.
+
+powGraphOptions graph_name option value ?option value option value ...? -
+	This function was added to allow easy customization of several
+        (more every day :) additional options that would have been too 
+        unweildy to add to the already too long powCreateGraph call.
+        Specify as many option value pairs as you like.  Boolean values
+        should have values of Yes/No if one wants POW's menus to properly
+        reflect the new values.  In addition to all of the arguments to
+        PowCreateGraph, current options are:
+	
+	bgcolor - A background color for the whole graph
+	
+	xmargin - The amount of space around a graph (in pixels by default)
+	ymargin - This will only affect subsequent operations on the graph
+                  (chain alignments, replottings, etc.), it doesn't move
+                  the graph immediately.
+
+        handletext - Change the text that normally says:
+	           "Select/Move: graphname"
+        handleanchor - Change the anchor point of the handletext. Default
+                   is "sw".
+        handleposition - Change where on the graph's bounding box the 
+                   handle is anchored to.  Choices are:
+	           t - midpoint of top
+                   l - midpoint of left side
+                   b - midpoint of bottom
+                   r - midpoint of right side
+                   Combine to get corners.  Default is "tl".
+
+        xNumTicks   - An integer number used to indicate how many ticks to
+                      place on the X axis.  3-6 are reasonable values.
+        yNumTicks   - An integer number used to indicate how many ticks to
+                      place on the Y axis.  3-6 are reasonable values.
+	xTickLength - 4 element list indicating how long to draw the x
+                      tick marks on each of the 4 sides of the graph.  Order
+                      is {left right top bottom}.  Negative values cause
+                      tickmarks to be drawn inside the graph box.
+	yTickLength - Same for y tick marks.
+	xLabelTicks - 4 element boolean list indicating whether the x tick
+                      marks should be labeled along each side of the graph.
+                      Order is {left right top bottom}.
+	yLabelTicks - Same for y tick labels.
+        xTickScal   - Scaling method for the X tick marks.  Valid values
+                      are "linear", "wcs" (for celestial coordinates/right
+                      ascension), or "log" (for logarithmic scaling).  Tick
+                      marks and labels will be drawn accordingly.  WCS scaling
+                      occurs only if WCS information exists for the graph.
+                      Logarithmic scaling *does not* affect the drawing of
+                      curves (ie, curve data are assumed to be in logarithmic
+                      format).
+        yTickScal   - Same for y ticks.  WCS scaling assumes declination
+                      values for the y axis, though.
+        GridLines   - A boolean value indicating whether to draw grid lines
+                      connecting the graph's tick marks
+        GridColor   - The color of the grid lines
+        GridDash    - Dash value of the grid lines.  Formats are:
+                        " "    - Solid line
+                        "10"   - 10 pixel dashes and spaces
+                        "15 5" - 15 pixel dashes, 5 pixel spaces
+                        "15 10 5 10" - Dash-dot
+                        etc.
+        useSixties  - A boolean value indicating whether to attempt to use
+                      base 60 tick marks (works only with WCS data).
+
+powSetCurveOptions graph curve ?option value option value ...? -
+        This function allows one to set the display parameters for a curve
+        in the indicated graph.  If this function is not called *prior* to
+        creating the graph, a curve will be assigned default values.  When
+        called after the graph is created (and curve plotted), this function
+        will update the appearance of the curve in both the main graph and,
+        if it is the current graph, the scopebox.  The allowed options and
+        values (boolean values should be Yes/No) are:
+
+           Option Name    Value Type    Option Meaning
+             pDisp     -->  boolean  -->  Display Points?
+             pShape    -->  string   -->  Point shape (Cross, Diamond, Box,
+                                             Octagon, Triangle, "Inv. Triangle")
+             pSizeErr  -->  boolean  -->  Draw point the size of errorbars?
+             pSize     -->  integer  -->  Size of point
+             pFill     -->  boolean  -->  Fill in point, if an outline
+             pColor    -->  color    -->  Color of points (any color name
+                                             or #RRGGBB value)
+         	       	    	     	  
+             lDisp     -->  boolean  -->  Display line?
+             lStyle    -->  dash     -->  Dash style of line (" " is solid, 
+                                             "20" is 20-pixel dashes,
+                                             "15 10 4 10" is Dash-dot, etc)
+             lWidth    -->  integer  -->  Width of line
+             lStep     -->  boolean  -->  Draw line as histogram?
+             lBoxFill  -->  boolean  -->  Fill histogram boxes?
+             lColor    -->  color    -->  Color of line (any color name
+                                             or #RRGGBB value)
+
+        If no option/value pairs are given, this function will return all the
+        defined options.  If the curve has been drawn already, all the options
+        will be defined.
+
+powSetImageOptions graph image ?option value option value ...? -
+        This function allows one to set the display parameters for an image
+        in the indicated graph.  If this function is not called *prior* to
+        creating the graph, an image will be assigned default values.  When
+        called after the graph is created (and image plotted), this function
+        will update the appearance of the image in both the main graph and,
+        if it is the current graph, the scopebox.  It will also update a
+        colorbar (or if changing a colorbar option, the original image).
+        The allowed options and values (boolean values should be Yes/No) are:
+
+           Option Name    Value Type    Option Meaning
+             colormap  -->  string   -->  Which colormap to use
+             invert    -->  boolean  -->  Invert colormap?
+             scale     -->  string   -->  Scaling law to use to create the
+                                             colormap (linear, sqrt, log)
+
+        If no option/value pairs are given, this function will return all the
+        defined options.  If the image has been drawn already, all the options
+        will be defined.
+
+
+"Destructors"
+
+powDestroyX  Xname  - Destroys the named POW Object.  "X" can be:
+                      Graph, Curve, Image, Vector, or Data.  Be careful,
+                      don't destroy a low-level object (e.g. data) before
+                      destroying a high-level one that depends on it (e.g.
+                      Graph or Curve); the destructors don't (yet anyway)
+                      search through all objects to handle these dependencies,
+                      it's up to you to keep track of them if you need to.
+                      The POWData destructor *will* free the associated 
+                      memory if the Data object was created with the 
+                      copy flag set.
+
+
+"Methods" 
+
+powPlotCurves graph curves ?canvas?- adds the list of Curves to an existing
+                                     Graph on the Canvas (default .pow.pow)
+
+powAddCurves graph curves - adds the list of Curves to an existing Graph,
+                            updating the scope box as necessary
+
+powPlotImages graph images - adds the list of Images to an existing Graph
+
+powMagGraph graph xMagstep yMagstep - resize a Graph to the given X and Y
+              magsteps (magstep = 1 is the "natural" size of the graph).
+              Magsteps can be any real value and X and Y may be different.
+
+powStretchGraph graph xFactor yFactor - shrink or grow a Graph by the given
+                 X and Y factors.
+
+powStretchGraphToSize graph xDim yDim - Set the size of the Graph to the
+                 given X and Y dimensions (in pixels).
+
+powStartNewRow - POW displays incoming graphs are placed to the right
+                 of all existing  material in the current "row".
+	         A "row" is defined by an (invisible) line on the graph.
+                 Initially this boundary line is 10 pixels from the
+                 top of the canvas.  powStartNewRow moves this line to
+                 just below all material currently displayed on the
+                 canvas.  To make a 3x2  "grid" of graphs do:
+
+	         %powCreateGraph graph1 ...
+	         %powCreateGraph graph2 ...
+	         %powCreateGraph graph3 ...
+                 %powStartNewRow	
+	         %powCreateGraph graph4 ...
+	         %powCreateGraph graph5	 ...
+	         %powCreateGraph graph6	 ...
+                  
+                 If the end-user moves or resizes something during
+                 this process, you won't get a strict rectangular
+                 grid, but new graphs will not land on top of existing
+                 ones.
+
+
+Note:  %x and %y return cursor positions in X coordinates, to turn
+       these into canvas coordinates, use '.pow.pow canvasx %x' etc.
+
+
+General Interface Concepts
+
+The general way for a developer to get back info from
+his users would be to bind the left mouse button on the .pow.pow
+canvas to whatever you want it to do (the only things on the canvas
+that are currently bound to the left mouse button are the "purple"
+handles, so this should be safe).  Once you've got a coordinate (or
+set of coordinates) use '.pow.pow canvasx' and 'powCanvasToGraph graph
+X' to find out what physical coordinates your user is interested in.
+powWhereAmI can tell you which graph they appear to be inside of if
+you need to know that easily.
+
+If you set the global variable powClickCallback, &lt;ButtonPress-1&gt;, 
+&lt;Double-Button-1&gt;, &lt;ButtonPress-2&gt;, or &lt;ButtonPress-3&gt; events on the
+main POW canvas will fire your callback with the arguments "graphname
+x y binding" where: 
+
+graphname - is the graph the user clicked inside of, if they click outside of
+            all graphs, nothing happens
+x and y - are the graph (i.e. "physical") coordinates of the point they 
+          clicked.
+binding - is the X event which fired the callback currently the only strings
+          returned are "B1", "B2", and "B1D" (for double clicking button 1)
+          but if you'd like to see more bindings,  let me know ("B3" is 
+	  currently in use for Region of Interest zooming).
+
+If you set the global variable powPreScrollCallback or powPostScrollCallback,
+when the user manipulates a scrollbar on the main .pow.pow canvas,
+your callback will be fired with the same arguments as would be
+recieved by the function specified in a '-command' argument to the
+scrollbar creation command.  See the Tk scrollbar documentation 
+for details.  The "Pre" form will fire your callback *before* the
+.pow.pow canvas is scrolled and the "Post" form will fire *after*.
+Combinations of the two should hopefully allow any custom behaviors
+you want.
+
+POW has general canvas and/or image bindings for changing the
+colortable of an image and for dragging out a Region of Interest
+(ROI).  By default, these are bound to B1 and B3 respectively (on 2
+button mice under Windows these are the two available buttons).  If
+you need to move these bindings to other buttons (to make way for your
+application's own behavior) you can set $powLutButton or $powROIButton
+to a different number after loading libpow.so but before calling
+powInit.  You can also disable either function entirely by setting 
+the corresponding variable to "0" or "NULL". For example, to move
+colortable "diddling" to button 2 and disable ROI dragging do:
+
+load libpow.so
+set powLutButton "2"
+set powROIButton "0"
+powInit .someWindow
+
+
+powGraphToCanvas graph x y ?canvas? -  takes physical coordinates
+             and returns a two element list giving the corresponding position
+	     on the specified canvas (.pow.pow by default).
+
+powCanvasToGraph graph x y ?canvas? - takes a canvas coordinate 
+             and returns the corresponding physical coordinates.
+             Optional argument specifies the canvas (.pow.pow by default). 
+
+powWhereAmI x y - takes an (x,y) pair of canvas coordinates and returns
+             which graph (or subgraph) they are inside of. If they are outside
+             of all graphs, returns "NULL".
+
+powFindCurvesMinMax curves X|Y|Z - takes a list of curves and an axis 
+            (X,Y, or Z) and returns the minimum and maximum values.
+
+
+Provided Interface Routines
+
+There will be more of these as I get feedback on what people need/want.
+
+powDragRange X|Y tag color callback - This will set up a binding on the
+left mouse button so that the user can click and drag a range in either
+Y or X for the *selected graph*.  He will see a line joining the current
+cursor position and the start position.  When he releases the LMB, all
+of the graph points that fall in the selected range will be tagged
+with the "tag" argument and will appear with the chosen "color".  The
+"callback" routine will be called with arguments graphname, X0 and X1 
+(or Y0 and Y1), specifying the edges of the user selected range in 
+*graph* (i.e. physical) coordinates.  To remove a  previous selection,
+just execute the Tk commands: 
+".pow.pow itemconfigure $tag -fill black; .pow.pow delete $tag" 
+
+This could be used to implement an "undo" feature.
+powDragRange will also select the congruent range on all graphs with axes
+linked to the chosen axis in the current graph.
+
+powDragRect tag color callback -  This works the same as powDragRange, but
+the user chooses a rectangular region of the selected graph.  And the
+callback routine recieves 5 arguments (graphname X0 Y0 X1 Y1). Also, 
+powDragRect ignores linked axes because it's not clear what "should"
+happen to the unlinked axis. If someone wants to make a case for a
+different (or selectable) behavior here, feel free.
+
+Linked Axes
+
+POW allows you to "link" any number of axes on different graphs together.
+The resulting set of linked axes is called a "chain".  Each axis can only
+be a member of one chain.  Linking an axis from one chain to an axis in 
+another chain has the effect of merging the two chains.  Zooming on a
+region of interest on one graph will affect the linked axis on any other
+graph.  There are several utility routines.  Also, the GUI allows the
+user to view links as light pink lines connecting linked axes.
+
+powLinkAxes graph1 axis1 graph2 axis2 - The axis can be specified with a
+            capital 'X' or 'Y'.
+
+powBreakLink graph axis - removes the specified axis from its chain.
+
+powAlignChain graph axis orientation ?gap? - orientation can be H 
+	(for horizontal) or V (for vertical).  This routine will move
+	all graphs belonging to the same chain as the specified graph 
+	so that they are aligned on the canvas.  I.e.  it "stacks" the
+	graphs up in a column or lines them up in a row on the users screen.
+	The optional "gap" argument determines how much blank space (in 
+	pixels to leave between graphs).
+
+
+
+"Useful Stuff that should be safe to access"
+
+The name of the pow canvas is ".pow.pow"
+
+The tag for the axis box for a graph is:
+${graphname}box
+When multi-axes are done, it will be:
+$graphname$xunits${yunits}box
+
+Everything belonging to a graph is tagged with the graph name.
+
+
+
+
+
+Do bugs still exist.  You bet!  Still too many to make a list yet, really; 
+you'll know 'em when you see 'em.  Known bugs in the latest release are
+listed on the "fv known bugs list" web page: 
+
+        http://heasarc.gsfc.nasa.gov/ftools/fv/fv_bugs.html
+
+
+Some info on the FitsTcl functions:
+
+
+I checked in the new fitstcl with the function you need to load a column
+ in a table into memory.
+
+Usage : FitsObj load column $colName $nulValue
+	where  	colName - column name
+	 	nulValue - the default Null value you want to set
+
+it returns "$address $dataType $numElements"
+	where 	(1) data can be recovered by "sscanf(address, "%p", &databuff)
+			with void *databuff
+	        (2) dataType 0 - byte
+			     1 - int
+	 		     2 - long
+		             3 - float
+	 		     4 - double
+	       	(3) numElement : size of the array
+
+Thanks
+
+Jianjun
+
+
+
+C Interface:
+
+All of the functions do the same thing as their TCL counterparts.  I'll
+list the definitions below.  The parallels should be obvious.  The one
+thing you will need is an event handler (i.e., when you call Pow, your
+program has to stop and let the user play with his or her graph).  To 
+do this you call an Event Handler.  When the user activates the "Close Pow"
+button, control returns to your program.  Eventually you'll be able
+to fork off the Event Handler etc., but for now, this is it.
+
+Only the "Constructors" are available from C, for now.  All of the "Methods"
+are written in TCL, so rather than creating Oroburos code with C calls
+TCL calls C calls ..., if you want to use any of them, just call
+
+Tcl_VarEval(proc,argument,argument,...,NULL);  - Note: all arguments
+                                                 are STRINGS ! 
+
+(see Ousterhout for details). 
+
+
+Event Handlers
+
+void PowHandleEvents( )  Your program stops, when the user closes POW
+                         your program begins again.
+
+void PowWishHandleEvents( ) Your program stops, until the user closes the POW
+                            GUI she can type in TCL commands at a wish
+                            prompt.  Useful for debugging and probably
+                            in production code as well. When the user closes
+                            POW, your program begins again.
+
+"Constructors"
+
+All of the POW functions have a status argument rather than just returning 
+the status.  Yes I know it's awkward, but it makes FORTRAN happier, of course
+noone's actually calling it from FORTRAN, but it was in the requirements....
+
+
+void PowInit(char *powSetupColormapArgs, char *powInitArgs, int *status)  - 
+      Call this before calling any other POW functions.  PowInit first calls
+      the general POW initialization routine (in the TCL version, this gets
+      called when you load libpow.so).  Then it calls powSetupColormap if
+      you've specified anything in the powSetupColormapArgs argument.  Then
+      it calls the TCL proc powInit with any powInitArgs you've specified.
+      See above for descriptions of how powSetupColormap and powInit work.
+	Example:  To force truecolor when you have no additional windows
+                  to create and your application will be using no more than
+                  10 non-POW colors do:
+
+        PowInit(".dummy 10 2",".dummy ",&status);
+
+        Tcl_VarEval(interp,"wm withdraw .dummy",(char *)NULL);
+
+
+
+void PowCreateData(char *data_name, void *data_array, int *data_type,
+		   int *length, int *copy, int *status) 
+
+
+void PowCreateVector(char *vector_name, char *data_name, int *offset,
+		     int *length, char *units, int *status) 
+
+void PowCreateVectorEN(char *vector_name, char *data_name, 
+			     int *length, double *start, double *increment, 
+			     char *units, int *status) 
+
+void PowCreateImage(char *image_name,char *data_name, int *xoffset, 
+		    int *yoffset, int *width, int *height, double *xorigin, 
+		    double *xinc, double *yorigin, double *yinc,char *xunits,
+		    char *yunits, char *zunits, int *status)
+
+void PowCreateCurve(char *curve_name, char *x_vector, char *x_error,
+		    char *y_vector, char *y_error, char *z_vector, 
+		    char *z_error, int *status)
+
+void PowCreateGraph(char *graph_name, char *curves, char *images,
+		    char *xunits, char *yunits, char *xlabel, char *ylabel,
+		    int *xdimdisp, int *ydimdisp, double *xmin_in, 
+		    double *ymin_in, double *xmax_in, double *ymax_in, 
+		    int *status)
+
+
+
+</pre>
+</body>
+</html>

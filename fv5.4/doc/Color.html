@@ -1,0 +1,75 @@
+<html>
+  <head>
+    <title>POW and Color</title>
+  </head>
+
+  <body>
+      <h1>POW and X  Colormaps</h1>
+
+      <p>
+      POW allows some interactive manipulation of the Colortable used
+      to display grayscale images.  POW has detailed X Colormap 
+      handling options. There are four different
+      ways of dealing with colormaps.  The powColormap options are
+      available in fv by using the "-cmap" command line argument to
+      fv.  The different options are:
+      <ul>
+	<li>0 - let POW attempt to determine the optimum colormap 
+                setup for you.  This is the default.
+        <li>1 - Force POW to setup a private colormap.  POW will setup 
+                this colormap to minimize (but not eliminate) flashing.
+        <li>2 - Force POW to use truecolor.  If you have a 16 or
+                24 bit truecolor visual available, this looks very nice,
+                and allows different colortables for different images,
+                but interactive changes to the image colortable are slow.
+                If you only have 8 bit truecolor, this will look pretty
+                bad.
+        <li>3 - Force POW to use the screen default colormap.  This 
+                guarantees no flashing, but may force truecolor
+                image mode to be used with an 8-bit visual
+                which looks <em>really</em> awful.
+
+      </ul>
+      Generally, if you experience colormap problems, mode 1 is 
+      probably the most robust unless you don't have any pseudocolor 
+      visuals (e.g. a Linux machine running in 16 or 24 bit mode).
+      </p>
+
+      <h1>The POW Color Menu</h1>
+
+      <p>
+      The POW Color menu has four parts:
+      <ol>
+	<li>The top section contains three hierarchical menus listing
+          a bunch of colortables from which to choose.  They are
+          divided into <B>Continuous</B> (colors vary in a smooth manner),
+          <B>Ramps</B> (colormap is divided into separate colors within
+          which the intensity varies from dark to bright), and <b>Steps</b>
+          (colormap is divided into blocks of a constant color/intensity).</li>
+	<li>You can reverse the "dark to light" direction of your
+	  colortable by checking the <b>Invert Colortable</b> button.</li>
+	<li>There are four scalings of the colortable available in the
+	  next section.  The first three <B>linear</B>, <B>sqrt</B>, and 
+	  <B>log</B> apply the indicated function to the color table.  The next
+	  item -- <B>Histo Equalize</B> -- will compute a histogram of an image (within
+	  a user-configurable range) and attempt to distribute colors equally
+	  amongst the pixels.  The <B>Rescale Image</B> command allows the user
+	  to define what intensity range over which to apply the color table.  The
+	  window which comes up contains the original and current intensity range and
+	  a histogram of the current image.
+	  A new range can be either typed in directly or selected using
+	  the histogram.</li>
+	<li>The final item -- <B>Create Colorbar</B> -- will create a new graph containing 
+	  a colorbar for the current image.
+      </ol>
+      </p>
+      <p>
+      You can interactively change the contrast and brightness of the
+      current image's colortable by dragging the left mouse button across
+      the image.
+      </p>
+  </body>
+</html>
+
+
+

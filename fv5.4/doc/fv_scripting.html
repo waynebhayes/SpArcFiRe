@@ -1,0 +1,418 @@
+<html>
+  <head>
+    <title>fv Scripting</title>
+  </head>
+<body>  <!-- Remove this line when moved to website -->
+        <!--#include virtual="/ftools/fv/fv_header.html"-->
+       
+
+<p align=center><font size="6" face="sans-serif"><b>
+   fv Scripting Guide
+</b></font></p>
+
+<p> Because fv and POW are written in Tcl, they are <i>inherently</i> 
+scriptable.  So long as one knows the necessary data structures and
+function calls, everything fv does can be controlled by a user-created
+Tcl script running inside of fv.  This, however, is a formidable task.
+Plus, fv's internal behavior and data are subject to change with each
+new release. </p>
+
+<p> To make scripting possible, then, a simplified (and hence limited)
+script interface has been added to fv.  It consists of a small set of
+commands which perform the basic operations of opening FITS files and
+displaying their contents.  Future versions should contain more
+capabilities. </p>
+
+<P>(Note: This method of scripting fv replaces an 
+<a href="oldscripting.html">earlier method</a>.  Although the older method
+still can be used, it is deprecated.)</P>
+
+<hr width="100%">
+<p align=center><font size="+2">Operational Summary</font></p>
+<hr width="50%">
+
+<p> There are several ways to access fv's scripting commands.  The
+simplest is to write a Tcl script which uses the commands directly and
+then have fv execute it.  Give the script a ".fv" filename extension
+so that fv can recognize it.  This method requires the user to open
+the file interactively within fv (using the same method as opening a
+FITS file).  This scripting method is useful for implementing macros
+which can perform certain common operations at the user's
+request. </p>
+
+<p> Alternatively, fv can be scripted by other programs, allowing
+those programs to make use of fv's capabilities remotely.  These
+programs, however, do not need to be written in Tcl so long as they
+can communicate with fv.  Currently fv supports XPA on unix platforms and
+AppleScript on MacOS for communication:</p>
+
+<BLOCKQUOTE>
+
+<p> The <B>XPA messaging system</B> (http://hea-www.harvard.edu/RD/xpa/)
+developed by the SAO/HEAD R&amp;D group implements a method of
+communicating between two programs running on unix platforms.
+Communication occurs either through standalone programs (ie,
+<B>xpaget</B> and <B>xpaset</B>), a C subroutine library, or a Tcl
+extension.  fv uses the Tcl extension to make its scripting commands
+available, but the calling program can use any of the XPA methods to
+access the commands.  The XPA software is not distributed with fv and
+must be obtained and built by the user.  (Use '--with-tcl=$FV/lib' when
+configuring XPA to have it build the tcl extension; if not installing
+XPA into the fv directories, using '--prefix=$FV', one must also set
+the LD_LIBRARY_PATH environment variable to point to the directory
+containing libtclxpa.so.)</p>
+
+<p> <B>AppleScript</B> (http://www.apple.com/applescript), the
+English-like language on all Macintosh computers (circa MacOS 7.5 and
+up), can also be used to control fv remotely.  (Actually, any program
+on the Mac can control fv through the use of Apple Events.)  Using the 
+<B>do script</B> command, Tcl code can be passed to fv.  Due to how
+Tcl's <B>do script</B> command and fv's scripting commands are
+implemented, fv commands must be prefixed with the <B>fvCmds::</B> 
+namespace specifier.</p>
+
+</BLOCKQUOTE>
+
+
+<P>Many scripting commands also can be used as inquiries.  Inquiries
+and commands are implemented using the same syntax, differing only in
+that commands supply the necessary parameters to perform an action,
+whereas inquiries leave them off indicating fv should return the
+current settings.  When used with XPA, inquiries must use the xpaget
+tool and commands the xpaset tool.</P>
+
+
+
+<hr width="100%">
+<p align=center><font size="+2">Command Summary</font></p>
+<hr width="50%">
+
+<DL>
+
+   <DT> <b>close</b> ?<i>extNum ...</i>?
+   <DD> Close the current file or one of its extensions.  If no extension
+        numbers are specified, the entire file will be closed, potentially
+        exitting fv if no windows remain open.  To close all extensions,
+        but keep the file open, give an <i>extNum</i> of -1.  Otherwise,
+        specify the particular extensions which should be closed; this will
+        close any windows (header or table) linked to that extension. </DD>
+
+   <DT> <b>create file</b> <i>fileName</i> <i>signed/unsigned</i> 
+        <i>bitpix</i> <i>dimension</i>
+   <DD> Create a file by providing <i>fileName</i> with keyword <i>signed</i> or
+        <i>unsigned</i> and a value for <i>bitpix</i> (8, 16, etc). Also users
+        need to provide value for <i>dimension</i> (11, 22 23, etc). </DD>
+
+   <DT> <b>create extension</b> <i>extName</i>  <b>image</b>
+        <b>signed/unsigned</b> <i>bitpix</i> <i>dimension</i>
+   <DD> Create an <b>image</b> extension <i>extName</i> in  
+        current opened FITS file with 
+        keyword <i>signed</i> or <i>unsigned</i> and a value for <i>bitpix</i> 
+        (8, 16, etc). Also users need to provide value for <i>dimension</i> 
+        (11, 22 23, etc). </DD>
+
+   <DT> <b>create extension</b> <i>extName</i> <b>table</b>
+        <b>binary/ASCII</b>
+   <DD> Create a <b>table</b> extension <i>extName</i>  
+        in current opened FITS file with 
+        keyword <b>Binary</b> or <b>ASCII</b> to indicate what type of extension 
+        is going to be created. </DD>
+
+   <DT> <b>delete</b> <b>rows</b> <i>extNum</i> <i>rowRange</i>
+   <DD> Delete rows of extension <i>extNum</i> 
+        of the currently <b>select</b>ed file. An example rowRange
+        is 2-10,15-20. 
+
+   <DT> <b>delete</b> <b>cols</b> <i>extNum</i> <i>colName(s)</i>
+   <DD> Delete columns of extension <i>extNum</i> 
+        of the currently <b>select</b>ed file. Column names should be separated by the space. 
+
+   <DT> <b>display header</b> <i>extNum</i>
+   <DD> Open a window containing the header keywords of extension <i>extNum</i>
+        of the currently <b>select</b>ed file.  If <i>extNum</i> is
+        <B>current</B> or "<B>.</B>", use the default extension (or
+        zero if undefined). </DD>
+
+   <DT> <b>display table</b>  <i>extNum ?columnName ...|frame?</i>
+   <DD> Open a window containing the extension data in a table format.  If
+        a real table extension, one can either supply a series of column
+        names to display or "-" to display all the columns.  Not specifying
+        a number will pop-up a column selection box requiring user input.
+        If the extension is an image, no arguments are required unless it
+        has 3 dimensions in which case the desired frame must be
+        specified.  If <i>extNum</i> is <B>current</B> or "<B>.</B>",
+        use the default extension (or zero if undefined). </DD>
+
+   <DT> <b>display image</b>  <i>extNum ?start? ?end?</i>
+   <DD> Display the contents of the extension as an image using either POW
+        or DS9, depending on fv's settings.  If the image has 3 dimensions,
+        the frames to plot must be specified.  If both a <i>start</i> and
+        <i>end</i> frame are supplied, the frames will be animated in POW.
+        If <i>extNum</i> is <B>current</B> or "<B>.</B>", use the
+        default extension (or zero if undefined). </DD>
+
+   <DT> <b>display curve</b>  <i>extNum</i> <b>-rows|-cols</b>
+        <i>start ?end? ?currGraph?</i>
+   <DD> Display a scatter plot of pixel intensity vs axis index from
+        selected rows or columns in an image.  If both <i>start</i>
+        and <i>end</i> are present, the range of rows/cols will be
+        averaged before plotting.  <i>currGraph</i> is a boolean flag
+        indicating whether this curve should be placed on the
+        currently selected graph in POW.  If false/zero (or absent), a
+        new graph will be created. If <i>extNum</i> is <B>current</B>
+        or "<B>.</B>", use the default extension (or zero if
+        undefined). </DD>
+
+   <DT> <b>display curve</b>  <i>extNum X xErr Y yErr ?currGraph? ?rowrange?</i>
+   <DD> Plot an <i>X</i> vs <i>Y</i> curve from a table. Errors for
+        <i>X</i> and <i>Y</i> can optionally be displayed.  Both error
+        parameters must be present, although an empty
+        place-holder (<B>{}</B>) can be used to indicate the absence
+        of errors.  Each of these parameters can be either a simple
+        column name or a complex arithmetic expression evaluated using
+        the extension's data.  The optional parameter, <i>currGraph</i>,
+        is a boolean flag indicating whether this curve should be
+        placed on the currently selected graph in POW.  If false/zero
+        (or absent), a new graph will be created. The parameter, 
+        <i> rowrange</i> specify which rows' data will be plot.
+         If <i>extNum</i> is
+        <B>current</B> or "<B>.</B>", use the default extension (or
+        zero if undefined). </DD>
+    
+   <DT> <b>export</b> <b>hdu</b> <i>extNum</i> <i>?fileName?</i>
+   <DD> Export a given <i>extNum</i> in the current fits
+        file. The result file will be saved in the current directory and be opened 
+        after the exporting function is finished. The optional 'fileName' argument 
+        specify the output file name.</DD> 
+
+   <DT> <b>export</b> <b>summary</b> <i>extNum</i> <i>?fileName?</i>
+   <DD> Export the summary in a given extNum</i> in the current file to a text
+        file. The result file will be named with <i>_hdu.txt</i> at the end or 'fileName' and saved
+        in the current directory.</DD>
+
+   <DT> <b>exporttable</b> <i>fileName</i> <b>option</b> <i>extNum</i>
+   <DD> Export the selected columns and rows from the table in a given <i>extNum</i> in the given <i>fileName</i> to a fits
+        file or text file. The <i> option </i> will be hdu and text. 
+        The valid extNum will be 0, 4 and etc. </DD>
+
+   <DT> <b>insert</b> <b>rows</b> <i>extNum</i> <i>afterRow</i> <i>numRows</i>
+   <DD> Insert 'numRows' rows after row 'afterRow' in a given extNum in the current file.
+
+   <DT> <b>insert</b>  <b>col</b> <i>extNum</i> <i>colName</i> <i>colFormat</i> <i>?beforeCol</i>
+   <DD> Insert a column in a given table (extNum) at the end or before 'beforeCol' in the current file.
+
+   <DT> <b>help</b> <i>operation ...</i>
+   <DD> Display short help on UNIX command line. The valid value for <i>operation</i>,
+        can be just one or a list of, are <b>close</b>, <b>create</b>, <b>delete</b>,<b>display</b>,  
+        <b>export</b>, <b>ecporttable</b>,<b>insert</b>,<b>open</b>, <b>opentool</b>, <b>pow</b>, <b>preference</b>, 
+        <b>quit</b>, <b>save</b>, <b>select</b>, <b>sort</b>, <b>tcl</b>, <b>version</b>
+
+   <DT> <b>open</b> <i>filename ...</i>
+   <DD> Open one or more FITS files.  The full paths to the files should
+        be specified since fv will probably have a different working
+        directory than the caller (ftp/http urls are acceptable).
+        Without a filename, a list of open files will be returned. 
+        (When used with XPA, inquiries must use the xpaget tool).</DD>
+
+   <DT> <b>opentool</b> <i>toolName</i>
+   <DD> Open available ftools dialog. The valid values for <i>toolName</i>
+        are <b>skyview</b>, <b>catalog</b>, <b>vizier</b>, or <b>ftools</b> </DD>
+
+   <DT> <b>pow</b> <i>powCommand ...</i>
+   <DD> Execute one of POW's scripting commands.  These commands are
+        described in the <a href="Scripting.html">POW
+        Scripting Guide</a>. </DD>
+
+   <DT> <b>preference</b> <i>parameter</i> ?<i>value</i>?
+   <DD> Set fv preference. 
+        <TABLE BORDER WIDTH="92%" ALIGN=center>
+               <TR ALIGN=center>
+                  <TD><b>preference</TD> <TD>parameter</TD> <TD>valid value</TD></b>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>open preference panel</TD> <TD>open</TD> <TD>N/A</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>close preference panel</TD> <TD>close</TD> <TD>N/A</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>minimize preference panel</TD> <TD>minimize</TD> <TD>N/A</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>iconify preference panel</TD> <TD>iconify</TD> <TD>N/A</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>select preference page</TD> <TD>page</TD> <TD>App, Keywords, Tables, Graphs, and Colors</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>display File Selection</TD> <TD>fileSelection</TD> <TD>Open, Close</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>color choice</TD> <TD>activebackground</TD> <TD>red, green, #cccccc, etc</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>color choice</TD> <TD>activeforeground</TD> <TD>red, green, #cccccc, etc</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>color choice</TD> <TD>background</TD> <TD>red, green, #cccccc, etc</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>color choice</TD> <TD>checkbuttoncolor</TD> <TD>red, green, #cccccc, etc</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>color choice</TD> <TD>foreground</TD> <TD>red, green, #cccccc, etc</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>graph display</TD> <TD>displayer</TD> <TD>ds9, pow, saotng</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>graph display</TD> <TD>graphsize</TD> <TD>300x300, 500x300, 300x500<br>500x500, 700x500, 500x700<br>700x700</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>desk topy help</TD> <TD>help</TD> <TD>N/A</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>auto-plot primary image</TD> <TD>autoplotprimary</TD> <TD>0 - deselect<br>1 - select</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>automatic format keys</TD> <TD>autoreformatkeys</TD> <TD>0 - deselect<br>1 - select</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>automatic update<br>checksum</TD> <TD>autoupdatechecksum</TD> <TD>0 - never<br>1 - if exist<br>2 - always</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>display Fits<br>file only</TD> <TD>dispfitsonly</TD> <TD>0 - deselect<br>1 - select</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>left justify string</TD> <TD>leftjustifystring</TD> <TD>0 - right<br>1 - left</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>protect required keyword</TD> <TD>protectedkeys</TD> <TD>0 - deselect<br>1 - select</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>show desktop manager</TD> <TD>usedesktopmanager</TD> <TD>0 - deselect<br>1 - select</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>use WCS info</TD> <TD>wcsinfo</TD> <TD>0 - deselect<br>1 - selects</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>write history key<br>after modification</TD> <TD>writehiskey</TD> <TD>0 - deselect<br>1 - select</TD>
+               </TR>
+               <TR ALIGN=left>
+                  <TD>Window Management</TD> <TD>winmanagement</TD> <TD>Keep, Hid, Close</TD>
+               </TR>
+        </TABLE>
+   </DD>
+
+   <DT> <b>quit</b>
+   <DD> Quit fv. </DD>
+
+   <DT> <b>save</b> ?<i>fileName</i>?
+   <DD> Save current file.  If <i>fileName</i> is specified, the file will
+        be saved under that name.  A pre-existing file of that name will
+        be overwritten.
+
+   <DT> <b>select</b> <i>fileIndex|fileName</i> ?<i>extNum</i>?
+   <DD> Select an opened file for manipulation.  One can specify it either
+        as an index into the list of opened filenames returned by the
+        <B>open</B> command or as a proper filename.  <i>fileName</i> can
+        be either a fully-specified pathname of the file or just the
+        filename itself.  The optional <i>extNum</i> can be used to select
+        a default extension which can be used in some other commands.
+        A <i>fileName</i> of <B>current</B> or "<B>.</B>" can be used
+        to modify the default extension of the current file.  Without
+        parameters, the full pathname of the default file will be
+        returned. (When used with XPA, inquiries must use the xpaget tool).</DD>
+
+   <DT> <b>sort</b> <i>extNum</i> ?<b>-unique</b>?
+        ?<b>-ascending|-descending</b>? <i>colName</i>
+        ?<b>-ascending|-descending</b>? <i>colName</i> ...
+   <DD> Sort a table extension according to the supplied <i>colName</i>s.
+        Each column can be sorted in either <i>-ascending</i> or
+        <i>-descending</i> order.  The default is ascending, but a column
+        will inherit the order of a previous column, if not explicit set.
+        If the <b>-unique</b> flag is set, duplicate rows which contain
+        identical sorted values will be deleted, leaving only one such row
+        per unique set of values.
+
+   <DT> <b>tcl</b> 
+   <DD> Execute tcl code read from stdin (XPA support only). </DD>
+
+   <DT> <b>version</b>
+   <DD> Return fv version number.  When used with XPA, inquiries must use the xpaget tool.</DD>
+
+</DL>
+
+<hr width="100%">
+<p align=center><font size="+2">Examples</font></p>
+<hr width="50%">
+
+<P> The following commands will open 2 files and display their contents in
+several ways.
+
+<PRE>
+  open ngc1316r.fit rate.fit       # open 2 files included with fv
+  select rate.fit                  # select one of files
+  display header 1                 # Open window of first extension's keywords
+  display curve 1 time rate        # Plot a curve of time vs rate in POW
+  pow bounds 720 -30 950 300       # Resize graph's bounding box
+  select ngc1316r.fit              # Select other file
+  display image 0                  # Plot image
+  set x [version]                  # Get fv's version number
+</PRE>
+  
+Type the preceding lines (without the comments) into a text file, name
+it <TT>commands.fv</TT>, then run it:  either put it in the command
+line when starting fv (eg, "fv commands.fv") or open the file with the
+Open File menu item.</P>
+
+<p>Using XPA from a Unix shell, one would do the following:
+
+<PRE>
+  xpaset -p fv open ngc1316r.fit rate.fit
+  xpaset -p fv select rate.fit       
+  xpaset -p fv display header 1            
+  xpaset -p fv display curve 1 time rate   
+  xpaset -p fv pow bounds 720 -30 950 300  
+  xpaset -p fv select ngc1316r.fit        
+  xpaset -p fv display image 0             
+  xpaget    fv version
+</PRE>
+
+The <B>-p</B> option tells xpaset to <i>not</i> read any data from
+stdin.  One can instead use stdin to send a series of Tcl commands en
+masse, using the command...
+
+<PRE>
+  cat commands.fv | xpaset fv tcl
+</PRE>
+
+This latter method allows one to insert real Tcl commands into the
+command sequence, whereas the individual xpaget/xpaset calls are
+restricted to the specific scripting commands.</P>
+
+<P>Finally, if using AppleScript, the commands are...
+
+<PRE>
+  tell application "fv"
+    activate
+    do script "fvCmds::open ngc1316r.fit rate.fit"
+    do script "fvCmds::select rate.fit"
+    do script "fvCmds::display header 1"
+    do script "fvCmds::display curve 1 time rate"
+    do script "fvCmds::pow bounds 720 -30 950 300"
+    do script "fvCmds::select ngc1316r.fit"
+    do script "fvCmds::display image 0"
+    do script "fvCmds::version"
+    set x to the result
+  end tell
+</PRE>
+
+Note that AppleScript will actually start fv if it isn't already running.</P>
+
+<P>Additional examples of scripting can be found in the
+<TT>sample_scripts</TT> directory within the fv distribution.</P>
+
+        <!--#include virtual="/ftools/fv/fv_footer.html"-->
+</body>
+</html>

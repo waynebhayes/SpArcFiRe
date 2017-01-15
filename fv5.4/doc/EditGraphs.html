@@ -1,0 +1,181 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+<head>
+  <title>Edit Graph</title>
+</head>
+
+<body>
+
+    <h1>Edit Graph</h1>
+
+<P> A POW <B>Graph</B> consists of a number of <B>Curves</B> and
+<B>Images</B> drawn within a given rectangular region.  The <B>Edit
+Graph</B> item in the <B>Edit</B> menu brings about a dialog box from
+which one can control what objects are drawn, how they are displayed,
+and how the graph itself is drawn...</P>
+
+<P> The dialog box consists of 3 major regions.  The top portion
+controls the contents of the current (or new) graph.  The box on the
+left lists the objects currently in the graph.  The box on the right
+lists all the available objects which are not in the graph.  In both
+boxes, the type of each object (image or curve) will be indicated in
+parentheses after the objects' names.  The <B>Add</B> and
+<B>Remove</B> buttons in between allows one to move the selected
+objects between the two lists.  The name of the graph being editted is
+given below the left box.  This can be changed if one wants to create
+a new graph rather than modify the current one.  The <a
+href="EditObjects.html"><B>Edit Objects</B></A> button under the right
+box opens up another dialog box which allows one to edit the data
+structures which define Curves and Images.</P>
+
+<P> The second region, below the graph contents section, contains the
+editable display options for the graph and graph objects.  It has a
+paned format.  At its top are a series of labeled tabs.  Click on one of
+the tabs to view and edit that set of options.  Each tab and its options
+are described below...</P>
+
+<UL>
+
+<LI> <B>Graph</B>
+
+     <P>This pane contains the highest-level options affecting a
+     graph's appearance.  The first entry box contains the graph's
+     title string.  By default it is the graph name used internally by
+     POW, but it can be any string or even blank.  The entry boxes list,
+     for both the X and Y
+     axes, the <B>Label</B> to be written, the <B>Min</B> and
+     <B>Max</B> values of the axis (actually, the lower-left and
+     upper-right bounds of the graph's display region), the
+     <B>Units</B> label of the values (printed within parentheses
+     after the axis label), and the <B>Size</B> of the graph on the
+     screen in pixels.  Any or all of these may be NULL which tells
+     POW to use the default values.  In the case of the bounding box
+     (Min/Max), default values will be determined by the minimum
+     values required to display all the graph's contents.  For
+     <B>Units</B>, a NULL value will indicate not to list any units in
+     the label axes.  Clicking the <B>Reset Min/Max</B> button at the
+     bottome sets all the bounding box values to NULL.</P>
+
+     <P>Below the entry boxes are a set of buttons labeled
+     <B>Scaling</B>.  These activate logarithmic graphs.  The first
+     row of <B>linear</B> and <B>log</B> buttons cause each axis to be
+     drawn in either linear or logarithmic format.  This does not
+     affect the data, just how the graph coordinates are interpretted
+     and labeled.  The <B>Scale curve data to axes</B> check button
+     determines whether the curves in this graph will be converted to
+     the same axis format.  Do not check this if any of your curves
+     already contain logarithmic values (instead of the true values)
+     and you only need to change how the axes are displayed, not how
+     the curves are plotted.  You can control the logarithmic
+     conversion of individual curve data from the Points and Lines
+     panes.</P>
+     
+
+<LI> <B>Fonts</B>
+
+     <P> This pane controls the appearance of text in the graph.  One can
+     independently set the font, size, style, and color of the <B>Title</B>,
+     <B>Axis Labels</B>, <B>Tick Labels</B>, and default <B>Text Labels</B>.
+     The Text Label value is used only for the initial text label.  All
+     subsequent labels inherit their values from the previous label.</P>
+
+
+<LI> <B>Ticks</B>
+
+     <P> This pane controls the appearance of the tick marks and
+     associated grid lines.  Use the slidebars to indicate
+     approximately how many tick marks should be drawn (and labeled)
+     on each axis of the graph.  At the far left, no tickmarks will be
+     drawn on each axis.  At the far right, about 30 may be drawn.
+     The <B>X Ticks</B> and <B>Y Ticks</B> options control whether the
+     X and Y tickmarks are drawn inside or outside the graph's box and
+     whether they are labeled on the left and bottom axes.  The
+     <B>Tick Labels</B> option selects between Decimal and Base 60
+     (degrees minutes seconds) numerical formats.  Base 60 is only used
+     when a graph contains WCS information.  If the <B>Grid Lines</B>
+     checkbox is selected, lines will drawn on the graph, tracing the
+     path of each tick mark coordinate.  One can control the
+     <B>Color</B> and line <B>Style</B> (solid, dashed, etc) of these
+     lines.</P>
+
+
+<LI> <B>Points</B>
+
+     <P> The checkbox at the top of this item indicates whether the
+     individual points of the curve should be drawn.  The points can
+     be drawn as any of the 7 listed <B>shapes</B>.  The </B>size</B>
+     of the points (except Dot which is always 1 point) can either be
+     <B>fixed</B> at a constant size indicated by the slidebar, or
+     drawn with widths/heights indicating the X and Y <B>error
+     bars</B>.  If there are X/Y error bars but the points are drawn
+     in a fixed style, the error bars will be indicated by
+     horizontal/vertical lines centered on the point.  Points can be
+     <B>Fill</B>ed or just drawn in outline.  Finally, select the
+     desired <B>color</B> from the displayed colorbar.  This can be a
+     different color than selected in the Lines pane.</P>
+
+     <P> At the bottom of the pane is a pair of LogX/logY
+     checkbuttons.  Checking these will cause this curve to have the
+     logarithm of its data plotted instead of its true values.  If
+     the data is logarithmic already, leave these options unchecked,
+     but select the appropriate <B>Scaling</B> mode in the Graph
+     options (see above).</P>
+
+
+<LI> <B>Lines</B>
+
+     <P> The checkbox at the top of this pane indicates whether data
+     points will be connected with a continuous line.  The line can be
+     of several patterned <B>styles</B> or <B>widths</B>.  The points
+     can also be <B>connect</B>ed directly (<B>Normal</B>) or in a
+     stair-step pattern (<B>Histogram</B>).  In the latter mode, the
+     <B>Fill Boxes</B> option draws the histogram as a series of solid
+     boxes instead of an outline.  Finally, select the desired <B>color</B>
+     from the displayed colorbar.  This can be a different color than
+     selected in the Points pane.</P>
+
+     <P> At the bottom of the pane is a pair of LogX/logY
+     checkbuttons.  Checking these will cause this curve to have the
+     logarithm of its data plotted instead of its true values.  If
+     the data is logarithmic already, leave these options unchecked,
+     but select the appropriate <B>Scaling</B> mode in the Graph
+     options (see above).</P>
+
+
+<LI> <B>Image</B>
+
+     <P>This pane controls the appearance of images.  Most of the pane
+     consists of a bunch of different colormaps.  They are grouped in
+     the same sequence as listed in the <a
+     href="Color.html"><b>Color</b></a> menu: smooth, continuous
+     colormaps, followed by ramps, then the step functions.  The
+     <B>Invert</B> option will reverse the order of the colormap when
+     turned on.  The <B>Scaling</B> option controls how the colormap
+     is applied to the image.  For <B>Linear</B> scaling, each
+     colormap level corresponds to a constant intensity range in the
+     image.  <B>Square-Root</B> scaling changes the mapping such that
+     the intensity range covered by each color level increases as the
+     square-root function, producing higher contrast at lower
+     intesities.  <B>Logarithmic</B> scaling uses the logarithmic
+     function for colormapping, giving even more contrast at low
+     intensities than sqrt.  <B>Histo Equalize</B> scaling computes
+     a histogram of the image and tries to distribute colors equally
+     over the number of pixels.  The <B>Range</B> entry boxes at the
+     bottom list the intensity range over which the colormap should be
+     applied.  Initially, they will contain the full intensity range
+     of the image.  The <B>Reset</B> button resets these values to the
+     full range of the image.</P>
+
+</UL>
+
+<P> At the very bottom of the dialog box are 3 buttons.  <B>Apply</B> 
+will update the selected graph using the modified parameter values.  
+The <B>Reset</B> button will reset the parameter options and
+object lists based on the currently selected graph (for when one
+either wants to revert to the original parameters, or if one selected
+a new graph, or if new objects were created).  The <B>Exit</B> button
+closes the dialog box.  Any changes will be lost if not <B>Apply</B>ed 
+before exitting.</P>
+
+  </body>
+</html>

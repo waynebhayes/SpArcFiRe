@@ -1,0 +1,83 @@
+<html>
+  <head>
+    <title>Select Plot Data</title>
+  </head>
+
+<body>
+
+<h3>Select Plot Data</h3>
+
+This is a very general plotting tool that allows you to plot a set of X,Y points calculated from the columns of data in a table.  For example you can:<pre>
+  - plot the values in a single column versus row number in the table
+  - plot the values in one column versus the values in a second column
+  - plot the values calculated from a general expression that is a
+    function of one or more columns of the table versus the values
+    calculated from any other general expression.
+</pre>
+In each case, error bars in the X and/or Y coordinates may be plotted on the points.
+
+ If the column name contains a space or a
+character which might appear as an arithmetic term, then enclose the
+name in '$' characters, as in '$MAX-PHA$' or '$RA(J2000)$'.
+
+<h4>List box</h4>
+
+All the displayed columns are listed in this box led by the
+   RowNumber (row number index) and ElementNumber (vector element index).
+
+<h4>Axes</h4>
+
+Specify the X and Y axes, and X Error and Y Error (optional) for
+   plotting. To link a column to an axis, select the column name in
+   the left list box first and then click on the axis button. The
+   linked column name will appear in the "Column" entry box.  One can
+   also type in an arithmetic expression (see the <a
+   href="expressions.html">Expressions</A> help file).  To specify a
+   single element of a vector column, append "[i]" to the column's
+   name, where i is the element's index (indices run from 1 to N, the
+   vector length of the column).  When a pair of compatible vectors
+   (vectors having the same length, with ElementNumber always
+   compatible) are plotted against each other, a separate curve will
+   be created and plotted for each row.
+
+<h4>Rows</h4>
+
+Indicate the row ranges to plot.  If left blank, all rows will be plotted.
+<pre>
+  Examples: 
+   1-100         plot the first 100 rows
+   20-40,60-80   plot rows 20-40 and rows 60-80
+</pre>
+
+<h4>Use selected rows</h4>
+
+Indicate to plot the data on the selected rows in the table.
+
+<h4>Add curve</h4>
+
+Indicate whether this curve should be plotted in the currently
+   selected graph in POW.  If unset (the default), a new graph will be
+   created.
+
+<h4>Go</h4>
+
+Make the plot.  After the plot is created you can then edit the style of the plot to change the size or color of the plot symbols, or connect the points with lines.
+
+<h4>Clear</h4>
+
+Clear all the selections.
+
+<h4>Cancel</h4>
+
+Cancel.
+
+<h4>Help</h4>
+
+Brings up this help file.
+
+<hr> 
+
+Go to <a href="aboutFv.html">About fv</a>.
+
+</body>
+</html>

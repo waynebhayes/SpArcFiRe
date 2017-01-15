@@ -1,0 +1,73 @@
+<html>
+  <head>
+    <title>Text Labels</title>
+  </head>
+<body>
+
+<h1>Add Text Labels...</h1>
+      
+<P>
+Users can add short text strings to a graph in a number of fonts, sizes, 
+and styles.  To add a label, select the graph to be used, then choose the 
+<B>Add Text Labels</B> command in the <B>Edit</B> menu.  The 
+<B>Annotations</B> window will come up.
+</P>
+
+<P>
+Type in the string to be created in the top entry box and select the 
+appropriate display options.  Only a small subset of commonly-used font 
+families are included in the font listing.  Click the color button to 
+specify a color.  (Note: For the first label created, the default font 
+values found here are obtained from the <A HREF="EditGraphs.html"><B>Edit 
+Graph</B></A>/<A HREF="DefaultOptions.html"><B>Set Default Options</B></A> 
+settings for Text Labels. For all subsequent labels, though, the values are 
+inheritted from the previous label created.)
+</P>
+
+<P>
+The <B>Position</B> entry boxes list the coordinates at which the label is 
+to be placed; the position corresponds to the bottom left corner of the 
+text string.  The values are interpretted based on the following option.
+</P>
+
+<P>
+The <B>Attach To</B> radiobuttons determine how the <B>Position</B> values 
+are interpretted and how the text handled.  The <B>Graph</B> option will 
+make the label a graph object which will be placed at a fixed position 
+relative to the graph but independent of the axes values (like the title or 
+axis labels). The lower-left corner of the graph is position 0,0 and the 
+top-right corner is 1,1.  The label can be placed outside the graph as well 
+as inside.  Zooming has no effect on it, but resizing the graph will move 
+the label so that its relative position is the same.  This option is good 
+for adding notes or legends to the graph.  The <B>Coordinates</B> option 
+will make the label a plotted object which will be placed according to the 
+graph's axes.  If the indicated position is not within the current 
+bounds -- due to zooming or panning -- the label will not be displayed.  
+This option is good for labeling objects in images or parts of curves.
+The <B>Position</B> values will be converted between these two coordinate 
+systems when the option is changed.
+</P>
+
+<P>
+The <B>Add</B> button creates a new label.  The <B>Delete</B> button 
+removes the current label from the graph.  And the <B>Apply</B> button 
+modifies the current label.
+</P>
+
+<P>
+Once created, labels can be repositioned by dragging them with the left 
+mouse button.  If a label is attached to a graph's <B>Coordinates</B> and 
+you drag it outside the graph, the label will disappear when dropped.  The 
+label still exists, but is just positioned outside the graph's axes range. 
+Alter the axes to display the labels new position.  
+</P>
+
+<P>
+Double-clicking a label will bring up the <B>Annotations</B> window, if it 
+doesn't already exist, with the label's information.  When this window is 
+open, a single-click is sufficient for selecting a different label for 
+editting.
+</P>
+
+</body>
+</html>

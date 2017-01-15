@@ -1,0 +1,103 @@
+<html>
+  <head>
+    <title>Fits Image Table</title>
+  </head>
+<body>
+
+<h3>Image Table display</h3>
+
+<PRE>The table window presents a spreadsheet-like display of the
+contents of the given FITS image extension.  Row numbers run along the
+left side of the window and column numbers run along the top (below the
+menubar).  Single click on a data cell to copy the value to the "Edit
+cell" entry at the bottom of the window, where one can immediately edit the
+value. Press &lt;Return&gt; in that entry to finalize the changes.
+
+If the FITS image is simultaneously displayed in the POW image viewer, then 
+double clicking with the mouse on any pixel in the POW image will cause
+the corresponding cell in the table display to be highlighted.</PRE>
+
+<H4>Menus</H4>
+
+<UL>
+
+<LI> <B>File</B>
+
+<UL>
+<LI> <B>Save</B>: Save current FITS file.  If the current extension
+     has not been modified, this menu item is disabled.
+<LI> <B>Export as Text</B>:  You will be able to specify which rows and columns to list,
+     as well as any special separater character(s) to be inserted in between the values
+     on each row. You may optionally choose which rows to be listed by highlighting the
+     desired row numbers in the first column of the table.
+<LI> <B>Close</B>: Close the table window.
+</UL>
+
+
+<LI> <B>Edit</B>
+
+<UL>
+
+<LI> <B>Undo</B>: Not supported in table windows.
+
+<LI> <B>Cut</B>: Not supported in table windows.
+
+<LI> <B>Copy</B>: To highlight a rectangular region of a table, first left-click on the
+     table cell in one corner of the rectangle, then right-click on the cell in the
+     opposite corner (Shift-Click on MacOS).
+
+<LI> <B>Paste</B>: Paste the contents of the clipboard at the
+     location of the current selection/region.
+
+<LI> <B>Clear</B>: Not supported in table windows.
+
+<LI> <B>Clipboard</B>: Bring up contents of the clipboards. If the type is
+     listed as "table", its contents can be pasted into the table.
+
+<LI> <B>Preferences</B>: Bring up the <a
+        href="preferences.html">Preferences</a> window.
+
+</UL>
+
+<P></P>
+
+<LI> <B>Tools</B>
+
+<UL>
+<LI> <B>Plot</B>
+
+<P> Display image data in user's prefered image device (see <a
+    href="preferences.html">Preferences</a>).</P>
+
+<p></p>
+
+</UL>
+
+<LI> <B>Help</B>
+
+<P>List of all the available help files.</P>
+
+</UL>
+
+<H4>User entries</H4>
+
+Two entry boxes are located at the bottom of the Table window:
+
+<UL>
+   <LI> <B>Go to</B>: Scroll the window to display the row specified in the
+        entry field.  Either click the "Go To" button or hit
+        &lt;Return&gt; to move to the indicated row.
+
+   <LI> <B>Edit cell</B>: Highlighting a cell in the table will copy
+        the value to this entry, in which the value can be edited.  To
+        set a table element as undefined, one can enter "NULL" as the
+        value (BLANK keyword must be present in the header for integer
+        data types).  Press &lt;Return&gt; to copy the new value into
+        the table.  </UL>
+
+<HR>
+
+Go to <a href="aboutFv.html">About fv</a>.
+
+</body>
+</html>

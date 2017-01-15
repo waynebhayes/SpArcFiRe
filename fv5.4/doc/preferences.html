@@ -1,0 +1,127 @@
+<html>
+  <head>
+    <title>Preferences</title>
+  </head>
+<body>
+
+<h3>Preferences</h3>
+
+<P>The Preferences window contains user-controlled options for how fv
+behaves and looks.  Click on one of the labeled tabs to bring up one
+of the following sets of options...</P>
+<UL>
+<LI> <B>App</B>
+<UL>
+   <LI> <B>List FITS files only</B>:
+       If turned on, only FITS file will be listed in the
+       file-selection-dialog.
+
+   <LI> <B>Show Desktop Manager</B>: Turn desktop manger on/off.
+
+   <LI> <B>Window Management</B>:
+       Select one of the following behaviors.
+       <UL>
+         <LI><B>Leave existing windows open when opening new one</B><BR>
+             All the opened windows will be kept on the desktop. 
+      
+         <LI><B>Hide existing windows open when opening new
+             one</B><BR> Only keep one window of a kind on the
+             desktop.  e.g. if displaying a header, will hide all the
+             other header windows.  All the hidden windows are listed
+             in the desktop manager.
+      
+         <LI><B>Close existing windows open when opening new one</B><BR>
+             Will close all the existing fv windows of the same kind. 
+             Will ask to save any change made.
+
+         <LI><B>Html Browser</B> (Unix only)<BR>
+             Web browser setting. User can specify which browser to use to display
+             web pages. If it is required in fv or Hera operation and user has not 
+             specified his/her perference, "<B>netscape</B>" will be substitued in 
+             the entry provided. On Windows, this option will not be displayed since 
+             the default browser will be opened via Windows "<B>start</B>" command. 
+       </UL>
+</UL>
+<LI> <B>Keywords</B>
+<UL>
+   <LI> <B>Write History Keywords</B>:
+        If turned on, a HISTORY keyword (with date and user name) is written
+        in the header unit when a change to the extension is saved.
+
+   <LI> <B>Auto-reformat Keys</B>: If enabled, all the keywords
+        inserted/changed in the Header window will be reformatted to a
+        fixed format.  When disabled, keyword entries will be written
+        exactly as you type them.
+
+   <LI> <B>Protect required keys</B>: If enabled, you will not be able to
+        modify required keywords such as BITPIX, NAXIS, TFORM, etc, or
+        insert keywords within the initial set of required keywords.
+
+   <LI> <B>Checksum Updates</B>:
+        When turned on, fv will update checksum keywords in an extension's
+        header when modifying the extension.
+</UL>
+<LI> <B>Tables</B>
+
+<UL>
+   <LI><B>ASCII Column Justification</B>:
+       Choose whether you'd like ASCII columns to be left or right
+       justified.
+</UL>
+<LI> <B>Graphs</B>
+<UL>
+   <LI> <B>Auto-Plot Primary Image</B>: When on, the primary image of
+        a FITS file will be automatically plotted when the file is
+        opened.
+
+   <LI> <B>Use WCS Info</B>: fv can choose to either use or ignore any
+        WCS (World Coordinate System) keywords in the FITS file when
+        creating a graph.  With WCS Info turned off, graphs will be
+        created using pixel coordinates.
+
+   <LI> <B>Image Viewer</B>: Select whether images should be display
+        using POW (included with fv) or or DS9 (products of the Harvard
+        SAO/HEAD R&D group).  When user selects DS9 on Windows platform, Preference will
+        give user the ability to supply (or to correct) DS9 and XPA library path.
+
+
+   <LI> <B>Graph Size</B>: Select the default graph size to use
+        (in screen pixels) when creating a new graph (image or curve)
+        using POW.  Sizes are given as "width x height".
+        
+        <P>Click on "Configure..." to modify the graph size list. 
+
+        <P>To delete one of more size(s), on the "fv: Graph Size" top panel, 
+           click the button in front of the selection (could click on more than
+           one selection.) And then click on "Delete" to delete the selection(s).</P>
+        <P>To add a new graph size, on the "fv: Graph Size" bottom panel, input 
+           new width and height. The new size (in width x height) will show up on
+           top of "Available Graph Size" if it is a new one.
+
+        <P>Click "OK" or "Cancel" to exit.
+        
+</UL>
+<LI> <B>Colors</B>
+<UL>
+   <LI> Click on the appropriate button to change the color of the
+        background/foreground/Active background/Active foreground/Check
+        button.
+
+   <LI> Use Up/Down arrow to change the font size. Fv panels will be rendered 
+        with new font size once "Save" is clicked.
+</UL>
+
+
+<P>Click the <B>Save</B> button to permanently save your preferences. Location of saved preference: <UL>
+   <LI> <B>UNIX</B>: saved in <B>~/.fvrc</B>; 
+   <LI> <B>Windows</B>: saved in <B>&lt;Installed fv Root&gt;\lib\fv\fv.ini</B>; 
+   <LI> <B>Mac OS</B>: saved in the <B>Preferences</B> folder as <B>fv Preferences</B>.
+</UL>
+</P>
+
+<hr> 
+
+Go to <a href="aboutFv.html">About fv</a>.
+
+</body>
+</html>

@@ -1,0 +1,140 @@
+<html>
+  <head>
+    <title>Run Ftools</title>
+  </head>
+<body>
+
+<h3>Run Ftools </h3>
+  This tool is the GUI client of console FTOOL programs. It takes advantage of
+the rich functionalities of FTOOL tools and integrates them into fv. With
+this utility, to run a FTOOL program, you no longer need to leave the fv and 
+open the other console window. However, you need to install the FTOOL or HEASOFT
+package to use this utility.
+
+<H4>Menus</H4>
+
+There are four menus. 
+<UL>
+
+<LI> <B>Ftool</B>
+
+<UL>
+
+   <LI> <B>Run </B>:Run the selected tool program. 
+   <LI> <B>Cancel </B>: Cancel the current running tool program.
+   <LI> <B>tool help </B>: Open the help file for the selected tool. 
+   <LI> <B>Clear Log </B>: Clear Log window.
+   <LI> <B>Dump Log</B>: Dump the content of Log window to a log file.
+   <LI> <B>Exit</B>: Terminate this tool.
+</UL>
+
+<LI> <B>Packages</B> 
+
+<UL>
+Listing of the sub-packages of tools. When one of them is selected,
+its contents will appear on the tool window.
+</UL>
+
+<LI> <B>Favorite </B> 
+You can choose tools from different sub-packages and assemble them
+in your favorite group. 
+
+<UL>
+   <LI> <B>Go to... </B>: Go to your favorite group.
+   <LI> <B>Add...</B>: Add current selected tool to the favorite group.
+   <LI> <B>Delete...</B>: Delete the selected tool from the favorite group.
+   <LI> <B>Reset...</B>: Delete every tool from the favorite group. 
+   <LI> <B>Configure </B> Configure the tool path, parfile path, and
+help file path, whether to save the parameters automatically, and
+whether to clear the log window automatically.   
+                
+</UL>
+
+<LI> <B>Help </B>: 
+<UL> 
+   <LI> <B>About this program... </B>: Open this help file.
+   <LI> <B>About selected tool.. </B>: Open the help file for the selected tool. 
+</UL>
+</UL>
+
+<H4>Tool Window </H4> 
+   When you selected a sub-package from <B>Packages </B> menu button, a
+listings of tools in this sub-package and its brief description will appear 
+in this window. To select the desired tool, click the left mouse button 
+on it.  
+<UL>
+   <LI> <B>Add to Favorite </B>: Add the selected tool to the 
+        favorite group.
+   <LI> <B>Run </B>: Run the selected tool. It opens the <a href="#par_dialog">
+    Parameter Dialog </a> or <a href="#cmd_dialog" >
+Command Dialog </a> depending on whether the task is parameter file 
+based or a script.  
+   <LI> <B>Cancel </B>: Terminate the Running tool. 
+   <LI> <B>tool Help </B>: Open the tool help window.  
+</UL>
+
+<H4>Log Window </H4> 
+   This window records the output of the tool when it is running.
+  
+<UL>
+   <LI> <B>Clear Log </B>: Clear Log window.
+   <LI> <B>Dump Log</B>: Dump the content of Log window to a log file.
+   <LI> <B>Exit</B>: Terminate this tool.
+</UL>
+
+
+<H4><a name=par_dialog> Parameter Dialog </a></H4> 
+    This window is opened when the <B> Run </B> Button is pressed. It
+displays the listings of parameters of the selected tool if it is 
+parameter-based.  It consists of three columns, name, description, 
+and value. You can enter the parameter value or set the <B>Yes/No </B>radio 
+buttons in the <B> Value </B> field. For a parameter asking file
+name(s), you can press the <B> Browser button </B> next to it to 
+open <a href="#browser"> a file selection dialog </a>.
+All the mandatory parameters are shaded with green color.    
+  
+<UL>
+   <LI> <B>Show hidden </B>: Toggle between showing or hiding the hidden
+                             parameters.
+   <LI> <B>Reset </B>: Reset the parameter values to system default
+                       values.
+   <LI> <B>OK </B>: Accept the current values, close this dialog and
+                    start to run the tool.
+   <LI> <B>Cancel </B>: Close this dialog without running the tool.
+   <LI> <B>Help </B>: Open the help file of the tool. 
+</UL>
+
+<H4><a name=cmd_dialog> Command Dialog </a></H4> 
+    This window is opened when the <B> Run </B> Button is pressed if 
+the corresponding tool is not parameter-based. The command is entered 
+in the <B>Command </B> field. The <B> Output Fits File </B> field is
+optional. It tells the program the file name of the output Fits File, 
+so it can open the <B> File Summary </B> after the command is
+successfully finished. 
+<UL>
+   <LI> <B>OK </B>: Accept the command,  close this dialog and
+                    start to run the command.
+   <LI> <B>Cancel </B>: Close this dialog without running.
+   <LI> <B>Help </B>: Open the help file for the command. 
+</UL>
+
+<H4><a name=browser> File Selection Dialog </a></H4> 
+<P>This window is opened when the <B> browser </B> Button in <a href=
+"#par_dialog">  the Parameter Dialog </a> is pressed.   
+To select a desired file, use left mouse to click on it then press
+either the <B>Apply to... </B>  or <B> Append to... </B> button.  
+The file name will be entered or appended on the <B>Value </B> field.
+When appending, a separator in the <B>Separator</B> field will be 
+inserted before the file name is appended.  
+
+<P>The attributes of the selected file can also be selected by the 
+radio buttons, <B> Output </B> and <B>Input </B>, and the check box
+<B>Fits file </B>. When both the <B>Output </B> and <B> Fits file
+</B> are set, a <B> File Summary </B> window will be opened after 
+the tool successfully finishes its execution.
+
+<hr> 
+Go to <a href="aboutFv.html">About fv</a>.
+
+</body>
+</html>

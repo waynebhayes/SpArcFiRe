@@ -1,0 +1,532 @@
+<html>
+  <head>
+    <title>POW Scripting</title>
+</head>
+<p align=center><font size="6" face="sans-serif"><b>
+   POW Scripting Guide
+</b></font></p>
+
+<p> Because fv and POW are written in Tcl, they are <i>inherently</i> 
+scriptable.  So long as one knows the necessary data structures and
+function calls, everything POW does can be controlled by a user-created
+Tcl script running inside of POW.  This, however, is a formidable task.
+Plus, POW's internal behavior and data are subject to change with each
+new release. </p>
+
+<p> To make scripting possible, then, a simplified (and hence limited)
+script interface has been added to POW.  It consists of a small set of
+commands which perform the basic operations of creating and modifying
+graphs.  Future versions should contain more capabilities. </p>
+
+
+
+<hr width="100%">
+<p align=center><font size="+2">Operational Summary</font></p>
+<hr width="50%">
+
+<p> There are several ways to access POW's scripting commands.  The
+simplest is to write a Tcl script which uses the commands directly and
+then execute it within POW's <B>powCmds</B> namespace.  As POW has no
+file capabilities nor command console of its own, this currently can
+be done only if implemented within an application containing POW, such
+as fv.  (See <a href="fv_scripting.html">fv's Scripting Guide</a> 
+for details on executing POW commands within fv.)  This scripting
+method is useful for implementing macros which can perform certain
+common operations at the user's request, such as setting specific
+graph options. </p>
+
+<p> Alternatively, POW can be scripted by other programs, allowing
+those programs to make use of POW's capabilities remotely.  These
+programs, however, do not need to be written in Tcl so long as they
+can communicate with POW.  Currently POW supports XPA on unix platforms and
+AppleScript on MacOS for communication:</p>
+
+<BLOCKQUOTE>
+
+<p> The <B>XPA messaging system</B> (http://hea-www.harvard.edu/RD/xpa/)
+developed by the SAO/HEAD R&amp;D group implements a method of
+communicating between two programs running on unix platforms.
+Communication occurs either through standalone programs (ie,
+<B>xpaget</B> and <B>xpaset</B>), a C subroutine library, or a Tcl
+extension.  POW uses the Tcl extension to make its scripting commands
+available, but the calling program can use any of the XPA methods to
+access the commands.  The XPA software is not distributed with POW or
+fv and must be obtained and built by the user.</p>
+
+<p> <B>AppleScript</B> (http://www.apple.com/applescript), the
+English-like language on all Macintosh computers (circa MacOS 7.5 and
+up), can also be used to control POW remotely.  (Actually, any program
+on the Mac can control POW through the use of Apple Events.)  Using the 
+<B>do script</B> command, Tcl code can be passed to POW.  Due to how
+Tcl's <B>do script</B> command and POW's scripting commands are
+implemented, POW commands must be prefixed with the <B>powCmds::</B> 
+namespace specifier.</p>
+
+</BLOCKQUOTE>
+
+<P> POW's scripting capabilities closely mimic the interface described
+in POW's <a href="POWAPI.html">Developer's Guide</a>.  In general, one
+first creates a data object from which either a curve or image is
+produced.  One then creates a graph onto which a series of curves
+and/or images is placed.  The graph size, position, and viewing region
+can then be modified as needed.  Once plotted in a graph, curves and
+images can be displayed using different point shapes, line styles, or
+colormaps.  In most cases, commands operate on the currently selected
+object (as appropriate). </P>
+
+<P>Many scripting commands also can be used as inquiries.  Inquiries
+and commands are implemented using the same syntax, differing only in
+that commands supply the necessary parameters to perform an action,
+whereas inquiries leave them off indicating POW should return the
+current settings.  When used with XPA, inquiries must use the xpaget
+tool and commands the xpaset tool.</P>
+
+
+<hr width="100%">
+<p align=center><font size="+2">Command Summary</font></p>
+<hr width="50%">
+
+<DL>
+
+   <DT> <b>add curve|image</b> <i>objName</i>
+   <DD> Add a curve or image to the current graph. </DD>
+    
+   <DT> <B>array</B> <I>channel dataName bitpix ?byteOrder?</I> <DD>
+        Imports data into POW from a TCL <I>channel</I>.  When run
+        using XPA, <I>channel</I> is dropped and the data is read form
+        stdin. <i>bitpix</i> indicates the data format of the binary
+        data (eg., 8, -32, INT, DOUBLE, etc) and <i>byteOrder</i>
+        indicates whether the data is stored in <B>bigEndian</B> or
+        <B>littleEndian</B> format.  The default value of
+        <i>byteOrder</i> is whichever is native for the
+        platform. <B>FITS</B> and <B>IEEE</B> are synonyms for
+        <B>bigEndian</B>.  If <i>bitpix</i> has the string value
+        <B>LIST</B>, the data is read treated as an ASCII stream with
+        double values.  If <i>dataName</i> has a singular element, all
+        values in the table are placed into a single data object with
+        the supplied name. If <i>dataName</i> is instead a list, the
+        stream will be considered as a columnar table with each column
+        going into a corresponding data element of <i>dataName</i>.  </DD>
+
+   <DT> <B>axes</B> <i>xscale ?yscale?</i> <DD> Sets axes as log or
+        linear.  If only one value applied it will be applied to both
+        axes. </DD>
+
+   <DT> <B>bounds</B> <i>xLft yBtm xRgt yTop</i> ?<b>wcs|pixel</b>?
+   <DD> Set the bounding box of the current graph in either
+        <B>wcs</B> (default) or <B>pixel</B> coordinates.  </DD>
+
+   <DT> <B>bounds reset</B> 
+   <DD> Reset the current graph's bounding box to its default values. </DD>
+
+   <DT> <B>bounds zoom</B> <i>xMag ?yMag?</i>
+   <DD> Increase or decrease the bounding box by the given
+        magnification factors. </DD>
+
+   <DT> <B>calculate</B> <I>newDataName expression</I>
+   <DD> Perform a calculation on existing data objects</DD>
+
+   <DT> <B>close</B>
+   <DD> Close/Exit POW </DD>
+
+   <DT> <B>colorbar create</B>
+   <DD> create a colorbar of the current graph</DD>
+
+   <DT> <B>colorbar delete</B>
+   <DD> delete a colorbar of the current graph</DD>
+
+   <DT> <B>colormap</B> <i>cmap</i>
+   <DD> Set the colormap of images in the current graph</DD>
+
+   <DT> <B>colormap add</B> <i>cmap R G B R G B ...</i>
+   <DD> Add a custom colormap named <i>cmap</i>.  The RGB values are given
+        in triplets of integer values ranging over 0 to 255.  Any number
+        of triplets can be provided and will be scaled to the number of
+        colors available on screen. </DD>
+
+   <DT> <B>colormap invert Yes|No</B> 
+   <DD> Invert colormap of images </DD>
+
+   <DT> <B>colormap scale</B> <i>?mode? ?min max?</i>
+   <DD> Set the colormap scaling mode and range of images</DD>
+
+   <DT> <B>contour</B> ?<B>-res</B> <i>n</i>? ?<B>-image</B> <i>imgName</i>?
+        <i>crvName level1 ?level2 ...?</i>
+   <DD> Create a contour map of the current (or <i>imgName</i>) image.
+        The result is a single curve object named <i>crvName</i>
+        outlining regions of the image with intensities <i>level1</i>
+        etc.  If <B>-image</B> is used to specify the image, the image
+        does not need to be plotted in the current (or any other) graph.
+        The <B>-res</B> option gives the image resolution to use in
+        calculating the contour (default is 1); the image will be
+        smoothed over this number of pixels square.  The curve contour
+        will not be plotted automatically; use <B>add curve</B> <I>crvName</I>
+        to add it to the current graph.
+
+   <DT> <B>create data</B> <i>dataName dataList</i>
+   <DD> Create a data object with the supplied values. </DD>
+   <DD> Note: to avoid hitting the limit on the command line length, use piped stdout command:</DD>
+        <DD><i>echo dataList</i> | <B>create data</B><i> dataName</i></DD>
+
+   <DT> <B>create curve</B> <i>curveName xDataName ?xeDataName?
+        yDataName ?yeDataName?</i>
+   <DD> Create an X/Y curve object with or without errors from the
+        supplied data objects. </DD>
+
+   <DT> <B>create image</B> <i>imageName dataName width height</i>
+   <DD> Create an image object of given dimensions and data object.</DD>
+
+   <DT> <B>create graph</B> <i>graphName curveList imageList ?width
+        height?</i> <DD> Create a graph with the given curves and
+        images.  <i>width</i> and <i>height</i> give the screen size
+        of the graph in pixels (default is set in the Preferences panel).
+        Either of the
+        lists can have a value of <B>NULL</B> if no objects of that
+        type are being used. </DD>
+
+   <DT> <B>cursor</B>
+   <DD> Wait for the user to click on the current graph then return the
+        graph coordinates and mouse button pressed:  <i>x y button</i>.
+        A keypress will also be captured and returned in the place of
+        <i>button</i> as its negative ASCII value (ie, -65 for A).</DD>
+
+   <DT> <B>curve</B> ?<B>-name</B> <i>crvName</i>? <i>param value
+        ?param value? ...</i>
+   <DD> Set curve options.  The currently-selected curve will be used
+        if the <B>-name</B> option isn't specified; otherwise set options
+        for the indicated curve. The curve <i>crvName</i> does not have to
+        exist prior to executing this command, so options can be set
+        before a curve is created and drawn.  If <i>crvName</i> is
+        "default", the value will apply to all curves not yet plotted.
+        The available parameters and value types are:
+
+<PRE>
+       pDisp     -->  boolean  -->  Display Points?
+       pShape    -->  string   -->  Point shape (Cross, Diamond, Box,
+                                       Octagon, Triangle, "Inv. Triangle")
+       pSizeErr  -->  boolean  -->  Draw point the size of errorbars?
+       pSize     -->  integer  -->  Size of point
+       pFill     -->  boolean  -->  Fill in point, if an outline
+       pColor    -->  color    -->  Color of points (any color name
+                                       or #RRGGBB value)
+   	       	             	  
+       lDisp     -->  boolean  -->  Display line?
+       lStyle    -->  dash     -->  Dash style of line (" " is solid, 
+                                       "20" is 20-pixel dashes,
+                                       "15 10 4 10" is Dash-dot, etc)
+       lWidth    -->  integer  -->  Width of line
+       lStep     -->  boolean  -->  Draw line as histogram?
+       lBoxFill  -->  boolean  -->  Fill histogram boxes?
+       lColor    -->  color    -->  Color of line (any color name
+                                       or #RRGGBB value)
+</PRE> </DD>
+
+   <DT> <B>delete ?-propogate? graph|image|curve|data</B> <i>objName</i>
+   <DD> Delete an object from POW, freeing any memory it occupied.
+        Deleted curves and images will be removed from all graphs in
+        which they are displayed.  With the <B>-propogate</B> option,
+        the contents of the object are also deleted, meaning all the
+        curves and images in a graph, and the original data within an
+        image or curve.  Data which is still being used by a curve or
+        image object, however, will not be deleted.</DD>
+
+   <DT> <B>graph</B> ?<B>-name</B> <i>graphName</i>? <i>param value
+        ?param value? ...</i>
+   <DD> Set graph options.  The currently-selected graph will be used
+        if the <B>-name</B> option isn't specified; otherwise set options
+        for the indicated graph. The graph <i>graphName</i> does not have to
+        exist prior to executing this command, so options can be set
+        before a graph is created and drawn.  If <i>graphName</i> is
+        "default", the value will apply to all future graphs.
+        The available parameters and value types are:
+<PRE>
+       bgcolor         -->  color     -->  Color behind graph (any color
+                                              name or #RRGGBB value)
+       xmargin         -->  integer   -->  Intergraph spacing; affects
+       ymargin         -->  integer   -->     placement of new graphs
+       xdimdisp        -->  integer   -->  Screen dimensions of graph;
+       ydimdisp        -->  integer   -->     affects size of new graphs
+       FixedAspect     -->  boolean   -->  Force identical horizontal
+                                              and vertical scales for graph
+                                              (defaults to yes if any
+                                               images present)
+
+       xlabel          -->  string    -->  Label for X axis
+       ylabel          -->  string    -->  Label for Y axis
+       xunits          -->  string    -->  Optional unit value for X axis
+       yunits          -->  string    -->  Optional unit value for Y axis
+       titleString     -->  string    -->  Title for graph
+       titlePosition   -->  direction -->  Position around graph to place
+                                              title... value is a string
+                                              containing the letters n, e,
+                                              w, s (for north, east, etc)
+       titleAnchor     -->  direction -->  Position in title to place at
+                                              the titlePosition... value is
+                                              a string containing n, e, w, s.
+
+       xNumTicks       -->  integer   -->  Scaling parameter for number of
+       yNumTicks       -->  integer   -->     tick marks on each axis
+                                              (default, 3; not 1-to-1)
+       xTickScal       -->  string    -->  Scaling of tick marks along
+       yTickScal       -->  string    -->     each axis: "linear" or "log".
+                                              Graphs with WCS information
+                                              ignore this and use ra/dec.
+       xTickLength     -->  list      -->  Length of tick marks for each
+       yTickLength     -->  list      -->     axis on each side of graph.
+                                              Order is [lft rgt top bot]
+                                              (default: "10 10 10 10")
+       xLabelTicks     -->  list      -->  Boolean indicating whether ticks
+       yLabelTicks     -->  list      -->     should be labels for each
+                                              axis on each side of graph.
+                                              Order is [lft rgt top bot]
+                                              (default: "Yes No No Yes")
+       tickLabels      -->  string    -->  Format for labeling ticks on
+                                              graphs with WCS information:
+                                              "degrees" or "decimal"
+       tickFormatCmdX  -->  string    -->  Tcl command used in formatting
+       tickFormatCmdY  -->  string    -->     tick values into labels
+                                              (default: "format %.6lg")
+
+       GridLines       -->  boolean   -->  Draw grid lines?
+       GridColor       -->  color     -->  Grid color (any color name
+                                              or #RRGGBB value)
+       GridDash        -->  dash      -->  Grid dash pattern
+                                              (" " is solid, "20" is
+                                              20-pixel dashes, "15 10 4 10"
+                                              is Dash-dot, etc)
+</PRE>
+   <DT> <B>helpPage</B> <i>?file?</i>
+   <DD> Open and display help file in html format.  Two ways to do this:
+<PRE>
+        1. xpaset -p pow helpPage <i>file</i> 
+                - if <i>file</i> is not a full path file name, then it is assumed to be one
+                  of the installed POW help file.
+                - else, user needs to supply the full path name to the file.
+        2. cat <i>file</i> | xpaset pow helpPage
+</PRE>
+   <DT> <B>init</B> <i>?nColors? ?cMode?</i>
+   <DD> Open and initialize pow's graphing window.  If the window is already
+        open, this does nothing. </DD>
+
+   <DT> <B>print</B> ?<B>-file</B> <i>filename</i>? ?<B>-landscape</B>? ?<B>-stretch</B>?  ?<B>-multipage</B>?
+   <DD> Send all images on POW canvas to printer. Save all images if -file is supplied.
+        <pre>
+        -file        : result file name. The extension of file name should indicates valid saved format
+                       (i.e. filename.jpg).  Current valid formats are bmp, jpg, ps, ppm, png, pnm, and tiff.
+        -landscape   : print/save result in landscape mode (default is portrait). 
+        -stretch     : stretch the image to fit the page (default is no).
+        -multipage   : one image per page (default is print/save on the same page/file)
+
+        Note: The image needs to be displayed in POW in order to print or save.</pre></DD>
+
+   <DT> <B>position ?offset?</B> <i>x y</i>
+   <DD> Moves current graph around the canvas.  When <b>offset</b> is
+        present, <i>x</i> and <i>y</i> are relative offsets from the
+        current position. </DD>
+
+   <DT> <B>refresh</B>
+   <DD> Redraws current graph </DD>
+
+   <DT> <B>regionName</B> <i>region file name</i>
+   <DD> Set output region name, should be used after Region Edit Panel is opened.</DD>
+
+   <DT> <B>regionTool</B> <i>?-open? ?-close? ?-wait?</i>
+   <DD> Open the Region Edit Panel on POW. </DD>
+<PRE>
+          -open  : open the region edit panel
+          -close : close the region edit panel
+          -wait  : wait for region edit panel to close. Return save means data has been saved.
+                                                        Return unsave means otherwise
+</PRE>
+
+   <DT> <B>regions</B>
+   <DD> Open Region Edit Panel (if not opened already), displays input Region of Interest (ROI) on
+        POW image and update entry in the Region Edit Panel.
+<PRE>
+        example of usage: 
+           cat <i>file</i> | xpaset pow regions
+</PRE>
+   <DT> <B>remote</B> ?<i>clientXPA</i>?
+   <DD> Set the XPA access point of a client POW session to which all
+        subsequent commands should be sent.  Send an empty <i>clientXPA</i>
+        to have commands executed locally. If the environment variable
+        <TT>POW_LIBRARY</TT> is defined, its value will
+        be used for <i>clientXPA</i>. </DD>
+
+   <DT> <B>remove</B> ?<B>-name</B> <i>graphName</i>? <B>curve|image</B>
+        <i>objName</i>
+   <DD> Remove an object from the current graph or <i>graphName</i>.</DD>
+
+   <DT> <B>scope</B> <i>width ?height?</i>
+   <DD> Sets scope window size.  If only one value is given, the scope
+        window will be a square.</DD>
+
+   <DT> <B>select curve|image|graph</B> <i>objName</i>
+   <DD> Select a curve/image/graph for manipulation </DD>
+
+   <DT> <B>size</B> <i>width height</i>
+   <DD> Set graph size </DD>
+
+   <DT> <B>size stretch ?to?</B> <i>xMag ?yMag?</i>
+   <DD> Stretch graph size by the given magnification either relative to
+        current magnification or an absolute magnification. </DD>
+
+   <DT> <B>tcl</B>
+   <DD> Execute tcl code read from stdin (XPA support only).</DD>
+
+   <DT> <B>version</B>
+   <DD> Return POW version number </DD>
+
+   <DT> <B>xrangeName</B> <i>file name</i>
+   <DD> Set output file name to save x axis ranges, should be used after X axis Range Edit Panel is opened.</DD>
+
+   <DT> <B>xrangeTool</B> <i>?-open? ?-close? ?-wait?</i>
+   <DD> Open the X axis Range Edit Panel on POW. </DD>
+<PRE>
+          -open  : open the x axis range edit panel
+          -close : close the x axis range edit panel
+          -wait  : wait for x axis range edit panel to close. Return save means data has been saved.
+                                                              Return unsave means otherwise
+</PRE>
+
+   <DT> <B>xranges</B>
+   <DD> Open X axis Range Edit Panel (if not opened already), displays input X axis Ranges of Interest (XROI) on
+        POW image and update entry in the X axis Range Edit Panel.
+<PRE>
+        example of usage: 
+           cat <i>file</i> | xpaset pow xranges 
+</PRE>
+   <DT> <B>wcs</B> <i>objName wcsData</i>
+   <DD> Set (or get) WCS information for the given object (can be a curve
+        or image).  The wcsData is a list of the form of either
+           <UL type=disc>
+             <LI> <i>xrval yrval xrpix yrpix xinc yinc rot ctype ?swap?</i>
+             <LI> <I>refVals refPix matrix types projections</I>
+           </UL>
+        If WCS information has not already been provided for <i>objName</i>
+        the "get" version of this command will return an empty string.
+        (See <a href="http://heasarc.gsfc.nasa.gov/lheasoft/ftools/fv/fitsTcl.html">fitsTcl documention</a> for more information.)</DD>
+
+</DL>
+
+<hr width="100%">
+<p align=center><font size="+2">Examples</font></p>
+<hr width="50%">
+
+<P> The following commands will create a graph in pow and plot 2 curves in it.
+
+<PRE>
+  create data d1 1 2 3 4 5 6 5 4 3 2 1     # Create data object d1
+  create data d2 1 4 9 16 20 16 9 4 2 1 1  # Create data object d2
+  create curve c1 d1 d2                    # Create curve of d1 vs d2
+  create graph g1 c1 NULL                  # Draw graph containing curve
+  size 200 150                             # Resize graph to 200x150
+  calculate d3 'd1*2'                      # Calculate new data object
+  create curve c2 d3 d2                    # Create curve of d3 vs d2
+  add curve c2                             # Add curve to graph
+  bounds reset                             # Reset bounding box
+  select curve c1                          # Select first curve
+  curve pFill Yes pColor Blue lDisp No     # Set display options
+  select curve c2                          # Select second curve
+  curve pDisp No lColor Red lStyle 20      # Set display options
+</PRE>
+  
+
+<p>Using XPA from a Unix shell, one would execute the above commands by
+doing the following:
+
+<PRE>
+  xpaset -p pow create data d1 1 2 3 4 5 6 5 4 3 2 1
+  xpaset -p pow create data d2 1 4 9 16 20 16 9 4 2 1 1
+  xpaset -p pow create curve c1 d1 d2
+  xpaset -p pow create graph g1 c1 NULL
+  xpaset -p pow size 200 150
+  xpaset -p pow calculate d3 d1*2
+  xpaset -p pow create curve c2 d3 d2
+  xpaset -p pow add curve c2
+  xpaset -p pow bounds reset
+  xpaset -p pow select curve c1
+  xpaset -p pow curve pFill Yes pColor Blue lDisp No
+  xpaset -p pow select curve c2
+  xpaset -p pow curve pDisp No lColor Red lStyle 20
+</PRE>
+
+The <B>-p</B> option tells xpaset to <i>not</i> read any data from
+stdin.  One can instead use stdin to send a series of Tcl commands en
+masse by putting all the POW commands into a text file and pass them
+to POW, using the command...
+
+<PRE>
+  cat commands.txt | xpaset pow tcl
+</PRE>
+
+This second method allows one to insert real TCL commands (providing
+access to the entire <A href="POWAPI.html">POW API</A>) into the
+command sequence, whereas the individual xpaget/xpaset calls are
+restricted to the specific scripting commands.</P>
+
+<P>Alternatively, if using AppleScript, the commands are...
+
+<PRE>
+  tell application "fv"
+    activate
+    -- Because POW is available only as part of POW on Macs, the following
+    -- line is needed to open POW's window, if it doesn't already exist
+    do script "if { ![winfo exist .pow.pow] } { powInit .dummy }"
+    do script "powCmds::create data d1 1 2 3 4 5 6 5 4 3 2 1"
+    do script "powCmds::create data d2 1 4 9 16 20 16 9 4 2 1 1"
+    do script "powCmds::create curve c1 d1 d2"
+    do script "powCmds::create graph g1 c1 NULL"
+    do script "powCmds::size 200 150"
+    do script "powCmds::calculate d3 d1*2"
+    do script "powCmds::create curve c2 d3 d2"
+    do script "powCmds::add curve c2"
+    do script "powCmds::bounds reset"
+    do script "powCmds::select curve c1"
+    do script "powCmds::curve pFill Yes pColor Blue lDisp No"
+    do script "powCmds::select curve c2"
+    do script "powCmds::curve pDisp No lColor Red lStyle 20"
+  end tell
+</PRE>
+
+Note that AppleScript will actually start fv if it isn't already running.</P>
+
+<P> Now that the graph is created, one can make inquiries with the
+following commands using XPA...
+
+<PRE>
+  xpaget pow bounds         # Get the bounding box of current graph
+  xpaget pow select graph   # Get name of the currently selected graph
+  xpaget pow position       # Get position of the graph
+  xpaget pow curve          # Get display options of current curve
+  xpaget pow version        # Get pow version number
+</PRE>
+
+... or, using AppleScript...
+
+<PRE>
+  set x to (do script "powCmds::bounds")
+  set x to (do script "powCmds::select graph")
+  set x to (do script "powCmds::position")
+  set x to (do script "powCmds::curve")
+  set x to (do script "powCmds::version")
+</PRE>
+
+... or, using an as-yet-missing interactive console...
+
+<PRE>
+  bounds
+  select graph
+  position
+  curve
+  version
+</PRE>
+
+</P>
+
+<P>Additional examples of scripting can be found in the
+<TT>sample_scripts</TT>
+directory within the fv distribution.</P>
+
+</body>
+</html>
