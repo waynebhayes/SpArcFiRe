@@ -2,7 +2,7 @@
 # SpArcFiRe to Galfit
 #Usage:
 # - Run on ics.uci.edu servers to access sparcfire
-# - Place png/fits files in 
+# - Place png/fits files in sparcfire_input
 echo "Running SpArcFiRe"
 /home/sparcfire/bin/SpArcFiRe sparcfire_input/ sparcfire_temp/ sparcfire_output/
 if [ "$?" != "0" ]; then
