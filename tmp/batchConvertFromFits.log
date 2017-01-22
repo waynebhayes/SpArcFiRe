@@ -1,0 +1,145 @@
+inSfxs given as string; interpreting as single-element array
+qLvl given as string; interpreting as floating point number
+nReps given as string; interpreting as integer
+blackQlvl given as string; interpreting as floating point number
+maskVal given as string, intrepreting as number
+2 matching files, 2 non-matching files
+skipped files: 
+	.
+	..
+2 unique objects
+qLvl is 0.7500
+nReps is 2
+black-level quantile is 0.2500
+using galaxy mask, suffix = _starmask.png, maskVal = 255
+processing: 1237651752944205838_r
+	reading: /tmp/SF29170/1237651752944205838_r.fits
+WARNING: could not convert 1237651752944205838_r (unable to read /tmp/SF29170/1237651752944205838_r.fits: File "/tmp/SF29170/1237651752944205838_r.fits" does not exist.)
+processing: 1237666338116993064_r
+	reading: /tmp/SF29170/1237666338116993064_r.fits
+WARNING: could not convert 1237666338116993064_r (unable to read /tmp/SF29170/1237666338116993064_r.fits: File "/tmp/SF29170/1237666338116993064_r.fits" does not exist.)
+inSfxs given as string; interpreting as single-element array
+qLvl given as string; interpreting as floating point number
+nReps given as string; interpreting as integer
+blackQlvl given as string; interpreting as floating point number
+maskVal given as string, intrepreting as number
+2 matching files, 2 non-matching files
+skipped files: 
+	.
+	..
+2 unique objects
+qLvl is 0.7500
+nReps is 2
+black-level quantile is 0.2500
+using galaxy mask, suffix = _starmask.png, maskVal = 255
+processing: 1237651752944205838_r
+	reading: /tmp/SF31156/1237651752944205838_r.fits
+WARNING: could not convert 1237651752944205838_r (unable to read /tmp/SF31156/1237651752944205838_r.fits: File "/tmp/SF31156/1237651752944205838_r.fits" does not exist.)
+processing: 1237666338116993064_r
+	reading: /tmp/SF31156/1237666338116993064_r.fits
+WARNING: could not convert 1237666338116993064_r (unable to read /tmp/SF31156/1237666338116993064_r.fits: File "/tmp/SF31156/1237666338116993064_r.fits" does not exist.)
+inSfxs given as string; interpreting as single-element array
+qLvl given as string; interpreting as floating point number
+nReps given as string; interpreting as integer
+blackQlvl given as string; interpreting as floating point number
+maskVal given as string, intrepreting as number
+7 matching files, 2 non-matching files
+skipped files: 
+	.
+	..
+7 unique objects
+qLvl is 0.7500
+nReps is 2
+black-level quantile is 0.2500
+using galaxy mask, suffix = _starmask.png, maskVal = 255
+processing: 1237658204498296934
+	reading: /tmp/SF31530/1237658204498296934.fits
+{Warning: The ability to read FITS files with IMREAD may be removed in a future
+release. Use FITSREAD to import FITS files.} 
+{> In imagesci/private/readfits at 12
+  In imread at 435
+  In batchConvertFromFits at 158} 
+blackLevel = 1107.0000
+asinhBeta (if no star masking were used) = 8.0000
+asinhBeta = 55.0000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0513
+asinhBeta = 0.3118
+processing: 1237660614513131530
+	reading: /tmp/SF31530/1237660614513131530.fits
+{Warning: The ability to read FITS files with IMREAD may be removed in a future
+release. Use FITSREAD to import FITS files.} 
+{> In imagesci/private/readfits at 12
+  In imread at 435
+  In batchConvertFromFits at 158} 
+blackLevel = 1238.0000
+asinhBeta (if no star masking were used) = 10.0000
+asinhBeta = 71.0000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0508
+asinhBeta = 0.3191
+processing: 1237661384387789055
+	reading: /tmp/SF31530/1237661384387789055.fits
+{Warning: The ability to read FITS files with IMREAD may be removed in a future
+release. Use FITSREAD to import FITS files.} 
+{> In imagesci/private/readfits at 12
+  In imread at 435
+  In batchConvertFromFits at 158} 
+blackLevel = 1106.0000
+asinhBeta (if no star masking were used) = 10.0000
+asinhBeta = 66.5000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0435
+asinhBeta = 0.2562
+processing: 1237662239093424322
+	reading: /tmp/SF31530/1237662239093424322.fits
+{Warning: The ability to read FITS files with IMREAD may be removed in a future
+release. Use FITSREAD to import FITS files.} 
+{> In imagesci/private/readfits at 12
+  In imread at 435
+  In batchConvertFromFits at 158} 
+blackLevel = 1149.0000
+asinhBeta (if no star masking were used) = 9.0000
+asinhBeta = 55.0000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0629
+asinhBeta = 0.3401
+processing: 1237662305650999364
+	reading: /tmp/SF31530/1237662305650999364.fits
+{Warning: The ability to read FITS files with IMREAD may be removed in a future
+release. Use FITSREAD to import FITS files.} 
+{> In imagesci/private/readfits at 12
+  In imread at 435
+  In batchConvertFromFits at 158} 
+blackLevel = 1081.0000
+asinhBeta (if no star masking were used) = 8.0000
+asinhBeta = 82.0000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0195
+asinhBeta = 0.1769
+processing: 1237664093973512232
+	reading: /tmp/SF31530/1237664093973512232.fits
+{Warning: The ability to read FITS files with IMREAD may be removed in a future
+release. Use FITSREAD to import FITS files.} 
+{> In imagesci/private/readfits at 12
+  In imread at 435
+  In batchConvertFromFits at 158} 
+blackLevel = 1179.0000
+asinhBeta (if no star masking were used) = 10.0000
+asinhBeta = 111.0000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0346
+asinhBeta = 0.3394
+processing: 1237667781754749028
+	reading: /tmp/SF31530/1237667781754749028.fits
+{Warning: The ability to read FITS files with IMREAD may be removed in a future
+release. Use FITSREAD to import FITS files.} 
+{> In imagesci/private/readfits at 12
+  In imread at 435
+  In batchConvertFromFits at 158} 
+blackLevel = 1106.0000
+asinhBeta (if no star masking were used) = 8.0000
+asinhBeta = 38.0000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0989
+asinhBeta = 0.4170

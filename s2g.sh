@@ -4,7 +4,7 @@
 # - Run on ics.uci.edu servers to access sparcfire
 # - Place png/fits files in sparcfire_input
 echo "Running SpArcFiRe"
-/home/sparcfire/bin/SpArcFiRe sparcfire_input/ sparcfire_temp/ sparcfire_output/
+/home/sparcfire/bin/SpArcFiRe -convert-FITS in tmp out
 if [ "$?" != "0" ]; then
 	echo "SpArcFiRe error, aborting" 1>&2
 	exit 1

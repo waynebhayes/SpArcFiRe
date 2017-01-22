@@ -1,0 +1,466 @@
+Enter 'help' for syntax; blank line or 'exit' or 'quit' exits. Wait for MATLAB to start...
+server run ID is 7367175320317417
+No fit settings specified. Using defaults.
+applying environment-variable override to "writeSettingsForEveryImage": 0 -> 1
+applying environment-variable override to "generateOrientationFieldPdf": 0 -> 1
+applying environment-variable override to "lookForBulge": 1 -> 1
+22-Jan-2017 12:46:07
+server run ID: 7367175320317417
+settings recorded to 7367175320317417_settings.txt
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix, output_dir):
+1>> running with in_dir=/home/dlcheng/sparcfire-galfit/tmp, image_name=1237667781754749028, image_suffix=.png, starmask_suffix=_starmask.png, output_dir=/home/dlcheng/sparcfire-galfit/out
+No ellipse-fitting parameters file given, using default.
+processing 1237667781754749028 (image 1 of 1, /home/dlcheng/sparcfire-galfit/tmp/1237667781754749028.png)...
+star mask found: /home/dlcheng/sparcfire-galfit/tmp/1237667781754749028_starmask.png
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+
+calculating orientation field...
+Elapsed time is 9.961472 seconds.
+...done calculating orientation field
+
+ans =
+
+   51.0552   51.5407
+
+15500 nonzero orientation field vectors
+57287 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 26.227431 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.297482 seconds.
+Time for arc-merging: 
+Elapsed time is 3.430551 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 31.225836 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix, output_dir):
+2>> running with in_dir=/home/dlcheng/sparcfire-galfit/tmp, image_name=1237664093973512232, image_suffix=.png, starmask_suffix=_starmask.png, output_dir=/home/dlcheng/sparcfire-galfit/out
+No ellipse-fitting parameters file given, using default.
+processing 1237664093973512232 (image 1 of 1, /home/dlcheng/sparcfire-galfit/tmp/1237664093973512232.png)...
+star mask found: /home/dlcheng/sparcfire-galfit/tmp/1237664093973512232_starmask.png
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+
+calculating orientation field...
+Elapsed time is 9.900732 seconds.
+...done calculating orientation field
+
+ans =
+
+   61.9241   84.8024
+
+11447 nonzero orientation field vectors
+50158 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 30.620850 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.102786 seconds.
+Time for arc-merging: 
+Elapsed time is 0.777764 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 32.163961 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix, output_dir):
+3>> running with in_dir=/home/dlcheng/sparcfire-galfit/tmp, image_name=1237658204498296934, image_suffix=.png, starmask_suffix=_starmask.png, output_dir=/home/dlcheng/sparcfire-galfit/out
+No ellipse-fitting parameters file given, using default.
+processing 1237658204498296934 (image 1 of 1, /home/dlcheng/sparcfire-galfit/tmp/1237658204498296934.png)...
+star mask found: /home/dlcheng/sparcfire-galfit/tmp/1237658204498296934_starmask.png
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+
+calculating orientation field...
+Elapsed time is 9.944726 seconds.
+...done calculating orientation field
+
+ans =
+
+  145.2609  146.5794
+
+22811 nonzero orientation field vectors
+51160 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 41.252526 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.226860 seconds.
+Time for arc-merging: 
+Elapsed time is 12.937432 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 55.241410 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix, output_dir):
+4>> running with in_dir=/home/dlcheng/sparcfire-galfit/tmp, image_name=1237661384387789055, image_suffix=.png, starmask_suffix=_starmask.png, output_dir=/home/dlcheng/sparcfire-galfit/out
+No ellipse-fitting parameters file given, using default.
+processing 1237661384387789055 (image 1 of 1, /home/dlcheng/sparcfire-galfit/tmp/1237661384387789055.png)...
+star mask found: /home/dlcheng/sparcfire-galfit/tmp/1237661384387789055_starmask.png
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+
+calculating orientation field...
+Elapsed time is 9.867651 seconds.
+...done calculating orientation field
+
+ans =
+
+   28.3820   28.4246
+
+3795 nonzero orientation field vectors
+58711 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 14.995594 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.026805 seconds.
+Time for arc-merging: 
+Elapsed time is 0.030281 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 15.600757 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix, output_dir):
+5>> running with in_dir=/home/dlcheng/sparcfire-galfit/tmp, image_name=1237662239093424322, image_suffix=.png, starmask_suffix=_starmask.png, output_dir=/home/dlcheng/sparcfire-galfit/out
+No ellipse-fitting parameters file given, using default.
+processing 1237662239093424322 (image 1 of 1, /home/dlcheng/sparcfire-galfit/tmp/1237662239093424322.png)...
+star mask found: /home/dlcheng/sparcfire-galfit/tmp/1237662239093424322_starmask.png
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+
+calculating orientation field...
+Elapsed time is 9.909017 seconds.
+...done calculating orientation field
+
+ans =
+
+   44.4082   54.1597
+
+12338 nonzero orientation field vectors
+59177 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 21.038457 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.099460 seconds.
+Time for arc-merging: 
+Elapsed time is 0.486326 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 22.245418 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix, output_dir):
+6>> running with in_dir=/home/dlcheng/sparcfire-galfit/tmp, image_name=1237660614513131530, image_suffix=.png, starmask_suffix=_starmask.png, output_dir=/home/dlcheng/sparcfire-galfit/out
+No ellipse-fitting parameters file given, using default.
+processing 1237660614513131530 (image 1 of 1, /home/dlcheng/sparcfire-galfit/tmp/1237660614513131530.png)...
+star mask found: /home/dlcheng/sparcfire-galfit/tmp/1237660614513131530_starmask.png
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+
+calculating orientation field...
+Elapsed time is 9.886051 seconds.
+...done calculating orientation field
+
+ans =
+
+  240.5711  240.6355
+
+18722 nonzero orientation field vectors
+45436 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 46.587543 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.161604 seconds.
+Time for arc-merging: 
+Elapsed time is 2.749953 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 50.407426 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix, output_dir):
+7>> running with in_dir=/home/dlcheng/sparcfire-galfit/tmp, image_name=1237662305650999364, image_suffix=.png, starmask_suffix=_starmask.png, output_dir=/home/dlcheng/sparcfire-galfit/out
+No ellipse-fitting parameters file given, using default.
+processing 1237662305650999364 (image 1 of 1, /home/dlcheng/sparcfire-galfit/tmp/1237662305650999364.png)...
+star mask found: /home/dlcheng/sparcfire-galfit/tmp/1237662305650999364_starmask.png
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+
+calculating orientation field...
+Elapsed time is 9.938927 seconds.
+...done calculating orientation field
+
+ans =
+
+  299.2349  299.3832
+
+16920 nonzero orientation field vectors
+52563 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 41.788813 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.192642 seconds.
+Time for arc-merging: 
+Elapsed time is 2.242726 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 45.025300 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix, output_dir):
+8>> Exiting...
