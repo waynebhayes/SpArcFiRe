@@ -3,7 +3,11 @@
 #Usage:
 # - Run on ics.uci.edu servers to access sparcfire
 # - Place png/fits files in sparcfire_input
+# - Requires fv (fits viewer) to view output automatically
+
+#Run SpArcFiRe on images within in/ directory
 echo "Running SpArcFiRe"
+rm -rf in/* tmp/* out/* 
 /home/sparcfire/bin/SpArcFiRe -convert-FITS in tmp out
 if [ "$?" != "0" ]; then
 	echo "SpArcFiRe error, aborting" 1>&2
@@ -12,7 +16,8 @@ fi
 
 #Run python conversion script on each sparfire output
 echo "Running python sparcfire to galfit conversion script"
-python main.py sparcfire_output/galaxy.csv sparcfire_output galaxy_arcs.csv
+rm -rf galfit_in/* galfit_out/*
+python s2g.py
 if [ "$?" != "0" ]; then
 	echo "Python error, aborting" 1>&2
 	exit 1
@@ -20,12 +25,15 @@ fi
 
 #Run galfit on each feedme file
 echo "Running GALFIT"
-#galfit galfit_input/*.feedme
-if [ "$?" != "0" ]; then
-	echo "GALFIT error, aborting" 1>&2
-	exit 1
-fi
+for f in galfit_in/*
+do
+	galfit "$f"
+	if [ "$?" != "0" ]; then
+		echo "GALFIT error, aborting" 1>&2
+		exit 1
+	fi
+done
 
 #Show original image, sparcfire output with arcs, galfit light curve, and subtraction
 echo "Showing images"
-
+fv galfit_out/*

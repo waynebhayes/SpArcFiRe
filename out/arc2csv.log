@@ -3,11 +3,11 @@ fileNames =
 
   Columns 1 through 5
 
-    [1x44 char]    [1x42 char]    [1x42 char]    [1x42 char]    [1x42 char]
+    [1x42 char]    [1x42 char]    [1x42 char]    [1x42 char]    [1x42 char]
 
-  Columns 6 through 9
+  Columns 6 through 7
 
-    [1x42 char]    [1x42 char]    [1x44 char]    [1x42 char]
+    [1x42 char]    [1x42 char]
 
 arcClusterColors
 arc_params

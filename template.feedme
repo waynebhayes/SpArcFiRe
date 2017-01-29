@@ -1,14 +1,14 @@
 ===============================================================================
 # IMAGE and GALFIT CONTROL PARAMETERS
-A) $name.fits            # Input data image (FITS file)
-B) imgblock.fits       # Output data image block
+A) in/$name.fits           # Input data image (FITS file)
+B) galfit_out/$name_out.fits       # Output data image block
 C) none                # Sigma image name (made from data if blank or "none") 
 D) psf.fits   #        # Input PSF image and (optional) diffusion kernel
 E) 1                   # PSF fine sampling factor relative to data 
 F) none                # Bad pixel mask (FITS image or ASCII coord list)
 G) none                # File with parameter constraints (ASCII file) 
-H) 1    256   1    256   # Image region to fit (xmin xmax ymin ymax)
-I) 256    256          # Size of the convolution box (x y)
+H) 1    $xmax   1   $ymax   # Image region to fit (xmin xmax ymin ymax)
+I) 40    40          # Size of the convolution box (x y)
 J) $integratedmagnitude # Magnitude photometric zeropoint 
 K) 0.038  0.038        # Plate scale (dx dy)    [arcsec per pixel]
 O) regular             # Display type (regular, curses, both)
