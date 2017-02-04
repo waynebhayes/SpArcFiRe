@@ -1,15 +1,15 @@
 
-# Component number: $alenRank
+# Component number: $component_number
  0) sersic                 #  object type 										- The light curve function
- 1) $centerx  $centery  1 1  #  position x, y 									- Light curve center coordinates
- 3) $integratedmagnitude     1          #  Integrated magnitude 				- Brightness parameter
+ 1) $x_center  $y_center  1 1  #  position x, y 									- Light curve center coordinates
+ 3) $integrated_magnitude     1          #  Integrated magnitude 				- Brightness parameter
  4) $radius      1          #  R_e (half-light radius)   [pix] 					- Size of the light curve at half brightness, in pixels
- 5) 0.45      1          #  Sersic index n (de Vaucouleurs n=4)					- The Sersic exponent (deVauc=4, expdisk/spirals=1)
+ 5) $sersic_index      1          #  Sersic index n (de Vaucouleurs n=4)					- The Sersic exponent (deVauc=4, expdisk/spirals=1)
  6) 0.0000      0          #
  7) 0.0000      0          #
  8) 0.0000      0          #
- 9) $axisratio      1          #  axis ratio (b/a)  							- Semiminoraxis/semimajor axis ratio
-10) $positionangle    1          #  position angle (PA) [deg: Up=0, Left=90]	- Orientation of the ellipse
+ 9) $axis_ratio      1          #  axis ratio (b/a)  							- Semiminoraxis/semimajor axis ratio
+10) $position_angle    1          #  position angle (PA) [deg: Up=0, Left=90]	- Orientation of the ellipse
 
 R0) power                  #  PA rotation func. (power, log, none)
 R1) $r_start     1          #  Bar radius [pixels]
