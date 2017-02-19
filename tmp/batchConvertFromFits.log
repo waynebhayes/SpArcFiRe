@@ -3,17 +3,30 @@ qLvl given as string; interpreting as floating point number
 nReps given as string; interpreting as integer
 blackQlvl given as string; interpreting as floating point number
 maskVal given as string, intrepreting as number
-7 matching files, 2 non-matching files
+9 matching files, 2 non-matching files
 skipped files: 
 	.
 	..
-7 unique objects
+9 unique objects
 qLvl is 0.7500
 nReps is 2
 black-level quantile is 0.2500
 using galaxy mask, suffix = _starmask.png, maskVal = 255
+processing: 1237654880741294238
+	reading: /tmp/SF23051/1237654880741294238.fits
+{Warning: The ability to read FITS files with IMREAD may be removed in a future
+release. Use FITSREAD to import FITS files.} 
+{> In imagesci/private/readfits at 12
+  In imread at 435
+  In batchConvertFromFits at 158} 
+blackLevel = 0.0235
+asinhBeta (if no star masking were used) = 0.0510
+asinhBeta = 0.1647
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.1229
+asinhBeta = 0.3554
 processing: 1237658204498296934
-	reading: /tmp/SF12830/1237658204498296934.fits
+	reading: /tmp/SF23051/1237658204498296934.fits
 {Warning: The ability to read FITS files with IMREAD may be removed in a future
 release. Use FITSREAD to import FITS files.} 
 {> In imagesci/private/readfits at 12
@@ -26,7 +39,7 @@ blackLevel = 0.0000
 asinhBeta (if no star masking were used) = 0.0513
 asinhBeta = 0.3118
 processing: 1237660614513131530
-	reading: /tmp/SF12830/1237660614513131530.fits
+	reading: /tmp/SF23051/1237660614513131530.fits
 {Warning: The ability to read FITS files with IMREAD may be removed in a future
 release. Use FITSREAD to import FITS files.} 
 {> In imagesci/private/readfits at 12
@@ -39,7 +52,7 @@ blackLevel = 0.0000
 asinhBeta (if no star masking were used) = 0.0508
 asinhBeta = 0.3191
 processing: 1237661384387789055
-	reading: /tmp/SF12830/1237661384387789055.fits
+	reading: /tmp/SF23051/1237661384387789055.fits
 {Warning: The ability to read FITS files with IMREAD may be removed in a future
 release. Use FITSREAD to import FITS files.} 
 {> In imagesci/private/readfits at 12
@@ -52,7 +65,7 @@ blackLevel = 0.0000
 asinhBeta (if no star masking were used) = 0.0435
 asinhBeta = 0.2562
 processing: 1237662239093424322
-	reading: /tmp/SF12830/1237662239093424322.fits
+	reading: /tmp/SF23051/1237662239093424322.fits
 {Warning: The ability to read FITS files with IMREAD may be removed in a future
 release. Use FITSREAD to import FITS files.} 
 {> In imagesci/private/readfits at 12
@@ -64,8 +77,21 @@ asinhBeta = 55.0000
 blackLevel = 0.0000
 asinhBeta (if no star masking were used) = 0.0629
 asinhBeta = 0.3401
+processing: 1237662302443274294
+	reading: /tmp/SF23051/1237662302443274294.fits
+{Warning: The ability to read FITS files with IMREAD may be removed in a future
+release. Use FITSREAD to import FITS files.} 
+{> In imagesci/private/readfits at 12
+  In imread at 435
+  In batchConvertFromFits at 158} 
+blackLevel = 0.0471
+asinhBeta (if no star masking were used) = 0.0902
+asinhBeta = 0.2941
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.2365
+asinhBeta = 0.6902
 processing: 1237662305650999364
-	reading: /tmp/SF12830/1237662305650999364.fits
+	reading: /tmp/SF23051/1237662305650999364.fits
 {Warning: The ability to read FITS files with IMREAD may be removed in a future
 release. Use FITSREAD to import FITS files.} 
 {> In imagesci/private/readfits at 12
@@ -78,7 +104,7 @@ blackLevel = 0.0000
 asinhBeta (if no star masking were used) = 0.0195
 asinhBeta = 0.1769
 processing: 1237664093973512232
-	reading: /tmp/SF12830/1237664093973512232.fits
+	reading: /tmp/SF23051/1237664093973512232.fits
 {Warning: The ability to read FITS files with IMREAD may be removed in a future
 release. Use FITSREAD to import FITS files.} 
 {> In imagesci/private/readfits at 12
@@ -91,7 +117,7 @@ blackLevel = 0.0000
 asinhBeta (if no star masking were used) = 0.0346
 asinhBeta = 0.3394
 processing: 1237667781754749028
-	reading: /tmp/SF12830/1237667781754749028.fits
+	reading: /tmp/SF23051/1237667781754749028.fits
 {Warning: The ability to read FITS files with IMREAD may be removed in a future
 release. Use FITSREAD to import FITS files.} 
 {> In imagesci/private/readfits at 12

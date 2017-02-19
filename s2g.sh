@@ -7,8 +7,8 @@
 
 #Run SpArcFiRe on images within in/ directory
 echo "Running SpArcFiRe"
-rm -rf tmp/* out/* 
-/home/sparcfire/bin/SpArcFiRe -convert-FITS in tmp out
+#rm -rf tmp/* out/* 
+#/home/sparcfire/bin/SpArcFiRe -convert-FITS in tmp out
 if [ "$?" != "0" ]; then
 	echo "SpArcFiRe error, aborting" 1>&2
 	exit 1
@@ -36,4 +36,4 @@ done
 
 #Show original image, sparcfire output with arcs, galfit light curve, and subtraction
 echo "Showing images"
-fv galfit_out/*
+#fv galfit_out/*
