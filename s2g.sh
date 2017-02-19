@@ -7,7 +7,7 @@
 
 #Run SpArcFiRe on images within in/ directory
 echo "Running SpArcFiRe"
-rm -rf in/* tmp/* out/* 
+rm -rf tmp/* out/* 
 /home/sparcfire/bin/SpArcFiRe -convert-FITS in tmp out
 if [ "$?" != "0" ]; then
 	echo "SpArcFiRe error, aborting" 1>&2
@@ -17,7 +17,7 @@ fi
 #Run python conversion script on each sparfire output
 echo "Running python sparcfire to galfit conversion script"
 rm -rf galfit_in/* galfit_out/*
-python s2g.py
+python2.7 s2g.py
 if [ "$?" != "0" ]; then
 	echo "Python error, aborting" 1>&2
 	exit 1
