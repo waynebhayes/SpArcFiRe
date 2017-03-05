@@ -1,10 +1,10 @@
-/home/dlcheng/sparcfire-galfit/tmp 1237664093973512232 .png _starmask.png NONE /home/dlcheng/sparcfire-galfit/out
+/home/dlcheng/sparcfire-galfit/tmp 1237654880741294238 .png _starmask.png NONE /home/dlcheng/sparcfire-galfit/out
 /home/dlcheng/sparcfire-galfit/tmp 1237660614513131530 .png _starmask.png NONE /home/dlcheng/sparcfire-galfit/out
+/home/dlcheng/sparcfire-galfit/tmp 1237664093973512232 .png _starmask.png NONE /home/dlcheng/sparcfire-galfit/out
 /home/dlcheng/sparcfire-galfit/tmp 1237667781754749028 .png _starmask.png NONE /home/dlcheng/sparcfire-galfit/out
 /home/dlcheng/sparcfire-galfit/tmp 1237658204498296934 .png _starmask.png NONE /home/dlcheng/sparcfire-galfit/out
-/home/dlcheng/sparcfire-galfit/tmp 1237662302443274294 .png _starmask.png NONE /home/dlcheng/sparcfire-galfit/out
 /home/dlcheng/sparcfire-galfit/tmp 1237662239093424322 .png _starmask.png NONE /home/dlcheng/sparcfire-galfit/out
-/home/dlcheng/sparcfire-galfit/tmp 1237654880741294238 .png _starmask.png NONE /home/dlcheng/sparcfire-galfit/out
-/home/dlcheng/sparcfire-galfit/tmp 1237662305650999364 .png _starmask.png NONE /home/dlcheng/sparcfire-galfit/out
+/home/dlcheng/sparcfire-galfit/tmp 1237662302443274294 .png _starmask.png NONE /home/dlcheng/sparcfire-galfit/out
 /home/dlcheng/sparcfire-galfit/tmp 1237661384387789055 .png _starmask.png NONE /home/dlcheng/sparcfire-galfit/out
+/home/dlcheng/sparcfire-galfit/tmp 1237662305650999364 .png _starmask.png NONE /home/dlcheng/sparcfire-galfit/out
 exit

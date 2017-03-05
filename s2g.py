@@ -30,7 +30,7 @@ for i in range(len(galaxies["name"])):
 
 #Using the galfit.feedme templates, subsitute values from galaxy.csv into a new feeedme.
 #i  =galaxyIndex, j = arcIndex
-for i in range(len(galaxies["name"])-8): 
+for i in range(len(galaxies["name"])-6): 
 	with open("galfit_in/" + galaxies["name"][i] + ".feedme", "wt") as fout, open("template.feedme", "rt") as fin, open("template_arcs.feedme", "rt") as finArcs:
 		print "Writing to galfit_in/" + galaxies["name"][i] + ".feedme"
 		iptSz = galaxies["iptSz"][i][1:-1].split() #Transform string '[xxx yyy]' into array ['xxx', 'yyy']
@@ -40,32 +40,32 @@ for i in range(len(galaxies["name"])-8):
 			line = line.replace('$x_center', galaxies["inputCenterC"][i])
 			line = line.replace('$y_center', galaxies["inputCenterR"][i])
 			line = line.replace('$radius', str(float(galaxies["diskMajAxsLen"][i]) / 4))
-			line = line.replace('$sersic_index', "1.0")
+			line = line.replace('$sersic_index', "1.2")
 			line = line.replace('$axis_ratio', galaxies["diskAxisRatio"][i])
-			line = line.replace('$position_angle', str(float(galaxies["diskMajAxsAngleRadians"][i]) * -180 / 3.14592))
+			line = line.replace('$position_angle', str(90 - float(galaxies["diskMajAxsAngleRadians"][i]) * 180 / 3.14592)) #Transform Sparcfire output into degrees, then correct for flipped x/y axes by subtracting from 90
 			line = line.replace('$x_max', iptSz[0])
 			line = line.replace('$y_max', iptSz[1])
 			fout.write(line)
 
 		componentNumber = 3 # 1 is the disk, 2 is the sky
-		continue
 		for j in arcsKeys[galaxies["name"][i]]:
 			#if (arcs["arc_length"][arcIndex] > 100): #only take in arcs larger than a certain size
 			for line in finArcs:
 				line = line.replace('$component_number', str(componentNumber))
 				line = line.replace('$x_center', galaxies["inputCenterC"][i])
 				line = line.replace('$y_center', galaxies["inputCenterR"][i])
-				line = line.replace('$radius', str(float(galaxies["diskMinAxsLen"][i]) / 2))
+				line = line.replace('$radius', str(float(galaxies["diskMajAxsLen"][i]) / 4))
 				line = line.replace('$sersic_index', "0.7")
 				line = line.replace('$axis_ratio', galaxies["diskAxisRatio"][i])
-				line = line.replace('$position_angle', str(float(galaxies["diskMajAxsAngleRadians"][i]) * 180 / 3.14592 + 90))
+				line = line.replace('$position_angle', str(90 - float(galaxies["diskMajAxsAngleRadians"][i]) * 180 / 3.14592)) #Transform Sparcfire output into degrees, then correct for flipped x/y axes by subtracting from 90
 				line = line.replace('$inclination', str(math.atan(math.log1p(float(galaxies["diskAxisRatio"][i]))) * 180 / 3.14592))
 				line = line.replace('$integrated_magnitude', str(float(galaxies["bulgeAvgBrt"][i]) * 10))
 				#line = line.replace('$integrated_magnitude', str(float(arcs["mean_intensity"][j]) * 10))
-				line = line.replace('$r_start', arcs["r_start"][j])
-				line = line.replace('$r_end', arcs["r_end"][j])
-				line = line.replace('$relative_theta_end', str(float(arcs["relative_theta_end"][j]) * 180 / 3.14592 + 90))
-				line = line.replace('$pitch_angle', str(float(galaxies["diskMajAxsAngleRadians"][i]) * 180 / 3.14592 + 90 + float(arcs["pitch_angle"][j])))
+				line = line.replace('$r_start', str(float(arcs["r_start"][j]) / 2))
+				line = line.replace('$r_end', str(float(arcs["r_end"][j]) / 2))
+				line = line.replace('$relative_theta_end', str(-float(arcs["relative_theta_end"][j]) * 180 / 3.14592))
+				#line = line.replace('$pitch_angle', str(float(galaxies["diskMajAxsAngleRadians"][i]) * 180 / 3.14592 + 90 + float(arcs["pitch_angle"][j])))
+				line = line.replace('$pitch_angle', arcs["pitch_angle"][j])
 				fout.write(line)
 			componentNumber += 1
 			break #Only get the first arc for now
