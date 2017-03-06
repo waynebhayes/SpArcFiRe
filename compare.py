@@ -34,37 +34,41 @@ def compare_images(fileA, fileK, fileL, fileM, fileN):
 	n_m, n_0, chi2nu, bright_ratio, diff = compare(imgA, imgK)
 	imsave(fileM, diff)
 	print "Stats for residual at ", fileM
-	print "	Manhattan norm:", n_m, "/ per pixel:", n_m/imgA.size
-	print "	Zero norm:", n_0, "/ per pixel:", n_0*1.0/imgA.size
-	print "	Chi2/Nu:", chi2nu
-	print "	Brightness ratio:", bright_ratio
+	print "	Manhattan norm/Nu:	", n_m/imgA.size
+	print "	Zero norm/Nu:		", n_0*1.0/imgA.size
+	print "	Chi2/Nu:		", chi2nu
+	print "	Brightness ratio:	", bright_ratio
 
 def compare(imgA, imgK):
 	# normalize to compensate for exposure difference
 	imgA = normalize(imgA)
 	imgK = normalize(imgK)
 	# calculate the difference and its norms
-	#diff = clip(imgA - imgK, 0, 255)  # elementwise for scipy arrays
+	diff = imgA - imgK
+	diff = numpy.clip(imgA - imgK, 0, 255)  # elementwise for scipy arrays
 	#print "diff min/max", diff.min(), " ", diff.max()
 	#print "A min/max", imgA.min(), " ", imgA.max()
 	#print "K min/max", imgK.min(), " ", imgK.max()
 	m_norm = sum(abs(diff))  # Manhattan norm - the sum of the absolute values
 	z_norm = norm(diff.ravel(), 0)  # Zero norm - the number of elements not equal to zero
-	chi2nu_value = chi2nu(diff) #
-	bright_ratio = bright_ratio(imgA, imgK)
-	return (m_norm, z_norm, chi2nu_value, bright_ratio, diff)
+	chi2nu_value = chi2nu(diff) # Chi2Nu - sum of chi squared values divided by number of degrees of freedom
+	b_ratio = bright_ratio(imgA, diff) # brightness ratio - the ratio of ratios of upper quartile of pixels over lower quartile of pixels between input and masked images 
+	return (m_norm, z_norm, chi2nu_value, b_ratio, diff)
 
-def bright_ratio(imgA, imgK):
+def bright_ratio(imgA, diff):
 	# Calculate ratio of pixels between top and bottom quartile of pixels
-	histogramA = numpy.histogram(imgA, bins=[0, 63, 127, 191, 255)
-	bright_ratioA = histogramA[3], histogramA[0]
-	print " histogramA = ", histogramA
-	print " bright_ratioA = ", bright_ratioA
- 	histogramK = numpy.histogram(imgK, bins=[0, 63, 127, 191, 255)
-	bright_ratioK = histogramK[3], histogramK[0]
-	print " histogramK = ", histogramK
-	print " bright_ratioK = ", bright_ratioK
-	bright_ratio = bright_ratioK / bright_ratioA
+	# We expect a higher brightness ratio value to correspond to better masking of bright pixels in the input image by the cluster mask.
+	histogramA = numpy.histogram(imgA, bins=[0, 63, 127, 191, 255])
+	#print "	histogramA = ", histogramA
+	bright_ratioA = float((imgA <= numpy.percentile(imgA, 25)).sum()) / float((imgA >= numpy.percentile(imgA, 75)).sum())
+	bright_ratioA = float(histogramA[0][3]) / float(histogramA[0][0])
+	#print "	bright_ratioA = ", bright_ratioA
+ 	histogramDiff = numpy.histogram(diff, bins=[0, 63, 127, 191, 255])
+	#print "	histogramDiff = ", histogramDiff
+	bright_ratioDiff = float((diff <= numpy.percentile(diff, 25)).sum()) / float((diff >= numpy.percentile(diff, 75)).sum())
+	bright_ratioDiff = float(histogramDiff[0][3]) / float(histogramDiff[0][0])
+	#print "	bright_ratioDiff = ", bright_ratioDiff
+	bright_ratio = bright_ratioA / bright_ratioDiff
 	return bright_ratio
 
 def chi2nu(arr):
@@ -75,7 +79,7 @@ def chi2nu(arr):
 def to_grayscale(arr):
 	"If arr is a color image (3D array), convert it to grayscale (2D array)."
 	if len(arr.shape) == 3:
-		return amax(arr, axis=-1)  # average over the last axis (color channels)
+		return numpy.amax(arr, axis=-1)  # average over the last axis (color channels)
 	else:
 		return arr
 

@@ -7,8 +7,8 @@
 
 #Run SpArcFiRe on images within in/ directory
 echo "Running SpArcFiRe"
-#rm -rf tmp/* out/* 
-/home/sparcfire/bin/SpArcFiRe -convert-FITS in tmp out -clusSizeCutoff 150 -unsharpMaskAmt 6 -unsharpMaskSigma 25 -stopThres 0.1500 -mergeChkMinClusSz 25 -errRatioThres 2.5000
+rm -rf tmp/* out/* 
+/home/sparcfire/bin/SpArcFiRe -convert-FITS in tmp out -clusSizeCutoff 25 -unsharpMaskAmt 8 -unsharpMaskSigma 20 -stopThres 0.0500 -mergeChkMinClusSz 350 -errRatioThres 7.5000 -lookForBulge 1
 if [ "$?" != "0" ]; then
 	echo "SpArcFiRe error, aborting" 1>&2
 	exit 1
