@@ -7,6 +7,9 @@ Original author: astanin @ http://stackoverflow.com/a/3935002/1905613
 
 import sys
 import os
+import csv
+import math
+from collections import defaultdict
 
 import numpy
 from scipy.misc import imread, imsave
@@ -24,20 +27,36 @@ def main():
 		fileL = os.path.join(d, s, s + "-L_input-blurred.png")
 		fileM = os.path.join(d, s, s + "-M_residual.png")
 		fileN = os.path.join(d, s, s + "-L_blurred-residual.png")
-		compare_images(fileA, fileK, fileL, fileM, fileN)
+		fileCSV = os.path.join(d, s, s + ".csv")
+		compare_images(fileA, fileK, fileL, fileM, fileN, fileCSV)
 	
-def compare_images(fileA, fileK, fileL, fileM, fileN):
+def compare_images(fileA, fileK, fileL, fileM, fileN, fileCSV):
 	# read images as 2D arrays (convert to grayscale for simplicity)
 	imgA = to_grayscale(imread(fileA).astype(float))
 	imgK = to_grayscale(imread(fileK).astype(float))
-	# compare
+	# Compare difference without bulge masking
 	n_m, n_0, chi2nu, bright_ratio, diff = compare(imgA, imgK)
-	imsave(fileM, diff)
 	print "Stats for residual at ", fileM
-	print "	Manhattan norm/Nu:	", n_m/imgA.size
-	print "	Zero norm/Nu:		", n_0*1.0/imgA.size
-	print "	Chi2/Nu:		", chi2nu
-	print "	Brightness ratio:	", bright_ratio
+	print "	Without bulge mask:"
+	print "		Manhattan norm/Nu:	", n_m/imgA.size
+	print "		Zero norm/Nu:		", n_0*1.0/imgA.size
+	print "		Chi2/Nu:		", chi2nu
+	print "		Brightness ratio:	", bright_ratio
+
+	# Compare difference with bulge masking
+	imgK = mask_bulge(imgK, fileCSV)
+	n_m_b, n_0_b, chi2nu_b, bright_ratio_b, diff_b = compare(imgA, imgK)
+	imsave(fileM, diff_b)
+	print "	With bulge mask:"
+	print "		Manhattan norm/Nu:	", n_m_b/imgA.size
+	print "		Zero norm/Nu:		", n_0_b*1.0/imgA.size
+	print "		Chi2/Nu:		", chi2nu_b
+	print "		Brightness ratio:	", bright_ratio_b
+	print "	Mask/no mask differences:"
+	print "		Manhattan norm/Nu:	", n_m_b/imgA.size - n_m/imgA.size
+	print "		Zero norm/Nu:		", n_0_b*1.0/imgA.size - n_0*1.0/imgA.size
+	print "		Chi2/Nu:		", chi2nu_b - chi2nu
+	print "		Brightness ratio:	", bright_ratio_b - bright_ratio
 
 def compare(imgA, imgK):
 	# normalize to compensate for exposure difference
@@ -60,12 +79,12 @@ def bright_ratio(imgA, diff):
 	# We expect a higher brightness ratio value to correspond to better masking of bright pixels in the input image by the cluster mask.
 	histogramA = numpy.histogram(imgA, bins=[0, 63, 127, 191, 255])
 	#print "	histogramA = ", histogramA
-	bright_ratioA = float((imgA <= numpy.percentile(imgA, 25)).sum()) / float((imgA >= numpy.percentile(imgA, 75)).sum())
+	bright_ratioA = float((imgA >= numpy.percentile(imgA, 75)).sum()) / float((imgA <= numpy.percentile(imgA, 25)).sum()) 
 	bright_ratioA = float(histogramA[0][3]) / float(histogramA[0][0])
 	#print "	bright_ratioA = ", bright_ratioA
  	histogramDiff = numpy.histogram(diff, bins=[0, 63, 127, 191, 255])
 	#print "	histogramDiff = ", histogramDiff
-	bright_ratioDiff = float((diff <= numpy.percentile(diff, 25)).sum()) / float((diff >= numpy.percentile(diff, 75)).sum())
+	bright_ratioDiff = float((diff >= numpy.percentile(diff, 75)).sum()) / float((diff <= numpy.percentile(diff, 25)).sum()) 
 	bright_ratioDiff = float(histogramDiff[0][3]) / float(histogramDiff[0][0])
 	#print "	bright_ratioDiff = ", bright_ratioDiff
 	bright_ratio = bright_ratioA / bright_ratioDiff
@@ -75,6 +94,47 @@ def chi2nu(arr):
 	# sum of chi squared values divided by number of degrees of freedom
 	expected2 = average(arr) ** 2
 	return sum(arr ** 2 / expected2) / arr.size
+
+def mask_bulge(img, fileCSV):
+	# Parse galaxy.csv file
+	galaxies = defaultdict(list) # each value in each column is appended to a list
+	with open(fileCSV) as f:
+		header = [h.strip() for h in f.next().split(',')] #strip whitespace in headers
+		reader = csv.DictReader(f, fieldnames=header) # read rows into a dictionary format
+		for row in reader: # read a row as {column1: value1, column2: value2,...}
+			for (k,v) in row.items(): # go over each column name and value 
+				galaxies[k].append(v) # append the value into the appropriate list based on column name k
+	# Define bulge ellipse	
+	center = (float(galaxies["inputCenterC"][0]), float(galaxies["inputCenterR"][0]))
+	width = float(galaxies["bulgeMajAxsLen"][0])
+	height = float(galaxies["bulgeMajAxsLen"][0]) * float(galaxies["bulgeAxisRatio"][0])
+	angle = float(galaxies["bulgeAxisRatio"][0])
+	#print center, width, height, angle
+	
+	# Mask pixels within bulge ellipse
+	for index, value in numpy.ndenumerate(img):
+		img[index[0], index[1]] = in_ellipse(index, value, center, width, height, angle) 	
+
+	return img
+
+def in_ellipse(index, value, center, width, height, angle):
+	cos_angle = numpy.cos(angle)
+	sin_angle = numpy.sin(angle)
+
+	xc = index[0] - center[0]
+	yc = index[1] - center[1]
+
+	xca = xc * cos_angle - yc * sin_angle
+	yca = xc * sin_angle + yc * cos_angle 
+
+	distance = (xca**2 / (width / 2.0)**2) + (yca**2 / (height / 2.0)**2)
+	#print distance
+	# If point is within ellipse, mask to max value of image. Else, return existing value. 
+	if (abs(distance) <= 1):
+		#print value, distance
+		return 255.0
+	else:
+		return value
 
 def to_grayscale(arr):
 	"If arr is a color image (3D array), convert it to grayscale (2D array)."
