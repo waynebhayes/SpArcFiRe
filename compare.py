@@ -19,6 +19,7 @@ from scipy import sum, average
 def main():
 	#Step through all subdirs in SpArcFiRe directory
 	d = sys.argv[1]
+	imagedir = 'images'
 	subdirs = [s for s in os.listdir(d) if os.path.isdir(os.path.join(d, s)) and s != "matout"]
 	for s in subdirs:
 		#Generate image residuals for each input
@@ -26,18 +27,18 @@ def main():
 		fileK = os.path.join(d, s, s + "-K_clusMask-reprojected.png")
 		fileL = os.path.join(d, s, s + "-L_input-blurred.png")
 		fileM = os.path.join(d, s, s + "-M_residual.png")
-		fileN = os.path.join(d, s, s + "-L_blurred-residual.png")
+		fileN = os.path.join(d, s, s + "-L_masked-residual.png")
 		fileCSV = os.path.join(d, s, s + ".csv")
-		compare_images(fileA, fileK, fileL, fileM, fileN, fileCSV)
+		compare_images(fileA, fileK, fileL, fileM, fileN, fileCSV, d, s)
 	
-def compare_images(fileA, fileK, fileL, fileM, fileN, fileCSV):
+def compare_images(fileA, fileK, fileL, fileM, fileN, fileCSV, d, s):
 	# read images as 2D arrays (convert to grayscale for simplicity)
 	imgA = to_grayscale(imread(fileA).astype(float))
 	imgK = to_grayscale(imread(fileK).astype(float))
 	# Compare difference without bulge masking
 	n_m, n_0, chi2nu, bright_ratio, diff = compare(imgA, imgK)
+	imsave(fileM, diff)
 	print "Stats for residual at ", fileM
-	print "	Without bulge mask:"
 	print "		Manhattan norm/Nu:	", n_m/imgA.size
 	print "		Zero norm/Nu:		", n_0*1.0/imgA.size
 	print "		Chi2/Nu:		", chi2nu
@@ -46,8 +47,8 @@ def compare_images(fileA, fileK, fileL, fileM, fileN, fileCSV):
 	# Compare difference with bulge masking
 	imgK = mask_bulge(imgK, fileCSV)
 	n_m_b, n_0_b, chi2nu_b, bright_ratio_b, diff_b = compare(imgA, imgK)
-	imsave(fileM, diff_b)
-	print "	With bulge mask:"
+	imsave(fileN, diff_b)
+	print "	Bulge masked residual at ", fileN
 	print "		Manhattan norm/Nu:	", n_m_b/imgA.size
 	print "		Zero norm/Nu:		", n_0_b*1.0/imgA.size
 	print "		Chi2/Nu:		", chi2nu_b
@@ -58,10 +59,18 @@ def compare_images(fileA, fileK, fileL, fileM, fileN, fileCSV):
 	print "		Chi2/Nu:		", chi2nu_b - chi2nu
 	print "		Brightness ratio:	", bright_ratio_b - bright_ratio
 
+	confidence_ratio = numpy.clip(0.034403 + 0.252975 * numpy.log(numpy.clip(bright_ratio_b, 0.873, 50)), 0.0, 1.0) #equation through (1, 0), (5, 0.5), (50, 1.0) 
+	print "	Confidence Ratio:		", confidence_ratio
+
+	fileO = os.path.join("images", str(confidence_ratio) + "_" + s + ".png")
+	imgO = numpy.concatenate((imgA, imgK, diff, diff_b), axis=0)
+	imsave(fileO, imgO)
+
+
 def compare(imgA, imgK):
 	# normalize to compensate for exposure difference
-	imgA = normalize(imgA)
-	imgK = normalize(imgK)
+	#imgA = normalize(imgA)
+	#imgK = normalize(imgK)
 	# calculate the difference and its norms
 	diff = imgA - imgK
 	diff = numpy.clip(imgA - imgK, 0, 255)  # elementwise for scipy arrays
@@ -77,17 +86,17 @@ def compare(imgA, imgK):
 def bright_ratio(imgA, diff):
 	# Calculate ratio of pixels between top and bottom quartile of pixels
 	# We expect a higher brightness ratio value to correspond to better masking of bright pixels in the input image by the cluster mask.
-	histogramA = numpy.histogram(imgA, bins=[0, 63, 127, 191, 255])
-	#print "	histogramA = ", histogramA
-	bright_ratioA = float((imgA >= numpy.percentile(imgA, 75)).sum()) / float((imgA <= numpy.percentile(imgA, 25)).sum()) 
-	bright_ratioA = float(histogramA[0][3]) / float(histogramA[0][0])
-	#print "	bright_ratioA = ", bright_ratioA
- 	histogramDiff = numpy.histogram(diff, bins=[0, 63, 127, 191, 255])
-	#print "	histogramDiff = ", histogramDiff
-	bright_ratioDiff = float((diff >= numpy.percentile(diff, 75)).sum()) / float((diff <= numpy.percentile(diff, 25)).sum()) 
-	bright_ratioDiff = float(histogramDiff[0][3]) / float(histogramDiff[0][0])
-	#print "	bright_ratioDiff = ", bright_ratioDiff
-	bright_ratio = bright_ratioA / bright_ratioDiff
+	try:
+		histogramA = numpy.histogram(imgA, bins=[0, 63, 127, 191, 255])
+		bright_ratioA = float(histogramA[0][3]) / float(histogramA[0][0])
+		histogramDiff = numpy.histogram(diff, bins=[0, 63, 127, 191, 255])
+		bright_ratioDiff = float(histogramDiff[0][3]) / float(histogramDiff[0][0])
+		bright_ratio = bright_ratioA / bright_ratioDiff
+	except:
+		print "Likely the bulge mask is too large or too small - check fit"
+		print "	histogramDiff = ", histogramDiff
+		bright_ratio = float("inf")
+	
 	return bright_ratio
 
 def chi2nu(arr):
