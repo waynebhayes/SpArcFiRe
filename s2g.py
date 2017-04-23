@@ -30,7 +30,7 @@ for i in range(len(galaxies["name"])):
 
 #Using the galfit.feedme templates, subsitute values from galaxy.csv into a new feeedme.
 #i  =galaxyIndex, j = arcIndex
-for i in range(len(galaxies["name"])-6): 
+for i in range(len(galaxies["name"])): 
 	with open("galfit_in/" + galaxies["name"][i] + ".feedme", "wt") as fout, open("template.feedme", "rt") as fin, open("template_arcs.feedme", "rt") as finArcs:
 		print "Writing to galfit_in/" + galaxies["name"][i] + ".feedme"
 		iptSz = galaxies["iptSz"][i][1:-1].split() #Transform string '[xxx yyy]' into array ['xxx', 'yyy']

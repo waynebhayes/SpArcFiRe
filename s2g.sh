@@ -26,16 +26,16 @@ fi
 
 #Run galfit on each feedme file
 #echo "Running GALFIT"
-#for f in galfit_in/*
-#do
-#	galfit "$f"
-#	if [ "$?" != "0" ]; then
-#		echo "GALFIT error, aborting" 1>&2
-#		exit 1
-#	fi
-#done
+for f in galfit_in/*
+do
+	galfit "$f"
+	if [ "$?" != "0" ]; then
+		echo "GALFIT error, aborting" 1>&2
+		exit 1
+	fi
+done
 
-python2.7 compare.py
+python2.7 compare_galfit.py
 if [ "$?" != "0" ]; then
 	echo "Python error, aborting" 1>&2
 	exit 1
