@@ -17,29 +17,19 @@ fi
 
 #Run python conversion script on each sparfire output
 #echo "Running python sparcfire to galfit conversion script"
-#rm -rf galfit_in/* galfit_out/*
+rm -rf galfit_in/* galfit_out/*
 python2.7 s2g.py
-if [ "$?" != "0" ]; then
-	echo "Python error, aborting" 1>&2
-	exit 1
-fi
 
 #Run galfit on each feedme file
-#echo "Running GALFIT"
+echo "Running GALFIT"
 for f in galfit_in/*
 do
 	galfit "$f"
-	if [ "$?" != "0" ]; then
-		echo "GALFIT error, aborting" 1>&2
-		exit 1
-	fi
 done
 
+#un python comparison and confidence estimation script
 python2.7 compare_galfit.py
-if [ "$?" != "0" ]; then
-	echo "Python error, aborting" 1>&2
-	exit 1
-fi
+
 #Show original image, sparcfire output with arcs, galfit light curve, and subtraction
 #echo "Showing images"
 #fv galfit_out/*

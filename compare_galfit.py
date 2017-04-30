@@ -38,7 +38,8 @@ def compare_galfit_images(fileG, d, f):
 	print "		Chi2/Nu:		", chi2nu
 	print "		Brightness ratio:	", bright_ratio
 
-	confidence_ratio = numpy.clip(0.034403 + 0.252975 * numpy.log(numpy.clip(bright_ratio, 0.873, 50)), 0.0, 1.0) #equation through (1, 0), (5, 0.5), (50, 1.0) 
+	#confidence_ratio = numpy.clip(0.034403 + 0.252975 * numpy.log(numpy.clip(bright_ratio, 0.873, 50)), 0.0, 1.0) #equation through (1, 0), (5, 0.5), (50, 1.0) 
+	confidence_ratio = bright_ratio
 	print "	Confidence Ratio:		", confidence_ratio
 	
 	fileO = os.path.join("images", str(confidence_ratio) + "_" + f + ".png")
