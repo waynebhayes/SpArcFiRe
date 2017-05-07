@@ -8,7 +8,7 @@
 #Run SpArcFiRe on images within in/ directory
 echo "Running SpArcFiRe"
 #rm -rf tmp/* out/* 
-#/home/sparcfire/bin/SpArcFiRe -convert-FITS in tmp out
+/home/sparcfire/bin/SpArcFiRe -convert-FITS sparcfire_in sparcfire_tmp sparcfire_out
 if [ "$?" != "0" ]; then
 	echo "SpArcFiRe error, aborting" 1>&2
 	exit 1
