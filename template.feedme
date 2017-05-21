@@ -1,6 +1,6 @@
 ===============================================================================
 # IMAGE and GALFIT CONTROL PARAMETERS
-A) in/$name.fits           		# Input data image (FITS file)
+A) fits/$name.fits           		# Input data image (FITS file)
 B) galfit_out/$name-out.fits    	# Output data image block
 C) none                			# Sigma image name (made from data if blank or "none") 
 D) psf.fits	   			# Input PSF image and (optional) diffusion kernel
@@ -19,7 +19,7 @@ P) 0					# Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
  1) $x_center $y_center  	0 0  	#  position x, y 			- Light curve center coordinates
  3) $integrated_magnitude_disk 	1       #  Integrated magnitude 		- Brightness parameter
  4) $radius_disk      		1       #  R_e (half-light radius)   [pix] 	- Size of the light curve at half brightness, in pixels
- 5) $sersic_index       	0	#  Sersic index n (de Vaucouleurs n=4)	- The Sersic exponent (deVauc=4, expdisk/spirals=1)
+ 5) $sersic_index       	1	#  Sersic index n (de Vaucouleurs n=4)	- The Sersic exponent (deVauc=4, expdisk/spirals=1)
  6) 0.0000			0       #     ----- 
  7) 0.0000			0       #     ----- 
  8) 0.0000			0       #     ----- 
@@ -32,7 +32,7 @@ P) 0					# Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
  1) $x_center $y_center  	0 0  	#  position x, y 			- Light curve center coordinates
  3) $integrated_magnitude_bulge	1       #  Integrated magnitude 		- Brightness parameter
  4) $radius_bulge      		1       #  R_e (half-light radius)   [pix] 	- Size of the light curve at half brightness, in pixels
- 5) $sersic_index       	0	#  Sersic index n (de Vaucouleurs n=4)	- The Sersic exponent (deVauc=4, expdisk/spirals=1)
+ 5) $sersic_index       	1	#  Sersic index n (de Vaucouleurs n=4)	- The Sersic exponent (deVauc=4, expdisk/spirals=1)
  6) 0.0000			0       #     ----- 
  7) 0.0000			0       #     ----- 
  8) 0.0000			0       #     ----- 
@@ -42,7 +42,7 @@ P) 0					# Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 
 # Object number: 3
  0) sky                    		#  object type
- 1) 1100	1          		#  sky background at center of fitting region [ADUs]
+ 1) 20		1          		#  sky background at center of fitting region [ADUs]
  2) 0.0000      0          		#  dsky/dx (sky gradient in x)
  3) 0.0000      0          		#  dsky/dy (sky gradient in y)
  Z) 0                     		#  output option (0 = resid., 1 = Don't subtract)

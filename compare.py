@@ -17,7 +17,7 @@ from scipy.linalg import norm
 from scipy import sum, average
 import pyfits
 
-def main():
+def compare():
 	#Step through all files in galfit output directory
 	galfitDir = 'galfit_out'
 	sparcfireDir = 'sparcfire_out'
@@ -26,45 +26,33 @@ def main():
 		sdssId = os.path.splitext(fileFits)[0][0:-4] #Remove '-out' from filename
 		pathMask = os.path.join(sparcfireDir, sdssId, sdssId + "-K_clusMask-reprojected.png")
 		pathFits = os.path.join(galfitDir, fileFits)
-		compare_galfit_images(pathFits, pathMask, outputDir, sdssId)
+		compare_images(pathFits, pathMask, outputDir, sdssId)
 
-def compare_galfit_images(pathFits, pathMask, outputDir, sdssId):
+def compare_images(pathFits, pathMask, outputDir, sdssId):
 	# read images as 2D arrays (convert to grayscale for simplicity)
 	imgInput = normalize(grayscale(pyfits.open(pathFits)[1].data))
 	imgModel = normalize(grayscale(pyfits.open(pathFits)[2].data))
 	imgResidual = normalize(grayscale(pyfits.open(pathFits)[3].data))
-	imgMask = normalize(grayscale(imread(pathMask).astype(float)))
+	imgMask = numpy.flipud(normalize(grayscale(imread(pathMask).astype(float))))
 	imgMaskedResidual = numpy.multiply(mask(imgMask), imgResidual)
+	#imgMaskedResidual = imgResidual - imgMask
 
 	# Compare difference without arc masking
-	n_m, n_0, chi2nu, bright_ratio, diff = compare_galfit(imgInput, imgResidual)
+	n_m, n_0, chi2nu, bright_ratio, diff = calculate_statistics(imgResidual, imgMaskedResidual)
 	print "Stats for residual at ", pathFits
 	print "		Manhattan norm/Nu:	", n_m/imgInput.size
 	print "		Zero norm/Nu:		", n_0*1.0/imgInput.size
 	print "		Chi2/Nu:		", chi2nu
 	print "		Brightness ratio:	", bright_ratio
 
-	# Compare difference with arc masking
-	n_m_b, n_0_b, chi2nu_b, bright_ratio_b, diff_b = compare_galfit(imgInput, imgMaskedResidual)
-	print "	Arc masked residual"
-	print "		Manhattan norm/Nu:	", n_m_b/imgInput.size
-	print "		Zero norm/Nu:		", n_0_b*1.0/imgInput.size
-	print "		Chi2/Nu:		", chi2nu_b
-	print "		Brightness ratio:	", bright_ratio_b
-	print "	Mask/no mask differences:"
-	print "		Manhattan norm/Nu:	", n_m_b/imgInput.size - n_m/imgInput.size
-	print "		Zero norm/Nu:		", n_0_b*1.0/imgInput.size - n_0*1.0/imgInput.size
-	print "		Chi2/Nu:		", chi2nu_b - chi2nu
-	print "		Brightness ratio:	", bright_ratio_b - bright_ratio
-
-	confidence_ratio = numpy.clip(0.034403 + 0.252975 * numpy.log(numpy.clip(bright_ratio_b, 0.873, 50)), 0.0, 1.0) #equation through (1, 0), (5, 0.5), (50, 1.0) 
+	confidence_ratio = numpy.interp(chi2nu, [2.9, 3.7], [0, 1])  #equation through (1, 0), (5, 0.5), (50, 1.0) 
 	print "	Confidence Ratio:		", confidence_ratio
 	
-	pathOutput= os.path.join(outputDir, sdssId + ".png")
+	pathOutput= os.path.join(outputDir, str(confidence_ratio) + "-" + sdssId + ".png")
 	imgOutput = numpy.concatenate((imgInput, imgModel, imgResidual, imgMask, imgMaskedResidual), axis=1)
 	imsave(pathOutput, imgOutput)
 	
-def compare_galfit(imgInput, diff):
+def calculate_statistics(imgInput, diff):
 	m_norm = sum(abs(diff))  # Manhattan norm - the sum of the absolute values
 	z_norm = norm(diff.ravel(), 0)  # Zero norm - the number of elements not equal to zero
 	chi2nu_value = chi2nu(diff) # Chi2Nu - sum of chi squared values divided by number of degrees of freedom
@@ -108,4 +96,4 @@ def mask(arr):
 	return numpy.where(arr > 127, 0, 1)
 
 if __name__ == "__main__":
-	main()
+	compare()
