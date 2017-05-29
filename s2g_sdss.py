@@ -18,38 +18,65 @@ def read_csv(path):
 				dictionary[k].append(v) # append the value into the appropriate list based on column name k
 	return dictionary
 
-def s2g_sdss(sdssOutDir, sdssIdFile, galfitInDir, quantity):
-	sdssIds = read_csv(sdssIdFile)
-	#for i in range(len(sdssIds["name"])): 
+def s2g_sdss(sdssOutDir, sdssIds, galfitInDir, useHash, quantity, steps):
+	if (steps[0]):
+		for i in range(quantity): 
+			objId = sdssIds[i]
+			objIdHash = objId[-3:]
+			if (useHash):
+				objIdPath = os.path.join(sdssOutDir, objIdHash, objId)
+			else:
+				objIdPath = os.path.join(sdssOutDir, objId)
+			s2g(objIdPath, galfitInDir, objId)
+			convertFITSCommand = 'convert '  + os.path.join(objIdPath, objId + '-A_input.png') + ' fits/' + objId + '.fits'
+			print 'Executing ' + convertFITSCommand
+			subprocess.call(convertFITSCommand, shell=True)  
 
-	for i in range(quantity): 
-		objId = sdssIds["objID"][i]
-		objIdHash = objId[-3:]
-		objIdPath = os.path.join(sdssOutDir, objIdHash, objId)
-		s2g(objIdPath, galfitInDir, objId)
-		convertFITSCommand = 'convert '  + os.path.join(objIdPath, objId + '-A_input.png') + ' fits/' + objId + '.fits'
-		subprocess.call(convertFITSCommand, shell=True)  
+	if (steps[1]):
+		for i in range(quantity): 
+			objId = sdssIds[i]
+			objIdHash = objId[-3:]
+			if (useHash):
+				objIdPath = os.path.join(sdssOutDir, objIdHash, objId)
+			else:
+				objIdPath = os.path.join(sdssOutDir, objId)
+			galfitCommand = 'galfit galfit_in/' + objId + '.feedme'
+			print 'Executing ' + galfitCommand 
+			subprocess.call(galfitCommand, shell=True)  
 
-	for i in range(quantity): 
-		objId = sdssIds["objID"][i]
-		objIdHash = objId[-3:]
-		objIdPath = os.path.join(sdssOutDir, objIdHash, objId)
-		galfitCommand = 'galfit galfit_in/' + objId + '.feedme'
-		subprocess.call(galfitCommand, shell=True)  
-
-	for i in range(quantity): 
-		objId = sdssIds["objID"][i]
-		objIdHash = objId[-3:]
-		objIdPath = os.path.join(sdssOutDir, objIdHash, objId)
-		try:
-			compare.compare_images('galfit_out/' + objId + '-out.fits', os.path.join(objIdPath, objId + '-K_clusMask-reprojected.png'), 'compare_out', objId) 
-		except:
-			print objId + " failed - galfit ouput is likely to be missing."
+	if (steps[2]):
+		for i in range(quantity): 
+			objId = sdssIds[i]
+			objIdHash = objId[-3:]
+			if (useHash):
+				objIdPath = os.path.join(sdssOutDir, objIdHash, objId)
+			else:
+				objIdPath = os.path.join(sdssOutDir, objId)
+			print 'Comparing ' + objId 
+			compare.compare_images('galfit_out/' + objId + '-out.fits', os.path.join(objIdPath, objId + '-K_clusMask-reprojected.png'), os.path.join(objIdPath, objId + '.csv'), 'compare_out', objId) 
 			
-
-if __name__ == "__main__":
+def read_SpiralsIDS():
 	sdssOutDir = '/extra/wayne1/research/drdavis/SDSS/SpArcFiRe/r'
 	sdssIdFile = '/extra/wayne1/research/drdavis/SDSS/SpiralsIDS.csv'
+	sdssIds = read_csv(sdssIdFile)['objID']
 	galfitInDir = 'galfit_in'
-	quantity = 25
-	s2g_sdss(sdssOutDir, sdssIdFile, galfitInDir, quantity)
+	useHash = True 
+	quantity = 5
+	steps = [True, True, True]
+	s2g_sdss(sdssOutDir, sdssIds, galfitInDir, useHash, quantity, steps)
+	
+
+def process_directory():
+	sdssOutDir = '/home/wayne/public_html/SDSS/G.out'
+	sdssIdFile = '/home/wayne/public_html/SDSS/G.out/galaxy.csv'
+	sdssIds = read_csv(sdssIdFile)['name']
+	print str(sdssIds)
+	galfitInDir = 'galfit_in'
+	useHash = False
+	quantity = len(sdssIds)
+	steps = [False, False, True]
+	s2g_sdss(sdssOutDir, sdssIds, galfitInDir, useHash, quantity, steps)
+
+if __name__ == "__main__":
+	process_directory()
+
