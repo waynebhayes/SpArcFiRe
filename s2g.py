@@ -35,7 +35,7 @@ def s2g(sparcfireOutDir, galfitInDir, csvName):
 	for i in range(len(galaxies["name"])): 
 		with open(os.path.join(galfitInDir, galaxies["name"][i] + ".feedme"), "w+") as fout, open("template.feedme", "r") as fin, open("template_arcs.feedme", "r") as finArcs:
 			print os.path.join(galfitInDir, galaxies["name"][i] + ".feedme") 
-			iptSz = galaxies["iptSz"][i][1:-1].split() #Transform string '[xxx yyy]' into array ['xxx', 'yyy']
+			iptSz = galaxies["iptSz"][i].strip()[1:-1].split() #Transform string '[xxx yyy]' into array ['xxx', 'yyy']
 			for line in fin:
 				line = line.replace('$name', galaxies["name"][i])
 				line = line.replace('$integrated_magnitude_disk', str(float(galaxies["bulgeAvgBrt"][i]) * 10))

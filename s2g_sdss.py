@@ -33,6 +33,9 @@ def s2g_sdss(sdssOutDir, sdssIds, galfitInDir, useHash, quantity, steps):
 			subprocess.call(convertFITSCommand, shell=True)  
 
 	if (steps[1]):
+		removeFitLogCommand = 'rm -f fit.log'
+		print 'Executing ' + removeFitLogCommand 
+		subprocess.call(removeFitLogCommand, shell=True)  
 		for i in range(quantity): 
 			objId = sdssIds[i]
 			objIdHash = objId[-3:]
@@ -43,6 +46,9 @@ def s2g_sdss(sdssOutDir, sdssIds, galfitInDir, useHash, quantity, steps):
 			galfitCommand = 'galfit galfit_in/' + objId + '.feedme'
 			print 'Executing ' + galfitCommand 
 			subprocess.call(galfitCommand, shell=True)  
+			moveCommand = 'mv fit.log fit_logs/' + objId + '-fit.log'
+			print 'Executing ' + moveCommand 
+			subprocess.call(moveCommand, shell=True)  
 
 	if (steps[2]):
 		for i in range(quantity): 
@@ -53,7 +59,7 @@ def s2g_sdss(sdssOutDir, sdssIds, galfitInDir, useHash, quantity, steps):
 			else:
 				objIdPath = os.path.join(sdssOutDir, objId)
 			print 'Comparing ' + objId 
-			compare.compare_images('galfit_out/' + objId + '-out.fits', os.path.join(objIdPath, objId + '-K_clusMask-reprojected.png'), os.path.join(objIdPath, objId + '.csv'), 'compare_out', objId) 
+			compare.compare_images('galfit_out/' + objId + '-out.fits', os.path.join(objIdPath, objId + '-K_clusMask-reprojected.png'), os.path.join(objIdPath, objId + '.csv'), os.path.join('fit_logs', objId + '-fit.log'), 'compare_out', objId) 
 			
 def read_SpiralsIDS():
 	sdssOutDir = '/extra/wayne1/research/drdavis/SDSS/SpArcFiRe/r'
@@ -61,7 +67,7 @@ def read_SpiralsIDS():
 	sdssIds = read_csv(sdssIdFile)['objID']
 	galfitInDir = 'galfit_in'
 	useHash = True 
-	quantity = 5
+	quantity = 25
 	steps = [True, True, True]
 	s2g_sdss(sdssOutDir, sdssIds, galfitInDir, useHash, quantity, steps)
 	
@@ -70,7 +76,6 @@ def process_directory():
 	sdssOutDir = '/home/wayne/public_html/SDSS/G.out'
 	sdssIdFile = '/home/wayne/public_html/SDSS/G.out/galaxy.csv'
 	sdssIds = read_csv(sdssIdFile)['name']
-	print str(sdssIds)
 	galfitInDir = 'galfit_in'
 	useHash = False
 	quantity = len(sdssIds)

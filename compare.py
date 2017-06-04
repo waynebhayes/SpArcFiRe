@@ -16,15 +16,17 @@ def compare():
 	galfitDir = 'galfit_out'
 	sparcfireDir = 'sparcfire_out'
 	outputDir = 'compare_out'
+	fitLogsDir = 'fit_logs'
 	for fileFits in os.listdir(galfitDir):
 		sdssId = os.path.splitext(fileFits)[0][0:-4] #Remove '-out' from filename
 		pathMask = os.path.join(sparcfireDir, sdssId, sdssId + "-K_clusMask-reprojected.png")
 		pathContrast = os.path.join(sparcfireDir, sdssId, sdssId + "-K_clusMask-reprojected.png")
 		pathFits = os.path.join(galfitDir, fileFits)
 		pathCSV = os.path.join(sparcfireDir, sdssId, sdssId + '.csv')
-		compare_images(pathFits, pathMask, pathCSV, outputDir, sdssId)
+		pathGalfitLog = os.path.join(fitLogsDir, sdssId + '-fit.log')
+		compare_images(pathFits, pathMask, pathCSV, pathGalfitLog, outputDir, sdssId)
 
-def compare_images(pathFits, pathMask, pathCSV, outputDir, sdssId):
+def compare_images(pathFits, pathMask, pathCSV, pathGalfitLog, outputDir, sdssId):
 	thresholds = [0.7, 0.725, 0.75, 0.775, 0.8]
 	print 'SDSS id: ' + sdssId
 	bestThreshold = thresholds[0]
@@ -35,7 +37,7 @@ def compare_images(pathFits, pathMask, pathCSV, outputDir, sdssId):
 		imgInput = normalize(grayscale(pyfits.open(pathFits)[1].data))
 		imgModel = normalize(grayscale(pyfits.open(pathFits)[2].data))
 		imgResidual = normalize(grayscale(pyfits.open(pathFits)[3].data))
-		imgDiskMask = mask_disk(imgInput.shape, pathCSV)
+		imgDiskMask = mask_disk(imgInput.shape, pathCSV, pathGalfitLog)
 		imgClusterMask = np.flipud(normalize(grayscale(imread(pathMask).astype(float))))
 		
 		(confidence, imgInputMasked, imgClusterMask, relevantElements, selectedElements, truePositives, imgMaskedResidual) = calculate_confidence(imgInput, imgResidual, imgClusterMask, imgDiskMask, threshold)
@@ -85,9 +87,10 @@ def calculate_confidence(imgInput, imgResidual, imgClusterMask, imgDiskMask, thr
 
 	return ((2 * precision * recall) / (precision + recall), imgInputMasked, imgClusterMaskMasked, relevantElements, selectedElements, truePositives, imgMaskedResidual)
 
-def mask_disk(shape, pathCSV):
+def mask_disk(shape, pathCSV, pathGalfitLog):
 	# Parse galaxy.csv file
 	mask = np.zeros(shape)
+	
 	galaxies = defaultdict(list) # each value in each column is appended to a list
 	with open(pathCSV) as f:
 		header = [h.strip() for h in f.next().split(',')] #strip whitespace in headers
@@ -97,16 +100,32 @@ def mask_disk(shape, pathCSV):
 				galaxies[k].append(v) # append the value into the appropriate list based on column name k
 	# Define disk ellipse	
 	center = (float(galaxies["inputCenterC"][0]), float(galaxies["inputCenterR"][0]))
-	width = float(galaxies["diskMajAxsLen"][0])
-	height = float(galaxies["diskMajAxsLen"][0]) * float(galaxies["diskAxisRatio"][0])
-	angle = float(galaxies["diskAxisRatio"][0])
-	#print center, width, height, angle
-	
+
+	#(width, height, angle) = sparcfireDiskEllipse(galaxies)
+	(width, height, angle) = galfitDiskEllipse(pathGalfitLog)
+
 	# Mask pixels within disk ellipse
 	for index, value in np.ndenumerate(mask):
 		mask[index[0], index[1]] = in_ellipse(index, center, width, height, angle) 	
 
 	return mask
+def sparcfireDiskEllipse(galaxies):
+	width = float(galaxies["diskMajAxsLen"][0])
+	height = float(galaxies["diskMajAxsLen"][0]) * float(galaxies["diskAxisRatio"][0])
+	angle = float(galaxies["diskAxisRatio"][0])
+	return (width, height, angle)
+
+def galfitDiskEllipse(pathGalfitLog):
+	with open(pathGalfitLog) as f:
+		fitLog = f.read().splitlines()
+	#line 8 contains fit parameters
+	line = fitLog[7]
+	startIndex = line.index(')') + 1
+	parameters = line[startIndex:].split()
+	width = float(parameters[1]) * 3
+	angle = float(parameters[3])
+	height = width * angle
+	return (width, height, angle)
 
 def in_ellipse(index, center, width, height, angle):
 	cos_angle = np.cos(angle)
