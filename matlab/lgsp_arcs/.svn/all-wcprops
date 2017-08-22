@@ -1,0 +1,251 @@
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/122/matlab/lgsp_arcs
+END
+fitBarUsingLine.m
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/lgsp_arcs/fitBarUsingLine.m
+END
+calcClusAsgns.m
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/lgsp_arcs/calcClusAsgns.m
+END
+bestIr.m
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/35/matlab/lgsp_arcs/bestIr.m
+END
+hac2mtxs.m
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/35/matlab/lgsp_arcs/hac2mtxs.m
+END
+getGalaxyParams.m
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/121/matlab/lgsp_arcs/getGalaxyParams.m
+END
+displayLgspPlot.m
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/113/matlab/lgsp_arcs/displayLgspPlot.m
+END
+findClusterArcs.m
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/122/matlab/lgsp_arcs/findClusterArcs.m
+END
+lgspIntersection.m
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/30/matlab/lgsp_arcs/lgspIntersection.m
+END
+calcErrArcScore.m
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/116/matlab/lgsp_arcs/calcErrArcScore.m
+END
+displayLgspOverlay.m
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/113/matlab/lgsp_arcs/displayLgspOverlay.m
+END
+genClusScoreTbl.m
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/lgsp_arcs/genClusScoreTbl.m
+END
+getPitchAngleQuantiles.m
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/84/matlab/lgsp_arcs/getPitchAngleQuantiles.m
+END
+fitErrArcs.m
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/lgsp_arcs/fitErrArcs.m
+END
+polXyMtx.m
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/9/matlab/lgsp_arcs/polXyMtx.m
+END
+writeGalaxyParams.m
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/118/matlab/lgsp_arcs/writeGalaxyParams.m
+END
+logSpiralFxn2Rev.m
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/lgsp_arcs/logSpiralFxn2Rev.m
+END
+logSpiralFxn.m
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/9/matlab/lgsp_arcs/logSpiralFxn.m
+END
+angleDist.m
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/9/matlab/lgsp_arcs/angleDist.m
+END
+fitResultsToStruct.m
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/32/matlab/lgsp_arcs/fitResultsToStruct.m
+END
+removeThetaDiscontFor2revOld.m
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/lgsp_arcs/removeThetaDiscontFor2revOld.m
+END
+lgspErr.m
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/lgsp_arcs/lgspErr.m
+END
+findBarFromClusters.m
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/59/matlab/lgsp_arcs/findBarFromClusters.m
+END
+addBarOverlay.m
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/89/matlab/lgsp_arcs/addBarOverlay.m
+END
+angleAverage.m
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/9/matlab/lgsp_arcs/angleAverage.m
+END
+calcArcMergeErr.m
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/117/matlab/lgsp_arcs/calcArcMergeErr.m
+END
+getGenomeScores.m
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/lgsp_arcs/getGenomeScores.m
+END
+lgspArea.m
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/32/matlab/lgsp_arcs/lgspArea.m
+END
+fitLogSpiral.m
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/116/matlab/lgsp_arcs/fitLogSpiral.m
+END
+calcLgspArcLengths.m
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/32/matlab/lgsp_arcs/calcLgspArcLengths.m
+END
+emRefineArcs.m
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/lgsp_arcs/emRefineArcs.m
+END
+getLgspFitErrs.m
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/35/matlab/lgsp_arcs/getLgspFitErrs.m
+END
+fitBarUsingGaussian.m
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/lgsp_arcs/fitBarUsingGaussian.m
+END
+calcClusScores.m
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/lgsp_arcs/calcClusScores.m
+END
+displayClusterOverlay.m
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/78/matlab/lgsp_arcs/displayClusterOverlay.m
+END
+fitLogSpiralsToClusters.m
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/116/matlab/lgsp_arcs/fitLogSpiralsToClusters.m
+END
+calcArcDist.m
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/lgsp_arcs/calcArcDist.m
+END
+logSpiralXY.m
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/16/matlab/lgsp_arcs/logSpiralXY.m
+END
+removeThetaDiscontFor2rev.m
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/lgsp_arcs/removeThetaDiscontFor2rev.m
+END
+idInnerOuterSpiralOld.m
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/lgsp_arcs/idInnerOuterSpiralOld.m
+END
+idInnerOuterSpiral.m
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/117/matlab/lgsp_arcs/idInnerOuterSpiral.m
+END
+mergeClustersByFit.m
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/116/matlab/lgsp_arcs/mergeClustersByFit.m
+END

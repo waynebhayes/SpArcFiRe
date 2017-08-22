@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/125/matlab
+END
+calcSurrSuppWts.m
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/2/matlab/calcSurrSuppWts.m
+END
+nonmaxSuppress.m
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/4/matlab/nonmaxSuppress.m
+END
+genGaussMtx.m
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/2/matlab/genGaussMtx.m
+END
+broaden_arc_width_all.m
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/119/matlab/broaden_arc_width_all.m
+END
+msStep.m
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/5/matlab/msStep.m
+END
+broaden_arc_width.m
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/97/matlab/broaden_arc_width.m
+END
+meanShiftCluster.m
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/4/matlab/meanShiftCluster.m
+END
+houghTransformPrev.m
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/70/matlab/houghTransformPrev.m
+END
+logSpiralHoughTransform.m
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/6/matlab/logSpiralHoughTransform.m
+END

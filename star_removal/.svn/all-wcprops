@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/96/star_removal
+END
+default.nnw
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/86/star_removal/default.nnw
+END
+star_rm.sex
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/80/star_removal/star_rm.sex
+END
+star_rm.param
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/80/star_removal/star_rm.param
+END
+default.conv
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/86/star_removal/default.conv
+END
+remove_stars_with_sextractor.py
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/96/star_removal/remove_stars_with_sextractor.py
+END

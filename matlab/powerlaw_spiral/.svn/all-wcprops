@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/116/matlab/powerlaw_spiral
+END
+batchComparePowerlawSpiral.m
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/113/matlab/powerlaw_spiral/batchComparePowerlawSpiral.m
+END
+display_arc_plot.m
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/powerlaw_spiral/display_arc_plot.m
+END
+compare_lgsp_to_plsp.m
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/powerlaw_spiral/compare_lgsp_to_plsp.m
+END
+powerlawSpiralXY.m
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/powerlaw_spiral/powerlawSpiralXY.m
+END
+fitPowerlawSpiral.m
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/116/matlab/powerlaw_spiral/fitPowerlawSpiral.m
+END

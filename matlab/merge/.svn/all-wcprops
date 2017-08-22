@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/116/matlab/merge
+END
+mergeClusters.m
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/116/matlab/merge/mergeClusters.m
+END
+intervalIntersect.m
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/31/matlab/merge/intervalIntersect.m
+END
+clusMtxIsThruCtr.m
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/39/matlab/merge/clusMtxIsThruCtr.m
+END
+runMergeOnAll.m
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/31/matlab/merge/runMergeOnAll.m
+END
+calcTipWtsDbl.m
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/31/matlab/merge/calcTipWtsDbl.m
+END
+translateThVals.m
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/31/matlab/merge/translateThVals.m
+END
+calcTipWtsSgl.m
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/31/matlab/merge/calcTipWtsSgl.m
+END

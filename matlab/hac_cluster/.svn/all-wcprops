@@ -1,0 +1,83 @@
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/119/matlab/hac_cluster
+END
+calcPxlSimilarities.m
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/hac_cluster/calcPxlSimilarities.m
+END
+findClusters.m
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/69/matlab/hac_cluster/findClusters.m
+END
+genHacTree.m
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/116/matlab/hac_cluster/genHacTree.m
+END
+showClusters.m
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/113/matlab/hac_cluster/showClusters.m
+END
+showClustersFromMtxs.m
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/119/matlab/hac_cluster/showClustersFromMtxs.m
+END
+PriorityQueue.m
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/36/matlab/hac_cluster/PriorityQueue.m
+END
+genSimilarityMtx.m
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/hac_cluster/genSimilarityMtx.m
+END
+asgnsToMtxs.m
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/hac_cluster/asgnsToMtxs.m
+END
+nbrIndsAL.m
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/13/matlab/hac_cluster/nbrIndsAL.m
+END
+getClusterSizes.m
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/13/matlab/hac_cluster/getClusterSizes.m
+END
+genHacTreeWithPq.m
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/116/matlab/hac_cluster/genHacTreeWithPq.m
+END
+nbrIndsFull.m
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/13/matlab/hac_cluster/nbrIndsFull.m
+END
+nbrIndsBR.m
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/13/matlab/hac_cluster/nbrIndsBR.m
+END

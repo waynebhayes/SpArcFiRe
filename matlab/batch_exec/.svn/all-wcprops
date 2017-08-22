@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/125/matlab/batch_exec
+END
+writeGxyParamsToCsv.m
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/121/matlab/batch_exec/writeGxyParamsToCsv.m
+END
+batchConvertFromFitsOld.m
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/batch_exec/batchConvertFromFitsOld.m
+END
+batchConvertFromFits.m
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/123/matlab/batch_exec/batchConvertFromFits.m
+END
+batchFindClusterArcs.m
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/118/matlab/batch_exec/batchFindClusterArcs.m
+END
+loadImageFolder.m
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/37/matlab/batch_exec/loadImageFolder.m
+END
+findClusterArcsServer.m
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/125/matlab/batch_exec/findClusterArcsServer.m
+END

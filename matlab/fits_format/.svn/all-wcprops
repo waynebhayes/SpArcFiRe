@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/124/matlab/fits_format
+END
+batchAutoCropFits.m
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/99/matlab/fits_format/batchAutoCropFits.m
+END
+getImageMode.m
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/fits_format/getImageMode.m
+END
+convertFromFitsExperimental.m
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/fits_format/convertFromFitsExperimental.m
+END
+convertFromFitsOld.m
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/fits_format/convertFromFitsOld.m
+END
+convertFromFits.m
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/123/matlab/fits_format/convertFromFits.m
+END
+convertFromFitsServer.m
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/124/matlab/fits_format/convertFromFitsServer.m
+END
+compareFitsConversion.m
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/fits_format/compareFitsConversion.m
+END

@@ -1,0 +1,65 @@
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/125/matlab/img_standardize
+END
+preprocessImage.m
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/125/matlab/img_standardize/preprocessImage.m
+END
+calcLikelihoods.m
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/12/matlab/img_standardize/calcLikelihoods.m
+END
+iterFitGauss.m
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/99/matlab/img_standardize/iterFitGauss.m
+END
+unsharpMask.m
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/108/matlab/img_standardize/unsharpMask.m
+END
+calcWtdMeanCovar.m
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/12/matlab/img_standardize/calcWtdMeanCovar.m
+END
+dblStructToString.m
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/122/matlab/img_standardize/dblStructToString.m
+END
+emStarSuppress.m
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/img_standardize/emStarSuppress.m
+END
+findCovarElpsAxes.m
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/103/matlab/img_standardize/findCovarElpsAxes.m
+END
+stringToDblStruct.m
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/122/matlab/img_standardize/stringToDblStruct.m
+END
+emFitMultiGauss.m
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/img_standardize/emFitMultiGauss.m
+END

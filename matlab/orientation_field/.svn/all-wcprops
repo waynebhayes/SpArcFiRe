@@ -1,0 +1,89 @@
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/120/matlab/orientation_field
+END
+displayOrientationField.m
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/120/matlab/orientation_field/displayOrientationField.m
+END
+genOriFilterFxn.m
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/96/matlab/orientation_field/genOriFilterFxn.m
+END
+deNoiseOrientationField.m
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/96/matlab/orientation_field/deNoiseOrientationField.m
+END
+genOriField.m
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/114/matlab/orientation_field/genOriField.m
+END
+mhf.m
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/orientation_field/mhf.m
+END
+cmhf.m
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/orientation_field/cmhf.m
+END
+genSglLvlOriFld.m
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/108/matlab/orientation_field/genSglLvlOriFld.m
+END
+Ref2Num.m
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/orientation_field/Ref2Num.m
+END
+oriFieldStrengths.m
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/11/matlab/orientation_field/oriFieldStrengths.m
+END
+getPhase.m
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/orientation_field/getPhase.m
+END
+mergeOriFields.m
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/109/matlab/orientation_field/mergeOriFields.m
+END
+oriFieldDirections.m
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/11/matlab/orientation_field/oriFieldDirections.m
+END
+genOriFilteredImgs.m
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/orientation_field/genOriFilteredImgs.m
+END
+genGaborFilt.m
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/orientation_field/genGaborFilt.m
+END

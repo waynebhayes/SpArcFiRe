@@ -1,0 +1,18 @@
+function writeTableToFile(tbl, fname, fldDelim)
+
+if exist(fname, 'file')
+    error('output file "%s" already exists', fname);
+end
+
+fid = fopen(fname, 'wt');
+
+for row=1:1:size(tbl, 1)
+    for col = 1:1:size(tbl, 2)
+        fprintf(fid, sprintf('%%s%s', fldDelim), tbl{row, col});
+    end
+    fprintf(fid, '\n');
+end
+
+fclose(fid);
+
+end

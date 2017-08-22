@@ -1,0 +1,143 @@
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/119/matlab/load_data
+END
+loadImagesFromPaths.m
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/42/matlab/load_data/loadImagesFromPaths.m
+END
+joinTables.m
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/42/matlab/load_data/joinTables.m
+END
+selectRows.m
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/42/matlab/load_data/selectRows.m
+END
+getAgreeingRows.m
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/42/matlab/load_data/getAgreeingRows.m
+END
+displayCz2CmpPlotsForCriterion.m
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/61/matlab/load_data/displayCz2CmpPlotsForCriterion.m
+END
+compareChiralityLongo.m
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/107/matlab/load_data/compareChiralityLongo.m
+END
+distForEntLvl.m
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/61/matlab/load_data/distForEntLvl.m
+END
+compareChirality.m
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/97/matlab/load_data/compareChirality.m
+END
+LoadNairAbrahamCatalog.m
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/42/matlab/load_data/LoadNairAbrahamCatalog.m
+END
+sampleGZ2.m
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/load_data/sampleGZ2.m
+END
+writeTableToFile.m
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/42/matlab/load_data/writeTableToFile.m
+END
+getImgSampleIdxs.m
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/42/matlab/load_data/getImgSampleIdxs.m
+END
+getNairAbrahamSample.m
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/42/matlab/load_data/getNairAbrahamSample.m
+END
+compareBarDes.m
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/load_data/compareBarDes.m
+END
+readTableFromFile.m
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/load_data/readTableFromFile.m
+END
+ent3.m
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/61/matlab/load_data/ent3.m
+END
+compareGZ2.m
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/118/matlab/load_data/compareGZ2.m
+END
+intersectRowsByField.m
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/99/matlab/load_data/intersectRowsByField.m
+END
+cmpJunMa.m
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/119/matlab/load_data/cmpJunMa.m
+END
+print_chir_bias_stats.m
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/load_data/print_chir_bias_stats.m
+END
+calcPaErrs.m
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/load_data/calcPaErrs.m
+END
+plotConfidences.m
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/42/matlab/load_data/plotConfidences.m
+END
+compareChiralityGZ2.m
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/119/matlab/load_data/compareChiralityGZ2.m
+END

@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/114/matlab/bar_find
+END
+houghTransform.m
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/95/matlab/bar_find/houghTransform.m
+END
+getBarInfo.m
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/bar_find/getBarInfo.m
+END
+houghFindBar.m
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/114/matlab/bar_find/houghFindBar.m
+END
+findBarScore.m
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/114/matlab/bar_find/findBarScore.m
+END
+findBarCandRgn.m
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/69/matlab/bar_find/findBarCandRgn.m
+END
+calcBarFitErr.m
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/114/matlab/bar_find/calcBarFitErr.m
+END
+findBarCandRgnFromImg.m
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/99/matlab/bar_find/findBarCandRgnFromImg.m
+END

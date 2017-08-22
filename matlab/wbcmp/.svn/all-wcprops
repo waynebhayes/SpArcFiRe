@@ -1,0 +1,83 @@
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/114/matlab/wbcmp
+END
+findXcorrMax.m
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/55/matlab/wbcmp/findXcorrMax.m
+END
+precomputeClustersPrev.m
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/wbcmp/precomputeClustersPrev.m
+END
+precomputeClusters.m
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/113/matlab/wbcmp/precomputeClusters.m
+END
+analyzeGaussFit.m
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/55/matlab/wbcmp/analyzeGaussFit.m
+END
+reassignMismatches.m
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/55/matlab/wbcmp/reassignMismatches.m
+END
+wtClustMtxsByFitsBrt.m
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/55/matlab/wbcmp/wtClustMtxsByFitsBrt.m
+END
+plotInterBandDists.m
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/55/matlab/wbcmp/plotInterBandDists.m
+END
+run_all.m
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/67/matlab/wbcmp/run_all.m
+END
+cmpWbands.m
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/55/matlab/wbcmp/cmpWbands.m
+END
+polartransRGB.m
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/55/matlab/wbcmp/polartransRGB.m
+END
+analyzeXCorr.m
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/55/matlab/wbcmp/analyzeXCorr.m
+END
+matchClusters.m
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/55/matlab/wbcmp/matchClusters.m
+END
+showClusOverlaps.m
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/drdavis/GalaxyCodePrototype/svn/!svn/ver/55/matlab/wbcmp/showClusOverlaps.m
+END
