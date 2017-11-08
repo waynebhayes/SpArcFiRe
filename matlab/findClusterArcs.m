@@ -107,7 +107,7 @@ tStartClus = tic;
 imgOrig = img;
 
 [img, imgNoUsm, gxyParams, fitParams, exactCtrR, exactCtrC, fromOrigImg, masked] = ...
-    preprocessImage(img, stgs, starMask, stdzParams);
+    preprocessImage(img, stgs, starMask, stdzParams, outputPath, gxyName);
 elpsFitFile = fopen([outputPath '-elps-fit-params.txt'], 'wt');
 fprintf(elpsFitFile, '%s\n', dblStructToString(fitParams));
 fclose(elpsFitFile);

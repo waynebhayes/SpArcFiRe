@@ -1,5 +1,5 @@
 function [img, imgNoUsm, gxyParams, fitParams, exactCtrR, exactCtrC, fromOrigImg, masked] = ...
-    preprocessImage(img, stgs, starMask, prevFitParams)
+    preprocessImage(img, stgs, starMask, prevFitParams, processGalfit, outputPath, gxyName)
 % Transforms the given image into a standardized/enhanced form for
 % clustering and arc-fitting.
 % INPUTS:
@@ -23,6 +23,11 @@ end
 
 if nargin < 4
     prevFitParams = [];
+end
+
+if nargin < 5
+    outputPath = '';
+    gxyName = '';
 end
 
 masked = [];
@@ -314,7 +319,11 @@ if any(rInputPad) || any(cInputPad)
     assert(all(size(img) == orig_size))
 end
 
-% imwrite(img, [run_id '_deproject_02.png']);
+
+% split into preprocessGalfitImage.m
+if getenv('USEGALFITRESIDUAL');
+    img = preprocessGalfitImage(img,outputPath,gxyParams);
+end
 
 fromOrigImg = ones(size(img));
 imgForUsm = img;
@@ -487,7 +496,7 @@ if useDeProjectStretch
     usmImgCropAmt = size(imgForUsm) - size(img);
     % image rotate dimensions should be odd on both dimensions, so the
     % differences of the dimensions should be even
-    assert(all(mod(usmImgCropAmt, 2) == 0));
+    % assert(all(mod(usmImgCropAmt, 2) == 0)); % This line causes csv writing errors. (tested 10/18/2017, not working)
     usmImgCropAmt = usmImgCropAmt / 2;
     imgForUsm = imgForUsm(1+usmImgCropAmt(1):end-usmImgCropAmt(1), ...
         1+usmImgCropAmt(2):end-usmImgCropAmt(2));
