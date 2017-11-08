@@ -1,0 +1,38 @@
+#!/bin/sh
+
+die() { echo "$@" >&2; exit 1
+}
+
+SCALE=0.125
+make_thumbs=false
+no_thumbs=false
+while :; do
+    case "$1" in
+    --scale) SCALE="$2"; shift 2 ;;
+    --make-thumbs) make_thumbs=true; shift ;;
+    --no-thumbs) no_thumbs=true; shift ;;
+    -*) die "unknown option $1";;
+    *) break ;;
+    esac
+done
+
+for i
+do
+    if $no_thumbs; then
+	thumb=`basename "$i"`
+    else
+	thumb="$i"
+	for ext in jpg JPG png PNG jpeg JPEG; do
+	    thumb=`basename "$thumb" .$ext`
+	done
+	thumb="$thumb"-thumb.jpg
+    fi
+    size=`du "$i" | awk '{print $1}'`
+    if "$make_thumbs" ; then
+	case "$i" in
+	*.[Jj][Pp][Ee]*[Gg]) djpeg "$i" ;;
+	*.[Pp][Nn][Gg]) pngtopnm "$i" ;;
+	esac | pnmscale $SCALE | cjpeg > "$thumb"
+    fi
+    echo "<a href=\"$i\"><img src=\"$thumb\"> $i ($size kB)</a>"
+done

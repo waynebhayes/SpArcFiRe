@@ -1,0 +1,232 @@
+#!/bin/sh -x
+HOME=/home/dlcheng   # Make this the base of your SpArcFiRe distribution.
+export HOME
+COMMAND_LINE="$0 $@"
+USAGE="USAGE: `basename $0` [-convert-FITS] [-compute-starmask <false|true>] [-ignore-starmask] [-elps_dir DIR] [-web] {inDir} {pngDir} {outDir} [SpArcFiRe-stdin.sh options]
+(\"SpArcFiRe-stdin.sh -help\" will tell you the other options.)
+SpArcFiRe uses PNG images internally, but can mask stars only if original images are in FITS format.
+Note that all three directories must exist BEFORE you run SpArcFiRe.
+Files of type PNG in {inDir} are copied verbatim to pngDir.
+Files of type JPG in {inDir} are converted to PNG and put in pndDir.
+Files of type FITS in {inDir} are converted to PNG if -convert-FITS is specified, in which case PNGs and starmasks are put in pngDir.
+When -convert-FITS is used, you can control the FITS->PNG conversion using '-p UPPER N LOWER' where UPPER and LOWER and the upper and lower brightness quantiles to chop off, and N is the number of times to apply the asinh transform.
+-ignore-starmask will ignore starmasks created during FITS conversion; default is to use them
+Default action (without options) is to assume starmarks and FITS conversion has occured and are in pngDir, and process all galaxies in *inDir*.
+You can skip FITS conversion once you've done it once, and images in pngDir will be re-used, but only galaxies appearing in inDir will actually be processed (even if they have images in pngDir).
+if -elps_dir is specified with value DIR, we expect there to be an ellipse fitting parameter file in DIR/{$F}_elps.txt, where $F is the base name of the image file.  For example if DIR is ELLIPSES and the galaxy name is M31, then we expect a file called ELLIPSES/M31_elps.txt to exist.  Otherwise we ignore it and generate an ellipse fit from the input image.
+Final parsing images go in outDir, one output directory per galaxy.
+Current directory will have log files and final output CSVs called 'galaxy.csv' and 'galaxy_arcs.csv'."
+
+if [ $# = 0 ]; then
+    echo "$USAGE"
+    echo ""
+    echo "And below are the options that come after the 3 directories, which are passed to SpArcFiRe-stdin.sh:"
+    echo ""
+    exec SpArcFiRe-stdin.sh -help
+fi
+
+die() { echo "FATAL ERROR: $@
+SpArcFire was run as:
+$COMMAND_LINE" >&2
+exit
+}
+warn() { echo "WARNING: $@" >&2
+}
+
+mkdir -p /tmp/sparcfire-${USER:=`basename $HOME`}
+MCR_CACHE_ROOT=/tmp/sparcfire-$USER
+export MCR_CACHE_ROOT
+
+FITS_PARAMS="0.25 0.75 2"
+STARMASK="_starmask.png"
+ELPS_DIR="NONE"
+COMPUTE_STARMASK=maybe
+FITS=false
+WEB=false
+MAXWEB=1024 # maximum linear resolution of web-submitted jobs
+SKIP="/dev/null"
+CONVERT_ARGS=""
+
+for i in "$@"
+do
+    case "$1" in
+    -elps_dir) ELPS_DIR="$2"; shift 2
+	[ -d "$ELPS_DIR" ] || die " -elps_dir '$ELPS_DIR' is not a directory"
+	;;
+    -ignore-starmask) STARMASK="NONE"; shift;;
+    -compute-starmask) [ $2 = true -o $2 = false ] || die "-compute-starmask argument must be 'true' or 'false'";
+	COMPUTE_STARMASK=$2; shift 2;;
+    -convert-args) CONVERT_ARGS="$2"; shift 2;;
+    -convert-FITS) FITS=true; shift
+	case "$1" in
+	-p) FITS_PARAMS="$2 $3 $4"; shift 4;;
+	esac
+	;;
+    -skip) SKIP="$2"; shift 2
+	[ -f "$SKIP" ] || die "skip file '$SKIP' must be a file containing, line-by-line, names of galaxies to skip"
+	;;
+    -web) WEB=true; shift;;
+    -*) die "put [other SpArcFiRe options] AFTER the three directory names";;
+    *) break;;
+    esac
+done
+
+if [ $COMPUTE_STARMASK = maybe ]; then
+    warn "-compute-starmask not specified, computing anyway..."
+    COMPUTE_STARMASK=true
+fi
+
+sfDir=/tmp/SF$$
+trap "/bin/rm -rf $sfDir" 0 1 2 3 15
+mkdir -p $sfDir
+
+# The echo and sed below is to remove trailing slashes, which confuse MATLAB.
+inDir=`echo "$1" | sed 's,/$,,'`; shift
+[ -d "$inDir" ] || die "inDir is missing"
+pngDir=`echo "$1" | sed 's,/$,,'`; shift
+[ -d "$pngDir" ] || die "pngDir is missing"
+outDir=`echo "$1" | sed 's,/$,,'`; shift
+[ -d "$outDir" ] || die "outDir is missing"
+
+cwd=`/bin/pwd`
+# Make pngDir and outDir relative to CWD if necessary.
+case "$inDir" in
+    /*) ;;
+    *) inDir="$cwd/$inDir";;
+esac
+case "$pngDir" in
+    /*) ;;
+    *) pngDir="$cwd/$pngDir";;
+esac
+case "$outDir" in
+    /*) ;;
+    *) outDir="$cwd/$outDir";;
+esac
+case "$SKIP" in
+/*) ;;
+*) SKIP="$cwd/$SKIP";;
+esac
+
+# copy only the necessary (non-skip) files to sfDir
+(cd "$inDir" && (ls | fgrep -v -f "$SKIP" | xargs --no-run-if-empty /home/dlcheng/bin/reverse-cp.sh $sfDir)) || die "could not copy files from '$inDir' to $sfDir"
+
+if [ "$ELPS_DIR" != NONE ]; then
+    cp -p "$ELPS_DIR"/*_elps.txt $pngDir || die "could not copy ellipse files from '$ELPS_DIR' to '$pngDir'"
+fi
+
+gunzip $sfDir/*.gz >/dev/null 2>&1
+funzip $sfDir/*.fz >/dev/null 2>&1
+(
+cd $sfDir
+    # rename .fit to .fits
+    for i in *.fit; do mv "$i" "${i}s"; done
+    # remove spaces from filenames
+    for i in *; do ns=`echo "$i" | sed 's/ /_/g'`; mv "$i" "$ns"; done
+) 2>/dev/null
+
+
+case `hostname` in
+theory-monster*) : ;;
+*) PATH=$HOME/.local/bin:$HOME/bin:$PATH ;;
+esac
+export PATH
+ 
+# Put starmask into pngDir
+$FITS && $COMPUTE_STARMASK && (
+    echo -n "Performing star masking on FITS images...";
+    if [ $STARMASK == NONE ]; then
+	echo "(they will be ignored later)"
+    else
+	echo ""
+    fi
+    cd $HOME/bin/ArcPNGcreator/star_removal
+    case `hostname` in
+    theory-monster*) python -s remove_stars_with_sextractor.py "$sfDir" "$pngDir" ;;
+    *) python2.7 remove_stars_with_sextractor.py "$sfDir" "$pngDir" ;;
+    esac
+)
+
+# Now run FITStoPNG convesion, if requested
+$FITS && ((echo "Converting FITS images to PNG..."; $HOME/bin/ArcPNGcreator/convertFromFits.0.sh -p $FITS_PARAMS $STARMASK $sfDir $pngDir >$outDir/convertFromFits.log) || die "something went wrong...")
+echo "Preparing PNG and JPG files to $pngDir..."
+for i in $sfDir/*; do
+    case $i in
+    *.[Pp][Nn][Gg]) b=`echo $i | sed -e 's,.*/,,' -e 's/\.[Pp][Nn][Gg]$//'`; cp $i $pngDir/$b.png;;
+    *.[Ff][Ii][Tt]|*.[Ff][Ii][Tt][Ss]) b=`echo $i | sed -e 's,.*/,,' -e 's/\.[Ff][Ii][Tt][Ss]*$//'`;
+	if [ ! -f $pngDir/$b.png ]; then warn "`basename $i`: no corresponding PNG file in pngDir"; fi;;
+    *.[Jj][Pp]*[Gg])  b=`echo $i | sed -e 's,.*/,,' -e 's/\.[Jj][Pp][eE]*[Gg]$//'`
+	if [ -f $i ] && echo "$i" | not fgrep -i '.fits'; then
+	    convert $CONVERT_ARGS $i $pngDir/$b.png
+	fi;;
+    esac
+    sizex=`file $pngDir/$b.png | sed -e 's/.*://' -e 's/,//g' | awk '{printf $4}'`
+    sizey=`file $pngDir/$b.png | sed -e 's/.*://' -e 's/,//g' | awk '{printf $6}'`
+    if [ "$sizex" -gt 1024 -o "$sizey" -gt 1024 ]; then
+	convert $CONVERT_ARGS $pngDir/$b.png -size 512x512 /tmp/x$$
+	mv /tmp/x$$ $pngDir/$b.png
+    fi
+done
+
+ls $pngDir/*.png >/dev/null || die "can't find any png images in $pngDir;
+note that you must include an inDir (and it must exist) even if you start with PNG images."
+
+if "$WEB"; then  # don't allow huge images
+    if file $pngDir/*.png | sed 's/,/ /g' | awk '{if($5>'$MAXWEB'||$7>'$MAXWEB')exit(1)}'; then
+	:
+    else
+	die "sorry, we don't accept images larger than $MAXWEB x $MAXWEB in web submissions"
+    fi
+fi
+
+# Finally, run SpArcFiRe itself
+ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\.[Ff][Ii][Tt][Ss]$//' | fgrep -v -f "$SKIP" |
+    (   while read f; do
+	if [ -f $pngDir/${f}_starmask.png ]; then
+	    SM=$STARMASK
+	else
+	    SM='NONE'
+	    if [ "$STARMASK" != NONE -a -f "$sfDir/${f}.fits" ]; then
+		warn "$f: you didn't ignore starmasks and there's a FITS image but no starmask; proceeding without starmask anyway"
+	    fi
+	fi
+	if [ "$ELPS_DIR" == NONE ]; then
+	    EF='NONE'
+	else
+	    EF="${f}_elps.txt"
+	    if [ -f "$pngDir/$EF" ]; then
+		ls -l "$pngDir/$EF"
+	    else
+		warn "$f:could not find ellipse file '$pngDir/$EF'; proceeding without it"
+		EF='NONE'
+	    fi
+	fi
+	echo $pngDir $f .png $SM $EF $outDir; done | randomizeLines; echo exit) | tee /dev/tty |
+    $HOME/bin/SpArcFiRe-stdin.sh -lookForBulge 1 -writeSettingsForEveryImage 1 -generateOrientationFieldPdf 1 "$@" | tee $outDir/SpArcFiRe.log
+ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\.[Ff][Ii][Tt][Ss]$//' | fgrep -v -f "$SKIP" |
+    ( while read f; do
+	#mv $outDir/$f/$f-orientation-field.pdf $outDir/$f/$f-O_orientation-field.pdf
+	convert $outDir/$f/$f-O_orientation-field.pdf $outDir/$f/$f-O_orientation-field.png
+      done)
+#    awk '{printf "'$pngDir' %s .png '$STARMASK' '$outDir'\n", $1}END{print "exit"}'
+
+# Now extract the CSV files
+cd $outDir
+arc2csv.sh matout galaxy > arc2csv.log
+mv matout/*.csv .
+for i in galaxy.csv galaxy_arcs.csv; do
+    csv2tsv $i > `basename $i .csv`.tsv
+done
+
+for G in `awk 'NR>1{print $1}' galaxy.tsv | sort -u`; do
+    awk "NR==1||/^$G/{print}" galaxy.csv > $G/$G.csv
+    awk "NR==1||/^$G/{print}" galaxy.tsv > $G/$G.tsv
+    awk "NR==1||/^$G/{print}" galaxy_arcs.csv > $G/${G}_arcs.csv
+    awk "NR==1||/^$G/{print}" galaxy_arcs.tsv > $G/${G}_arcs.tsv
+done
+
+if $WEB; then (
+    #mkimgindex --scale 0.50 --make-thumbs */*-J_* | sed -e 's,/[^"]*,,' -e 's,/[^/]*),,' > index.html
+    ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\.[Ff][Ii][Tt][Ss]$//' |
+	awk '{printf "(cd %s; mkimgindex --no-thumbs *.png > index.html)\n", $1}' | sh
+    chmod -R go+rX ..
+) fi
