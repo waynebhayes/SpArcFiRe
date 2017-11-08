@@ -1,0 +1,83 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Jul  3 15:04:44 2012
+
+@author: darren
+"""
+
+import logging
+import numpy
+import pyfits
+
+logger = logging.getLogger(__name__)
+
+def read_fits(fpath):    
+    """Reads a FITS image from the given file path.
+    
+    Args:
+        fpath: the path to the FITS file.
+    
+    Returns:
+        Numpy array containing the FITS image data.    
+    
+    Raises:
+        IOError: something went wrong when reading from the file
+        ValueError: the FITS file's data was not an image
+    """    
+    logger.info("reading FITS image information from file %s", fpath)
+    
+    try:
+        ff_in = pyfits.open(fpath)
+    except IOError:
+        logger.exception("could not read FITS file: %s", fpath)
+        raise
+    
+    prihdr = ff_in['PRIMARY'].header
+    imdata = ff_in['PRIMARY'].data
+    
+    if not isinstance(imdata, numpy.ndarray):
+        raise ValueError("FITS file does not contain an image or not read as numpy.ndarray")
+    
+    if ('photflam' in prihdr) and ('exptime' in prihdr):
+        logger.info("found photflam and exptime in header. Converting image from counts to flux.")
+        photflam = prihdr['photflam']
+        exptime = prihdr['exptime']
+        #print 'photflam = ' + photflam
+        #print 'exptime = ' + exptime
+    else:
+        logger.info("photflam and/or exptime not found in header. Not converting to flux.")
+        photflam = 1;
+        exptime = 1;
+    
+    try:
+        ff_in.close()
+    except IOError:
+        logger.exception("could not close FITS file: %s", fpath)
+    
+    imdata = imdata * (photflam / exptime);
+
+    logger.info("done reading FITS image information from file: %s", fpath)
+    
+    return imdata
+    
+def write_fits(img, fpath):
+    """Writes a 2D image matrix to a FITS file.
+    
+    Args:
+        img: the image (2D Numpy array) to write to the FITS file
+        fpath: path to which the file will be written
+        
+    Raises:
+        TypeError: img was not a Numpy array
+        IOError: an error occurred when trying to write to the file
+    """
+    if not isinstance(img, numpy.ndarray):
+        raise TypeError("img must be a numpy array")
+    
+    logger.info("writing fits image to {0}".format(fpath))
+    hdu = pyfits.PrimaryHDU(img)
+    hdu.writeto(fpath)
+    logger.info("done writing fits image to {0}".format(fpath))
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
