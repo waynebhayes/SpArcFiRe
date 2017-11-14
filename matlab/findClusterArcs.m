@@ -375,18 +375,26 @@ if ~isempty(gxyName) && outputParams.writeImages
     imwrite(olMerged, [outputPath '-J_logSpiralArcs-merged.png']);
     pause(sleepSecondsAfterImageWrite);
 end
-if ~isempty(gxyName) && outputParams.writeTxt
-    gxyParamsM = getGalaxyParams(lgspParamsM, lgspBoundsM, sumSqErrsM, ...
-        used2revM, hasBadBoundsM, barUsedM, barInfo, barIndsM, img, ...
-        clusMtxsM, stgs, gxyParams);
-    writeGalaxyParams(gxyParamsM, [gxyName '-merged'], outputDir);
-end
 
 if ~isempty(gxyName) && outputParams.writeImages
     clusReproj = reProject(clusMask, gxyParams.diskAxisRatio, gxyParams.diskMajAxsLen, ...
         gxyParams.diskMajAxsAngleRadians, [gxyParams.iptSz(1) - gxyParams.iptCtrXY(2) + 1, ...
         gxyParams.iptCtrXY(1)], gxyParams.iptSz);
     imwrite(clusReproj, [outputPath '-K_clusMask-reprojected.png']);
+    if getenv('GENERATEFITQUALITY')
+        gxyParams = getFitQuality(img, clusReproj, outputPath, gxyParams);
+    end
+end
+
+if ~isempty(gxyName) && outputParams.writeImages
+    gxyParams = getFitQuality(img, outputPath, gxyParams);
+end
+
+if ~isempty(gxyName) && outputParams.writeTxt
+    gxyParamsM = getGalaxyParams(lgspParamsM, lgspBoundsM, sumSqErrsM, ...
+        used2revM, hasBadBoundsM, barUsedM, barInfo, barIndsM, img, ...
+        clusMtxsM, stgs, gxyParams);
+    writeGalaxyParams(gxyParamsM, [gxyName '-merged'], outputDir);
 end
 % close all
 % figure;
