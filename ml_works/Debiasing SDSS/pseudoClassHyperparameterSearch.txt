@@ -1,0 +1,449 @@
+10 trees and 30 features
+RMSE: 0.70378620633871
+Pearson Correlation: 0.009406183510235549
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3083    | 3121    | 6204  |
+| 2   | 3011    | 3165    | 6176  |
+
+10 trees and 40 features
+RMSE: 0.7043598360747741
+Pearson Correlation: 0.007821129651160351
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3039    | 3165    | 6204  |
+| 2   | 2977    | 3199    | 6176  |
+
+10 trees and 50 features
+RMSE: 0.7102412614278136
+Pearson Correlation: -0.008835429898959404
+Accuracy = 49.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3003    | 3201    | 6204  |
+| 2   | 3044    | 3132    | 6176  |
+
+10 trees and 60 features
+RMSE: 0.7047610990861636
+Pearson Correlation: 0.006708629984957398
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3012    | 3192    | 6204  |
+| 2   | 2957    | 3219    | 6176  |
+
+10 trees and 70 features
+RMSE: 0.7007381291799322
+Pearson Correlation: 0.01797564233260478
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3102    | 3102    | 6204  |
+| 2   | 2977    | 3199    | 6176  |
+
+15 trees and 30 features
+RMSE: 0.701371838309399
+Pearson Correlation: 0.01629283609844944
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2993    | 3211    | 6204  |
+| 2   | 2879    | 3297    | 6176  |
+
+15 trees and 40 features
+RMSE: 0.7073352117469197
+Pearson Correlation: -0.0005814075419369344
+Accuracy = 49.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3011    | 3193    | 6204  |
+| 2   | 3001    | 3175    | 6176  |
+
+15 trees and 50 features
+RMSE: 0.7045891572060575
+Pearson Correlation: 0.007178659895162098
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3032    | 3172    | 6204  |
+| 2   | 2974    | 3202    | 6176  |
+
+15 trees and 60 features
+RMSE: 0.7069925382289902
+Pearson Correlation: 0.00040594972760636926
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2990    | 3214    | 6204  |
+| 2   | 2974    | 3202    | 6176  |
+
+15 trees and 70 features
+RMSE: 0.7064210463093669
+Pearson Correlation: 0.0020180138360568188
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3001    | 3203    | 6204  |
+| 2   | 2975    | 3201    | 6176  |
+
+20 trees and 30 features
+RMSE: 0.7077347878173817
+Pearson Correlation: -0.0017238392408579601
+Accuracy = 49.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3023    | 3181    | 6204  |
+| 2   | 3020    | 3156    | 6176  |
+
+20 trees and 40 features
+RMSE: 0.6992957454324799
+Pearson Correlation: 0.022007023035176904
+Accuracy = 51.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3124    | 3080    | 6204  |
+| 2   | 2974    | 3202    | 6176  |
+
+20 trees and 50 features
+RMSE: 0.7006228477562385
+Pearson Correlation: 0.01837892189409208
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3016    | 3188    | 6204  |
+| 2   | 2889    | 3287    | 6176  |
+
+20 trees and 60 features
+RMSE: 0.713701584371741
+Pearson Correlation: -0.018719580580131328
+Accuracy = 49.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3015    | 3189    | 6204  |
+| 2   | 3117    | 3059    | 6176  |
+
+20 trees and 70 features
+RMSE: 0.7029248840158236
+Pearson Correlation: 0.011861089512828485
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3052    | 3152    | 6204  |
+| 2   | 2965    | 3211    | 6176  |
+
+25 trees and 30 features
+RMSE: 0.7069925382289902
+Pearson Correlation: 0.00041773432002560113
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2974    | 3230    | 6204  |
+| 2   | 2958    | 3218    | 6176  |
+
+25 trees and 40 features
+RMSE: 0.7061923200458646
+Pearson Correlation: 0.0026539804127678015
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3017    | 3187    | 6204  |
+| 2   | 2987    | 3189    | 6176  |
+
+25 trees and 50 features
+RMSE: 0.7070496620151481
+Pearson Correlation: 0.00024172141970270325
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2993    | 3211    | 6204  |
+| 2   | 2978    | 3198    | 6176  |
+
+25 trees and 60 features
+RMSE: 0.7032695395324958
+Pearson Correlation: 0.010922014374026614
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3013    | 3191    | 6204  |
+| 2   | 2932    | 3244    | 6176  |
+
+25 trees and 70 features
+RMSE: 0.707791851698774
+Pearson Correlation: -0.0018743526414844488
+Accuracy = 49.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3007    | 3197    | 6204  |
+| 2   | 3005    | 3171    | 6176  |
+
+30 trees and 30 features
+RMSE: 0.7054484475256265
+Pearson Correlation: 0.004757819809474398
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3020    | 3184    | 6204  |
+| 2   | 2977    | 3199    | 6176  |
+
+30 trees and 40 features
+RMSE: 0.7063638716869343
+Pearson Correlation: 0.0021876088997418845
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2991    | 3213    | 6204  |
+| 2   | 2964    | 3212    | 6176  |
+
+30 trees and 50 features
+RMSE: 0.7036140262244908
+Pearson Correlation: 0.009975523285228381
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2983    | 3221    | 6204  |
+| 2   | 2908    | 3268    | 6176  |
+
+30 trees and 60 features
+RMSE: 0.7069925382289902
+Pearson Correlation: 0.00044505022236398357
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2937    | 3267    | 6204  |
+| 2   | 2921    | 3255    | 6176  |
+
+30 trees and 70 features
+RMSE: 0.7091030535467133
+Pearson Correlation: -0.00556453459196737
+Accuracy = 49.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2955    | 3249    | 6204  |
+| 2   | 2976    | 3200    | 6176  |
+
+35 trees and 30 features
+RMSE: 0.7070496620151481
+Pearson Correlation: 0.0002792148025734527
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2942    | 3262    | 6204  |
+| 2   | 2927    | 3249    | 6176  |
+
+35 trees and 40 features
+RMSE: 0.7068211391707773
+Pearson Correlation: 0.0009098789705576663
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2966    | 3238    | 6204  |
+| 2   | 2947    | 3229    | 6176  |
+
+35 trees and 50 features
+RMSE: 0.7139279048417937
+Pearson Correlation: -0.019314462376688955
+Accuracy = 49.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2925    | 3279    | 6204  |
+| 2   | 3031    | 3145    | 6176  |
+
+35 trees and 60 features
+RMSE: 0.7076206462493759
+Pearson Correlation: -0.0013562434226891895
+Accuracy = 49.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2962    | 3242    | 6204  |
+| 2   | 2957    | 3219    | 6176  |
+
+35 trees and 70 features
+RMSE: 0.7087042489215218
+Pearson Correlation: -0.004391587991989666
+Accuracy = 49.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2896    | 3308    | 6204  |
+| 2   | 2910    | 3266    | 6176  |
+
+40 trees and 30 features
+RMSE: 0.70378620633871
+Pearson Correlation: 0.009439736319044928
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3041    | 3163    | 6204  |
+| 2   | 2969    | 3207    | 6176  |
+
+40 trees and 40 features
+RMSE: 0.7059635196769739
+Pearson Correlation: 0.0033469251774292715
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2959    | 3245    | 6204  |
+| 2   | 2925    | 3251    | 6176  |
+
+40 trees and 50 features
+RMSE: 0.7075064862669844
+Pearson Correlation: -0.001019226604446903
+Accuracy = 49.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2944    | 3260    | 6204  |
+| 2   | 2937    | 3239    | 6176  |
+
+40 trees and 60 features
+RMSE: 0.7034418039660734
+Pearson Correlation: 0.010431381313580124
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3018    | 3186    | 6204  |
+| 2   | 2940    | 3236    | 6176  |
+
+40 trees and 70 features
+RMSE: 0.7087042489215218
+Pearson Correlation: -0.004423661296799151
+Accuracy = 49.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2945    | 3259    | 6204  |
+| 2   | 2959    | 3217    | 6176  |
+
+45 trees and 30 features
+RMSE: 0.7068782768079241
+Pearson Correlation: 0.0007738374290769867
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2931    | 3273    | 6204  |
+| 2   | 2913    | 3263    | 6176  |
+
+45 trees and 40 features
+RMSE: 0.704932999027519
+Pearson Correlation: 0.006228094177099146
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3005    | 3199    | 6204  |
+| 2   | 2953    | 3223    | 6176  |
+
+45 trees and 50 features
+RMSE: 0.7088751926624413
+Pearson Correlation: -0.004924435917125209
+Accuracy = 49.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2967    | 3237    | 6204  |
+| 2   | 2984    | 3192    | 6176  |
+
+45 trees and 60 features
+RMSE: 0.7064782163047107
+Pearson Correlation: 0.0018552381959893612
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3002    | 3202    | 6204  |
+| 2   | 2977    | 3199    | 6176  |
+
+45 trees and 70 features
+RMSE: 0.7023500823136634
+Pearson Correlation: 0.013534749586679953
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2993    | 3211    | 6204  |
+| 2   | 2896    | 3280    | 6176  |
+
+50 trees and 30 features
+RMSE: 0.704531833920993
+Pearson Correlation: 0.007387681655138917
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2975    | 3229    | 6204  |
+| 2   | 2916    | 3260    | 6176  |
+
+50 trees and 40 features
+RMSE: 0.7068211391707773
+Pearson Correlation: 0.0009218089862188612
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2950    | 3254    | 6204  |
+| 2   | 2931    | 3245    | 6176  |
+
+50 trees and 50 features
+RMSE: 0.7040157143201372
+Pearson Correlation: 0.00881893507959595
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 3008    | 3196    | 6204  |
+| 2   | 2940    | 3236    | 6176  |
+
+50 trees and 60 features
+RMSE: 0.7034418039660734
+Pearson Correlation: 0.010469299408891129
+Accuracy = 50.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2975    | 3229    | 6204  |
+| 2   | 2897    | 3279    | 6176  |
+
+50 trees and 70 features
+RMSE: 0.7075064862669844
+Pearson Correlation: -0.000985701174293373
+Accuracy = 49.02%
+2x3 DataFrames.DataFrame
+| Row | 0.0-0.5 | 0.5-1.0 | TOTAL |
+|-----|---------|---------|-------|
+| 1   | 2897    | 3307    | 6204  |
+| 2   | 2890    | 3286    | 6176  |
