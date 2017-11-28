@@ -16,8 +16,8 @@ exe_dir=`dirname "$0"`
 #MCRROOT=$HOME/global-data/MCRlib/v717
 
 #The MCRROOTs below are for running on the UCI Computer Science servers
-#MCRROOT=/pkg/matlab/R2017a
-MCRROOT=/pkg/matlab/current
+MCRROOT=/pkg/matlab/R2017a
+#MCRROOT=/pkg/matlab/current
 #MCRROOT=/pkg/matlab/R2014a
 #MCRROOT=/pkg/matlab/7.14_r2012a # What Araceli had
 #MCRROOT=/pkg/matlib/7.11_r2010b
@@ -37,4 +37,4 @@ export XAPPLRESDIR;
 USAGE="USAGE:
 `basename $0` <matout dirname> <cssv filename>"
 
-exec /home/sparcfire/bin/ArcServer/writeGxyParamsToCsv.r123 "$@"
+exec /home/dlcheng/bin/ArcServer/writeGxyParamsToCsv.r124 "$@"

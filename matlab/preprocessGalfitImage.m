@@ -43,12 +43,12 @@ function [result] = preprocessGalfitImage(img,outputPath,gxyParams)
 
     % Retrieve input/model subtraction
     result = mat2gray(fitsread([outputPath '_galfit_output.fits'], 'image', 3));
-    result = img - mat2gray(fitsread([outputPath '_galfit_output.fits'], 'image', 2));
+    %result = img - mat2gray(fitsread([outputPath '_galfit_output.fits'], 'image', 2));
 
     % Cleanup files
     disp('Removing galfit.* files...')
     delete([outputPath 'galfit.*']);
-    delete([outputPath '.feedme.fits']);
+    delete([outputPath '.feedme']);
     delete([outputPath '_galfit_input.fits']);
     delete([outputPath '_galfit_output.fits']);
 end

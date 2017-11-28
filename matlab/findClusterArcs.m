@@ -382,12 +382,8 @@ if ~isempty(gxyName) && outputParams.writeImages
         gxyParams.iptCtrXY(1)], gxyParams.iptSz);
     imwrite(clusReproj, [outputPath '-K_clusMask-reprojected.png']);
     if getenv('GENERATEFITQUALITY')
-        gxyParams = getFitQuality(img, clusReproj, outputPath, gxyParams);
+        gxyParams = getGalfitFitQuality(imgOrig, clusReproj, outputPath, gxyParams);
     end
-end
-
-if ~isempty(gxyName) && outputParams.writeImages
-    gxyParams = getFitQuality(img, outputPath, gxyParams);
 end
 
 if ~isempty(gxyName) && outputParams.writeTxt

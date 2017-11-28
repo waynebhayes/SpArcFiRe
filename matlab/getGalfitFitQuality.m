@@ -26,6 +26,7 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
     text = strrep(text, '$output_name', [outputPath '_galfit_output.fits']);
     text = strrep(text, '$x_center', num2str(muFit(1)));
     text = strrep(text, '$y_center', num2str(size(img, 1) - muFit(2) + 1));
+    text = strrep(text, '$radius_bulge', num2str(gxyParams.bulgeMajAxsLen / 4));
     text = strrep(text, '$radius_disk', num2str(gxyParams.diskMajAxsLen / 4));
     text = strrep(text, '$sersic_index', num2str(1.0));
     text = strrep(text, '$axis_ratio', num2str(gxyParams.diskAxisRatio));
@@ -42,36 +43,56 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
     eval(galfitCommand)
 
     % Retrieve input/model subtraction
+    model = mat2gray(fitsread([outputPath '_galfit_output.fits'], 'image', 2));
     residual = mat2gray(fitsread([outputPath '_galfit_output.fits'], 'image', 3));
-    binarizedClusters = imbinarize(clusReproj, 0.1);
-    binarized = imbinarize(residual, 'adaptive');
-    figure(1);
-    imshow(binarizedClusters);
-    figure(2);
-    imshow(binarized);
+    binarizedClusters = imbinarize(rgb2gray(clusReproj), 0.1);
+    binarizedModel = imbinarize(model);
+    binarizedResidual = imbinarize(residual);
+    relevantElements = binarizedModel.*binarizedResidual;
+%     figure(1);
+%     imshow(binarizedClusters);
+%     figure(2);
+%     imshow(binarizedModel);
+%     figure(3);
+%     imshow(binarizedResidual);
+%     figure(4);
+%     imshow(relevantElements);
     
     % Calculate number of true positives.
     selectedElements = binarizedClusters;
-    relevantElements = binarized
-    truePositives = sum(times(relevantElements, selectedElements));
+    %relevantElements = binarizedModel.*binarizedResidual;
+    truePositiveElements = times(relevantElements, selectedElements);
+    truePositives = sum(sum(times(relevantElements, selectedElements)));
     disp(['     truePositives: ' int2str(truePositives)])
 
     % Calculate F1 confidence.
-    precision = truePositives / sum(selectedElements);
-    recall = truePositives / sum(relevantElements);
-    disp(['     precision: ' int2str(precision)]);
-    disp(['     recall: ' int2str(recall)]);
+    precision = truePositives / sum(sum(selectedElements));
+    recall = truePositives / sum(sum(relevantElements));
+    disp(['     precision: ' num2str(precision)]);
+    disp(['     recall: ' num2str(recall)]);
 
     f1confidence = (2 * precision * recall) / (precision + recall);
-    disp(['     f1confidence: ' int2str(f1confidence)]);
+    disp(['     f1confidence: ' num2str(f1confidence)]);
     
     gxyParams.fitQuality = f1confidence;
     result = gxyParams;
+
+
+
+    % Writing images
+    grouped =  cat(2,model,residual,relevantElements,selectedElements,truePositiveElements);
+    imwrite(model, [outputPath '-L1_model.png']);
+    imwrite(residual, [outputPath '-L2_residual.png']);
+    imwrite(relevantElements, [outputPath '-L3_maskedResidual.png']);
+    imwrite(selectedElements, [outputPath '-L4_clusMask.png']);
+    imwrite(truePositiveElements, [outputPath '-L5_maskedClustersResidual.png']);
+    imwrite(grouped, [outputPath '-L_fitQuality.png']);
+
     % Cleanup files
-    disp('Removing galfit.* files...')
-    delete([outputPath 'galfit.*']);
-    delete([outputPath '.feedme.fits']);
-    delete([outputPath '_galfit_input.fits']);
-    delete([outputPath '_galfit_output.fits']);
+    %disp('Removing galfit.* files...')
+    %delete([outputPath 'galfit.*']);
+    %delete([outputPath '.feedme']);
+    %delete([outputPath '_galfit_input.fits']);
+    %delete([outputPath '_galfit_output.fits']);
 end
 
