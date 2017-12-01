@@ -270,7 +270,16 @@ if ~isempty(gxyName) && outputParams.writeImages
     clusMask = showClustersFromMtxs(cat(3, clusMtxs, barClus), size(img), [], [], false);
     imwrite(clusMask, [outputPath '-D_clusMask.png']);
     pause(sleepSecondsAfterImageWrite);
-    
+
+    if getenv('WRITEBULGEMASK')
+        imgSize = size(imgNoUsm);
+        greyscaleClusMask = im2double(imbinarize(rgb2gray(clusMask), 0.1));
+        bulgeMask = im2double(imresize(imread([outputPath '-D1_bulgeMask.png']), imgSize));
+        cropMasked = imsubtract(imsubtract(imgNoUsm, greyscaleClusMask), bulgeMask);
+        imwrite(cropMasked, [outputPath '-D2_cropMasked.png']);
+        pause(sleepSecondsAfterImageWrite);
+    end
+
 %     hacImg = showClusters(clusters, size(img), clusSizeCutoff);
     hacOverlay = displayLgspOverlay(hacImg, lgspParams, ctrR, ctrC, lgspBounds);
 %     hacOverlay = hacOverlay + repmat(barOverlay, [1 1 3]);

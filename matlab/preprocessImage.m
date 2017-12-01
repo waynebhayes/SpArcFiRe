@@ -1,5 +1,5 @@
 function [img, imgNoUsm, gxyParams, fitParams, exactCtrR, exactCtrC, fromOrigImg, masked] = ...
-    preprocessImage(img, stgs, starMask, prevFitParams, processGalfit, outputPath, gxyName)
+    preprocessImage(img, stgs, starMask, prevFitParams, outputPath, gxyName)
 % Transforms the given image into a standardized/enhanced form for
 % clustering and arc-fitting.
 % INPUTS:
@@ -145,7 +145,7 @@ if isempty(prevFitParams)
     doneFitting = false;
     imgBeforeMasking = img;
     while ~doneFitting
-        [muFit, covarFit, nonConvFlag, likFinal, gxyParams] = ...
+        [muFit, covarFit, nonConvFlag, likFinal, gxyParams, bulgeMask] = ...
             iterFitGauss(img, stgs, muFix, gxyParams);
         ctrDrift = sqrt((muFit(1) - imgCtrC)^2 + (muFit(2) - imgCtrR)^2);
         [t1, t2, t3, curMajAxsLen] = findCovarElpsAxes(covarFit, likCutoff, size(img));
@@ -251,6 +251,10 @@ if isempty(prevFitParams)
     brtOuter = sort(img(likOuter), 'descend');
     contourBrtRatio = mean(img(likInner)) / mean(brtOuter(1:nnz(likInner)));
 
+    if getenv('WRITEBULGEMASK')
+        imwrite(bulgeMask, [outputPath '-D1_bulgeMask.png']);
+    end
+
     % figure; imshow(img .* likOuter);
 
     % brtInner = sort(img(likInner), 'descend'); brtInner = brtInner(1:100);
@@ -321,7 +325,7 @@ end
 
 
 % split into preprocessGalfitImage.m
-if getenv('USEGALFITRESIDUAL');
+if getenv('USEGALFITRESIDUAL')
     img = preprocessGalfitImage(img,outputPath,gxyParams);
 end
 

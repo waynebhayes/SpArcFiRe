@@ -1,4 +1,4 @@
-function [muFinal, covarFinal, nonConvFlag, likFinal, gxyParams] = ...
+function [muFinal, covarFinal, nonConvFlag, likFinal, gxyParams, bulgeMask] = ...
     iterFitGauss(img, stgs, muFix, gxyParams, plotFlag)
 % Iteratively fits a Gaussian to the image pixels (re-weighting according
 % to an estimate of the probability that the pixel value actually belongs 
@@ -267,7 +267,7 @@ for refit = 1:1:maxRefits % change this condition
     if lookForCtr
         muChg = sqrt(sum((mu - muPrev).^2));
         if (muChg < convTol) || (refit == maxRefits)
-            [muFinal, covarFinal, nonConvFlag, likFinal, gxyParams] = ...
+            [muFinal, covarFinal, nonConvFlag, likFinal, gxyParams, bulgeMask] = ...
                 iterFitGauss(img, stgs, mu, gxyParams, origPlotFlag);
             return;
         end
@@ -286,6 +286,8 @@ if lookForBulge
         gxyParams.bulgeMajAxsAngle = bulgeMajAxsAngle;
     end
     bulgeRgn = likBulge >= likCutoff;
+    bulgeMask = zeros(size(likBulge, 1), size(likBulge, 2));
+    bulgeMask(bulgeRgn) = 1;
     diskRgn = (likFinal >= likCutoff) & ~bulgeRgn;
     diskAvgBrt = sum(img(diskRgn)) / sum(diskRgn(:));
     gxyParams.bulgeAvgBrt = sum(img(bulgeRgn)) / sum(bulgeRgn(:));
