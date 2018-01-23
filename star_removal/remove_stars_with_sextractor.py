@@ -20,7 +20,7 @@ import shutil
 import subprocess
 import sys
 
-import fits_rw
+import pyfits
 
 logger = logging.getLogger('remove_stars_with_sextractor')
 
@@ -32,8 +32,8 @@ def remove_padding(img):
 #    print img.shape
 #    print "c_rep shape: ", c_rep.shape
 #    print "r_rep shape: ", r_rep.shape
-#    fits_rw.write_fits(c_rep, "c_rep.fits")
-#    fits_rw.write_fits(r_rep, "r_rep.fits")
+#    pyfits.write_fits(c_rep, "c_rep.fits")
+#    pyfits.write_fits(r_rep, "r_rep.fits")
     npr = np.flatnonzero(
         np.sum((img != c_rep),
             axis=1) )
@@ -90,7 +90,7 @@ def gen_sextractor_segmentation(in_filepath, tmp_catalog_filepath, tmp_seg_filep
         logger.warning("output not produced for {0}".format(in_filename))
         return None
     logger.info("reading input and SExtractor-segmentation images")
-    seg_img = fits_rw.read_fits(tmp_seg_filepath)
+    seg_img = pyfits.getdata(tmp_seg_filepath)
     return seg_img.astype(np.int)
     
 def remove_nonconnected_cmpts(seg_img):
@@ -456,7 +456,7 @@ if __name__ == '__main__':
         tmp_seg_filepath = os.path.join(
             tmpdir, in_imgname + '_segmentation.fits')
         
-        in_img = fits_rw.read_fits(in_filepath)
+        in_img = pyfits.getdata(in_filepath)
         logger.info('input image dimensions: {0}'.format(in_img.shape))
         tmp_depad_imgpath = None
         (depad_img, removed_padding) = remove_padding(in_img)
@@ -466,7 +466,7 @@ if __name__ == '__main__':
             logger.warning("padding found in the input image")
             tmp_depad_imgpath = os.path.join(tmpdir, 
                 in_filename[:-len(fits_suffix)] + "_depadded.fits")
-            fits_rw.write_fits(depad_img, tmp_depad_imgpath)
+            pyfits.writeto(tmp_depad_imgpath, depad_img)
             logger.info("created a de-padded image for SExtractor to use")
             sex_in_filepath = tmp_depad_imgpath
             ctr_r = ctr_r - removed_padding[0][0]
@@ -479,7 +479,10 @@ if __name__ == '__main__':
             os.remove(tmp_depad_imgpath)
             logger.info("removed temporary de-padded image")
         if not keep_seg_img:
-            os.remove(tmp_seg_filepath)
+            try:
+                os.remove(tmp_seg_filepath)
+            except:
+                logger.info("not able to remove segmentation image")
             logger.info("removed segmentation image")
         if seg_img is None:
             continue
@@ -499,7 +502,7 @@ if __name__ == '__main__':
         assert in_filename.endswith(fits_suffix)
         if write_masked_img:
             out_filepath = os.path.join(out_dirpath, in_imgname + '_star-rm.fits')
-            fits_rw.write_fits(out_img, out_filepath)
+            pyfits.writeto(out_filepath, out_img)
             logger.info("wrote {0}".format(out_filepath))
         
         imsave(os.path.join(out_dirpath, in_imgname + '_starmask.png'), mask_levels)
