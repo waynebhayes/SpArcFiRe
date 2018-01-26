@@ -1,5 +1,6 @@
 #!/bin/bash
-input="/home/dlcheng/sparcfire/scripts/dlcheng/P_SP.8.uniq.txt"
+#input="/home/dlcheng/sparcfire/scripts/dlcheng/P_SP.8.uniq.txt"
+input="/home/dlcheng/sparcfire/scripts/dlcheng/P_SP.8-.5.uniq.txt"
 START=$1
 END=$2
 COPYDIR="/home/dlcheng/SDSS/G.in"
@@ -12,7 +13,7 @@ do
             echo "zcat /extra/wayne1/research/drdavis/SDSS/FITS/hash/${line:(-2)}/${line}/${line}_g.fits.gz > $COPYDIR/${line}_g.fits"
             zcat /extra/wayne1/research/drdavis/SDSS/FITS/hash/${line:(-2)}/${line}/${line}_g.fits.gz > $COPYDIR/${line}_g.fits
             COUNTER=$[COUNTER + 1]
-            if [ $COUNTER -eq $END || "$COUNTER" -eq 50 ] #Break out when set amount of galaxies have been read out. 
+            if [ $COUNTER -eq $END ]; #Break out when set amount of galaxies have been read out. 
             then
                 break 
             fi

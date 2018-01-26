@@ -9,10 +9,8 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
 % OUTPUTS:
 %   img: the preprocessed image
 %   imgNoUsm: the preprocessed image, without applying the unsharp mask
-%   gxyParams: structure containing some information about the ellipse fit
-
+%   gxyParams: structure containing some information about the ellipse fit 
     
-    %  
     fitswrite(img, [outputPath '_galfit_input.fits']);
     galfitTemplate = fopen('~/sparcfire/galfit/template.feedme','r');
     text = fread(galfitTemplate);
@@ -49,14 +47,22 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
     binarizedModel = imbinarize(model);
     binarizedResidual = imbinarize(residual);
     relevantElements = binarizedModel.*binarizedResidual;
-%     figure(1);
-%     imshow(binarizedClusters);
-%     figure(2);
-%     imshow(binarizedModel);
-%     figure(3);
-%     imshow(binarizedResidual);
-%     figure(4);
-%     imshow(relevantElements);
+    
+   % disp(mean2(model));
+   % disp(mean2(residual));
+   % disp(mean2(binarizedResidual));
+   % residualMedian = medfilt2(residual, 'symmetric');
+   % residual2Median = medfilt2(binarizedResidual, 'symmetric');
+   % figure(1);
+   % imshow(residual);
+   % figure(2);
+   % imshow(residualMedian);
+   % figure(3);
+   % imshow(residual2Median);
+   %  figure(3);
+   %  imshow(binarizedResidual);
+   %  figure(4);
+   %  imshow(relevantElements);
     
     % Calculate number of true positives.
     selectedElements = binarizedClusters;
@@ -70,14 +76,13 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
     recall = truePositives / sum(sum(relevantElements));
     disp(['     precision: ' num2str(precision)]);
     disp(['     recall: ' num2str(recall)]);
-
     f1confidence = (2 * precision * recall) / (precision + recall);
     disp(['     f1confidence: ' num2str(f1confidence)]);
-    
-    gxyParams.fitQuality = f1confidence;
+    gxyParams.fitQualityF1 = f1confidence;
+
+    pearsonCorrelationCoefficient = corr2(residual, selectedElements);
+    gxyParams.fitQualityPCC = pearsonCorrelationCoefficient;
     result = gxyParams;
-
-
 
     % Writing images
     grouped =  cat(2,model,residual,relevantElements,selectedElements,truePositiveElements);

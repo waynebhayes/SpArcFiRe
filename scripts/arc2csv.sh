@@ -33,7 +33,7 @@ export XAPPLRESDIR;
 export MCRROOT;
 #echo LD_LIBRARY_PATH is ${LD_LIBRARY_PATH};
 N=1
-until ${exe_dir}/writeGxyParamsToCsv.r124 "$@"
+until ${exe_dir}/writeGxyParamsToCsv.r125 "$@"
 do
   N=`expr $N - 1`
   if [ $N -eq 0 ]; then break; fi; 

@@ -37,4 +37,4 @@ export XAPPLRESDIR;
 USAGE="USAGE:
 `basename $0` <matout dirname> <cssv filename>"
 
-exec /home/dlcheng/bin/ArcServer/writeGxyParamsToCsv.r124 "$@"
+exec /home/dlcheng/bin/ArcServer/writeGxyParamsToCsv.r125 "$@"

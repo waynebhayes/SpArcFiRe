@@ -1,6 +1,6 @@
 SF_DIR=/home/dlcheng/SDSS/G.out
 cd $SF_DIR
-rm /home/dlcheng/public_html/images/*
+#rm /home/dlcheng/public_html/images/*
 for d in * ; do
     echo "$d"
     if [ -d "$d" ]; 
