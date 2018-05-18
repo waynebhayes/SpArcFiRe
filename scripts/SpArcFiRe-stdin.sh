@@ -4,6 +4,7 @@
 # Sets up the MCR environment for the current $ARCH and executes 
 # the specified command.
 #
+#HOME=/home/sparcfire   # Make this the base of your SpArcFiRe bin/ distribution, or leave commented to use default HOME.
 unset DISPLAY # ensure no X windows pop up
 die() { echo "$@" >&2; exit 1
 }
@@ -70,6 +71,7 @@ while [ "$1" != "" ]; do
                   -groupOutputByProcess)                     GROUPOUTPUTBYPROCESS="$2"; export GROUPOUTPUTBYPROCESS; shift 2;;
                -groupOutputByInputImage)                  GROUPOUTPUTBYINPUTIMAGE="$2"; export GROUPOUTPUTBYINPUTIMAGE; shift 2;;
             -writeSettingsForEveryImage)               WRITESETTINGSFOREVERYIMAGE="$2"; export WRITESETTINGSFOREVERYIMAGE; shift 2;;
+                        -writeBulgeMask)                           WRITEBULGEMASK="$2"; export WRITEBULGEMASK; shift 2;;
                                 -useMex)                                   USEMEX="$2"; export USEMEX; shift 2;;
              -numOrientationFieldLevels)                NUMORIENTATIONFIELDLEVELS="$2"; export NUMORIENTATIONFIELDLEVELS; shift 2;;
                               -mirrorLR)                                 MIRRORLR="$2"; export MIRRORLR; shift 2;;
@@ -106,4 +108,4 @@ done
 echo "Enter 'help' for syntax; blank line or 'exit' or 'quit' exits. Wait for MATLAB to start..."
 # only argument is a settings file, NONE for none.
 set -x
-tee SpArcFiRe-stdin.stdin.txt | exec /home/dlcheng/sparcfire/executable/run_findClusterArcsServer.sh $MCRROOT NONE
+tee SpArcFiRe-stdin.stdin.txt | exec $HOME/bin/ArcServer/run_findClusterArcsServer.sh $MCRROOT NONE

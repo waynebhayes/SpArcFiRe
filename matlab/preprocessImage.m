@@ -1,3 +1,4 @@
+
 function [img, imgNoUsm, gxyParams, fitParams, exactCtrR, exactCtrC, fromOrigImg, masked] = ...
     preprocessImage(img, stgs, starMask, prevFitParams, outputPath, gxyName)
 % Transforms the given image into a standardized/enhanced form for
@@ -497,13 +498,13 @@ if useDeProjectStretch
 %     imwrite(imgForUsm, [run_id '_deproject_06.png']);
     imgForUsm = imrotate(imgForUsm, rotAngle, 'bilinear');
 %     imwrite(imgForUsm, [run_id '_deproject_07.png']);
-    usmImgCropAmt = size(imgForUsm) - size(img);
+    usmImgCropAmt = round(size(imgForUsm) - size(img));
     % image rotate dimensions should be odd on both dimensions, so the
     % differences of the dimensions should be even
     % assert(all(mod(usmImgCropAmt, 2) == 0)); % This line causes csv writing errors. (tested 10/18/2017, not working)
     usmImgCropAmt = usmImgCropAmt / 2;
-    imgForUsm = imgForUsm(1+usmImgCropAmt(1):end-usmImgCropAmt(1), ...
-        1+usmImgCropAmt(2):end-usmImgCropAmt(2));
+    imgForUsm = imgForUsm(round(1+usmImgCropAmt(1)):round(end-usmImgCropAmt(1)), ...
+        round(1+usmImgCropAmt(2)):round(end-usmImgCropAmt(2)));
 %     imwrite(imgForUsm, [run_id '_deproject_08.png']);
     assert(all(size(imgForUsm) == size(img)));
     

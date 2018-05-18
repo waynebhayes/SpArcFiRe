@@ -173,16 +173,23 @@ ofld = ofld .* repmat(intensityImg ~= 0, [1 1 2]);
 if ~isempty(gxyName) && outputParams.writeImages && generateOrientationFieldPdf
     displayOrientationField(ofld, true, false);
 %     export_fig([outputPath '-orientation-field.pdf']);
-    ti = get(gca,'TightInset');
-    set(gca,'Position',[ti(1) ti(2) 1-ti(3)-ti(1) 1-ti(4)-ti(2)]);
-    set(gca,'units','centimeters')
-    pos = get(gca,'Position');
-    ti = get(gca,'TightInset');
-    set(gcf, 'PaperUnits','centimeters');
-    set(gcf, 'PaperSize', [pos(3)+ti(1)+ti(3) pos(4)+ti(2)+ti(4)]);
+    %ti = get(gca,'TightInset');
+    %set(gca,'Position',[ti(1) ti(2) 1-ti(3)-ti(1) 1-ti(4)-ti(2)]);
+    %set(gca,'units','centimeters')
+    %pos = get(gca,'Position');
+    %ti = get(gca,'TightInset');
+    %set(gcf, 'PaperUnits','centimeters');
+    %set(gcf, 'PaperSize', [pos(3)+ti(1)+ti(3) pos(4)+ti(2)+ti(4)]);
+    %set(gcf, 'PaperPositionMode', 'manual');
+    %set(gcf, 'PaperPosition',[0 0 pos(3)+ti(1)+ti(3) pos(4)+ti(2)+ti(4)]);
+    figSize = 1024/150;
+    set(gcf, 'PaperUnits','inches');
+    set(gcf, 'PaperSize', [figSize figSize]);
     set(gcf, 'PaperPositionMode', 'manual');
-    set(gcf, 'PaperPosition',[0 0 pos(3)+ti(1)+ti(3) pos(4)+ti(2)+ti(4)]);
-    saveas(gcf, [outputPath '-O_orientation-field.pdf']);
+    set(gcf, 'PaperPosition',[0 0 figSize figSize]);
+    saveas(gcf, [outputPath '-O_orientation-field.png']);
+    pngLarge = rgb2gray(imread([outputPath '-O_orientation-field.png']));
+    imwrite(pngLarge, [outputPath '-O_orientation-field.png'],'BitDepth',4);
     close(gcf);
 end
 
@@ -392,6 +399,9 @@ if ~isempty(gxyName) && outputParams.writeImages
     imwrite(clusReproj, [outputPath '-K_clusMask-reprojected.png']);
     if getenv('GENERATEFITQUALITY')
         gxyParams = getGalfitFitQuality(imgOrig, clusReproj, outputPath, gxyParams);
+    else
+        gxyParams.fitQualityF1 = '';
+        gxyParams.fitQualityPCC = '';
     end
 end
 

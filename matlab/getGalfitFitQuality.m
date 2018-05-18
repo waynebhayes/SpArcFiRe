@@ -12,7 +12,7 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
 %   gxyParams: structure containing some information about the ellipse fit 
     
     fitswrite(img, [outputPath '_galfit_input.fits']);
-    galfitTemplate = fopen('~/sparcfire/galfit/template.feedme','r');
+    galfitTemplate = fopen('~/bin/GalfitTemplates/template.feedme','r');
     text = fread(galfitTemplate);
     fclose(galfitTemplate);
 
@@ -37,7 +37,7 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
     fclose(galfitInput);
 
     % Run galfit
-    galfitCommand = ['!~/sparcfire/galfit/galfit ' outputPath '.feedme'];
+    galfitCommand = ['!~/bin/galfit ' outputPath '.feedme'];
     eval(galfitCommand)
 
     % Retrieve input/model subtraction
@@ -86,18 +86,18 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
 
     % Writing images
     grouped =  cat(2,model,residual,relevantElements,selectedElements,truePositiveElements);
-    imwrite(model, [outputPath '-L1_model.png']);
-    imwrite(residual, [outputPath '-L2_residual.png']);
-    imwrite(relevantElements, [outputPath '-L3_maskedResidual.png']);
-    imwrite(selectedElements, [outputPath '-L4_clusMask.png']);
-    imwrite(truePositiveElements, [outputPath '-L5_maskedClustersResidual.png']);
-    imwrite(grouped, [outputPath '-L_fitQuality.png']);
+    %imwrite(model, [outputPath '-L1_model.png']);
+    %imwrite(residual, [outputPath '-L2_residual.png']);
+    %imwrite(relevantElements, [outputPath '-L3_maskedResidual.png']);
+    %imwrite(selectedElements, [outputPath '-L4_clusMask.png']);
+    %imwrite(truePositiveElements, [outputPath '-L5_maskedClustersResidual.png']);
+    %imwrite(grouped, [outputPath '-L_fitQuality.png']);
 
     % Cleanup files
     %disp('Removing galfit.* files...')
     %delete([outputPath 'galfit.*']);
     %delete([outputPath '.feedme']);
-    %delete([outputPath '_galfit_input.fits']);
-    %delete([outputPath '_galfit_output.fits']);
+    delete([outputPath '_galfit_input.fits']);
+    delete([outputPath '_galfit_output.fits']);
 end
 
