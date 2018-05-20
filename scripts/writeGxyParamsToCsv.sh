@@ -4,6 +4,7 @@
 # Sets up the MCR environment for the current $ARCH and executes 
 # the specified command.
 #
+#HOME=/home/sparcfire   # Make this the base of your SpArcFiRe bin/ distribution, or leave commented to use default HOME.
 unset DISPLAY # ensure no X windows pop up
 die() { echo "$@" >&2; exit 1
 }
@@ -37,4 +38,4 @@ export XAPPLRESDIR;
 USAGE="USAGE:
 `basename $0` <matout dirname> <cssv filename>"
 
-exec /home/dlcheng/bin/ArcServer/writeGxyParamsToCsv.r125 "$@"
+exec $HOME/bin/ArcServer/writeGxyParamsToCsv.r125 "$@"

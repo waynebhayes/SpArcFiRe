@@ -292,7 +292,10 @@ if lookForBulge
     diskAvgBrt = sum(img(diskRgn)) / sum(diskRgn(:));
     gxyParams.bulgeAvgBrt = sum(img(bulgeRgn)) / sum(bulgeRgn(:));
     gxyParams.bulgeDiskBrtRatio = gxyParams.bulgeAvgBrt / diskAvgBrt;
+else
+    bulgeMask = zeros(size(img));
 end
+
 if ~lookForBulge && ~isfield(gxyParams, 'badBulgeFitFlag')
     gxyParams.badBulgeFitFlag = [];
     gxyParams.bulgeAxisRatio = [];

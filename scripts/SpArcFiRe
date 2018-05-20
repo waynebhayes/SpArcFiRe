@@ -1,5 +1,5 @@
 #!/bin/sh -x
-HOME=/home/dlcheng   # Make this the base of your SpArcFiRe distribution.
+HOME=/home/dlcheng
 export HOME
 COMMAND_LINE="$0 $@"
 USAGE="USAGE: `basename $0` [-convert-FITS] [-compute-starmask <false|true>] [-ignore-starmask] [-elps_dir DIR] [-web] {inDir} {pngDir} {outDir} [SpArcFiRe-stdin.sh options]
@@ -17,6 +17,8 @@ if -elps_dir is specified with value DIR, we expect there to be an ellipse fitti
 Final parsing images go in outDir, one output directory per galaxy.
 Current directory will have log files and final output CSVs called 'galaxy.csv' and 'galaxy_arcs.csv'."
 
+
+#Show help if no input arguments are given
 if [ $# = 0 ]; then
     echo "$USAGE"
     echo ""
@@ -25,6 +27,7 @@ if [ $# = 0 ]; then
     exec SpArcFiRe-stdin.sh -help
 fi
 
+#Define custom functions for error/warning handling
 die() { echo "FATAL ERROR: $@
 SpArcFire was run as:
 $COMMAND_LINE" >&2
@@ -33,6 +36,7 @@ exit
 warn() { echo "WARNING: $@" >&2
 }
 
+#Set matlab component cache root folder. Make sure permissions are allowed for current user (even if gsu'd in as another user).
 mkdir -p /tmp/sparcfire-${USER:=`basename $HOME`}
 MCR_CACHE_ROOT=/tmp/sparcfire-$USER
 export MCR_CACHE_ROOT
@@ -47,6 +51,7 @@ MAXWEB=1024 # maximum linear resolution of web-submitted jobs
 SKIP="/dev/null"
 CONVERT_ARGS=""
 
+#Handle Sparcfire input arguments
 for i in "$@"
 do
     case "$1" in
@@ -108,7 +113,7 @@ case "$SKIP" in
 esac
 
 # copy only the necessary (non-skip) files to sfDir
-(cd "$inDir" && (ls | fgrep -v -f "$SKIP" | xargs --no-run-if-empty /home/dlcheng/bin/reverse-cp.sh $sfDir)) || die "could not copy files from '$inDir' to $sfDir"
+(cd "$inDir" && (ls | fgrep -v -f "$SKIP" | xargs --no-run-if-empty $HOME/bin/reverse-cp.sh $sfDir)) || die "could not copy files from '$inDir' to $sfDir"
 
 if [ "$ELPS_DIR" != NONE ]; then
     cp -p "$ELPS_DIR"/*_elps.txt $pngDir || die "could not copy ellipse files from '$ELPS_DIR' to '$pngDir'"
@@ -130,8 +135,9 @@ theory-monster*) : ;;
 *) PATH=$HOME/.local/bin:$HOME/bin:$PATH ;;
 esac
 export PATH
- 
+
 # Put starmask into pngDir
+# Depending on server, change python directory to properly call sextractor helper script
 $FITS && $COMPUTE_STARMASK && (
     echo -n "Performing star masking on FITS images...";
     if [ $STARMASK == NONE ]; then
@@ -142,7 +148,14 @@ $FITS && $COMPUTE_STARMASK && (
     cd $HOME/bin/ArcPNGcreator/star_removal
     case `hostname` in
     theory-monster*) python -s remove_stars_with_sextractor.py "$sfDir" "$pngDir" ;;
-    *) python2.7 remove_stars_with_sextractor.py "$sfDir" "$pngDir" ;;
+    bayonet-06*) 
+        source $HOME/bin/SpArcFiRe-pyvenv-bayonet-06/bin/activate;
+        python -s remove_stars_with_sextractor-bayonet-06.py "$sfDir" "$pngDir";
+        deactivate;;
+    *) 
+        source $HOME/bin/SpArcFiRe-pyvenv/bin/activate;
+        python -s remove_stars_with_sextractor.py "$sfDir" "$pngDir"; 
+        deactivate;;
     esac
 )
 
@@ -202,12 +215,7 @@ ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\
 	fi
 	echo $pngDir $f .png $SM $EF $outDir; done | randomizeLines; echo exit) | tee /dev/tty |
     $HOME/bin/SpArcFiRe-stdin.sh -lookForBulge 1 -writeSettingsForEveryImage 1 -generateOrientationFieldPdf 1 "$@" | tee $outDir/SpArcFiRe.log
-ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\.[Ff][Ii][Tt][Ss]$//' | fgrep -v -f "$SKIP" |
-    ( while read f; do
-	#mv $outDir/$f/$f-orientation-field.pdf $outDir/$f/$f-O_orientation-field.pdf
-	convert $outDir/$f/$f-O_orientation-field.pdf $outDir/$f/$f-O_orientation-field.png
-      done)
-#    awk '{printf "'$pngDir' %s .png '$STARMASK' '$outDir'\n", $1}END{print "exit"}'
+ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\.[Ff][Ii][Tt][Ss]$//' | fgrep -v -f "$SKIP"
 
 # Now extract the CSV files
 cd $outDir
