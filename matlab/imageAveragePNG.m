@@ -3,6 +3,7 @@ function imageAveragePNG(files,cleanUp)
 %   files - a matlab cell array of filenames
 %       the first cell should contain the full path of the output file
 %       the rest of the cells should be full filenames of .FITS files
+%   cleanUp - cleanup object that removes the tempGZdir if this function crashes
 if eq(length(files),0)
 	errorStruct.message = 'FATAL ERROR: no files inputted';
 	errorStruct.identifier = 'imageAveragePNG:noInputFiles';
