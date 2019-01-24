@@ -4,6 +4,7 @@
 mkdir "$HOME"/SDSS
 mkdir "$HOME"/SDSS/G.in
 mkdir "$HOME"/SDSS/G.out
+mkdir "$HOME"/SDSS/G.out/matout
 mkdir "$HOME"/SDSS/G.tmp
 
 #download sample fits files to test SpArcFiRe on
