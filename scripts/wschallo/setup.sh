@@ -1,7 +1,6 @@
 #!/bin/bash
 
 #create output directories
-echo "$HOME"
 mkdir "$HOME"/SDSS
 mkdir "$HOME"/SDSS/G.in
 mkdir "$HOME"/SDSS/G.out
@@ -17,4 +16,5 @@ ln -s "$HOME"/SpArcFiRe/scripts/ "$HOME"/bin
 
 #edit Path variables
 sed -i 's#/home/dlcheng/sparcfire/scripts#"$HOME"/bin#g' your_file
-sed -i 's/dlcheng/wschallo/g' "$HOME"/bin/SpArcFiRe
+A="$(echo "$HOME" | cut -d'/' -f3)" #assume HOME in form of: /home/wschallo 
+sed -i 's/dlcheng/"$A"/g' "$HOME"/bin/SpArcFiRe
