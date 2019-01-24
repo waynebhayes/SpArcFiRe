@@ -22,4 +22,4 @@ sed -i "s/dlcheng/$NAME/g" "$HOME"/bin/SpArcFiRe
 
 #fix permission issues:
 chmod +x "$HOME"/bin/ArcServer/run_findClusterArcsServer.sh
-chmod +x "$HOME"/bin/SpArcFiRe
+chmod +x "$HOME"/bin/wschallo/SpArcFiRe-run.sh
