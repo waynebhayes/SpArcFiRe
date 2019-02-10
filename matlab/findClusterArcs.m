@@ -329,10 +329,22 @@ end
 %     writeGalaxyParams(gxyParams, gxyName, outputDir);
 % end
 
+%%%%%% EDITS HERE %%%%%
+
 % do arc merging and produce output files analogous to the ones without
 % the merging
+
+% USES MEAN IMAGE AS GUIDE FOR CLUSTERING 
+if strcmp( gxyName(end), 'n')
+    fprintf('in mean image clustering\n');
+    clusMtxsM = mergeClustersByFit(clusMtxs, ctrR, ctrC, barInfo, stgs);
+else
+    fprintf('using mean image guide\n');
+    clusMtxsM = mergeClustersByGuide(clusMtxs, outputPath, 0.0);
+end
+
 failed2revDuringMerge = false;
-clusMtxsM = mergeClustersByFit(clusMtxs, ctrR, ctrC, barInfo, stgs);
+%clusMtxsM = mergeClustersByFit(clusMtxs, ctrR, ctrC, barInfo, stgs);
 [lgspParamsM, lgspBoundsM, sumSqErrsM, used2revM, failed2revM, hasBadBoundsM] = ...
     fitLogSpiralsToClusters(clusMtxsM, ctrR, ctrC, stgs);
 [barClusM, lgspParamsM, lgspBoundsM, sumSqErrsM, used2revM, failed2revM, hasBadBoundsM, clusMtxsM, barAnglesM, barHalfLensM] = ...
