@@ -1,8 +1,8 @@
 function [gxyParamsList, allClusMtxs] = ...
-    batchFindClusterArcs(iptImgDir, imgNames, imgSuffix, starMaskSuffix, procNum, numProcs, stgs, outputDir, params_filename, recoveryFileName, out_id)
+    batchFindClusterArcs(iptImgDir, imgNames, imgSuffix, starMaskSuffix, procNum, numProcs, stgs, outputDir, params_filename, guides, recoveryFileName, out_id)
 
 usage_msg = ['parameters: input_img_dir img_names img_suffix ',...
-    'star_mask_suffix proc_num num_procs stgs output_dir\n',...
+    'star_mask_suffix proc_num num_procs stgs output_dir guides\n',...
     '\tinput_img_dir is a path to the directory where the input PNG or JPG images are to be found\n',...
     '\timg_names is a text-file path or cell array giving the image names\n',...
     '\timg_suffix is what should be appended to each image name ',...
@@ -13,6 +13,13 @@ usage_msg = ['parameters: input_img_dir img_names img_suffix ',...
     'than one process, each should be given the same img_names.\n',...
     '\tstgs is a settings struct or path to a settings file, or "NONE" to use defaults.\n',...
     '\toutput_dir is where the output files should be placed.\n',...
+    '\tguideDir is a path to the directory where guide images are found, specify iff using ',...
+    'image guiding otherwise "NONE".\n',...
+    '\tguides is a text-file path or a cell array giving which guide images should be used ',...
+    'with which image. "NONE" if not using image guiding. ',...
+    'For text, should be formatted imgName,guideName where guideName is a path to the guide image. ',...
+    'For MATLAB matrix, should be a 2xn matrix where n is the number of images, ',...
+    'imageName in first column and guideImage in second column\n',...
     'If this is being run in standalone mode, the corresponding script may ',...
     'need additional parameters.\n'];
 % out_id is for findClusterArcsServer and should be specified iff the arc
@@ -23,7 +30,7 @@ if nargin < 8
     fprintf(usage_msg)
 end
 
-error(nargchk(8, 11, nargin));
+error(nargchk(8, 12, nargin)); %EDITED
 
 if strcmpi(stgs, 'NONE') || isempty(stgs)
     fprintf('No fit settings specified. Using defaults.\n');
@@ -70,7 +77,30 @@ if nargin < 9
     stdzParamsList = {};
 end
 
-if nargin < 10
+
+if strcmpi(guides, 'NONE')
+    if stgs.imageGuidingThreshold >= 0
+        error('Using Image Guiding but no guide images specified');
+    else
+        imageGuiding = 0;
+    end
+else %guideDir specified
+    if stgs.imageGuidingThreshold < 0
+        error('image guiding is off but guide images are specified');
+    %elseif ~isdir(guide)
+    %    error('%s is not a directory',guideDir);
+    %elseif guideDir(end) ~= filesep
+    %    guideDir = [guideDir filesep];
+    %    imageGuiding = 1;
+    else
+        if (stgs.imageGuidingThreshold > 1)
+            error('imageGuidingThreshold must be between 1 and 0 inclusive');
+        end
+        imageGuiding = 1;
+    end
+end
+
+if nargin < 12
     recoveryFileName = [];
 end
 
@@ -149,6 +179,59 @@ if ischar(imgNames)
         fclose(namesFile);
     end
 end
+
+guideDirGiven=false;
+if imageGuiding
+    validateattributes(guides,{'char','cell'},{});
+    if ischar(guides)
+        fprintf('guides specified as a path string, attempting to load from disk \n');
+        try 
+            if exist(guides,'dir')
+                guideDirGiven=true;
+                fprintf('guide directory given, will attempt to load guide when loading galaxy images %s.\n'...
+                    ,guides)                
+            else
+                %get guide from list of guides
+                if (endsWith(guides,'.mat'))
+                    fprintf('attempting to read guides as mat file.\n');
+                    guideStruct=load(guides);
+                    guideFields=fields(guideStruct);
+                    guidePath=cellfun(@(x)(~isempty(regexpi(x,'Guides$'))),guideFields);
+                    if sum(guidePath) == 0
+                        error('no variable with suffix "Guides" found in mat-file %s',...
+                            guides)
+                    elseif sum(guidePath) > 1
+                        error('multiple variables with suffix "Guides" found in mat-file %s',...
+                            guides)
+                    end
+                    guideFieldName=guideFields(guidePath);
+                    imagesAndGuides=getfield(guideStruct,guideFieldName{1});
+                else
+                    fileID=fopen(guides);
+                    imagesAndGuides = textscan(fileID,'%s %s','Delimiter',',');
+                    fclose(fileID);
+                end
+                gxyImages=imagesAndGuides{1};
+                guideImages=imagesAndGuides{2};
+
+            end
+        catch ME
+            error('ERROR:there was a problem loading the guide image/images : Orginal Error Message: %s\n', ME.message);
+        end
+    else
+        fprintf('reading guides as Matlab cell array\n');
+        try
+            gxyImages=guides{1};
+            guideImages=guides{2};
+        catch ME
+            error('ERROR: unable to load guide images : orginal error message: %s\n',ME.message);
+        end
+        
+    end 
+else
+    guideImageFile='NONE';
+end
+
 % if ischar(imgPaths)
 %     fprintf('imgPaths specified as a path string, attempting to load from disk.\n');
 %     load(imgPaths, 'imgPaths');
@@ -264,6 +347,65 @@ for imgIdx = startIdx:1:length(imgNames)
        curImg = rgb2gray(curImg);
     end
     
+    if imageGuiding
+        if guideDirGiven
+        %get guide from list of guides
+            possibleGuides = [dir(sprintf('%s%s*%s%s%s%s*.png',guides,filesep,filesep,gxyName,filesep,gxyName)), dir(sprintf('%s%s%s%s%s*.png',guides,filesep,gxyName,filesep,gxyName))]; %The first one is for the way the SpArcFiRe team stores files
+            if size(possibleGuides,1) ~=0
+                fprintf('Treating %s as a standard SpArcFiRe output directory\n',guides); %option to disable this?
+                if size(possibleGuides,1) == 1
+                    guideImageFile = [possibleGuides.folder filesep possibleGuides.name];
+                else
+                    fprintf('WARNING: multiple possible guide images detected,attempting to pick 1\n'...
+                        ,gxyName);
+                    index=regexpi({possibleGuides.name},'.*-H_clusMask-merged.png');
+                    possibleFileIndex=find(~cellfun('isempty',index));
+                    if size(possibleFileIndex,2)==1
+                        guideNames={possibleGuides.name};
+                        guideFolders={possibleGuides.folder};
+                        guideImageFile = [guideFolders{possibleFileIndex} filesep guideNames{possibleFileIndex}];
+                    else
+                        error('WARNING: %s :  unable to find 1 guide image, skipping\n',gxyName);
+                    end
+                end
+            else
+                fprintf('%s is not a standard SpArcFiRe output directory, not looking at subdirectories\n',guides);
+                possibleGuides = dir(sprintf('%s%s*%s*.png',guides,filesep,gxyName)); 
+                if size(possibleGuides,1) == 0
+                    fprintf('WARNING: %s:no guide image found in %s, skipping %s\n',gxyName,guides,gxyName);%this error will cause an empty directory to be created
+                    continue;
+                elseif size(possibleGuides,1) == 1
+                    guideImageFile = [possibleGuides.folder filesep possibleGuides.name];
+                else
+                    fprintf('WARNING: %s: multiple possible guide images detected,attempting to pick 1\n'...
+                        ,gxyName)
+                    names={possibleGuides.name};
+                    clusMaskIndex=regexpi(names,'.*-H_clusMask-merged.png');                    
+                    possibleFileIndex=find(~cellfun('isempty',clusMaskIndex));
+                    if size(possibleFileIndex,2)==1
+                        guideNames={possibleGuides.name};
+                        guideFolders={possibleGuides.folder};
+                        guideImageFile = [guideFolders{possibleFileIndex} filesep guideNames{possibleFileIndex}];
+                    else
+                        fprintf('WARNING: %s: unable to find 1 guide image, skipping\n',gxyName);
+                        continue;
+                    end
+                end 
+            end
+        else %use array
+            index = find(strcmp(gxyImages, gxyName));
+            if size(index,1) == 0
+                fprintf('WARNING : %s: No guide image specified, skipping %s\n',gxyName,gxyName);
+                continue;
+            end
+            guideImageFile = guideImages{index};
+
+        end
+        fprintf('using %s as the guide image\n',guideImageFile);
+    else
+        guideImageFile = 'NONE';
+    end
+
     tStart = tic;
     cpuTStart = cputime();
     if groupOutputByInputImage
@@ -282,7 +424,7 @@ for imgIdx = startIdx:1:length(imgNames)
         [lgspParams, lgspBounds, errs, used2rev, failed2rev, hasBadBounds, barInfo, ...
                 clusMtxs, gxyParams, imgAutoCrop, barInds, barUsed] = ...
             findClusterArcs(curImg, stgs, ...
-            gxyName, gxyOutputCtrl, imgOutputDir, starMask, stdzParamsList{imgIdx});
+            gxyName, gxyOutputCtrl, imgOutputDir, starMask, stdzParamsList{imgIdx}, guideImageFile); %EDITED
 %         isBar = false(size(clusMtxs, 3), 1); isBar(barInds) = true;
         if nargout >= 2
             allClusMtxs{imgIdx} = clusMtxs;

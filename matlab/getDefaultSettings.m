@@ -161,4 +161,6 @@ stgs.balClusWtsInMerging = true;
 % potential merge.
 stgs.errRatioThres = 2.5;
 
+stgs.imageGuidingThreshold = -1;
+
 end
