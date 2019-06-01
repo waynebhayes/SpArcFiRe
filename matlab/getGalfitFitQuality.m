@@ -12,9 +12,16 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
 %   gxyParams: structure containing some information about the ellipse fit 
     
     fitswrite(img, [outputPath '_galfit_input.fits']);
+<<<<<<< HEAD
     galfitTemplate = fopen('~/bin/GalfitTemplates/template.feedme','r');
     disp(["galFitProcessNumber",galfitTemplate]);
     text = fread(galfitTemplate);
+=======
+    galfitTemplateFilename = ['/home/' getenv('USER') '/bin/GalfitTemplates/template.feedme']; #added this to call galfit using correct path
+    disp(['Reading GALFIT template file: ' galfitTemplateFilename])
+    galfitTemplate = fopen(galfitTemplateFilename,'r');
+    text = fread(galfitTemplate, '*char')';
+>>>>>>> aa20bad6420a0461c16d54a0bc10b71f147ecd08
     fclose(galfitTemplate);
 
     % Fill out template by replacing variables with their actual values
@@ -38,8 +45,8 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
     fclose(galfitInput);
 
     % Run galfit
-    galfitCommand = ['!~/bin/galfit ' outputPath '.feedme'];
-    eval(galfitCommand)
+    galfitCommand = ['/home/' getenv('USER') '/bin/galfit ' outputPath '.feedme'];
+    system(galfitCommand)
 
     % Retrieve input/model subtraction
     model = mat2gray(fitsread([outputPath '_galfit_output.fits'], 'image', 2));

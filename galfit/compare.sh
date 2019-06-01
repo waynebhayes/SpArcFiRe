@@ -19,6 +19,9 @@ fi
 #echo "Running python sparcfire to galfit conversion script"
 #rm -rf galfit_in/* galfit_out/*
 #python2.7 s2g.py
+
+#activate ? (Will added this on 5/7)
+
 python2.7 compare.py out
 #if [ "$?" != "0" ]; then
 #	echo "Python error, aborting" 1>&2

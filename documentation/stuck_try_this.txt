@@ -1,0 +1,11 @@
+Notes:
+*When compiling the doHacClustering.cpp, use gcc/g++ version 4.9 or below (version 5 and above are not supported by matlab r2017a).
+https://stackoverflow.com/questions/43877694/matlab-invalid-mex-file-error-missing-symbol-invalid-argument
+
+*When compiling matlab, matlab changes paths to reflect environment it was compiled in.
+ex) If I (wschallo) compiled a code containing the following line of code:
+          galfitTemplate = fopen('~/bin/GalfitTemplates/template.feedme','r');
+    It would be translated to:
+          galfitTemplate = fopen('/home/wschallo/bin/GalfitTemplates/template.feedme','r');
+    At compile time
+ To resolve this, create a variable that retrives the user name, and plug-it in to the path.

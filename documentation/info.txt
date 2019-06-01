@@ -1,0 +1,3 @@
+This folder contains documentation about SpArcFiRe's code.
+
+For instructions on how to run SpArcFiRe please see our wikipedia page: https://github.com/wschallo/SpArcFiRe/wiki
