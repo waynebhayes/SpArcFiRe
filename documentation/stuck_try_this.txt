@@ -1,0 +1,3 @@
+Notes:
+When compiling the doHacClustering.cpp, use gcc/g++ version 4.9 or below (version 5 and above are not supported by matlab r2017a).
+https://stackoverflow.com/questions/43877694/matlab-invalid-mex-file-error-missing-symbol-invalid-argument
