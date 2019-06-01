@@ -13,6 +13,7 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
     
     fitswrite(img, [outputPath '_galfit_input.fits']);
     galfitTemplate = fopen('~/bin/GalfitTemplates/template.feedme','r');
+    disp(["galFitProcessNumber",galfitTemplate]);
     text = fread(galfitTemplate);
     fclose(galfitTemplate);
 
