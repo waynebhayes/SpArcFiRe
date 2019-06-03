@@ -17,6 +17,7 @@ ln -s "$HOME"/SpArcFiRe/scripts/ "$HOME"/bin
 
 #edit Path variables
 sed -i "s#/home/dlcheng/sparcfire/scripts#$HOME/bin#g" "$HOME"/bin/SpArcFiRe-pyvenv/bin/activate
+ #  ^above line changes line: VIRTUAL_ENV="/home/dlcheng/bin/SpArcFiRe-pyvenv" in file /bin/SpArcFiRe-pyvenv/bin/activate
 NAME="$(echo "$HOME" | cut -d'/' -f3)" #assume HOME in form of: /home/wschallo 
 sed -i "s/dlcheng/$NAME/g" "$HOME"/bin/SpArcFiRe
 
