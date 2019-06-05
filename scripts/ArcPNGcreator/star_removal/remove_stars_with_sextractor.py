@@ -13,14 +13,14 @@ import logging
 import numpy as np
 import os
 import random
-from scipy.misc import imsave
+import scipy.misc
 import scipy.ndimage as ndimage
 import scipy.stats as stats
 import shutil
 import subprocess
 import sys
 
-import pyfits
+from astropy.io import fits
 
 logger = logging.getLogger('remove_stars_with_sextractor')
 
@@ -90,7 +90,7 @@ def gen_sextractor_segmentation(in_filepath, tmp_catalog_filepath, tmp_seg_filep
         logger.warning("output not produced for {0}".format(in_filename))
         return None
     logger.info("reading input and SExtractor-segmentation images")
-    seg_img = pyfits.getdata(tmp_seg_filepath)
+    seg_img = fits.getdata(tmp_seg_filepath)
     return seg_img.astype(np.int)
     
 def remove_nonconnected_cmpts(seg_img):
@@ -180,8 +180,7 @@ def calc_adj_with_obj(seg_img, refobj_mask):
 #    plt.matshow(refobj_mask)
     for objval in objvals:
         curobj_mask = (seg_img == objval)
-        surr = (ndimage.binary_dilation(ndimage.binary_fill_holes(curobj_mask))
-            - curobj_mask)
+        surr = (ndimage.binary_dilation(ndimage.binary_fill_holes(curobj_mask)) ^ curobj_mask)
 #        plt.matshow(surr);
         adj_props[objval] = np.sum(surr & refobj_mask) / np.sum(surr)
 #    plt.show()
@@ -301,7 +300,7 @@ def calc_brdr_stdev(objmask):
     (all_x, all_y) = np.nonzero(objmask)
     mean_x = np.mean(all_x)
     mean_y = np.mean(all_y)
-    mask_border = objmask - ndimage.binary_erosion(objmask)
+    mask_border = objmask ^ ndimage.binary_erosion(objmask)
     (brdr_x, brdr_y) = np.nonzero(mask_border)
     brdr_dists = np.sqrt((brdr_x - mean_x)**2 + (brdr_y - mean_y)**2)
     brdr_stdev = np.std(brdr_dists)
@@ -456,17 +455,17 @@ if __name__ == '__main__':
         tmp_seg_filepath = os.path.join(
             tmpdir, in_imgname + '_segmentation.fits')
         
-        in_img = pyfits.getdata(in_filepath)
+        in_img = fits.getdata(in_filepath)
         logger.info('input image dimensions: {0}'.format(in_img.shape))
         tmp_depad_imgpath = None
         (depad_img, removed_padding) = remove_padding(in_img)
-        ctr_r = np.round(in_img.shape[0]/2)
-        ctr_c = np.round(in_img.shape[1]/2)
+        ctr_r = int(np.round(in_img.shape[0]/2))
+        ctr_c = int(np.round(in_img.shape[1]/2))
         if removed_padding:
             logger.warning("padding found in the input image")
             tmp_depad_imgpath = os.path.join(tmpdir, 
                 in_filename[:-len(fits_suffix)] + "_depadded.fits")
-            pyfits.writeto(tmp_depad_imgpath, depad_img)
+            fits.writeto(tmp_depad_imgpath, depad_img)
             logger.info("created a de-padded image for SExtractor to use")
             sex_in_filepath = tmp_depad_imgpath
             ctr_r = ctr_r - removed_padding[0][0]
@@ -502,10 +501,10 @@ if __name__ == '__main__':
         assert in_filename.endswith(fits_suffix)
         if write_masked_img:
             out_filepath = os.path.join(out_dirpath, in_imgname + '_star-rm.fits')
-            pyfits.writeto(out_filepath, out_img)
+            fits.writeto(out_filepath, out_img)
             logger.info("wrote {0}".format(out_filepath))
         
-        imsave(os.path.join(out_dirpath, in_imgname + '_starmask.png'), mask_levels)
+        scipy.misc.imsave(os.path.join(out_dirpath, in_imgname + '_starmask.png'), mask_levels)
         
 if not keep_seg_img:
     shutil.rmtree(tmpdir)

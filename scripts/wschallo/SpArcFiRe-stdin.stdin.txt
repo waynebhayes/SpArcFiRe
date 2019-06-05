@@ -1,0 +1,4 @@
+/home/wschallo/SDSS/G.tmp 1237648702967054406_g .png _starmask.png NONE /home/wschallo/SDSS/G.out
+/home/wschallo/SDSS/G.tmp 1237648702967251093_g .png _starmask.png NONE /home/wschallo/SDSS/G.out
+/home/wschallo/SDSS/G.tmp 1237648702966988820_g .png _starmask.png NONE /home/wschallo/SDSS/G.out
+exit
