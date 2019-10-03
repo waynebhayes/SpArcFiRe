@@ -40,6 +40,8 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
 
     % Run galfit
     galfitCommand = ['/home/' getenv('USER') '/bin/galfit ' outputPath '.feedme'];
+    % ^Will 9/30/19: This line of code was added a few months ago because of how matlab evaluates path's at compile time
+    % see documentation/stuck_try_this.txt for more explanation
     system(galfitCommand)
 
     % Retrieve input/model subtraction
