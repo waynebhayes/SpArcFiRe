@@ -99,9 +99,9 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
 
     % Cleanup files
     %disp('Removing galfit.* files...')
-    %delete([outputPath 'galfit.*']);
+    delete([outputPath 'galfit.*']);
     %delete([outputPath '.feedme']);
-    delete([outputPath '_galfit_input.fits']);
-    delete([outputPath '_galfit_output.fits']);
+    %delete([outputPath '_galfit_input.fits']);
+    %delete([outputPath '_galfit_output.fits']);
 end
 
