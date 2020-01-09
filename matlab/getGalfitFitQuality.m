@@ -12,7 +12,7 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
 %   gxyParams: structure containing some information about the ellipse fit 
     
     fitswrite(img, [outputPath '_galfit_input.fits']);
-    galfitTemplateFilename = ['/home/' getenv('USER') '/bin/GalfitTemplates/template.feedme']; #added this to call galfit using correct path
+    galfitTemplateFilename = ['/home/' getenv('USER') '/bin/GalfitTemplates/template.feedme']; %added this to call galfit using correct path
     disp(['Reading GALFIT template file: ' galfitTemplateFilename])
     galfitTemplate = fopen(galfitTemplateFilename,'r');
     text = fread(galfitTemplate, '*char')';
@@ -99,9 +99,9 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
 
     % Cleanup files
     %disp('Removing galfit.* files...')
-    %delete([outputPath 'galfit.*']);
+    delete([outputPath 'galfit.*']);
     %delete([outputPath '.feedme']);
-    delete([outputPath '_galfit_input.fits']);
-    delete([outputPath '_galfit_output.fits']);
+    %delete([outputPath '_galfit_input.fits']);
+    %delete([outputPath '_galfit_output.fits']);
 end
 
