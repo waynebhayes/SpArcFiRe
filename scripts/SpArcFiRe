@@ -1,6 +1,12 @@
 #!/bin/sh -x
-HOME=/home/dlcheng
-export HOME
+die() { echo "FATAL ERROR: $@
+SpArcFire was run as:
+$COMMAND_LINE" >&2
+exit
+}
+warn() { echo "WARNING: $@" >&2
+}
+[ -d "$SPARCFIRE_HOME" ] || die "you forgot to run 'source ./setup.sh' from the base of the SpArcFiRe repo"
 COMMAND_LINE="$0 $@"
 USAGE="USAGE: `basename $0` [-convert-FITS] [-compute-starmask <false|true>] [-ignore-starmask] [-elps_dir DIR] [-web] {inDir} {pngDir} {outDir} [SpArcFiRe-stdin.sh options]
 (\"SpArcFiRe-stdin.sh -help\" will tell you the other options.)
@@ -28,16 +34,8 @@ if [ $# = 0 ]; then
 fi
 
 #Define custom functions for error/warning handling
-die() { echo "FATAL ERROR: $@
-SpArcFire was run as:
-$COMMAND_LINE" >&2
-exit
-}
-warn() { echo "WARNING: $@" >&2
-}
-
 #Set matlab component cache root folder. Make sure permissions are allowed for current user (even if gsu'd in as another user).
-mkdir -p /tmp/sparcfire-${USER:=`basename $HOME`}
+mkdir -p /tmp/sparcfire-${USER:=`basename $SPARCFIRE_HOME`}
 MCR_CACHE_ROOT=/tmp/sparcfire-$USER
 export MCR_CACHE_ROOT
 
@@ -113,7 +111,7 @@ case "$SKIP" in
 esac
 
 # copy only the necessary (non-skip) files to sfDir
-(cd "$inDir" && (ls | fgrep -v -f "$SKIP" | xargs --no-run-if-empty $HOME/bin/reverse-cp.sh $sfDir)) || die "could not copy files from '$inDir' to $sfDir"
+(cd "$inDir" && (ls | fgrep -v -f "$SKIP" | xargs --no-run-if-empty $SPARCFIRE_HOME/scripts/reverse-cp.sh $sfDir)) || die "could not copy files from '$inDir' to $sfDir"
 
 if [ "$ELPS_DIR" != NONE ]; then
     cp -p "$ELPS_DIR"/*_elps.txt $pngDir || die "could not copy ellipse files from '$ELPS_DIR' to '$pngDir'"
@@ -132,7 +130,7 @@ cd $sfDir
 
 case `hostname` in
 theory-monster*) : ;;
-*) PATH=$HOME/.local/bin:$HOME/bin:$PATH ;;
+*) PATH=$SPARCFIRE_HOME/.local/bin:$SPARCFIRE_HOME/scripts:$PATH ;;
 esac
 export PATH
 
@@ -145,22 +143,22 @@ $FITS && $COMPUTE_STARMASK && (
     else
 	echo ""
     fi
-    cd $HOME/bin/ArcPNGcreator/star_removal
+    cd $SPARCFIRE_HOME/scripts/ArcPNGcreator/star_removal
     case `hostname` in
     theory-monster*) python -s remove_stars_with_sextractor.py "$sfDir" "$pngDir" ;;
     bayonet-06*) 
-        source $HOME/bin/SpArcFiRe-pyvenv-bayonet-06/bin/activate;
+        source $SPARCFIRE_HOME/scripts/SpArcFiRe-pyvenv-bayonet-06/bin/activate;
         python -s remove_stars_with_sextractor-bayonet-06.py "$sfDir" "$pngDir";
         deactivate;;
     *) 
-        source $HOME/bin/SpArcFiRe-pyvenv/bin/activate;
+        source $SPARCFIRE_HOME/scripts/SpArcFiRe-pyvenv/bin/activate;
         python -s remove_stars_with_sextractor.py "$sfDir" "$pngDir"; 
         deactivate;;
     esac
 )
 
 # Now run FITStoPNG convesion, if requested
-$FITS && ((echo "Converting FITS images to PNG..."; $HOME/bin/ArcPNGcreator/convertFromFits.0.sh -p $FITS_PARAMS $STARMASK $sfDir $pngDir >$outDir/convertFromFits.log) || die "something went wrong...")
+$FITS && ((echo "Converting FITS images to PNG..."; $SPARCFIRE_HOME/scripts/ArcPNGcreator/convertFromFits.0.sh -p $FITS_PARAMS $STARMASK $sfDir $pngDir >$outDir/convertFromFits.log) || die "something went wrong...")
 echo "Preparing PNG and JPG files to $pngDir..."
 for i in $sfDir/*; do
     case $i in
@@ -214,7 +212,7 @@ ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\
 	    fi
 	fi
 	echo $pngDir $f .png $SM $EF $outDir; done | randomizeLines; echo exit) | tee /dev/tty |
-    $HOME/bin/SpArcFiRe-stdin.sh -lookForBulge 1 -writeSettingsForEveryImage 1 -generateOrientationFieldPdf 1 "$@" | tee $outDir/SpArcFiRe.log
+    $SPARCFIRE_HOME/scripts/SpArcFiRe-stdin.sh -lookForBulge 1 -writeSettingsForEveryImage 1 -generateOrientationFieldPdf 1 "$@" | tee $outDir/SpArcFiRe.log
 ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\.[Ff][Ii][Tt][Ss]$//' | fgrep -v -f "$SKIP"
 
 # Now extract the CSV files
