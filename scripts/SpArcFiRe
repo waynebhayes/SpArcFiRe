@@ -138,7 +138,7 @@ export PATH
 # Depending on server, change python directory to properly call sextractor helper script
 $FITS && $COMPUTE_STARMASK && (
     echo -n "Performing star masking on FITS images...";
-    if [ $STARMASK == NONE ]; then
+    if [ $STARMASK = NONE ]; then
 	echo "(they will be ignored later)"
     else
 	echo ""
@@ -147,13 +147,13 @@ $FITS && $COMPUTE_STARMASK && (
     case `hostname` in
     theory-monster*) python -s remove_stars_with_sextractor.py "$sfDir" "$pngDir" ;;
     bayonet-06*) 
-        source $SPARCFIRE_HOME/scripts/SpArcFiRe-pyvenv-bayonet-06/bin/activate;
-        python -s remove_stars_with_sextractor-bayonet-06.py "$sfDir" "$pngDir";
-        deactivate;;
+        #source $SPARCFIRE_HOME/scripts/SpArcFiRe-pyvenv-bayonet-06/bin/activate;
+        python -s remove_stars_with_sextractor-bayonet-06.py "$sfDir" "$pngDir";;
+        #. deactivate;;
     *) 
-        source $SPARCFIRE_HOME/scripts/SpArcFiRe-pyvenv/bin/activate;
-        python -s remove_stars_with_sextractor.py "$sfDir" "$pngDir"; 
-        deactivate;;
+        #source $SPARCFIRE_HOME/scripts/SpArcFiRe-pyvenv/bin/activate;
+        python -s remove_stars_with_sextractor.py "$sfDir" "$pngDir";; 
+        #deactivate;;
     esac
 )
 

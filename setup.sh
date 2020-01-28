@@ -1,5 +1,5 @@
 #!/bin/sh
-die() { echo "FATAL ERROR: $@" >&2; exit 1
+die() { echo "FATAL ERROR: $@" >&2; return 1
 }
 USAGE="USAGE:
 
