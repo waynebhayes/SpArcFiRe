@@ -108,4 +108,4 @@ done
 echo "Enter 'help' for syntax; blank line or 'exit' or 'quit' exits. Wait for MATLAB to start..."
 # only argument is a settings file, NONE for none.
 set -x
-tee SpArcFiRe-stdin.stdin.txt | exec $HOME/bin/ArcServer/run_findClusterArcsServer.sh $MCRROOT NONE
+tee SpArcFiRe-stdin.stdin.txt | exec $SPARCFIRE_HOME/scripts/ArcServer/run_findClusterArcsServer.sh $MCRROOT NONE
