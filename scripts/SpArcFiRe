@@ -39,6 +39,7 @@ mkdir -p /tmp/sparcfire-${USER:=`basename $SPARCFIRE_HOME`}
 MCR_CACHE_ROOT=/tmp/sparcfire-$USER
 export MCR_CACHE_ROOT
 
+SPARCFIRE_PYTHON="/usr/bin/python2.7"
 FITS_PARAMS="0.25 0.75 2"
 STARMASK="_starmask.png"
 ELPS_DIR="NONE"
@@ -133,7 +134,6 @@ theory-monster*) : ;;
 *) PATH=$SPARCFIRE_HOME/.local/bin:$SPARCFIRE_HOME/scripts:$PATH ;;
 esac
 export PATH
-
 # Put starmask into pngDir
 # Depending on server, change python directory to properly call sextractor helper script
 $FITS && $COMPUTE_STARMASK && (
@@ -145,15 +145,15 @@ $FITS && $COMPUTE_STARMASK && (
     fi
     cd $SPARCFIRE_HOME/scripts/ArcPNGcreator/star_removal
     case `hostname` in
-    theory-monster*) python -s remove_stars_with_sextractor.py "$sfDir" "$pngDir" ;;
+    theory-monster*) $SPARCFIRE_PYTHON remove_stars_with_sextractor.py "$sfDir" "$pngDir" ;;
     bayonet-06*) 
         #source $SPARCFIRE_HOME/scripts/SpArcFiRe-pyvenv-bayonet-06/bin/activate;
-        python -s remove_stars_with_sextractor-bayonet-06.py "$sfDir" "$pngDir";;
-        #. deactivate;;
+        $SPARCFIRE_PYTHON remove_stars_with_sextractor-bayonet-06.py "$sfDir" "$pngDir";;
+        #source deactivate;;
     *) 
         #source $SPARCFIRE_HOME/scripts/SpArcFiRe-pyvenv/bin/activate;
-        python -s remove_stars_with_sextractor.py "$sfDir" "$pngDir";; 
-        #deactivate;;
+        $SPARCFIRE_PYTHON remove_stars_with_sextractor.py "$sfDir" "$pngDir";; 
+        #source deactivate;;
     esac
 )
 
