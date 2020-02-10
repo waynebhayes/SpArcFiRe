@@ -23,6 +23,9 @@ exe_dir=$HOME/bin/ArcPNGcreator
 
 [ "$HOME" = "" ] && die "HOME not set!"
 
+R=121
+MCRROOT=/pkg/matlab/v83
+
 LD_LIBRARY_PATH=.:${MCRROOT}/runtime/glnxa64
 LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRROOT}/bin/glnxa64
 LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRROOT}/sys/os/glnxa64

@@ -15,7 +15,7 @@ exe_dir="$HOME/bin/ArcServer"
 #MCRROOT=/pkg/matlab/current
 #MCRROOT=$HOME/global-data/MCRlib/v717
 #MCRROOT=/pkg/matlab/R2014a
-MCRROOT=/pkg/matlab/R2017a
+MCRROOT=/pkg/matlab/v92
 #MCRROOT=/pkg/matlab/7.14_r2012a # What Araceli had
 #MCRROOT=/pkg/matlib/7.11_r2010b
 
