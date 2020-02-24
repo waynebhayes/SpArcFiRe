@@ -10,10 +10,13 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
 %   img: the preprocessed image
 %   imgNoUsm: the preprocessed image, without applying the unsharp mask
 %   gxyParams: structure containing some information about the ellipse fit 
-    
+
     fitswrite(img, [outputPath '_galfit_input.fits']);
-    galfitTemplate = fopen('~/bin/GalfitTemplates/template.feedme','r');
-    text = fread(galfitTemplate);
+    %galfitTemplateFilename = ['/home/' getenv('USER') '/bin/GalfitTemplates/template.feedme']; %added this to call galfit using correct path
+    galfitTemplateFilename = [getenv('SPARCFIRE_HOME') '/scripts/GalfitTemplates/template.feedme'];
+    disp(['Reading GALFIT template file: ' galfitTemplateFilename])
+    galfitTemplate = fopen(galfitTemplateFilename,'r');
+    text = fread(galfitTemplate, '*char')';
     fclose(galfitTemplate);
 
     % Fill out template by replacing variables with their actual values
@@ -37,8 +40,11 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
     fclose(galfitInput);
 
     % Run galfit
-    galfitCommand = ['!~/bin/galfit ' outputPath '.feedme'];
-    eval(galfitCommand)
+    %galfitCommand = ['/home/' getenv('USER') '/bin/galfit ' outputPath '.feedme'];
+    % ^Will 9/30/19: This line of code was added a few months ago because of how matlab evaluates path's at compile time
+    % see documentation/stuck_try_this.txt for more explanation
+    galfitCommand = [getenv('SPARCFIRE_HOME') '/scripts/galfit ' outputPath '.feedme'];
+    system(galfitCommand)
 
     % Retrieve input/model subtraction
     model = mat2gray(fitsread([outputPath '_galfit_output.fits'], 'image', 2));
@@ -95,9 +101,9 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
 
     % Cleanup files
     %disp('Removing galfit.* files...')
-    %delete([outputPath 'galfit.*']);
+    delete([outputPath 'galfit.*']);
     %delete([outputPath '.feedme']);
-    delete([outputPath '_galfit_input.fits']);
-    delete([outputPath '_galfit_output.fits']);
+    %delete([outputPath '_galfit_input.fits']);
+    %delete([outputPath '_galfit_output.fits']);
 end
 

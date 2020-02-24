@@ -1,0 +1,24 @@
+
+# component number: $component_number
+ 0) sersic                              #  object type                          - The light curve function
+ 1) $x_center  $y_center        0 0     #  position x, y                        - Light curve center coordinates
+ 3) $integrated_magnitude       1       #  Integrated magnitude                 - Brightness parameter
+ 4) $radius                     0       #  R_e (half-light radius)   [pix]      - Size of the light curve at half brightness, in pixels
+ 5) $sersic_index               0       #  Sersic index n (de Vaucouleurs n=4)  - The Sersic exponent (deVauc=4, expdisk/spirals=1)
+ 6) 0.0000                      0       #     -----
+ 7) 0.0000                      0       #     -----
+ 8) 0.0000                      0       #     -----
+ 9) 0.4                         0       #  axis ratio (b/a)                             - Semiminoraxis/semimajor axis ratio
+10) $pitch_angle                0       #  position angle (PA) [deg: Up=0, Left=90]     - Orientation of the ellipse
+
+R0) power                               #  PA rotation func. (power, log, none)
+R1) $r_start                    0       #  Bar radius [pixels]
+R2) $r_end                      0       #  Spiral outer (i.e. asymptotic) radius [pixels]
+R3) $relative_theta_end         0       #  Cumul. rotation out to outer radius [degrees]
+R4) 1.6000                      0       #  Asymptotic spiral powerlaw
+R9) $inclination                0       #  Inclination to L.o.S. [degrees]
+R10) $position_angle            0       #  Sky position angle
+#F1) 0.1 0                      1 1     #  Azim. Fourier mode 1, amplitude, & phase angle
+#F2) 0.0526   28.7927           1 1     #  Azim. Fourier mode 3, amplitude, & phase angle
+#F4) 0.0059   -0.1061           1 1     #  Azim. Fourier mode 4, amplitude, & phase angle
+ Z) 0                                   #  Skip this model in output image?  (yes=1, no=0)
