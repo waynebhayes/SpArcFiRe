@@ -10,9 +10,10 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
 %   img: the preprocessed image
 %   imgNoUsm: the preprocessed image, without applying the unsharp mask
 %   gxyParams: structure containing some information about the ellipse fit 
-    
+
     fitswrite(img, [outputPath '_galfit_input.fits']);
-    galfitTemplateFilename = ['/home/' getenv('USER') '/bin/GalfitTemplates/template.feedme']; %added this to call galfit using correct path
+    %galfitTemplateFilename = ['/home/' getenv('USER') '/bin/GalfitTemplates/template.feedme']; %added this to call galfit using correct path
+    galfitTemplateFilename = [getenv('SPARCFIRE_HOME') '/scripts/GalfitTemplates/template.feedme'];
     disp(['Reading GALFIT template file: ' galfitTemplateFilename])
     galfitTemplate = fopen(galfitTemplateFilename,'r');
     text = fread(galfitTemplate, '*char')';
@@ -39,9 +40,10 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
     fclose(galfitInput);
 
     % Run galfit
-    galfitCommand = ['/home/' getenv('USER') '/bin/galfit ' outputPath '.feedme'];
+    %galfitCommand = ['/home/' getenv('USER') '/bin/galfit ' outputPath '.feedme'];
     % ^Will 9/30/19: This line of code was added a few months ago because of how matlab evaluates path's at compile time
     % see documentation/stuck_try_this.txt for more explanation
+    galfitCommand = [getenv('SPARCFIRE_HOME') '/scripts/galfit ' outputPath '.feedme'];
     system(galfitCommand)
 
     % Retrieve input/model subtraction
