@@ -5,4 +5,4 @@ For instructions on how to setup/ run SpArcFiRe please see our wiki page: https:
 
 Information about SpArcFiRe's code can be found in the documentation directory.
 
-If you have any questions, please email me at: wschallo@uci.edu
+If you have any questions, please email whayes@uci.edu, or jeenglis@uci.edu
