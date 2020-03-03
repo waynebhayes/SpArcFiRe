@@ -3,7 +3,7 @@
 SPiral ARC FInder and REporter - find spiral arcs in galaxies.... or maybe hurricanes too? The "documentation" directory contains the original paper and some other (possibly irrelevant) info. The documentaton below is up-to-date as of March 2020. If you have any questions, please email whayes@uci.edu, or jeenglis@uci.edu
 
 
-#How to Use SpArcFiRe
+##How to Use SpArcFiRe
 
 **Usage**
 
@@ -170,7 +170,7 @@ If a cluster is found to contain the center of the galaxy then it will not be co
 If set to 1 then an approximate pitch angle for each arc is used instead of the slower -deterministic method used by default.
 
 
-**Features Under Maintenence**
+**Features Under Maintenance**
 
 
 -web
@@ -183,12 +183,12 @@ If set to 1 then an approximate pitch angle for each arc is used instead of the 
 
 -fitUsingNonUsmIVals &lt;0 | 1> {Default is 1}
 
-**-nhSize VALUE {Default is 1}**
+-nhSize VALUE {Default is 1}
 
-**-barCandCutoff VALUE {Default is 7}**
+-barCandCutoff VALUE {Default is 7}
 
-**-barDetCutoff VALUE {Default is 2}**
+-barDetCutoff VALUE {Default is 2}
 
-**-ctrDriftThresForStarMask VALUE {Default is 2.5}**
+-ctrDriftThresForStarMask VALUE {Default is 2.5}
 
-**-generateFitQuality &lt;0 | 1> {Default is 1} **
+-generateFitQuality &lt;0 | 1> {Default is 1}
