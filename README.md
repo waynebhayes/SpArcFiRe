@@ -3,9 +3,11 @@
 SPiral ARC FInder and REporter - find spiral arcs in galaxies.... or maybe hurricanes too? The "documentation" directory contains the original paper and some other (possibly irrelevant) info. The documentaton below is up-to-date as of March 2020. If you have any questions, please email whayes@uci.edu, or jeenglis@uci.edu
 
 
-**How to Use SpArcFiRe**
+#How to Use SpArcFiRe
 
-Usage: ~/SpArcFiRe/scripts/SpArcFiRe [-convert-FITS [-p UPPER LOWER N]] [-compute-starmask &lt;true | false>] [-ignore-starmask] [-elps_dir DIR] [-web] {inDir} {tmpDir} {outDir} [other optional options (see below)]
+**Usage**
+
+>~/SpArcFiRe/scripts/SpArcFiRe [-convert-FITS [-p UPPER LOWER N]] [-compute-starmask &lt;true | false>] [-ignore-starmask] [-elps_dir DIR] [-web] {inDir} {tmpDir} {outDir} [other optional options (see below)]
 
 To use recommended arguments
 
@@ -16,7 +18,8 @@ This is the equivalent of
 >~/ SpArcFiRe/scripts/SpArcFiRe -convert-FITS ~/SDSS/G.in ~/SDSS/G.tmp ~/SDSS/G.out -generateFitQuality 0 -writeBulgeMask 1
 
 
-**Optional Arguments:**
+**Optional Arguments**
+
 
 **-convert-FITS [-p UPPER LOWER N]**
 
@@ -35,7 +38,8 @@ Enabling this will tell SpArcFiRe not to attempt to block out the noise or stars
 In order to view a galaxy straight on SpArcFiRe has to warp the original image of the galaxy into one where it appears circular.  This is done by fitting an ellipse around the galaxy and warping it into a circle, which is done automatically by SpArcFiRe unless this option is set.  If this option is set then a file following the format GALAXY_NAME_epls.txt is expected for each galaxy in DIR.
 
 
-**Required Arguments:**
+**Required Arguments**
+
 
 **inDir**
 
@@ -50,7 +54,8 @@ All image types are converted into PNG files for processing, this directory stor
 All SpArcFire output will be saved here.  By default, each galaxy will have its own directory where images showing the steps SpArcFire takes to detect arm segments is visualized.  The data of each arm segment is located at outDir/galaxy_arc.csv and the data of each galaxy is located at outDir/galaxy.csv.  A directory located at ~/SDSS/G.out has been created for this purpose.
 
 
-**Other Optional Arguments:**
+**Other Optional Arguments**
+
 
 **-generateOrientationFieldPdf &lt;0 | 1> {Default is 1}**
 
@@ -152,7 +157,7 @@ If set to 0 then clusters that are being analyzed for merging will weighted base
 
 Controls the amount of error (or difference) that is allowed between clusters when merging, the higher the value the more merging that will occur and vise versa.
 
-**-failWhenNoStarmaskFound &lt;0 | 1> {Default is 0} **
+**-failWhenNoStarmaskFound &lt;0 | 1> {Default is 0}**
 
 If set to 1 and no star mask file is found then then SpArcFiRe will fail instead of the default behavior which is just to create the star mask.
 
@@ -164,17 +169,19 @@ If a cluster is found to contain the center of the galaxy then it will not be co
 
 If set to 1 then an approximate pitch angle for each arc is used instead of the slower -deterministic method used by default.
 
+
 **Features Under Maintenence**
 
-**-web**
 
-**-sleepSecondsAfterImageWrite VALUE {Default is 0} **
+-web
 
-**-ignoreJaggedBoundaryPixelsDuringMerges &lt;0 | 1> {Default is 1}**
+-sleepSecondsAfterImageWrite VALUE {Default is 0}
 
-**-useMex &lt;0 | 1> {Default is 1}**
+-ignoreJaggedBoundaryPixelsDuringMerges &lt;0 | 1> {Default is 1}
 
-**-fitUsingNonUsmIVals &lt;0 | 1> {Default is 1}**
+-useMex &lt;0 | 1> {Default is 1}
+
+-fitUsingNonUsmIVals &lt;0 | 1> {Default is 1}
 
 **-nhSize VALUE {Default is 1}**
 
