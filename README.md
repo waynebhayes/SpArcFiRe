@@ -5,7 +5,7 @@ SPiral ARC FInder and REporter - find spiral arcs in galaxies.... or maybe hurri
 
 ## How to Use SpArcFiRe ##
 
-**Usage**
+Usage
 
 >~/SpArcFiRe/scripts/SpArcFiRe [-convert-FITS [-p UPPER LOWER N]] [-compute-starmask &lt;true | false>] [-ignore-starmask] [-elps_dir DIR] [-web] {inDir} {tmpDir} {outDir} [other optional options (see below)]
 
@@ -18,8 +18,7 @@ This is the equivalent of
 >~/ SpArcFiRe/scripts/SpArcFiRe -convert-FITS ~/SDSS/G.in ~/SDSS/G.tmp ~/SDSS/G.out -generateFitQuality 0 -writeBulgeMask 1
 
 
-**Optional Arguments**
-
+## Optional Arguments ##
 
 **-convert-FITS [-p UPPER LOWER N]**
 
@@ -38,7 +37,7 @@ Enabling this will tell SpArcFiRe not to attempt to block out the noise or stars
 In order to view a galaxy straight on SpArcFiRe has to warp the original image of the galaxy into one where it appears circular.  This is done by fitting an ellipse around the galaxy and warping it into a circle, which is done automatically by SpArcFiRe unless this option is set.  If this option is set then a file following the format GALAXY_NAME_epls.txt is expected for each galaxy in DIR.
 
 
-**Required Arguments**
+## Required Arguments ##
 
 
 **inDir**
@@ -54,8 +53,7 @@ All image types are converted into PNG files for processing, this directory stor
 All SpArcFire output will be saved here.  By default, each galaxy will have its own directory where images showing the steps SpArcFire takes to detect arm segments is visualized.  The data of each arm segment is located at outDir/galaxy_arc.csv and the data of each galaxy is located at outDir/galaxy.csv.  A directory located at ~/SDSS/G.out has been created for this purpose.
 
 
-**Other Optional Arguments**
-
+## Other Optional Arguments ##
 
 **-generateOrientationFieldPdf &lt;0 | 1> {Default is 1}**
 
@@ -170,8 +168,7 @@ If a cluster is found to contain the center of the galaxy then it will not be co
 If set to 1 then an approximate pitch angle for each arc is used instead of the slower -deterministic method used by default.
 
 
-**Features Under Maintenance**
-
+## Features Under Maintenance ##
 
 -web
 
