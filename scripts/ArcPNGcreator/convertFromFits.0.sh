@@ -19,7 +19,9 @@ die() { echo "$@" >&2; exit 1
 #    esac
 #    ;;
 #esac
-export MCRROOT=/pkg/matlab/R2017a; R="test";
+export MCRROOT=/pkg/matlab/R2017a;
+#R="test";
+R="123";
 exe_dir=$SPARCFIRE_HOME/scripts/ArcPNGcreator
 
 [ "$HOME" = "" ] && die "HOME not set!"
