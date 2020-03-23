@@ -33,19 +33,19 @@ if ischar(starMaskVal)
         error('cannot interpret %s as a number\n', starMaskValIn);
     end
 end
-if isempty(starMaskPath)
-    paramEstMask = [];
-else
+
+paramEstMask = [];
+if ~isempty(starMaskPath)
     try
         mask = imread(starMaskPath);
+        paramEstMask = (mask == starMaskVal);
     catch ME
-        err_str = sprintf('unable to read mask image %s: %s)',...
+        err_str = sprintf('unable to read mask image %s: %s)',... 
             starMaskPath, ME.message);
         fprintf('WARNING: %s\n', err_str);
 %         fprintf(errs_file, '%s\n', err_str);
 %         bad_read = true;
     end
-    paramEstMask = (mask == starMaskVal);
 end
 if ischar(qLvl)
     fprintf('qLvl given as string; interpreting as floating point number\n');

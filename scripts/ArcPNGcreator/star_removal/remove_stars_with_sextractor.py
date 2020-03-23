@@ -75,7 +75,8 @@ def gen_sextractor_segmentation(in_filepath, tmp_catalog_filepath, tmp_seg_filep
 	    '-CHECKIMAGE_NAME', tmp_seg_filepath,
 	    '-CATALOG_NAME', tmp_catalog_filepath]
     try:
-        subprocess.check_output(sextractor_args, stderr=subprocess.STDOUT)
+        proc = subprocess.Popen(sextractor_args, stderr=subprocess.STDOUT)
+        proc.communicate()
         logger.info("SExtractor finished")
     except OSError as ose:
       logger.error("Sextractor call failed: {0}".format(ose))
@@ -447,65 +448,70 @@ if __name__ == '__main__':
     
     fits_suffix = '.fits'
     for in_filename in flist:
-        in_imgname = in_filename[:-len(fits_suffix)]
-        logger.info("processing: {0}".format(in_filename))
-        in_filepath = os.path.join(in_dirpath, in_filename)
-        sex_in_filepath = in_filepath
-        
-        tmp_seg_filepath = os.path.join(
-            tmpdir, in_imgname + '_segmentation.fits')
-        
-        in_img = fits.getdata(in_filepath)
-        logger.info('input image dimensions: {0}'.format(in_img.shape))
-        tmp_depad_imgpath = None
-        (depad_img, removed_padding) = remove_padding(in_img)
-        ctr_r = int(np.round(in_img.shape[0]/2))
-        ctr_c = int(np.round(in_img.shape[1]/2))
-        if removed_padding:
-            logger.warning("padding found in the input image")
-            tmp_depad_imgpath = os.path.join(tmpdir, 
-                in_filename[:-len(fits_suffix)] + "_depadded.fits")
-            fits.writeto(tmp_depad_imgpath, depad_img)
-            logger.info("created a de-padded image for SExtractor to use")
-            sex_in_filepath = tmp_depad_imgpath
-            ctr_r = ctr_r - removed_padding[0][0]
-            ctr_c = ctr_c - removed_padding[1][0]
-        logger.info('segmentation image dimensions (depadded): {0}'.format(
-            depad_img.shape))
-        seg_img = gen_sextractor_segmentation(sex_in_filepath, 
-            tmp_catalog_filepath, tmp_seg_filepath)
-        if removed_padding:
-            os.remove(tmp_depad_imgpath)
-            logger.info("removed temporary de-padded image")
-        if not keep_seg_img:
-            try:
-                os.remove(tmp_seg_filepath)
-            except:
-                logger.info("not able to remove segmentation image")
-            logger.info("removed segmentation image")
-        if seg_img is None:
+        try:
+            in_imgname = in_filename[:-len(fits_suffix)]
+            logger.info("processing: {0}".format(in_filename))
+            in_filepath = os.path.join(in_dirpath, in_filename)
+            sex_in_filepath = in_filepath
+            
+            tmp_seg_filepath = os.path.join(
+                tmpdir, in_imgname + '_segmentation.fits')
+            
+            in_img = fits.getdata(in_filepath)
+            logger.info('input image dimensions: {0}'.format(in_img.shape))
+            tmp_depad_imgpath = None
+            (depad_img, removed_padding) = remove_padding(in_img)
+            ctr_r = int(np.round(in_img.shape[0]/2))
+            ctr_c = int(np.round(in_img.shape[1]/2))
+            if removed_padding:
+                logger.warning("padding found in the input image")
+                tmp_depad_imgpath = os.path.join(tmpdir, 
+                    in_filename[:-len(fits_suffix)] + "_depadded.fits")
+                fits.writeto(tmp_depad_imgpath, depad_img)
+                logger.info("created a de-padded image for SExtractor to use")
+                sex_in_filepath = tmp_depad_imgpath
+                ctr_r = ctr_r - removed_padding[0][0]
+                ctr_c = ctr_c - removed_padding[1][0]
+                ctr_r = int(round(ctr_r))
+                ctr_c = int(round(ctr_c))
+            logger.info('segmentation image dimensions (depadded): {0}'.format(
+                depad_img.shape))
+            seg_img = gen_sextractor_segmentation(sex_in_filepath, 
+                tmp_catalog_filepath, tmp_seg_filepath)
+            if removed_padding:
+                os.remove(tmp_depad_imgpath)
+                logger.info("removed temporary de-padded image")
+            if not keep_seg_img:
+                try:
+                    os.remove(tmp_seg_filepath)
+                except:
+                    logger.info("not able to remove segmentation image")
+                logger.info("removed segmentation image")
+            if seg_img is None:
+                continue
+            (star_mask, star_mask_aggressive, isobj) = create_star_mask(
+                seg_img, ctr_r, ctr_c)
+            mask_levels = np.zeros(star_mask.shape)
+            mask_levels[isobj] = 1
+            mask_levels[star_mask] = 2
+            mask_levels[star_mask_aggressive] = 3
+            out_img = depad_img * ~star_mask
+            if removed_padding:
+                out_img = restore_padding(out_img, removed_padding)
+                assert np.all(in_img.shape == out_img.shape)
+                mask_levels = restore_padding(mask_levels, removed_padding)
+            
+            assert in_filename.endswith(fits_suffix)
+            if write_masked_img:
+                out_filepath = os.path.join(out_dirpath, in_imgname + '_star-rm.fits')
+                fits.writeto(out_filepath, out_img)
+                logger.info("wrote {0}".format(out_filepath))
+            
+            scipy.misc.imsave(os.path.join(out_dirpath, in_imgname + '_starmask.png'), mask_levels)
+        except Exception as e:
+            logger.warning("could not create starmask for " + in_imgname)
+            logger.warning(e)
             continue
-        
-        (star_mask, star_mask_aggressive, isobj) = create_star_mask(
-            seg_img, ctr_r, ctr_c)
-        mask_levels = np.zeros(star_mask.shape)
-        mask_levels[isobj] = 1
-        mask_levels[star_mask] = 2
-        mask_levels[star_mask_aggressive] = 3
-        out_img = depad_img * ~star_mask
-        if removed_padding:
-            out_img = restore_padding(out_img, removed_padding)
-            assert np.all(in_img.shape == out_img.shape)
-            mask_levels = restore_padding(mask_levels, removed_padding)
-        
-        assert in_filename.endswith(fits_suffix)
-        if write_masked_img:
-            out_filepath = os.path.join(out_dirpath, in_imgname + '_star-rm.fits')
-            fits.writeto(out_filepath, out_img)
-            logger.info("wrote {0}".format(out_filepath))
-        
-        scipy.misc.imsave(os.path.join(out_dirpath, in_imgname + '_starmask.png'), mask_levels)
-        
 if not keep_seg_img:
     shutil.rmtree(tmpdir)
     logger.info("removed temporary directory: {0}".format(tmpdir))
