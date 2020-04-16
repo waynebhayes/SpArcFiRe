@@ -216,7 +216,7 @@ ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\
 ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\.[Ff][Ii][Tt][Ss]$//' | fgrep -v -f "$SKIP"
 
 # Clean up galfit files
-./moveGalfitFiles.sh $outDir
+$SPARCFIRE_HOME/scripts/moveGalfitFiles.sh $cwd $outDir
 
 # Now extract the CSV files
 cd $outDir
