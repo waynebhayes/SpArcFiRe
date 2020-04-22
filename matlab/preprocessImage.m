@@ -273,7 +273,7 @@ if isempty(prevFitParams)
     % end
     % cropRad = ceil(cropRad);
     
-else
+else %using elps file
     majAxsLen = prevFitParams.diskMajAxsLen;
     semiMajAxsLen = majAxsLen / 2;
     majAxsAngle = prevFitParams.diskMajAxsAngle;
@@ -296,10 +296,18 @@ else
     gxyParams.gaussLogLik = prevFitParams.gaussLogLik;
     gxyParams.contourBrtRatio = prevFitParams.contourBrtRatio;
     %WARNING: the prevFitParams might not have the following if it is old. The 2016 run will not have these
+    gxyParams.diskMinAxsLen = prevFitParams.diskMinAxsLen;
+    gxyParams.badBulgeFitFlag = prevFitParams.badBulgeFitFlag;
     gxyParams.bulgeAxisRatio = prevFitParams.bulgeAxisRatio;
     gxyParams.bulgeMajAxsLen = prevFitParams.bulgeMajAxsLen;
     gxyParams.bulgeMajAxsAngle = prevFitParams.bulgeMajAxsAngle;
+    gxyParams.bulgeAvgBrt = prevFitParams.bulgeAvgBrt;
+    gxyParams.bulgeDiskBrtRatio = prevFitParams.bulgeDiskBrtRatio;
+    gxyParams.numElpsRefits = prevFitParams.numElpsRefits;
+    gxyParams.bulgeMajAxsLen = prevFitParams.bulgeMajAxsLen;
     gxyParams.diskMajAxsAngleRadians = prevFitParams.diskMajAxsAngleRadians;
+    gxyParams.starMaskUsed = prevFitParams.starMaskUsed;
+    gxyParams.noiseMaskUsed = prevFitParams.noiseMaskUsed;
 end
 fitParams.diskMajAxsLen = majAxsLen;
 fitParams.diskMajAxsAngle = majAxsAngle;
@@ -312,11 +320,17 @@ fitParams.likOfCtr = gxyParams.likOfCtr;
 fitParams.brtUnifScore = gxyParams.brtUnifScore;
 fitParams.contourBrtRatio = contourBrtRatio;
 %edits
+fitParams.diskMinAxsLen = gxyParams.diskMinAxsLen;
+fitParams.badBulgeFitFlag = gxyParams.badBulgeFitFlag;
 fitParams.bulgeAxisRatio = gxyParams.bulgeAxisRatio;
 fitParams.bulgeMajAxsLen = gxyParams.bulgeMajAxsLen;
 fitParams.bulgeMajAxsAngle = gxyParams.bulgeMajAxsAngle;
 fitParams.diskMajAxsAngleRadians = gxyParams.diskMajAxsAngleRadians;
-%edits end
+fitParams.starMaskUsed = gxyParams.starMaskUsed;
+fitParams.noiseMaskUsed = gxyParams.starMaskUsed;
+fitParams.bulgeAvgBrt = gxyParams.bulgeAvgBrt;
+fitParams.bulgeDiskBrtRatio = gxyParams.bulgeDiskBrtRatio;
+fitParams.numElpsRefits = gxyParams.numElpsRefits;
 
 clear imgCtrR
 clear imgCtrC
