@@ -4,15 +4,16 @@
 #Galfit will output a series of files, called galfit.01, galfit.02, ... etc
 #This script simply moves the file to the corresponding galaxy directory
 
-#TODO move fit.log
 #TODO check if the generateFitQuality variable has been set so that this is safer
 
-BASEOUTDIR=$1
+INDIR=$1 #original directory that the script was called from
+BASEOUTDIR=$2 #directory where all of SpArcFiRe's output directories are
 
 echo "Moving Galfit Files"
 
-for file in $(find "$SPARCFIRE_HOME/scripts" -iregex '.*/galfit\.[0-9]+')
+for file in $(find "$INDIR" -iregex '.*/galfit\.[0-9]+')
 do
+    echo "moving file $file"
     secondLine=$(sed '2q;d' $file)
     out=$(echo "$secondLine" | cut -c 1-20 --complement )
     outdir=$(echo "$out" | rev | cut -d '/' -f2- | rev)
@@ -24,4 +25,4 @@ do
     fi
 done
 
-mv fit.log "$BASEOUTDIR/galfit_fit.log"
+mv "$INDIR/fit.log" "$BASEOUTDIR/galfit_fit.log"
