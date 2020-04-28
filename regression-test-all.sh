@@ -4,6 +4,9 @@ die() { echo "FATAL ERROR: $@" >&2; return 1
 PATH=`pwd`:`pwd`/scripts:$PATH
 export PATH
 
+#SpArcFiRe ONLY!!
+source setup.sh
+
 case "$1" in
 -make)
     CORES=`cpus 2>/dev/null || echo 4`
