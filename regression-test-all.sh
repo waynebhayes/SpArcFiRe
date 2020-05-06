@@ -1,5 +1,5 @@
 #!/bin/bash
-die() { echo "FATAL ERROR: $@" >&2; return 1
+die() { echo "FATAL ERROR: $@" >&2; exit 1
 }
 PATH=`pwd`:`pwd`/scripts:$PATH
 export PATH
@@ -30,4 +30,4 @@ for dir in regression-tests/*; do
     done
 done
 echo Number of failures: $NUM_FAILS
-return $NUM_FAILS
+exit $NUM_FAILS
