@@ -41,6 +41,7 @@ useDeProjectStretch = stgs.useDeProjectStretch;
 fixToCenter = stgs.fixToCenter;
 medFiltRad = stgs.medFiltRad;
 ctrDriftThres = stgs.ctrDriftThresForStarMask;
+recomputeCenter = stgs.recomputeCenter;
 
 if ~isempty(resizeDims) && (resizeDims(1) ~= resizeDims(2))
     warning('resizeDims should be square (was %s)', mat2str(resizeDims))
@@ -126,160 +127,163 @@ end
 % imwrite(img, [run_id '_deproject_01.png']);
 
 likCutoff = 10^-9;
-%if isempty(prevFitParams)
+if isempty(prevFitParams) | recomputeCenter
 %%%perform the fit even if there is a prevFitParams to get the center of the galaxy%%%
-if fixToCenter
-    ctrX = size(img, 2) / 2;
-    ctrY = size(img, 1) / 2;
-    if stgs.useSubpixelCtr
-        ctrX = ctrX + 0.5;
-        ctrY = ctrY + 0.5;
-    end
-    muFix = [ctrX, ctrY];
-else
-    muFix = [];
-end
-
-starMaskLevel = 0;
-noiseMaskLevel = 0;
-masked = [];
-doneFitting = false;
-imgBeforeMasking = img;
-while ~doneFitting
-    [muFit, covarFit, nonConvFlag, likFinal, gxyParams, bulgeMask] = ...
-        iterFitGauss(img, stgs, muFix, gxyParams);
-    ctrDrift = sqrt((muFit(1) - imgCtrC)^2 + (muFit(2) - imgCtrR)^2);
-    [t1, t2, t3, curMajAxsLen] = findCovarElpsAxes(covarFit, likCutoff, size(img));
-    if ctrDrift > ctrDriftThres
-        if starMaskLevel == 0 % no star mask applied yet
-            if isempty(starMask)
-                gxyParams.warnings = [gxyParams.warnings
-                    'preprocessing:largeCenterDriftAndNoStarMaskAvailable'];
-                doneFitting = true;
-            else
-                masked = (starMask == otherObjVal);
-                img(masked) = 0;
-                starMaskLevel = 1;
-            end
-        elseif starMaskLevel == 1 % already tried conservative mask
-            masked = masked | (starMask == extRgnVal);
-            img(masked) = 0;
-            starMaskLevel = 2;
-        elseif starMaskLevel == 2 % already tried aggressive mask
-            masked = masked | (starMask ~= gxyRgnVal);
-            img(masked) = 0;
-            starMaskLevel = 3;
-        elseif starMaskLevel == 3 % already tried last-resort mask
-            doneFitting = true;
-            starMaskLevel = 4;
-        else
-            error('internal error: unrecognized star mask level');
+    if fixToCenter
+        ctrX = size(img, 2) / 2;
+        ctrY = size(img, 1) / 2;
+        if stgs.useSubpixelCtr
+            ctrX = ctrX + 0.5;
+            ctrY = ctrY + 0.5;
         end
-    elseif curMajAxsLen > max(size(img))
-        if noiseMaskLevel == 0 % no noise mask applied yet
-            if isempty(starMask)
-                gxyParams.warnings = [gxyParams.warnings
-                    'preprocessing:excessiveMajAxsLenAndNoNoiseMaskAvailable'];
-                doneFitting = true;
-            else
-                masked = (starMask ~= gxyRgnVal) & (starMask ~= extRgnVal);
-                img(masked) = 0;
-                noiseMaskLevel = 1;
-            end
-        elseif noiseMaskLevel == 1 % already tried conservative mask
-            masked = (starMask ~= gxyRgnVal);
-            img(masked) = 0;
-            noiseMaskLevel = 2;
-        elseif noiseMaskLevel == 2 % already tried aggressive mask
-            doneFitting = true;
-            noiseMaskLevel = 3;
-        else
-            error('internal error: unrecognized noise mask level');
-        end
+        muFix = [ctrX, ctrY];
     else
-        doneFitting = true;
+        muFix = [];
     end
-end
-img = imgBeforeMasking;
 
-[majAxsVec, majAxsAngle, axisRatio, majAxsLen] = ...
-    findCovarElpsAxes(covarFit, likCutoff, size(img));
-%     minAxsLen = majAxsLen * axisRatio;
-semiMajAxsLen = majAxsLen / 2;
+    starMaskLevel = 0;
+    noiseMaskLevel = 0;
+    masked = [];
+    doneFitting = false;
+    imgBeforeMasking = img;
+    while ~doneFitting
+        [muFit, covarFit, nonConvFlag, likFinal, gxyParams, bulgeMask] = ...
+            iterFitGauss(img, stgs, muFix, gxyParams);
+        ctrDrift = sqrt((muFit(1) - imgCtrC)^2 + (muFit(2) - imgCtrR)^2);
+        [t1, t2, t3, curMajAxsLen] = findCovarElpsAxes(covarFit, likCutoff, size(img));
+        if ctrDrift > ctrDriftThres
+            if starMaskLevel == 0 % no star mask applied yet
+                if isempty(starMask)
+                    gxyParams.warnings = [gxyParams.warnings
+                        'preprocessing:largeCenterDriftAndNoStarMaskAvailable'];
+                    doneFitting = true;
+                else
+                    masked = (starMask == otherObjVal);
+                    img(masked) = 0;
+                    starMaskLevel = 1;
+                end
+            elseif starMaskLevel == 1 % already tried conservative mask
+                masked = masked | (starMask == extRgnVal);
+                img(masked) = 0;
+                starMaskLevel = 2;
+            elseif starMaskLevel == 2 % already tried aggressive mask
+                masked = masked | (starMask ~= gxyRgnVal);
+                img(masked) = 0;
+                starMaskLevel = 3;
+            elseif starMaskLevel == 3 % already tried last-resort mask
+                doneFitting = true;
+                starMaskLevel = 4;
+            else
+                error('internal error: unrecognized star mask level');
+            end
+        elseif curMajAxsLen > max(size(img))
+            if noiseMaskLevel == 0 % no noise mask applied yet
+                if isempty(starMask)
+                    gxyParams.warnings = [gxyParams.warnings
+                        'preprocessing:excessiveMajAxsLenAndNoNoiseMaskAvailable'];
+                    doneFitting = true;
+                else
+                    masked = (starMask ~= gxyRgnVal) & (starMask ~= extRgnVal);
+                    img(masked) = 0;
+                    noiseMaskLevel = 1;
+                end
+            elseif noiseMaskLevel == 1 % already tried conservative mask
+                masked = (starMask ~= gxyRgnVal);
+                img(masked) = 0;
+                noiseMaskLevel = 2;
+            elseif noiseMaskLevel == 2 % already tried aggressive mask
+                doneFitting = true;
+                noiseMaskLevel = 3;
+            else
+                error('internal error: unrecognized noise mask level');
+            end
+        else
+            doneFitting = true;
+        end
+    end
+    img = imgBeforeMasking;
 
-starMaskLevelNames = {'none', 'conservative', 'aggressive', 'aggressive-exclusive', 'FAIL'};
-noiseMaskLevelNames = {'none', 'conservative-exclusive', 'aggressive-exclusive', 'FAIL'};
-if isempty(starMask)
-    gxyParams.starMaskUsed = 'unavailable';
-    gxyParams.noiseMaskUsed = 'unavailable';
-else
-    gxyParams.starMaskUsed = starMaskLevelNames{starMaskLevel+1};
-    gxyParams.noiseMaskUsed = noiseMaskLevelNames{noiseMaskLevel+1};
-end
+    [majAxsVec, majAxsAngle, axisRatio, majAxsLen] = ...
+        findCovarElpsAxes(covarFit, likCutoff, size(img));
+    %     minAxsLen = majAxsLen * axisRatio;
+    semiMajAxsLen = majAxsLen / 2;
 
-gxyParams.diskAxisRatio = axisRatio;
-gxyParams.diskMinAxsLen = majAxsLen * axisRatio;
-gxyParams.diskMajAxsLen = majAxsLen;
-gxyParams.diskMajAxsAngleRadians = majAxsAngle;
-gxyParams.iptCtrXY = muFit;
-gxyParams.iptSz = [nRows nCols];
-gxyParams.muDist = sqrt((muFit(1) - imgCtrC)^2 + (muFit(2) - imgCtrR)^2);
-gxyParams.muDistProp = gxyParams.muDist / min([nRows nCols]/2);
-gxyParams.wtdLik = sum(img(:) .* likFinal(:));
-gxyParams.likOfCtr = likFinal(round(imgCtrR), round(imgCtrC));
-gxyParams.brtUnifScore = getBrtUnifScore(img, likFinal, likCutoff, 10);
-gxyParams.gaussLogLik = sum(log(likFinal(:))); % remove this?
+    starMaskLevelNames = {'none', 'conservative', 'aggressive', 'aggressive-exclusive', 'FAIL'};
+    noiseMaskLevelNames = {'none', 'conservative-exclusive', 'aggressive-exclusive', 'FAIL'};
+    if isempty(starMask)
+        gxyParams.starMaskUsed = 'unavailable';
+        gxyParams.noiseMaskUsed = 'unavailable';
+    else
+        gxyParams.starMaskUsed = starMaskLevelNames{starMaskLevel+1};
+        gxyParams.noiseMaskUsed = noiseMaskLevelNames{noiseMaskLevel+1};
+    end
 
-% try to determine whether preprocessing went wrong by stretching in
-% between two bright sources
-% likInner = likFinal >= 10^-3.5;
-% if nnz(likInner) == 0
-%     likInner = likFinal >= 10^-4;
-% end
-innerLikRadiusRatio = 0.1;
-% in some cases with bad preprocessing, the ellipse is stretched between
-% two bright sources.  We may be able to measure this by comparing the
-% brightness in an inner elliptical contour with the brightness in an outer
-% elliptical contour.
-% the likelihood values already give us elliptical contours, so we use them
-% to find the cutoffs for the inner and outer regions
-innerLikContourPosn = (innerLikRadiusRatio * semiMajAxsLen) * majAxsVec;
-innerLikContourPosn = round([size(img, 1) - (muFit(2) + innerLikContourPosn(2)),...
-    muFit(1) + innerLikContourPosn(1)]);
-innerLikContourVal = likFinal(innerLikContourPosn(1), innerLikContourPosn(2));
-likInner = likFinal >= innerLikContourVal;
-likOuter = likFinal >= 10^-9 & ~likInner;
-brtOuter = sort(img(likOuter), 'descend');
-contourBrtRatio = mean(img(likInner)) / mean(brtOuter(1:nnz(likInner)));
+    gxyParams.diskAxisRatio = axisRatio;
+    gxyParams.diskMinAxsLen = majAxsLen * axisRatio;
+    gxyParams.diskMajAxsLen = majAxsLen;
+    gxyParams.diskMajAxsAngleRadians = majAxsAngle;
+    gxyParams.iptCtrXY = muFit;
+    gxyParams.iptSz = [nRows nCols];
+    gxyParams.muDist = sqrt((muFit(1) - imgCtrC)^2 + (muFit(2) - imgCtrR)^2);
+    gxyParams.muDistProp = gxyParams.muDist / min([nRows nCols]/2);
+    gxyParams.wtdLik = sum(img(:) .* likFinal(:));
+    gxyParams.likOfCtr = likFinal(round(imgCtrR), round(imgCtrC));
+    gxyParams.brtUnifScore = getBrtUnifScore(img, likFinal, likCutoff, 10);
+    gxyParams.gaussLogLik = sum(log(likFinal(:))); % remove this?
 
-if getenv('WRITEBULGEMASK')
-    imwrite(bulgeMask, [outputPath '-D1_bulgeMask.png']);
-end
+    % try to determine whether preprocessing went wrong by stretching in
+    % between two bright sources
+    % likInner = likFinal >= 10^-3.5;
+    % if nnz(likInner) == 0
+    %     likInner = likFinal >= 10^-4;
+    % end
+    innerLikRadiusRatio = 0.1;
+    % in some cases with bad preprocessing, the ellipse is stretched between
+    % two bright sources.  We may be able to measure this by comparing the
+    % brightness in an inner elliptical contour with the brightness in an outer
+    % elliptical contour.
+    % the likelihood values already give us elliptical contours, so we use them
+    % to find the cutoffs for the inner and outer regions
+    innerLikContourPosn = (innerLikRadiusRatio * semiMajAxsLen) * majAxsVec;
+    innerLikContourPosn = round([size(img, 1) - (muFit(2) + innerLikContourPosn(2)),...
+        muFit(1) + innerLikContourPosn(1)]);
+    innerLikContourVal = likFinal(innerLikContourPosn(1), innerLikContourPosn(2));
+    likInner = likFinal >= innerLikContourVal;
+    likOuter = likFinal >= 10^-9 & ~likInner;
+    brtOuter = sort(img(likOuter), 'descend');
+    contourBrtRatio = mean(img(likInner)) / mean(brtOuter(1:nnz(likInner)));
 
-% figure; imshow(img .* likOuter);
+    if getenv('WRITEBULGEMASK')
+        imwrite(bulgeMask, [outputPath '-D1_bulgeMask.png']);
+    end
 
-% brtInner = sort(img(likInner), 'descend'); brtInner = brtInner(1:100);
-% brtOuter = brtOuter(1:100);
-% contourBrtRatio = mean(brtInner) / mean(brtOuter)
+    % figure; imshow(img .* likOuter);
 
-gxyParams.contourBrtRatio = contourBrtRatio;
+    % brtInner = sort(img(likInner), 'descend'); brtInner = brtInner(1:100);
+    % brtOuter = brtOuter(1:100);
+    % contourBrtRatio = mean(brtInner) / mean(brtOuter)
 
-% if abs(majAxsAngle) <= pi/4
-%     cropRad = abs(fzero(@(x)(mvnpdf([x, 0], [0, 0], covarFit) - likCutoff), 100))
-%     cropRad = majAxsLen * cos(majAxsAngle)
-% else
-%     cropRad = abs(fzero(@(x)(mvnpdf([0, x], [0, 0], covarFit) - likCutoff), 100))
-%     cropRad = abs(majAxsLen * sin(majAxsAngle))
-% end
-% cropRad = ceil(cropRad);
+    gxyParams.contourBrtRatio = contourBrtRatio;
 
-%else %using elps file
-if ~isempty(prevFitParams)
+    % if abs(majAxsAngle) <= pi/4
+    %     cropRad = abs(fzero(@(x)(mvnpdf([x, 0], [0, 0], covarFit) - likCutoff), 100))
+    %     cropRad = majAxsLen * cos(majAxsAngle)
+    % else
+    %     cropRad = abs(fzero(@(x)(mvnpdf([0, x], [0, 0], covarFit) - likCutoff), 100))
+    %     cropRad = abs(majAxsLen * sin(majAxsAngle))
+    % end
+    % cropRad = ceil(cropRad);
+
+else %using elps file
+%if ~isempty(prevFitParams)
     majAxsLen = prevFitParams.diskMajAxsLen;
     semiMajAxsLen = majAxsLen / 2;
     majAxsAngle = prevFitParams.diskMajAxsAngle;
     axisRatio = prevFitParams.diskAxisRatio;
-    %muFit = prevFitParams.muFit;
+    if ~recomputeCenter
+        muFit = prevFitParams.muFit;
+        gxyParams.iptCtrXY = muFit;
+    end
     covarFit = prevFitParams.covarFit;
     contourBrtRatio = prevFitParams.contourBrtRatio;
     

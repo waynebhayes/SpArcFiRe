@@ -102,6 +102,7 @@ while [ "$1" != "" ]; do
                -failWhenNoStarmaskFound)                  FAILWHENNOSTARMASKFOUND="$2"; export FAILWHENNOSTARMASKFOUND; shift 2;;
          -deleteClusterContainingCenter)            DELETECLUSTERCONTAININGCENTER="$2"; export DELETECLUSTERCONTAININGCENTER; shift 2;;
 -ignoreJaggedBoundaryPixelsDuringMerges)   IGNOREJAGGEDBOUNDARYPIXELSDURINGMERGES="$2"; export IGNOREJAGGEDBOUNDARYPIXELSDURINGMERGES; shift 2;;
+                       -recomputeCenter)                          RECOMPUTECENTER="$2"; export RECOMPUTECENTER; shift 2;;
                                       *) echo "$USAGE" >&2; die "unknown option '$1'";
     esac
 done
