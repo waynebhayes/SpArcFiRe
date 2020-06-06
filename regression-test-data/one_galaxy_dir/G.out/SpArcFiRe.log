@@ -1,0 +1,84 @@
+Enter 'help' for syntax; blank line or 'exit' or 'quit' exits. Wait for MATLAB to start...
+------------------------------------------
+Setting up environment variables
+---
+LD_LIBRARY_PATH is .:/pkg/matlab/R2017a/runtime/glnxa64:/pkg/matlab/R2017a/bin/glnxa64:/pkg/matlab/R2017a/sys/os/glnxa64:/pkg/matlab/R2017a/sys/opengl/lib/glnxa64
+server run ID is 7378895110952184
+No fit settings specified. Using defaults.
+applying environment-variable override to "writeSettingsForEveryImage": 0 -> 1
+applying environment-variable override to "generateOrientationFieldPdf": 0 -> 1
+applying environment-variable override to "lookForBulge": 1 -> 1
+08-Apr-2020 12:15:59
+server run ID: 7378895110952184
+settings recorded to 7378895110952184_settings.txt
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix, output_dir):
+1>> running with in_dir=/home/john/SpArcFiRe/regression-tests/../regression-test-data/Control_group/one_galaxy_dir/G.tmp, image_name=1237648721789256091, image_suffix=.png, starmask_suffix=_starmask.png, output_dir=/home/john/SpArcFiRe/regression-tests/../regression-test-data/Control_group/one_galaxy_dir/G.out
+No ellipse-fitting parameters file given, using default.
+processing 1237648721789256091 (image 1 of 1, /home/john/SpArcFiRe/regression-tests/../regression-test-data/Control_group/one_galaxy_dir/G.tmp/1237648721789256091.png)...
+star mask found: /home/john/SpArcFiRe/regression-tests/../regression-test-data/Control_group/one_galaxy_dir/G.tmp/1237648721789256091_starmask.png
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+
+padding detected in input image (rows: 0, 0; cols: 1, 1)
+input padding will be replaced with replicated values to avoid unsharp-mask artifacts.
+calculating orientation field...
+Elapsed time is 9.300756 seconds.
+...done calculating orientation field
+padding detected in input image (rows: 0, 0; cols: 1, 1)
+input padding will be replaced with replicated values to avoid unsharp-mask artifacts.
+
+ans =
+
+   41.5253   40.9326
+
+11774 nonzero orientation field vectors
+48848 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 42.384180 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.188599 seconds.
+Time for arc-merging: 
+Elapsed time is 0.631443 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 47.054159 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix, output_dir):
+2>> Exiting...
