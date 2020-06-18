@@ -43,6 +43,7 @@ SPARCFIRE_PYTHON="/usr/bin/python2.7"
 FITS_PARAMS="0.25 0.75 2"
 STARMASK="_starmask.png"
 ELPS_DIR="NONE"
+GUIDE_DIR="NONE"
 COMPUTE_STARMASK=maybe
 FITS=false
 WEB=false
@@ -57,6 +58,9 @@ do
     -elps_dir) ELPS_DIR="$2"; shift 2
 	[ -d "$ELPS_DIR" ] || die " -elps_dir '$ELPS_DIR' is not a directory"
 	;;
+    -guide_dir) GUIDE_DIR="$2"; shift 2
+    [ -d "$GUIDE_DIR" ] || die " -guide_dir '$GUIDE_DIR' is not a directory"
+    ;;
     -ignore-starmask) STARMASK="NONE"; shift;;
     -compute-starmask) [ $2 = true -o $2 = false ] || die "-compute-starmask argument must be 'true' or 'false'";
 	COMPUTE_STARMASK=$2; shift 2;;
@@ -91,6 +95,7 @@ pngDir=`echo "$1" | sed 's,/$,,'`; shift
 [ -d "$pngDir" ] || die "pngDir is missing"
 outDir=`echo "$1" | sed 's,/$,,'`; shift
 [ -d "$outDir" ] || die "outDir is missing"
+
 
 cwd=`/bin/pwd`
 # Make pngDir and outDir relative to CWD if necessary.
@@ -211,7 +216,7 @@ ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\
 		EF='NONE'
 	    fi
 	fi
-	echo $pngDir $f .png $SM $EF $outDir; done | randomizeLines; echo exit) | tee /dev/tty |
+	echo $pngDir $f .png $SM $EF $GUIDE_DIR $outDir; done | randomizeLines; echo exit) | tee /dev/tty |
     $SPARCFIRE_HOME/scripts/SpArcFiRe-stdin.sh -lookForBulge 1 -writeSettingsForEveryImage 1 -generateOrientationFieldPdf 1 "$@" | tee $outDir/SpArcFiRe.log
 ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\.[Ff][Ii][Tt][Ss]$//' | fgrep -v -f "$SKIP"
 
