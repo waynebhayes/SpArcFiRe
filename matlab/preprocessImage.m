@@ -422,6 +422,54 @@ exactCtrR = size(img, 1) - muFit(2) + 1;
 ctrC = round(exactCtrC);
 ctrR = round(exactCtrR);
 ctrAdjAmt = 0.5;
+
+%%%%%%%%%%%%%
+
+% ----- 1/31/20 - Matthew
+% Code to print autocrop coordinates to file for galfit use
+% Copying and pasting the crop code here shouldn't affect the later crop
+% but I'll use different variables just in case.
+
+if stgs.useSubpixelCtr
+    xStart = (round(exactCtrR)-cropRad);
+    xEnd = (round(exactCtrR)+cropRad);
+    yStart = (round(exactCtrC)-cropRad);
+    yEnd = (round(exactCtrC)+cropRad);
+else
+    xStart = (ctrR-cropRad);
+    xEnd = (ctrR+cropRad);
+    yStart = (ctrC-cropRad);
+    yEnd = (ctrC+cropRad);
+end
+
+% check if the crop box would go out of range; if so, add more padding
+
+cropRem = min([xStart - 1, size(img, 1) - xEnd,...
+    yStart - 1, size(img, 2) - yEnd]);
+
+if cropRem < 0
+
+    xStart = xStart + (-cropRem);
+    yStart = yStart + (-cropRem);
+
+end
+
+crop_coord_file = fopen([outputPath '_crop_coord.txt'],'at');
+% fprintf(crop_coord_file, ['Path to output (for debugging):' outputPath '\n']);
+fprintf(crop_coord_file, '%d\n', xStart, xEnd, yStart, yEnd);
+fprintf(crop_coord_file, '\n');
+fclose(crop_coord_file);
+
+disp('Wrote autocrop coordinates to file.')
+
+clear xStart
+clear xEnd
+clear yStart
+clear yEnd
+
+%%%%%%%%%%%%%%
+
+
 % fprintf('imgSz = %s, ctrR = %2.2f exactCtrR = %2.2f ctrC = %2.2f exactCtrC = %2.2f\n',...
 %         mat2str(size(img)), size(img,1)/2, exactCtrR, size(img,2)/2, exactCtrC)
 if useDeProjectStretch
