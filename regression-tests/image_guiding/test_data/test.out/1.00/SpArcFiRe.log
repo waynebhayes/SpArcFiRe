@@ -1,0 +1,673 @@
+Enter 'help' for syntax; blank line or 'exit' or 'quit' exits. Wait for MATLAB to start...
+------------------------------------------
+Setting up environment variables
+---
+LD_LIBRARY_PATH is .:/pkg/matlab/R2017a/runtime/glnxa64:/pkg/matlab/R2017a/bin/glnxa64:/pkg/matlab/R2017a/sys/os/glnxa64:/pkg/matlab/R2017a/sys/opengl/lib/glnxa64
+server run ID is 7379607158265047
+No fit settings specified. Using defaults.
+applying environment-variable override to "writeSettingsForEveryImage": 0 -> 1
+applying environment-variable override to "generateOrientationFieldPdf": 0 -> 1
+applying environment-variable override to "lookForBulge": 1 -> 1
+applying environment-variable override to "imageGuidingThreshold": -1 -> 1
+18-Jun-2020 17:10:47
+server run ID: 7379607158265047
+settings recorded to 7379607158265047_settings.txt
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
+1>> running with in_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905962547_g, image_suffix=.png, starmask_suffix=NONE, output_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/test.out/1, guide_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide
+No ellipse-fitting parameters file given, using default.
+guides specified as a path string, attempting to load from disk 
+guide directory given, will attempt to load guide when loading galaxy images /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide.
+processing 1237645942905962547_g (image 1 of 1, /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.tmp/1237645942905962547_g.png)...
+no star mask suffix given, not looking for a star mask
+/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
+using /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_g.png as the guide image
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                           recomputeCenter: 0
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+                     imageGuidingThreshold: 1
+
+calculating orientation field...
+Elapsed time is 12.406541 seconds.
+...done calculating orientation field
+
+ans =
+
+   39.6019   39.6094
+
+19417 nonzero orientation field vectors
+54182 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 61.967245 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.440747 seconds.
+using image guide clustering
+Using /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_g.png as guide image.
+Time for arc-merging: 
+Elapsed time is 0.224968 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 64.979954 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
+2>> running with in_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905438473_r, image_suffix=.png, starmask_suffix=NONE, output_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/test.out/1, guide_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide
+No ellipse-fitting parameters file given, using default.
+guides specified as a path string, attempting to load from disk 
+guide directory given, will attempt to load guide when loading galaxy images /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide.
+processing 1237645942905438473_r (image 1 of 1, /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.tmp/1237645942905438473_r.png)...
+no star mask suffix given, not looking for a star mask
+/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
+using /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_r.png as the guide image
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                           recomputeCenter: 0
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+                     imageGuidingThreshold: 1
+
+calculating orientation field...
+Elapsed time is 9.858388 seconds.
+...done calculating orientation field
+
+ans =
+
+   71.9968   70.8938
+
+10806 nonzero orientation field vectors
+50546 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 23.675554 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.143042 seconds.
+using image guide clustering
+Using /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_r.png as guide image.
+Time for arc-merging: 
+Elapsed time is 0.125264 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 25.187534 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
+3>> running with in_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905962547_z, image_suffix=.png, starmask_suffix=NONE, output_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/test.out/1, guide_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide
+No ellipse-fitting parameters file given, using default.
+guides specified as a path string, attempting to load from disk 
+guide directory given, will attempt to load guide when loading galaxy images /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide.
+processing 1237645942905962547_z (image 1 of 1, /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.tmp/1237645942905962547_z.png)...
+no star mask suffix given, not looking for a star mask
+/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
+using /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_z.png as the guide image
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                           recomputeCenter: 0
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+                     imageGuidingThreshold: 1
+
+calculating orientation field...
+Elapsed time is 12.140262 seconds.
+...done calculating orientation field
+
+ans =
+
+   39.6862   38.9976
+
+29763 nonzero orientation field vectors
+48740 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 61.273069 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.630415 seconds.
+using image guide clustering
+Using /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_z.png as guide image.
+Time for arc-merging: 
+Elapsed time is 0.240882 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 63.568370 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
+4>> running with in_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905962547_i, image_suffix=.png, starmask_suffix=NONE, output_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/test.out/1, guide_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide
+No ellipse-fitting parameters file given, using default.
+guides specified as a path string, attempting to load from disk 
+guide directory given, will attempt to load guide when loading galaxy images /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide.
+processing 1237645942905962547_i (image 1 of 1, /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.tmp/1237645942905962547_i.png)...
+no star mask suffix given, not looking for a star mask
+/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
+using /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_i.png as the guide image
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                           recomputeCenter: 0
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+                     imageGuidingThreshold: 1
+
+calculating orientation field...
+Elapsed time is 7.487349 seconds.
+...done calculating orientation field
+
+ans =
+
+   40.3671   39.2619
+
+11707 nonzero orientation field vectors
+52193 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 21.593456 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.162291 seconds.
+using image guide clustering
+Using /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_i.png as guide image.
+Time for arc-merging: 
+Elapsed time is 0.062408 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 22.718172 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
+5>> running with in_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905438473_u, image_suffix=.png, starmask_suffix=NONE, output_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/test.out/1, guide_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide
+No ellipse-fitting parameters file given, using default.
+guides specified as a path string, attempting to load from disk 
+guide directory given, will attempt to load guide when loading galaxy images /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide.
+processing 1237645942905438473_u (image 1 of 1, /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.tmp/1237645942905438473_u.png)...
+no star mask suffix given, not looking for a star mask
+/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
+using /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_u.png as the guide image
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                           recomputeCenter: 0
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+                     imageGuidingThreshold: 1
+
+calculating orientation field...
+Elapsed time is 6.686321 seconds.
+...done calculating orientation field
+
+ans =
+
+   72.0981   70.7130
+
+40804 nonzero orientation field vectors
+43970 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 74.051031 seconds.
+Time for all optimization steps: 
+Elapsed time is 1.003328 seconds.
+using image guide clustering
+Using /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_u.png as guide image.
+Time for arc-merging: 
+Elapsed time is 0.373542 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 77.012506 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
+6>> running with in_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905962547_r, image_suffix=.png, starmask_suffix=NONE, output_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/test.out/1, guide_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide
+No ellipse-fitting parameters file given, using default.
+guides specified as a path string, attempting to load from disk 
+guide directory given, will attempt to load guide when loading galaxy images /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide.
+processing 1237645942905962547_r (image 1 of 1, /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.tmp/1237645942905962547_r.png)...
+no star mask suffix given, not looking for a star mask
+/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
+using /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_r.png as the guide image
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                           recomputeCenter: 0
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+                     imageGuidingThreshold: 1
+
+calculating orientation field...
+Elapsed time is 12.238592 seconds.
+...done calculating orientation field
+
+ans =
+
+   39.6102   39.5073
+
+12799 nonzero orientation field vectors
+50409 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 28.196125 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.265649 seconds.
+using image guide clustering
+Using /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_r.png as guide image.
+Time for arc-merging: 
+Elapsed time is 0.120420 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 29.711920 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
+7>> running with in_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905438473_i, image_suffix=.png, starmask_suffix=NONE, output_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/test.out/1, guide_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide
+No ellipse-fitting parameters file given, using default.
+guides specified as a path string, attempting to load from disk 
+guide directory given, will attempt to load guide when loading galaxy images /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide.
+processing 1237645942905438473_i (image 1 of 1, /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.tmp/1237645942905438473_i.png)...
+no star mask suffix given, not looking for a star mask
+/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
+using /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_i.png as the guide image
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                           recomputeCenter: 0
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+                     imageGuidingThreshold: 1
+
+calculating orientation field...
+Elapsed time is 12.283101 seconds.
+...done calculating orientation field
+
+ans =
+
+   71.2956   71.6075
+
+10362 nonzero orientation field vectors
+54695 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 20.408893 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.073965 seconds.
+using image guide clustering
+Using /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_i.png as guide image.
+Time for arc-merging: 
+Elapsed time is 0.046661 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 21.236930 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
+8>> running with in_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905438473_z, image_suffix=.png, starmask_suffix=NONE, output_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/test.out/1, guide_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide
+No ellipse-fitting parameters file given, using default.
+guides specified as a path string, attempting to load from disk 
+guide directory given, will attempt to load guide when loading galaxy images /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide.
+processing 1237645942905438473_z (image 1 of 1, /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.tmp/1237645942905438473_z.png)...
+no star mask suffix given, not looking for a star mask
+/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
+using /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_z.png as the guide image
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                           recomputeCenter: 0
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+                     imageGuidingThreshold: 1
+
+calculating orientation field...
+Elapsed time is 12.228410 seconds.
+...done calculating orientation field
+
+ans =
+
+   71.6021   71.6251
+
+23417 nonzero orientation field vectors
+50646 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 45.739803 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.568153 seconds.
+using image guide clustering
+Using /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_z.png as guide image.
+Time for arc-merging: 
+Elapsed time is 0.229315 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 47.772997 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
+9>> running with in_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905438473_g, image_suffix=.png, starmask_suffix=NONE, output_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/test.out/1, guide_dir=/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide
+No ellipse-fitting parameters file given, using default.
+guides specified as a path string, attempting to load from disk 
+guide directory given, will attempt to load guide when loading galaxy images /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide.
+processing 1237645942905438473_g (image 1 of 1, /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.tmp/1237645942905438473_g.png)...
+no star mask suffix given, not looking for a star mask
+/extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
+using /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_g.png as the guide image
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                           recomputeCenter: 0
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+                     imageGuidingThreshold: 1
+
+calculating orientation field...
+Elapsed time is 7.636457 seconds.
+...done calculating orientation field
+
+ans =
+
+   71.8502   71.1062
+
+12927 nonzero orientation field vectors
+51375 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 16.916176 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.118872 seconds.
+using image guide clustering
+Using /extra/wayne_scratch0/preserve/barkleya/SpArcFiRe/SpArcFiRe-Fork/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_g.png as guide image.
+Time for arc-merging: 
+Elapsed time is 0.102355 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 18.026013 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
+10>> Exiting...
