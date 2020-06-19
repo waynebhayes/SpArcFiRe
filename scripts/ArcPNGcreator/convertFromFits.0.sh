@@ -8,18 +8,21 @@
 die() { echo "$@" >&2; exit 1
 }
 # Variables you may need to change
-case `uname -a | awk '{print $3}'` in
-3.10.0*) export MCRROOT=/pkg/matlab/current; R=121;
-    ;;
-2.6.32*) export MCRROOT=$HOME/bin/ArcFinder/MCRlib/v717; R=120;
-    #unless it's odin
-    case `hostname` in
-    odin*) export MCRROOT=/pkg/matlab/current; R=121;
-	;;
-    esac
-    ;;
-esac
-exe_dir=$HOME/bin/ArcPNGcreator
+#case `uname -a | awk '{print $3}'` in
+#3.10.0*) export MCRROOT=/pkg/matlab/current; R=121;
+#    ;;
+#2.6.32*) export MCRROOT=$HOME/bin/ArcFinder/MCRlib/v717; R=120;
+#    #unless it's odin
+#    case `hostname` in
+#    odin*) export MCRROOT=/pkg/matlab/current; R=121;
+#	;;
+#    esac
+#    ;;
+#esac
+export MCRROOT=/pkg/matlab/R2017a;
+#R="test";
+R="123";
+exe_dir=$SPARCFIRE_HOME/scripts/ArcPNGcreator
 
 [ "$HOME" = "" ] && die "HOME not set!"
 

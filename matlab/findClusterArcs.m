@@ -1,6 +1,6 @@
 function [lgspParams, lgspBounds, sumSqErrs, used2rev, failed2rev, hasBadBounds, ...
         barInfo, clusMtxs, gxyParams, imgAutoCrop, barInds, barUsed] = ...
-    findClusterArcs(img, stgs, gxyName, outputParams, outputDir, starMask, stdzParams)
+    findClusterArcs(img, stgs, gxyName, outputParams, outputDir, starMask, stdzParams, guideImageFile)
 % Main function for generating HAC clusters from an image using an
 % orientation field, fitting logarithmic spirals to each cluster, and
 % displaying the results
@@ -21,6 +21,8 @@ function [lgspParams, lgspBounds, sumSqErrs, used2rev, failed2rev, hasBadBounds,
 %       image; this shouldn't usually be supplied but can be useful to
 %       make sure a set of images (e.g., different wavebands for the same
 %       galaxy) are standardized in the same way
+%   guideImageFile: (optional unless using image guiding) path to image to guide
+%       cluster merging step.
 % OUTPUTS:
 %   lgspParams: the [theta-offset, pitch-angle, initial-radius] parameters
 %       of the log-spirals fitted to the clusters, one set of parameters 
@@ -55,6 +57,11 @@ end
 if nargin < 7
     stdzParams = [];
 end
+
+if nargin < 8 
+    guideImageFile = 'NONE';
+end
+
 if ischar(stdzParams)
     stdzParams = dblStructToString(stdzParams);
 end
@@ -85,6 +92,7 @@ stopThres = stgs.stopThres;
 fitUsingNonUsmIVals = stgs.fitUsingNonUsmIVals;
 deleteClusterContainingCenter = stgs.deleteClusterContainingCenter;
 
+
 if sleepSecondsAfterImageWrite < 0
     error('parameter sleepSecondsAfterImageWrite can''t be negative\n');
 elseif sleepSecondsAfterImageWrite > 0
@@ -101,6 +109,22 @@ if writeSettingsForEveryImage
     diary off
     pause(sleepSecondsAfterImageWrite);
 end
+
+%EDITS
+if stgs.imageGuidingThreshold >= 0 
+    if ~strcmp(guideImageFile,'NONE') && exist(guideImageFile) == 2 %TODO test
+        imageGuiding = true;
+    else
+        error('image guiding specified but no image was given');
+    end
+else
+    imageGuiding = false;
+end
+
+if ~strcmp(guideImageFile,'NONE') && imageGuiding == false
+    error ('guide image specified but no threshold was given');
+end
+%EDITS END
 
 tStartClus = tic;
 
@@ -329,10 +353,33 @@ end
 %     writeGalaxyParams(gxyParams, gxyName, outputDir);
 % end
 
+%%%%%% EDITS HERE %%%%%
+
 % do arc merging and produce output files analogous to the ones without
 % the merging
+
+% USES MEAN IMAGE AS GUIDE FOR CLUSTERING 
+%if strcmp( gxyName(end), 'n')
+%    fprintf('in mean image clustering\n');
+%    clusMtxsM = mergeClustersByFit(clusMtxs, ctrR, ctrC, barInfo, stgs);
+%    %save([outputPath,'-Clusters.mat'], clusMtxsM);
+%else
+%    fprintf('using mean image guide\n');
+%    clusMtxsM = mergeClustersByGuide(clusMtxs, outputPath, 0.0);
+%    %save([outPath,'-meanClusters.mat'],clusMtxs);
+%end
+
+if imageGuiding
+    fprintf('using image guide clustering\n');
+    clusMtxsM = mergeClustersByGuide(clusMtxs, outputPath, stgs.imageGuidingThreshold, guideImageFile);
+else
+    fprintf('using standard clustering\n');
+    clusMtxsM = mergeClustersByFit(clusMtxs, ctrR, ctrC, barInfo, stgs);
+end
+
+
 failed2revDuringMerge = false;
-clusMtxsM = mergeClustersByFit(clusMtxs, ctrR, ctrC, barInfo, stgs);
+%clusMtxsM = mergeClustersByFit(clusMtxs, ctrR, ctrC, barInfo, stgs);
 [lgspParamsM, lgspBoundsM, sumSqErrsM, used2revM, failed2revM, hasBadBoundsM] = ...
     fitLogSpiralsToClusters(clusMtxsM, ctrR, ctrC, stgs);
 [barClusM, lgspParamsM, lgspBoundsM, sumSqErrsM, used2revM, failed2revM, hasBadBoundsM, clusMtxsM, barAnglesM, barHalfLensM] = ...

@@ -73,6 +73,12 @@ stgs.maxHalfGapFillForUndefinedBounds = 3;
 % a large effect on the final output.
 stgs.ignoreJaggedBoundaryPixelsDuringMerges = true;
 
+% recalculates the center of the galaxy and saves it to the elps file,
+% regardless of other settings. If using another elps file, SpArcFiRe
+% will still perform the ellipse fit but will disregard everything 
+% but the center.
+stgs.recomputeCenter = false;
+
 % DEPRECATED - should always be 0
 % How much to use an approximation (vs least-squares fitting) for the 
 % pitch angle
@@ -154,5 +160,7 @@ stgs.balClusWtsInMerging = true;
 % proceed, this criterion must be met for both clusters involved in the
 % potential merge.
 stgs.errRatioThres = 2.5;
+
+stgs.imageGuidingThreshold = -1;
 
 end

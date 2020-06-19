@@ -1,0 +1,29 @@
+output will be written to /home/john/SpArcFiRe/regression-tests/../regression-test-data/Control_group/one_galaxy_dir/G.tmp/batchConvertFromFits.log
+galaxy-level errors will also be written to /home/john/SpArcFiRe/regression-tests/../regression-test-data/Control_group/one_galaxy_dir/G.tmp/batchConvertFromFits.err
+inSfxs given as string; interpreting as single-element array
+qLvl given as string; interpreting as floating point number
+nReps given as string; interpreting as integer
+blackQlvl given as string; interpreting as floating point number
+maskVal given as string, intrepreting as number
+1 matching files, 2 non-matching files
+skipped files: 
+	.
+	..
+1 unique objects
+qLvl is 0.7500
+nReps is 2
+black-level quantile is 0.2500
+using galaxy mask, suffix = _starmask.png, maskVal = 255
+processing: 1237648721789256091
+	reading: /tmp/SF26240/1237648721789256091.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 0.0136
+asinhBeta (if no star masking were used) = 0.0304
+asinhBeta = 0.1822
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0752
+asinhBeta = 0.3988

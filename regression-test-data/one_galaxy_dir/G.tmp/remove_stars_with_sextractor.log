@@ -1,0 +1,44 @@
+INFO:remove_stars_with_sextractor:not keeping segmentation images
+INFO:remove_stars_with_sextractor:will only write masks (not masked images)
+WARNING:remove_stars_with_sextractor:output directory already exists /home/john/SpArcFiRe/regression-test-data/Control_group/one_galaxy_dir/G.tmp
+INFO:remove_stars_with_sextractor:in directory is: /tmp/SF25978
+INFO:remove_stars_with_sextractor:out directory is: /home/john/SpArcFiRe/regression-test-data/Control_group/one_galaxy_dir/G.tmp
+INFO:remove_stars_with_sextractor:created temporary directory: /home/john/SpArcFiRe/regression-test-data/Control_group/one_galaxy_dir/G.tmp/star-rm_tmp_135610149
+INFO:remove_stars_with_sextractor:found 1 FITS files in /tmp/SF25978
+INFO:remove_stars_with_sextractor:processing: 1237648721789256091.fits
+INFO:remove_stars_with_sextractor:input image dimensions: (82, 82)
+INFO:remove_stars_with_sextractor:segmentation image dimensions (depadded): (82, 82)
+INFO:remove_stars_with_sextractor:running SExtractor
+INFO:remove_stars_with_sextractor:SExtractor finished
+INFO:remove_stars_with_sextractor:reading input and SExtractor-segmentation images
+INFO:remove_stars_with_sextractor:removed segmentation image
+INFO:remove_stars_with_sextractor:SExtractor found 1 objects
+INFO:remove_stars_with_sextractor:segmentation image center is: ctr_r = 41, ctr_c = 41
+INFO:remove_stars_with_sextractor:center object is object 1
+INFO:remove_stars_with_sextractor:defragmenting object 1
+INFO:remove_stars_with_sextractor:nonzero adjacency proportions: []:[]
+INFO:remove_stars_with_sextractor:no (new) object fragments found
+INFO:remove_stars_with_sextractor:keeping center object: object 1 (dist from ctrobj = 0.0, size = 503, border dist stdev = 1.8230)
+INFO:remove_stars_with_sextractor:removed temporary directory: /home/john/SpArcFiRe/regression-test-data/Control_group/one_galaxy_dir/G.tmp/star-rm_tmp_135610149
+INFO:remove_stars_with_sextractor:not keeping segmentation images
+INFO:remove_stars_with_sextractor:will only write masks (not masked images)
+WARNING:remove_stars_with_sextractor:output directory already exists /home/john/SpArcFiRe/regression-tests/../regression-test-data/Control_group/one_galaxy_dir/G.tmp
+INFO:remove_stars_with_sextractor:in directory is: /tmp/SF26240
+INFO:remove_stars_with_sextractor:out directory is: /home/john/SpArcFiRe/regression-tests/../regression-test-data/Control_group/one_galaxy_dir/G.tmp
+INFO:remove_stars_with_sextractor:created temporary directory: /home/john/SpArcFiRe/regression-tests/../regression-test-data/Control_group/one_galaxy_dir/G.tmp/star-rm_tmp_952182419
+INFO:remove_stars_with_sextractor:found 1 FITS files in /tmp/SF26240
+INFO:remove_stars_with_sextractor:processing: 1237648721789256091.fits
+INFO:remove_stars_with_sextractor:input image dimensions: (82, 82)
+INFO:remove_stars_with_sextractor:segmentation image dimensions (depadded): (82, 82)
+INFO:remove_stars_with_sextractor:running SExtractor
+INFO:remove_stars_with_sextractor:SExtractor finished
+INFO:remove_stars_with_sextractor:reading input and SExtractor-segmentation images
+INFO:remove_stars_with_sextractor:removed segmentation image
+INFO:remove_stars_with_sextractor:SExtractor found 1 objects
+INFO:remove_stars_with_sextractor:segmentation image center is: ctr_r = 41, ctr_c = 41
+INFO:remove_stars_with_sextractor:center object is object 1
+INFO:remove_stars_with_sextractor:defragmenting object 1
+INFO:remove_stars_with_sextractor:nonzero adjacency proportions: []:[]
+INFO:remove_stars_with_sextractor:no (new) object fragments found
+INFO:remove_stars_with_sextractor:keeping center object: object 1 (dist from ctrobj = 0.0, size = 503, border dist stdev = 1.8230)
+INFO:remove_stars_with_sextractor:removed temporary directory: /home/john/SpArcFiRe/regression-tests/../regression-test-data/Control_group/one_galaxy_dir/G.tmp/star-rm_tmp_952182419

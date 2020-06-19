@@ -102,10 +102,12 @@ while [ "$1" != "" ]; do
                -failWhenNoStarmaskFound)                  FAILWHENNOSTARMASKFOUND="$2"; export FAILWHENNOSTARMASKFOUND; shift 2;;
          -deleteClusterContainingCenter)            DELETECLUSTERCONTAININGCENTER="$2"; export DELETECLUSTERCONTAININGCENTER; shift 2;;
 -ignoreJaggedBoundaryPixelsDuringMerges)   IGNOREJAGGEDBOUNDARYPIXELSDURINGMERGES="$2"; export IGNOREJAGGEDBOUNDARYPIXELSDURINGMERGES; shift 2;;
+                       -recomputeCenter)                          RECOMPUTECENTER="$2"; export RECOMPUTECENTER; shift 2;;
+                 -imageGuidingThreshold)                    IMAGEGUIDINGTHRESHOLD="$2"; export IMAGEGUIDINGTHRESHOLD; shift 2;;
                                       *) echo "$USAGE" >&2; die "unknown option '$1'";
     esac
 done
 echo "Enter 'help' for syntax; blank line or 'exit' or 'quit' exits. Wait for MATLAB to start..."
 # only argument is a settings file, NONE for none.
 set -x
-tee SpArcFiRe-stdin.stdin.txt | exec $HOME/bin/ArcServer/run_findClusterArcsServer.sh $MCRROOT NONE
+tee SpArcFiRe-stdin.stdin.txt | exec $SPARCFIRE_HOME/scripts/ArcServer/run_findClusterArcsServer.sh $MCRROOT NONE

@@ -41,6 +41,7 @@ useDeProjectStretch = stgs.useDeProjectStretch;
 fixToCenter = stgs.fixToCenter;
 medFiltRad = stgs.medFiltRad;
 ctrDriftThres = stgs.ctrDriftThresForStarMask;
+recomputeCenter = stgs.recomputeCenter;
 
 if ~isempty(resizeDims) && (resizeDims(1) ~= resizeDims(2))
     warning('resizeDims should be square (was %s)', mat2str(resizeDims))
@@ -126,8 +127,8 @@ end
 % imwrite(img, [run_id '_deproject_01.png']);
 
 likCutoff = 10^-9;
-if isempty(prevFitParams)
-
+if isempty(prevFitParams) | recomputeCenter
+%%%perform the fit even if there is a prevFitParams to get the center of the galaxy%%%
     if fixToCenter
         ctrX = size(img, 2) / 2;
         ctrY = size(img, 1) / 2;
@@ -139,7 +140,7 @@ if isempty(prevFitParams)
     else
         muFix = [];
     end
-    
+
     starMaskLevel = 0;
     noiseMaskLevel = 0;
     masked = [];
@@ -153,7 +154,7 @@ if isempty(prevFitParams)
         if ctrDrift > ctrDriftThres
             if starMaskLevel == 0 % no star mask applied yet
                 if isempty(starMask)
-                	gxyParams.warnings = [gxyParams.warnings
+                    gxyParams.warnings = [gxyParams.warnings
                         'preprocessing:largeCenterDriftAndNoStarMaskAvailable'];
                     doneFitting = true;
                 else
@@ -204,7 +205,7 @@ if isempty(prevFitParams)
 
     [majAxsVec, majAxsAngle, axisRatio, majAxsLen] = ...
         findCovarElpsAxes(covarFit, likCutoff, size(img));
-%     minAxsLen = majAxsLen * axisRatio;
+    %     minAxsLen = majAxsLen * axisRatio;
     semiMajAxsLen = majAxsLen / 2;
 
     starMaskLevelNames = {'none', 'conservative', 'aggressive', 'aggressive-exclusive', 'FAIL'};
@@ -216,7 +217,7 @@ if isempty(prevFitParams)
         gxyParams.starMaskUsed = starMaskLevelNames{starMaskLevel+1};
         gxyParams.noiseMaskUsed = noiseMaskLevelNames{noiseMaskLevel+1};
     end
-    
+
     gxyParams.diskAxisRatio = axisRatio;
     gxyParams.diskMinAxsLen = majAxsLen * axisRatio;
     gxyParams.diskMajAxsLen = majAxsLen;
@@ -272,13 +273,17 @@ if isempty(prevFitParams)
     %     cropRad = abs(majAxsLen * sin(majAxsAngle))
     % end
     % cropRad = ceil(cropRad);
-    
-else
+
+else %using elps file
+%if ~isempty(prevFitParams)
     majAxsLen = prevFitParams.diskMajAxsLen;
     semiMajAxsLen = majAxsLen / 2;
     majAxsAngle = prevFitParams.diskMajAxsAngle;
     axisRatio = prevFitParams.diskAxisRatio;
-    muFit = prevFitParams.muFit;
+    if ~recomputeCenter
+        muFit = prevFitParams.muFit;
+        gxyParams.iptCtrXY = muFit;
+    end
     covarFit = prevFitParams.covarFit;
     contourBrtRatio = prevFitParams.contourBrtRatio;
     
@@ -286,20 +291,28 @@ else
     gxyParams.diskMinAxsLen = majAxsLen * axisRatio;
     gxyParams.diskMajAxsLen = majAxsLen;
     gxyParams.diskMajAxsAngleRadians = majAxsAngle;
-    gxyParams.iptCtrXY = muFit;
+    %gxyParams.iptCtrXY = muFit;
     gxyParams.iptSz = [nRows nCols];
     gxyParams.muDist = sqrt((muFit(1) - imgCtrC)^2 + (muFit(2) - imgCtrR)^2);
     gxyParams.muDistProp = gxyParams.muDist / min([nRows nCols]/2);
     gxyParams.wtdLik = prevFitParams.wtdLik;
-    gxyParams.likOfCtr = prevFitParams.likOfCtr;
+    gxyParams.likOfCtr = prevFitParams.likOfCtr; %not sure if this should be removed if we always find center
     gxyParams.brtUnifScore = prevFitParams.brtUnifScore;
     gxyParams.gaussLogLik = prevFitParams.gaussLogLik;
     gxyParams.contourBrtRatio = prevFitParams.contourBrtRatio;
     %WARNING: the prevFitParams might not have the following if it is old. The 2016 run will not have these
+    gxyParams.diskMinAxsLen = prevFitParams.diskMinAxsLen;
+    gxyParams.badBulgeFitFlag = prevFitParams.badBulgeFitFlag;
     gxyParams.bulgeAxisRatio = prevFitParams.bulgeAxisRatio;
     gxyParams.bulgeMajAxsLen = prevFitParams.bulgeMajAxsLen;
     gxyParams.bulgeMajAxsAngle = prevFitParams.bulgeMajAxsAngle;
+    gxyParams.bulgeAvgBrt = prevFitParams.bulgeAvgBrt;
+    gxyParams.bulgeDiskBrtRatio = prevFitParams.bulgeDiskBrtRatio;
+    gxyParams.numElpsRefits = prevFitParams.numElpsRefits;
+    gxyParams.bulgeMajAxsLen = prevFitParams.bulgeMajAxsLen;
     gxyParams.diskMajAxsAngleRadians = prevFitParams.diskMajAxsAngleRadians;
+    gxyParams.starMaskUsed = prevFitParams.starMaskUsed;
+    gxyParams.noiseMaskUsed = prevFitParams.noiseMaskUsed;
 end
 fitParams.diskMajAxsLen = majAxsLen;
 fitParams.diskMajAxsAngle = majAxsAngle;
@@ -311,12 +324,18 @@ fitParams.wtdLik = gxyParams.wtdLik;
 fitParams.likOfCtr = gxyParams.likOfCtr;
 fitParams.brtUnifScore = gxyParams.brtUnifScore;
 fitParams.contourBrtRatio = contourBrtRatio;
-%edits
+%added the 2016 run might not have these in it's _elps files
+fitParams.diskMinAxsLen = gxyParams.diskMinAxsLen;
+fitParams.badBulgeFitFlag = gxyParams.badBulgeFitFlag;
 fitParams.bulgeAxisRatio = gxyParams.bulgeAxisRatio;
 fitParams.bulgeMajAxsLen = gxyParams.bulgeMajAxsLen;
 fitParams.bulgeMajAxsAngle = gxyParams.bulgeMajAxsAngle;
 fitParams.diskMajAxsAngleRadians = gxyParams.diskMajAxsAngleRadians;
-%edits end
+fitParams.starMaskUsed = gxyParams.starMaskUsed;
+fitParams.noiseMaskUsed = gxyParams.starMaskUsed;
+fitParams.bulgeAvgBrt = gxyParams.bulgeAvgBrt;
+fitParams.bulgeDiskBrtRatio = gxyParams.bulgeDiskBrtRatio;
+fitParams.numElpsRefits = gxyParams.numElpsRefits;
 
 clear imgCtrR
 clear imgCtrC

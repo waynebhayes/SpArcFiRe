@@ -11,7 +11,6 @@ elseif ischar(stgs)
     fprintf('stgs specified as a path string, attempting to load from disk.\n');
     load(stgs, 'stgs');
 end
-
 stgs_txtfile_name = sprintf('%s_settings.txt', server_run_id);
 diary(stgs_txtfile_name);
 fprintf('%s\n', datestr(clock));
@@ -20,12 +19,12 @@ stgs;
 diary off
 fprintf('settings recorded to %s\n', stgs_txtfile_name);
 
-expected_tokens = 6;
+expected_tokens = 7;
 nxtSeqNum = 1;
 consecutive_empty_lines = 0;
 max_consecutive_empty_lines = 1;
 while true
-    fprintf('ready for next image (in_dir, image_name, image_suffix, starmask_suffix, output_dir):\n');
+    fprintf('ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):\n');
     in_str = input(sprintf('%d>> ', nxtSeqNum), 's');
     %in_str = input('', 's');
     %in_str
@@ -61,7 +60,7 @@ while true
             expected_tokens));
         fprintf(2, 'expected inputs (whitespace-delimited) are:\n');
         fprintf(2, ['(in_dir, image_name, image_suffix, starmask_suffix, '...
-            'elps_fit_params_file, output_dir)\n']);
+            'elps_fit_params_file,guide_dir, output_dir)\n']);
         continue
     end
     in_dir = tokens{1};
@@ -69,15 +68,16 @@ while true
     image_suffix = tokens{3};
     starmask_suffix = tokens{4};
     elps_fit_params_filename = tokens{5};
-    output_dir = tokens{6};
+    guide_dir = tokens{6};
+    output_dir = tokens{7};
     fprintf(['running with in_dir=%s, image_name=%s, image_suffix=%s, '...
-        'starmask_suffix=%s, output_dir=%s\n'], in_dir, image_name, ...
-        image_suffix, starmask_suffix, output_dir)
+    'starmask_suffix=%s, output_dir=%s, guide_dir=%s\n'], in_dir, image_name, ...
+    image_suffix, starmask_suffix, output_dir, guide_dir)
     image_run_id = sprintf('%s_%07d', server_run_id, nxtSeqNum-1);
     
     try
         batchFindClusterArcs(in_dir, {image_name}, image_suffix, starmask_suffix,...
-            [], [], stgs, output_dir, elps_fit_params_filename, [], image_run_id);
+            [], [], stgs, output_dir, elps_fit_params_filename, guide_dir, [], image_run_id);
     catch ME
         fprintf(2, '%s', sprintf('ERROR: %s\n', ME.message));
     end
