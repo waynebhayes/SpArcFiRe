@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 die() { echo "FATAL ERROR IN IMAGE GUIDING: $@" >&2; exit 1;}
 
 TEST_RESULT=0
