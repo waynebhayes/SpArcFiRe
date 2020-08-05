@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/bash -x
 die() { echo "FATAL ERROR: $@
 SpArcFire was run as:
 $COMMAND_LINE" >&2
