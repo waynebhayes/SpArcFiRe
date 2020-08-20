@@ -1,6 +1,10 @@
 #!/bin/bash
 
 die() { echo "FATAL ERROR IN CONVERT FITS: $@" >&2; exit 1;}
+
+
+mkdir -p $SPARCFIRE_HOME/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.tmp
+mkdir -p $SPARCFIRE_HOME/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out
 $SPARCFIRE_HOME/scripts/SpArcFiRe -convert-FITS $SPARCFIRE_HOME/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.in/ $SPARCFIRE_HOME/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.tmp $SPARCFIRE_HOME/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out -generateFitQuality 1 > fit_quality_test.txt 2> fit_quality_err.txt
 TEST_RESULT=1
 

@@ -5,6 +5,8 @@ TEST_RESULT=1
 for i in $(seq 0 .25 1)
 #for i in $(seq 0 .25 0)
     do
+    mkdir -p $SPARCFIRE_HOME/regression-tests/image_guiding/test_data/G.tmp/
+    mkdir -p $SPARCFIRE_HOME/regression-tests/image_guiding/test_data/G.out/$i
     $SPARCFIRE_HOME/scripts/SpArcFiRe -guide_dir $SPARCFIRE_HOME/regression-tests/image_guiding/test_data/G.guide $SPARCFIRE_HOME/regression-tests/image_guiding/test_data/G.in/ $SPARCFIRE_HOME/regression-tests/image_guiding/test_data/G.tmp/ $SPARCFIRE_HOME/regression-tests/image_guiding/test_data/G.out/$i -imageGuidingThreshold $i > tempImageGuiding.txt;
 
     diff <(cut -f1-39,42-150 -d$','  $SPARCFIRE_HOME/regression-tests/image_guiding/test_data/G.out/"$i"/galaxy.csv) <(cut -f1-39,42-150 -d$','  $SPARCFIRE_HOME/"regression-tests/image_guiding/test_data/test.out/$i/galaxy.csv") > comp.txt
