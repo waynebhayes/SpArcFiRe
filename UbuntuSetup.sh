@@ -1,21 +1,38 @@
 #!/bin/sh
+
+# ensure that only -sudo is accepted as an argument
+if [[ $# -gt 1 ]]; then
+   echo "USAGE: UbuntuSetup.sh [-sudo]"; echo "   -sudo: runs install commands with sudo"; exit
+fi
+
+SUDO=''
+
+if [[ $# -eq 1 ]]; then
+    case "$1" in
+    -sudo) SUDO=sudo; shift;;
+    *) echo "USAGE: UbuntuSetup.sh [-sudo]"; echo "   -sudo: runs install commands with sudo"; exit;;
+    esac
+fi
+
+# download needed libaries
 echo "\n\n---Gettting latest package lists---\n\n"
-apt-get update
-apt-get install unzip
+
+$SUDO apt-get update
+$SUDO apt-get install unzip
 
 echo "\n\n---Installing GIT---\n\n"
-apt-get install git -y
+$SUDO apt-get install git -y
 
 echo "\n\n---Installing GCC---\n\n"
-apt install gcc -y
+$SUDO apt install gcc -y
 
 
 echo "\n\n---Installing Python2.7, numpy, astropy, scipy, and Pillow---\n\n"
-apt install python2.7 python-pip -y
-pip2 install numpy
-pip2 install astropy
-pip2 install scipy
-pip2 install Pillow
+$SUDO apt install python2.7 python-pip -y
+$SUDO pip2 install numpy
+$SUDO pip2 install astropy
+$SUDO pip2 install scipy
+$SUDO pip2 install Pillow
 
 # create a temporary directory to download and unzip matlab installs
 mkdir /matlab_downloads/
@@ -34,11 +51,10 @@ rmdir /matlab_downloads
 mv /pkg/matlab/v92 /pkg/matlab/R2017a
 
 echo "\n\n---Cloning SpArcFiRe---\n\n"
-sudo -u username git clone https://github.com/wschallo/SpArcFiRe.git
-
+$SUDO -u username git clone https://github.com/wschallo/SpArcFiRe.git
 
 echo "\n\n---Setting Up SpArcFiRe---\n\n"
-sudo -u username SpArcFiRe/scripts/wschallo/setup.sh
+$SUDO -u username SpArcFiRe/scripts/wschallo/setup.sh
 
-echo "Setup Complete, to run SpArcFiRe on the test images run ~/bin/wschallo/SpArcFiRe-run.sh"
+echo "Setup complete, to run SpArcFiRe on the test images run ~/bin/wschallo/SpArcFiRe-run.sh"
 echo "For an in-depth tutorial on how to use SpArcFiRe read the README file or look at it on the GitHub repo."
