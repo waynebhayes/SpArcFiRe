@@ -16,6 +16,7 @@ fi
 
 # download needed libaries
 echo "\n\n---Gettting latest package lists---\n\n"
+
 $SUDO apt-get update
 $SUDO apt-get install unzip
 
@@ -51,7 +52,6 @@ mv /pkg/matlab/v92 /pkg/matlab/R2017a
 
 echo "\n\n---Cloning SpArcFiRe---\n\n"
 $SUDO -u username git clone https://github.com/wschallo/SpArcFiRe.git
-
 
 echo "\n\n---Setting Up SpArcFiRe---\n\n"
 $SUDO -u username SpArcFiRe/scripts/wschallo/setup.sh
