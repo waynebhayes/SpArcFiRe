@@ -6,7 +6,7 @@ exit
 }
 warn() { echo "WARNING: $@" >&2
 }
-[ -d "$SPARCFIRE_HOME" ] || die "you forgot to run 'source ./setup.sh' from the base of the SpArcFiRe repo"
+[ -d "$SPARCFIRE_HOME" ] || die "you forgot to run 'source ./setup.sh SPARCFIRE_REPO_DIRECTORY' from the base of the SpArcFiRe repo"
 COMMAND_LINE="$0 $@"
 USAGE="USAGE: `basename $0` [-convert-FITS] [-compute-starmask <false|true>] [-ignore-starmask] [-elps_dir DIR] [-web] {inDir} {pngDir} {outDir} [SpArcFiRe-stdin.sh options]
 (\"SpArcFiRe-stdin.sh -help\" will tell you the other options.)
