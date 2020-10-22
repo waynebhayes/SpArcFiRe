@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # script for execution of deployed applications
 #
 # Sets up the MCR environment for the current $ARCH and executes 

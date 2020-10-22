@@ -1,0 +1,48 @@
+===============================================================================
+# IMAGE and GALFIT CONTROL PARAMETERS
+A) /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237668272437199076/1237668272437199076_galfit_input.fits                          # Input data image (FITS file)
+B) /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237668272437199076/1237668272437199076_galfit_output.fits         # Output data image block
+C) none                                 # Sigma image name (made from data if blank or "none")
+#D) psf.fits                            # Input PSF image and (optional) diffusion kernel
+E) 1                                    # PSF fine sampling factor relative to data
+F) none                                 # Bad pixel mask (FITS image or ASCII coord list)
+G) none                                 # File with parameter constraints (ASCII file)
+H) 1    194   1   194             # Image region to fit (xmin xmax ymin ymax)
+I) 40    40                             # Size of the convolution box (x y)
+J) 22                                   # Magnitude photometric zeropoint
+K) 0.038  0.038                         # Plate scale (dx dy)    [arcsec per pixel]
+O) regular                              # Display type (regular, curses, both)
+P) 0                                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
+
+# Object number: 1
+ 0) sersic                              #  object type                          - The light curve function
+ 1) 97.575 97.5741         0 0     #  position x, y                        - Light curve center coordinates
+ 3) 12                          1       #  Integrated magnitude                 - Brightness parameter
+ 4) 15.9288                1       #  R_e (half-light radius)   [pix]      - Size of the light curve at half brightness, in pixels
+ 5) 1.0                     1   #  Sersic index n (de Vaucouleurs n=4)  - The Sersic exponent (deVauc=4, expdisk/spirals=1)
+ 6) 0.0000                      0       #     -----
+ 7) 0.0000                      0       #     -----
+ 8) 0.0000                      0       #     -----
+ 9) 0.86479                 1       #  axis ratio (b/a)                             - Semiminoraxis/semimajor axis ratio
+10) 46.1464             1       #  position angle (PA) [deg: Up=0, Left=90]     - Orientation of the ellipse
+ Z) 0                                   #  output option (0 = resid., 1 = Don't subtract)
+
+# Object number: 2
+# 0) sersic                             #  object type                          - The light curve function
+# 1) 97.575 97.5741        0 0     #  position x, y                        - Light curve center coordinates
+# 3) 10                         1       #  Integrated magnitude                 - Brightness parameter
+# 4) 2.1035                      1       #  R_e (half-light radius)   [pix]      - Size of the light curve at half brightness, in pixels
+# 5) 1.0                    1   #  Sersic index n (de Vaucouleurs n=4)  - The Sersic exponent (deVauc=4, expdisk/spirals=1)
+# 6) 0.0000                     0       #     -----
+# 7) 0.0000                     0       #     -----
+# 8) 0.0000                     0       #     -----
+# 9) 0.86479                        1       #  axis ratio (b/a)                             - Semiminoraxis/semimajor axis ratio
+#10) 46.1464            1       #  position angle (PA) [deg: Up=0, Left=90]     - Orientation of the ellipse
+# Z) 0                                  #  output option (0 = resid., 1 = Don't subtract)
+
+# Object number: 3
+ 0) sky                                 #  object type
+ 1) 0           1                       #  sky background at center of fitting region [ADUs]
+ 2) 0.0000      0                       #  dsky/dx (sky gradient in x)
+ 3) 0.0000      0                       #  dsky/dy (sky gradient in y)
+ Z) 0                                   #  output option (0 = resid., 1 = Don't subtract)

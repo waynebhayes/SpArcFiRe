@@ -28,6 +28,7 @@ for dir in regression-tests/*; do
 	    (( NUM_FAILS+=$? ))
 	fi
     done
+    echo Number of failures so far: $NUM_FAILS
 done
-echo Number of failures: $NUM_FAILS
+echo Total Number of failures: $NUM_FAILS
 exit $NUM_FAILS

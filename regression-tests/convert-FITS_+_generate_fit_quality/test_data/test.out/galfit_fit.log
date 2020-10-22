@@ -1,0 +1,375 @@
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237674603216699671/1237674603216699671_galfit_input.fits[1:221,1:221] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237674603216699671/1237674603216699671.feedme 
+Restart file    : galfit.01 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237674603216699671/1237674603216699671_galfit_output.fits 
+
+ sersic    : ( [110.73], [108.12])  14.57     31.93    0.61    0.22     9.68
+             (   [0.00],   [0.00])   0.01      0.34    0.02    0.00     0.16
+ sky       : [111.00, 111.00]  1.67e-02  [0.00e+00]  [0.00e+00]
+                                1.78e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 35560.68477,  ndof = 48835
+ Chi^2/nu = 0.728 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237667735031251259/1237667735031251259_galfit_input.fits[1:110,1:110] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237667735031251259/1237667735031251259.feedme 
+Restart file    : galfit.02 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237667735031251259/1237667735031251259_galfit_output.fits 
+
+ sersic    : (  [55.39],  [55.51])  15.64     11.83    0.41    0.71    38.85
+             (   [0.00],   [0.00])   0.02      0.22    0.02    0.01     2.23
+ sky       : [ 55.50,  55.50]  9.68e-02  [0.00e+00]  [0.00e+00]
+                                9.37e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 9755.59894,  ndof = 12094
+ Chi^2/nu = 0.807 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237668332565496083/1237668332565496083_galfit_input.fits[1:89,1:89] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237668332565496083/1237668332565496083.feedme 
+Restart file    : galfit.03 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237668332565496083/1237668332565496083_galfit_output.fits 
+
+ sersic    : (  [45.03],  [45.47])  15.99     12.47    0.58    0.43   -26.38
+             (   [0.00],   [0.00])   0.02      0.22    0.03    0.01     0.71
+ sky       : [ 45.00,  45.00]  3.45e-02  [0.00e+00]  [0.00e+00]
+                                4.22e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 5249.08484,  ndof = 7915
+ Chi^2/nu = 0.663 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237671262274912400/1237671262274912400_galfit_input.fits[1:96,1:96] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237671262274912400/1237671262274912400.feedme 
+Restart file    : galfit.04 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237671262274912400/1237671262274912400_galfit_output.fits 
+
+ sersic    : (  [48.04],  [48.43])  15.76     10.62    0.45    0.67     9.72
+             (   [0.00],   [0.00])   0.02      0.16    0.02    0.01     1.46
+ sky       : [ 48.50,  48.50]  4.05e-02  [0.00e+00]  [0.00e+00]
+                                4.65e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 6478.13417,  ndof = 9210
+ Chi^2/nu = 0.703 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237654948913873117/1237654948913873117_galfit_input.fits[1:67,1:67] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237654948913873117/1237654948913873117.feedme 
+Restart file    : galfit.05 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237654948913873117/1237654948913873117_galfit_output.fits 
+
+ sersic    : (  [34.25],  [33.29])  16.50      6.94    0.53    0.81    75.41
+             (   [0.00],   [0.00])   0.02      0.16    0.03    0.02     4.21
+ sky       : [ 34.00,  34.00]  4.63e-02  [0.00e+00]  [0.00e+00]
+                                7.16e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 2925.77077,  ndof = 4483
+ Chi^2/nu = 0.653 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237665428093272108/1237665428093272108_galfit_input.fits[1:50,1:50] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237665428093272108/1237665428093272108.feedme 
+Restart file    : galfit.06 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237665428093272108/1237665428093272108_galfit_output.fits 
+
+ sersic    : (  [25.35],  [25.36])  16.48      8.00    0.57    0.64    -7.51
+             (   [0.00],   [0.00])   0.02      0.15    0.03    0.01     1.53
+ sky       : [ 25.50,  25.50]  1.94e-02  [0.00e+00]  [0.00e+00]
+                                8.33e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 1129.07935,  ndof = 2494
+ Chi^2/nu = 0.453 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237662695962902783/1237662695962902783_galfit_input.fits[1:99,1:99] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237662695962902783/1237662695962902783.feedme 
+Restart file    : galfit.07 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237662695962902783/1237662695962902783_galfit_output.fits 
+
+ sersic    : (  [49.72],  [50.26])  15.26     19.76    0.37    0.35   -10.76
+             (   [0.00],   [0.00])   0.01      0.16    0.01    0.00     0.23
+ sky       : [ 50.00,  50.00]  7.41e-03  [0.00e+00]  [0.00e+00]
+                                1.67e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 3568.16738,  ndof = 9795
+ Chi^2/nu = 0.364 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237668272437199076/1237668272437199076_galfit_input.fits[1:194,1:194] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237668272437199076/1237668272437199076.feedme 
+Restart file    : galfit.08 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237668272437199076/1237668272437199076_galfit_output.fits 
+
+ sersic    : (  [97.57],  [97.57])  14.37     19.30    0.67    0.88    38.64
+             (   [0.00],   [0.00])   0.01      0.18    0.02    0.01     2.81
+ sky       : [ 97.50,  97.50]  4.53e-02  [0.00e+00]  [0.00e+00]
+                                2.64e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 25028.20502,  ndof = 37630
+ Chi^2/nu = 0.665 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237664870821855281/1237664870821855281_galfit_input.fits[1:64,1:64] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237664870821855281/1237664870821855281.feedme 
+Restart file    : galfit.09 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237664870821855281/1237664870821855281_galfit_output.fits 
+
+ sersic    : (  [32.60],  [32.63])  16.46      7.98    0.87    0.76    44.22
+             (   [0.00],   [0.00])   0.02      0.20    0.05    0.02     2.91
+ sky       : [ 32.50,  32.50]  3.15e-02  [0.00e+00]  [0.00e+00]
+                                6.14e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 2153.78504,  ndof = 4090
+ Chi^2/nu = 0.527 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237657776084222119/1237657776084222119_galfit_input.fits[1:64,1:64] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237657776084222119/1237657776084222119.feedme 
+Restart file    : galfit.10 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237657776084222119/1237657776084222119_galfit_output.fits 
+
+ sersic    : (  [32.62],  [32.72])  16.74      7.64    0.53    0.59   -74.90
+             (   [0.00],   [0.00])   0.03      0.19    0.04    0.01     1.78
+ sky       : [ 32.50,  32.50]  3.36e-02  [0.00e+00]  [0.00e+00]
+                                6.28e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 2696.46234,  ndof = 4090
+ Chi^2/nu = 0.659 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237655128770347419/1237655128770347419_galfit_input.fits[1:165,1:165] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237655128770347419/1237655128770347419.feedme 
+Restart file    : galfit.11 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237655128770347419/1237655128770347419_galfit_output.fits 
+
+ sersic    : (  [82.88],  [83.43])  15.04     21.25    0.43    0.36    26.23
+             (   [0.00],   [0.00])   0.01      0.24    0.01    0.00     0.37
+ sky       : [ 83.00,  83.00]  4.59e-02  [0.00e+00]  [0.00e+00]
+                                3.04e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 20340.61085,  ndof = 27219
+ Chi^2/nu = 0.747 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237658801501372583/1237658801501372583_galfit_input.fits[1:159,1:159] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237658801501372583/1237658801501372583.feedme 
+Restart file    : galfit.12 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237658801501372583/1237658801501372583_galfit_output.fits 
+
+ sersic    : (  [79.86],  [79.51])  15.26     13.09    0.48    0.90    31.26
+             (   [0.00],   [0.00])   0.01      0.21    0.02    0.01     5.72
+ sky       : [ 80.00,  80.00]  7.58e-02  [0.00e+00]  [0.00e+00]
+                                5.05e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 20271.27757,  ndof = 25275
+ Chi^2/nu = 0.802 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237653622298509849/1237653622298509849_galfit_input.fits[1:53,1:53] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237653622298509849/1237653622298509849.feedme 
+Restart file    : galfit.13 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237653622298509849/1237653622298509849_galfit_output.fits 
+
+ sersic    : (  [27.28],  [26.39])  16.55      7.57    0.29    0.59   -78.96
+             (   [0.00],   [0.00])   0.02      0.10    0.01    0.01     1.07
+ sky       : [ 27.00,  27.00]  4.44e-03  [0.00e+00]  [0.00e+00]
+                                3.18e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 1058.16328,  ndof = 2803
+ Chi^2/nu = 0.378 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237665532261695598/1237665532261695598_galfit_input.fits[1:106,1:106] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237665532261695598/1237665532261695598.feedme 
+Restart file    : galfit.14 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237665532261695598/1237665532261695598_galfit_output.fits 
+
+ sersic    : (  [53.20],  [53.44])  15.52     10.43    0.51    0.87    17.57
+             (   [0.00],   [0.00])   0.02      0.16    0.02    0.01     4.22
+ sky       : [ 53.50,  53.50]  4.59e-02  [0.00e+00]  [0.00e+00]
+                                5.22e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 8043.94005,  ndof = 11230
+ Chi^2/nu = 0.716 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237665442066596049/1237665442066596049_galfit_input.fits[1:71,1:71] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237665442066596049/1237665442066596049.feedme 
+Restart file    : galfit.15 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237665442066596049/1237665442066596049_galfit_output.fits 
+
+ sersic    : (  [35.76],  [36.21])  16.29     12.28    0.56    0.31   -56.70
+             (   [0.00],   [0.00])   0.02      0.24    0.03    0.01     0.52
+ sky       : [ 36.00,  36.00]  3.35e-02  [0.00e+00]  [0.00e+00]
+                                5.04e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 3272.71269,  ndof = 5035
+ Chi^2/nu = 0.650 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237662302450483506/1237662302450483506_galfit_input.fits[1:113,1:113] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237662302450483506/1237662302450483506.feedme 
+Restart file    : galfit.16 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237662302450483506/1237662302450483506_galfit_output.fits 
+
+ sersic    : (  [57.04],  [57.06])  15.60     10.88    0.63    0.91    66.36
+             (   [0.00],   [0.00])   0.02      0.19    0.03    0.01     6.66
+ sky       : [ 57.00,  57.00]  5.49e-02  [0.00e+00]  [0.00e+00]
+                                5.39e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 8931.65077,  ndof = 12763
+ Chi^2/nu = 0.700 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237654652032712862/1237654652032712862_galfit_input.fits[1:160,1:160] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237654652032712862/1237654652032712862.feedme 
+Restart file    : galfit.17 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237654652032712862/1237654652032712862_galfit_output.fits 
+
+ sersic    : (  [80.54],  [80.35])  14.74     21.38    0.84    0.74    35.11
+             (   [0.00],   [0.00])   0.01      0.40    0.03    0.01     1.81
+ sky       : [ 80.50,  80.50]  6.90e-02  [0.00e+00]  [0.00e+00]
+                                5.13e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 16299.38975,  ndof = 25594
+ Chi^2/nu = 0.637 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237657775538372865/1237657775538372865_galfit_input.fits[1:26,1:26] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237657775538372865/1237657775538372865.feedme 
+Restart file    : galfit.18 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237657775538372865/1237657775538372865_galfit_output.fits 
+
+ sersic    : (  [13.65],  [13.49])  17.51      4.59    0.50    0.66    35.71
+             (   [0.00],   [0.00])   0.01      0.06    0.02    0.01     1.34
+ sky       : [ 13.50,  13.50]  6.23e-03  [0.00e+00]  [0.00e+00]
+                                7.23e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 80.75855,  ndof = 670
+ Chi^2/nu = 0.121 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237648721789256091/1237648721789256091_galfit_input.fits[1:82,1:82] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237648721789256091/1237648721789256091.feedme 
+Restart file    : galfit.19 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237648721789256091/1237648721789256091_galfit_output.fits 
+
+ sersic    : (  [41.53],  [42.07])  16.26      8.72    0.46    0.67   -67.70
+             (   [0.00],   [0.00])   0.02      0.19    0.02    0.01     2.06
+ sky       : [ 41.50,  41.50]  1.66e-02  [0.00e+00]  [0.00e+00]
+                                4.82e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 5707.33650,  ndof = 6718
+ Chi^2/nu = 0.850 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237662224615932114/1237662224615932114_galfit_input.fits[1:83,1:83] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237662224615932114/1237662224615932114.feedme 
+Restart file    : galfit.20 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237662224615932114/1237662224615932114_galfit_output.fits 
+
+ sersic    : (  [42.12],  [42.20])  16.25      8.43    0.48    0.70   -20.09
+             (   [0.00],   [0.00])   0.02      0.18    0.03    0.01     2.39
+ sky       : [ 42.00,  42.00]  5.81e-02  [0.00e+00]  [0.00e+00]
+                                7.89e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 5050.59913,  ndof = 6883
+ Chi^2/nu = 0.734 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237662193991876699/1237662193991876699_galfit_input.fits[1:139,1:139] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237662193991876699/1237662193991876699.feedme 
+Restart file    : galfit.21 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237662193991876699/1237662193991876699_galfit_output.fits 
+
+ sersic    : (  [69.98],  [69.63])  15.36     15.40    0.47    0.56   -15.52
+             (   [0.00],   [0.00])   0.02      0.25    0.02    0.01     1.04
+ sky       : [ 70.00,  70.00]  7.05e-02  [0.00e+00]  [0.00e+00]
+                                5.61e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 15389.56448,  ndof = 19315
+ Chi^2/nu = 0.797 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237662662136758436/1237662662136758436_galfit_input.fits[1:98,1:98] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237662662136758436/1237662662136758436.feedme 
+Restart file    : galfit.22 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237662662136758436/1237662662136758436_galfit_output.fits 
+
+ sersic    : (  [49.03],  [49.55])  15.76     11.52    0.44    0.54   -71.23
+             (   [0.00],   [0.00])   0.02      0.16    0.02    0.01     0.87
+ sky       : [ 49.50,  49.50]  3.27e-02  [0.00e+00]  [0.00e+00]
+                                3.60e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 6374.28404,  ndof = 9598
+ Chi^2/nu = 0.664 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237667323787018444/1237667323787018444_galfit_input.fits[1:69,1:69] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237667323787018444/1237667323787018444.feedme 
+Restart file    : galfit.23 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237667323787018444/1237667323787018444_galfit_output.fits 
+
+ sersic    : (  [34.86],  [35.32])  16.57      7.04    0.57    0.77    -5.48
+             (   [0.00],   [0.00])   0.03      0.17    0.04    0.02     3.56
+ sky       : [ 35.00,  35.00]  4.12e-02  [0.00e+00]  [0.00e+00]
+                                6.42e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 3267.29136,  ndof = 4755
+ Chi^2/nu = 0.687 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237662534362005987/1237662534362005987_galfit_input.fits[1:148,1:148] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237662534362005987/1237662534362005987.feedme 
+Restart file    : galfit.24 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237662534362005987/1237662534362005987_galfit_output.fits 
+
+ sersic    : (  [74.59],  [74.53])  15.28     17.60    0.54    0.49   -37.13
+             (   [0.00],   [0.00])   0.02      0.31    0.03    0.01     0.87
+ sky       : [ 74.50,  74.50]  8.08e-02  [0.00e+00]  [0.00e+00]
+                                5.82e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 17606.53004,  ndof = 21898
+ Chi^2/nu = 0.804 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Input image     : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237662264323211434/1237662264323211434_galfit_input.fits[1:75,1:75] 
+Init. par. file : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237662264323211434/1237662264323211434.feedme 
+Restart file    : galfit.25 
+Output image    : /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.out/1237662264323211434/1237662264323211434_galfit_output.fits 
+
+ sersic    : (  [37.75],  [38.47])  16.28      7.86    0.54    0.82   -43.97
+             (   [0.00],   [0.00])   0.02      0.16    0.03    0.02     3.97
+ sky       : [ 38.00,  38.00]  3.94e-02  [0.00e+00]  [0.00e+00]
+                                5.78e-04  [0.00e+00]  [0.00e+00]
+ Chi^2 = 3664.38405,  ndof = 5619
+ Chi^2/nu = 0.652 
+
+-----------------------------------------------------------------------------
