@@ -490,7 +490,7 @@ if __name__ == "__main__":
         feedme_list.append("0) sersic")
         feedme_list.append("1) " + center_pos_x + " " + center_pos_y + "   0  0")
         feedme_list.append("3) " + str(float(petromag) + 3.0) + " 1") # Initial guess goes here
-        feedme_list.append("4) " + bulge_rad + "0") 
+        feedme_list.append("4) " + bulge_rad + " 1") 
         feedme_list.append("5) 4  1") # According to other paper GALFIT usually doesn't have a problem with the index
         feedme_list.append("6) 0  0")    
         feedme_list.append("7) 0  0")    
@@ -498,7 +498,7 @@ if __name__ == "__main__":
         # According to other papers, bulge (esp. in spiral galaxies) averages to about 2 so this is a good starting place
         # see https://ned.ipac.caltech.edu/level5/Sept11/Buta/Buta9.html
         feedme_list.append("9) " + axis_ratio + " 0")  
-        feedme_list.append("10) " + pos_angle_bulge + " 0") 
+        feedme_list.append("10) " + pos_angle_bulge + " 1") 
         feedme_list.append("")
     
         # Sersic 2
