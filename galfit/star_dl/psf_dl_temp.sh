@@ -1,7 +1,8 @@
-#!bin/bashuthor: Vivek Gite under GPL v2.0+
+#!bin/bash
 # ------------------------------------------
 INPUT=10_star_dl.csv
 mkdir psfield_files
+mkdir psf_files
 OLDIFS=$IFS
 IFS=','
 url="http://das.sdss.org/raw"
@@ -12,10 +13,12 @@ do
 	if [[ ${#run} -eq 3 ]]; then run="0${run}"; fi
 	if [[ ${#field} -eq 2 ]]; then field="0${field}"; fi
 	
-	wget "${input_str}${run}-${camcol}-0${field}.fit" -O "psfield_files/${name}_${rowc%.*}_${colc%.*}_psfield.fit"
+	#wget "${input_str}${run}-${camcol}-0${field}.fit" -O "psfield_files/${name}_${rowc%.*}_${colc%.*}_psfield.fit"
+
+	./read_PSF "psfield_files/${name}_${rowc%.*}_${colc%.*}_psfield.fit" 5 "${rowc%.*}" "${colc%.*}" "psf_files/${name}_psf.fit"
 
 done < $INPUT
 IFS=$OLDIFS
 rm "psfield_files/name_rowC_colC_psfield.fit"
-
+mv psf_files ../sparcfire-tmp
 
