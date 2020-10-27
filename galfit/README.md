@@ -1,47 +1,56 @@
---------------------------------------------- README (work in progress)------------------------------------------
+<h2> README (work in progress) </h2>
 
 The scripts in this folder are written to automatically generate GALFIT input files from SpArcFiRe output.
 Please note, this script is still a work-in-progress and relies on the hard-coding of some things including
 directory structure. 
 
-The previous version, s2g.py and its related scripts, are written to automatically generate the disk and bulge
+The previous version, *s2g.py* and its related scripts, are written to automatically generate the disk and bulge
 parameters for GALFIT. This version intended to include the generation of spiral arc parameters but was halted
 before it could be completed.
 
-The new version, sparc_to_galfit_feedme_gen.py, includes the generation of spiral arc parameters. Due to the nature
-of the work however, one cannot run sparc_to_galfit_feedme_gen.py and then immediately GALFIT; sparc_to_galfit_feedme_gen.py
+The new version, *sparc_to_galfit_feedme_gen.py*, includes the generation of spiral arc parameters. Due to the nature
+of the work however, one cannot run *sparc_to_galfit_feedme_gen.py* and then immediately GALFIT; *sparc_to_galfit_feedme_gen.py*
 places each feedme into the individual output folder for each galaxy. Furthermore, the feedme generated allots for the inclusion
 of star masking, (and soon) PSFs, which are stored separately. For these reasons and more, we use a bash script aptly named
-control_script.sh to handle all the nuts and bolts. To reiterate, for the components and parameters, you may run
-sparc_to_galfit_feedme_gen.py alone. 
+*control_script.sh* to handle all the nuts and bolts. To reiterate, for the components and parameters, you may run
+*sparc_to_galfit_feedme_gen.py* alone. 
 
---------------------------------------------- TO RUN: ---------------------------------------------------------
+---
+
+<h3> TO RUN: </h3>
 
 These two scripts should be placed in the same directory as the containing directory for the in, tmp, and out folders
 used with SpArcFiRe. Since it's still a WIP, please name these folders sparcfire-in, sparcfire-tmp, sparcfire-out or
 the script(s) won't work. 
 
------------------------------------------- JUST THE FEEDME PARAMETERS ---------------------------------------
+---
 
-python sparc_to_galfit_feedme_gen.py (it was written in python3 but should work in python2 as well)
+<h3> JUST THE FEEDME PARAMETERS </h3>
 
------------------------------------------ THE FEEDMEs + GALFIT --------------------------------------
+`python sparc_to_galfit_feedme_gen.py`
+(it was written in python3 but should work in python2 as well)
 
-bash control_script.sh
+We recommend running this alone upon first installation to ensure it works correctly.
 
-------------------------------------------------------------------------------------------------------
+---
+
+<h3> THE FEEDMEs + GALFIT </h3>
+
+`bash control_script.sh`
+
+---
 
 It is possible to perform the feedme generation with just these two but there are other optional
 inputs which we recommend and have also included already built into the control script - if you do not wish to include
 these, the scripts should run anyway albeit with many messages:
 
-* Star Masks: Requires the use of SExtractor. Parameters and python script found in star_removal. control_script.sh
+* Star Masks: Requires the use of SExtractor. Parameters and python script found in star_removal. *control_script.sh*
 automatically generates a folder to hold the masks and checks if they've already been generated. Placed in a folder in
 sparcfire-tmp. 
 
-* PSF Generation (SDSS only): Requires the use of the Read_PSF program from SDSS's website. sparc_to_galfit_feedme_gen.py
+* PSF Generation (SDSS only): Requires the use of the Read_PSF program from SDSS's website. *sparc_to_galfit_feedme_gen.py*
 takes information from the csv included in star_dl according to our own naming convention - as controlled by a function in
-sparc_to_galfit_feedme_gen.py to be easily modified to follow SDSS' naming convention - and
+*sparc_to_galfit_feedme_gen.py* to be easily modified to follow SDSS' naming convention - and
 outputs the information necessary to find and download the psfield file (work in progress) into the generated feedme. The 
 psfield should then be processed by the Read_PSF executable.
 ** NOTE, once you compile the Read_PSF executable, you must replace the file, phConsts.h with the file included here or 
