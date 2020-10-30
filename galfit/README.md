@@ -87,5 +87,5 @@ PNGs are then deleted and all that is left is the combined/paneled image in a se
 
 
 ------------------------------------------------------------------------------------
-Some scripts written by Matthew Portman under the tutelage of Dr. Wayne Hayes, UCI.
+Newest scripts written by Matthew Portman under the tutelage of Dr. Wayne Hayes, UCI.
 Others written by the SDSS team and Darren Davis who also made SpArcFiRe. 
