@@ -4,6 +4,20 @@ The scripts in this folder are written to automatically generate GALFIT input fi
 Please note, this script is still a work-in-progress and relies on the hard-coding of some things including
 directory structure. 
 
+<h3> Current Directory Structure </h3>
+
+
+**control_script.sh**
+**sparc_to_galfit_feedme_gen.py** 
+*sparcfire-in*  - input FITS files
+                      *galfit_masks* - SExtractor Star Masks
+*sparcfire-tmp* - < - *galfits* - Output FITS models
+                      *psf_files* - PSFs generated for input FITS
+                                         Output FITS models
+*sparcfire-out* - *all_galfit_out* - < - *comparison_param.csv*
+                                         *galfit_png*           - FITS models converted to PNG
+
+
 The previous version, *s2g.py* and its related scripts, are written to automatically generate the disk and bulge
 parameters for GALFIT. This version intended to include the generation of spiral arc parameters but was halted
 before it could be completed.
