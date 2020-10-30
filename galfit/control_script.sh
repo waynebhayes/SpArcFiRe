@@ -15,14 +15,16 @@ silent() {
 # Making some directories and cleaning them
 
 silent mkdir ./sparcfire-tmp/galfit_masks \
-./sparcfire-out/galfit_png \
-./sparcfire-tmp/galfits/ \
+./sparcfire-tmp/galfits \
+./sparcfire-temp/PSF_files \
 ./sparcfire-out/all_galfit_out \
+./sparcfire-out/all_galfit_out/galfit_png 
 
 silent rm -f \ #./sparcfire-tmp/galfit_masks/* \
-./sparcfire-tmp/galfits/* \
-./sparcfire-out/galfit_png/* \
-./sparcfire-out/all_galfit_out/*
+./sparcfire-tmp/galfits/*.fits \
+./sparcfire-out/all_galfit_out/*.fits \
+./sparcfire-out/all_galfit_out/galfit_png/*.png \
+
 
 if which galfit; then
 	echo -e "Found GALFIT. Proceeding.\n"
@@ -91,6 +93,7 @@ do
 	feedme_path="${gal_path_out}/autogen_feedme_galfit.in"
 
 	# GENERATE PSF HERE -- TO DO, text necessary in feedme, need to write separate script to download all psfield files
+	# Rather check for PSF here and generate it if its not here... implement as a function
 
 	echo "Galfitting" $feedme_path
 	$run_galfit $feedme_path
@@ -121,8 +124,13 @@ cp ./sparcfire-tmp/galfits/*.fits ./sparcfire-out/all_galfit_out/
 
 # Cleaning up 
 silent rm galfit.* fit.log
-mv *_combined.png ./sparcfire-out/galfit_png/
+mv *_combined.png ./sparcfire-out/all_galfit_out/galfit_png/
 rm *.png
+
+# Running a script to compare input to galfit and output
+# See comparison_params.csv for *just* the differences
+# Each galaxy folder contains the input, output, and difference in a text file galfit_io_compare
+$python in_out_comparison.py
 
 # For running fitspng on all galfit output assuming all in one folder
 # Keep the below line in case of desire to parallelize... which will be strong
