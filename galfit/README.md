@@ -4,7 +4,7 @@ The scripts in this folder are written to automatically generate GALFIT input fi
 Please note, this script is still a work-in-progress and relies on the hard-coding of some things including
 directory structure. 
 
-<h3> Current Directory Structure </h3>
+<h3> Current Directory Structure </h3> (in progress)
 
 
 **control_script.sh**
