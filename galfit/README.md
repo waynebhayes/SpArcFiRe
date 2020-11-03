@@ -4,24 +4,7 @@ The scripts in this folder are written to automatically generate GALFIT input fi
 Please note, this script is still a work-in-progress and relies on the hard-coding of some things including
 directory structure. 
 
-<h3> Current Directory Structure </h3> 
-
-```
-control_script.sh
-
-sparc_to_galfit_feedme_gen.py
-
-*sparcfire-in -- input FITS files
-
-                      *galfit_masks -- SExtractor Star Masks
-*sparcfire-tmp --  <- *galfits      -- Output FITS models
-                      *psf_files    -- PSFs generated for input FITS
-                      
-                                        -- Output FITS models
-*sparcfire-out -- *all_galfit_out -- <- comparison_param.csv
-                                        *galfit_png           -- FITS models converted to PNG
-```
-
+<h3> INTRODUCTION </h3>
 
 The previous version, *s2g.py* and its related scripts, are written to automatically generate the disk and bulge
 parameters for GALFIT. This version intended to include the generation of spiral arc parameters but was halted
@@ -41,6 +24,26 @@ the user a chance to see how much the two differ. *in_out_comparison.py* outputs
 between the two as a text file called *galfit_io_compare.txt*
 * one file which contains *all* of the difference values between the two for every galaxy but just the differences. This is called
 *comparison_params.csv* and will be generated in the folder *all_galfit_out*. 
+
+---
+
+<h3> Current Directory Structure </h3> 
+
+```
+control_script.sh
+
+sparc_to_galfit_feedme_gen.py
+
+*sparcfire-in -- input FITS files
+
+                      *galfit_masks -- SExtractor Star Masks
+*sparcfire-tmp --  <- *galfits      -- Output FITS models
+                      *psf_files    -- PSFs generated for input FITS
+                      
+                                        -- Output FITS models
+*sparcfire-out -- *all_galfit_out -- <- comparison_param.csv
+                                        *galfit_png           -- FITS models converted to PNG
+```
 
 ---
 
