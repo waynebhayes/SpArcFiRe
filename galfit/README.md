@@ -6,16 +6,21 @@ directory structure.
 
 <h3> Current Directory Structure </h3> (in progress)
 
+```
+control_script.sh
 
-**control_script.sh**
-**sparc_to_galfit_feedme_gen.py** 
-*sparcfire-in*  - input FITS files
-                      *galfit_masks* - SExtractor Star Masks
-*sparcfire-tmp* - < - *galfits* - Output FITS models
-                      *psf_files* - PSFs generated for input FITS
-                                         Output FITS models
-*sparcfire-out* - *all_galfit_out* - < - *comparison_param.csv*
-                                         *galfit_png*           - FITS models converted to PNG
+sparc_to_galfit_feedme_gen.py
+
+*sparcfire-in -- input FITS files
+
+                      *galfit_masks -- SExtractor Star Masks
+*sparcfire-tmp --  <- *galfits      -- Output FITS models
+                      *psf_files    -- PSFs generated for input FITS
+                      
+                                        -- Output FITS models
+*sparcfire-out -- *all_galfit_out -- <- comparison_param.csv
+                                        *galfit_png           -- FITS models converted to PNG
+```
 
 
 The previous version, *s2g.py* and its related scripts, are written to automatically generate the disk and bulge
