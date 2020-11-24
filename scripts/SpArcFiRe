@@ -1,37 +1,34 @@
-#!/bin/bash -x
-die() { echo "FATAL ERROR: $@
+#!/bin/bash
+USAGE="USAGE: $0 [-convert-FITS] [-compute-starmask <false|true>] [-ignore-starmask] [-elps_dir DIR] [-web] {inDir} {pngDir} {outDir} [SpArcFiRe-stdin.sh options]
+    (\"SpArcFiRe-stdin.sh -help\" will tell you the other options.)
+
+    SpArcFiRe uses PNG images internally, but can mask stars only if original images are in FITS format.
+    Note that all three directories must exist BEFORE you run SpArcFiRe.
+    Files of type PNG in {inDir} are copied verbatim to pngDir.
+    Files of type JPG in {inDir} are converted to PNG and put in pndDir.
+    Files of type FITS in {inDir} are converted to PNG if -convert-FITS is specified, in which case PNGs and starmasks are put in pngDir.
+    When -convert-FITS is used, you can control the FITS->PNG conversion using '-p UPPER N LOWER' where UPPER and LOWER and the upper and lower brightness quantiles to chop off, and N is the number of times to apply the asinh transform.
+    -ignore-starmask will ignore starmasks created during FITS conversion; default is to use them
+    Default action (without options) is to assume starmarks and FITS conversion has occured and are in pngDir, and process all galaxies in *inDir*.
+    You can skip FITS conversion once you've done it once, and images in pngDir will be re-used, but only galaxies appearing in inDir will actually be processed (even if they have images in pngDir).
+    if -elps_dir is specified with value DIR, we expect there to be an ellipse fitting parameter file in DIR/{$F}_elps.txt, where $F is the base name of the image file.  For example if DIR is ELLIPSES and the galaxy name is M31, then we expect a file called ELLIPSES/M31_elps.txt to exist.  Otherwise we ignore it and generate an ellipse fit from the input image.
+    Final parsing images go in outDir, one output directory per galaxy.
+    Current directory will have log files and final output CSVs called 'galaxy.csv' and 'galaxy_arcs.csv'."
+
+die() { echo "$USAGE
+
 SpArcFire was run as:
-$COMMAND_LINE" >&2
-exit
+$COMMAND_LINE
+
+FATAL ERROR: $@" >&2
+    exit 1
 }
 warn() { echo "WARNING: $@" >&2
 }
 [ -d "$SPARCFIRE_HOME" ] || die "you forgot to run 'source ./setup.sh SPARCFIRE_REPO_DIRECTORY' from the base of the SpArcFiRe repo"
 COMMAND_LINE="$0 $@"
-USAGE="USAGE: `basename $0` [-convert-FITS] [-compute-starmask <false|true>] [-ignore-starmask] [-elps_dir DIR] [-web] {inDir} {pngDir} {outDir} [SpArcFiRe-stdin.sh options]
-(\"SpArcFiRe-stdin.sh -help\" will tell you the other options.)
-SpArcFiRe uses PNG images internally, but can mask stars only if original images are in FITS format.
-Note that all three directories must exist BEFORE you run SpArcFiRe.
-Files of type PNG in {inDir} are copied verbatim to pngDir.
-Files of type JPG in {inDir} are converted to PNG and put in pndDir.
-Files of type FITS in {inDir} are converted to PNG if -convert-FITS is specified, in which case PNGs and starmasks are put in pngDir.
-When -convert-FITS is used, you can control the FITS->PNG conversion using '-p UPPER N LOWER' where UPPER and LOWER and the upper and lower brightness quantiles to chop off, and N is the number of times to apply the asinh transform.
--ignore-starmask will ignore starmasks created during FITS conversion; default is to use them
-Default action (without options) is to assume starmarks and FITS conversion has occured and are in pngDir, and process all galaxies in *inDir*.
-You can skip FITS conversion once you've done it once, and images in pngDir will be re-used, but only galaxies appearing in inDir will actually be processed (even if they have images in pngDir).
-if -elps_dir is specified with value DIR, we expect there to be an ellipse fitting parameter file in DIR/{$F}_elps.txt, where $F is the base name of the image file.  For example if DIR is ELLIPSES and the galaxy name is M31, then we expect a file called ELLIPSES/M31_elps.txt to exist.  Otherwise we ignore it and generate an ellipse fit from the input image.
-Final parsing images go in outDir, one output directory per galaxy.
-Current directory will have log files and final output CSVs called 'galaxy.csv' and 'galaxy_arcs.csv'."
 
-
-#Show help if no input arguments are given
-if [ $# = 0 ]; then
-    echo "$USAGE"
-    echo ""
-    echo "And below are the options that come after the 3 directories, which are passed to SpArcFiRe-stdin.sh:"
-    echo ""
-    exec SpArcFiRe-stdin.sh -help
-fi
+[ $# -eq 0 ] && die "Expecting at least 3 arguments"
 
 #Define custom functions for error/warning handling
 #Set matlab component cache root folder. Make sure permissions are allowed for current user (even if gsu'd in as another user).

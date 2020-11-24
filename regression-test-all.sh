@@ -1,34 +1,45 @@
 #!/bin/bash
-die() { echo "FATAL ERROR: $@" >&2; exit 1
-}
+case "$1" in
+-use-git-at)
+    if [ -f git-at ] && [ `wc -l < git-at` -eq 2 -a `git log -1 --format=%at` -eq `tail -1 git-at` ]; then
+	echo -n "Repo unchanged; returning same status code as "
+	tail -1 git-at | xargs -I{} date -d @{} +%Y-%m-%d-%H:%M:%S
+	exit `head -1 git-at`
+    fi
+    shift
+    ;;
+esac
+
+USAGE="USAGE: $0 [ list of tests to run, defaults to regression-tests/*/*.sh ]"
+source ~/bin/misc.sh
 PATH=`pwd`:`pwd`/scripts:$PATH
 export PATH
 
 #SpArcFiRe ONLY!!
 source setup.sh
 
-case "$1" in
--make)
-    CORES=`cpus 2>/dev/null || echo 4`
-    make clean; make multi -j$CORES; [ -x sana.multi ] || die "could not create executable 'sana.multi'"
-    make clean; make -j$CORES; [ -x sana ] || die "could not create 'sana' executable"
-    ;;
-"") ;;
-*) die "unknown argument '$1'" ;;
-esac
-
 NUM_FAILS=0
-for dir in regression-tests/*; do
-    echo --- in directory $dir ---
-    for r in $dir/*.sh; do
-	echo --- running test $r ---
-	if nice -19 "$r"; then
-	    :
-	else
-	    (( NUM_FAILS+=$? ))
-	fi
-    done
-    echo Number of failures so far: $NUM_FAILS
+STDBUF=''
+if which stdbuf >/dev/null; then
+    STDBUF='stdbuf -oL -eL'
+fi
+if [ $# -eq 0 ]; then
+    set regression-tests/*/*.sh
+fi
+for r
+do
+    REG_DIR=`dirname "$r"`
+    NEW_FAILS=0
+    export REG_DIR
+    echo --- running test $r ---
+    if eval $STDBUF "$r"; then # force output and error to be line buffered
+	:
+    else
+	NEW_FAILS=$?
+	(( NUM_FAILS+=$NEW_FAILS ))
+    fi
+    echo --- test $r incurred $NEW_FAILS failures, cumulative failures is $NUM_FAILS ---
 done
-echo Total Number of failures: $NUM_FAILS
+echo Total number of failures: $NUM_FAILS
+(echo $NUM_FAILS; git log -1 --format=%at) > git-at
 exit $NUM_FAILS
