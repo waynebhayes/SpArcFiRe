@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 USAGE="USAGE:
 
     source ./setup.sh [SpArcFiRe Repo Directory]
@@ -11,10 +11,10 @@ directory.
 Note: the 'source' command assumes you're using bash as your shell; if not, you'll need
 to figure out how to set the environment variable SPARCFIRE_HOME yourself.
 "
-die() { (echo "$USAGE"; echo "FATAL ERROR: $@") >&2; exit 1
+die() { (echo "$USAGE"; echo "FATAL ERROR: $@") >&2; return 1
 }
 
-if [ `basename $0` == setup.sh ]; then
+if [ "`echo $0 | sed 's,.*/,,'`" = setup.sh ]; then
     die "You've run this script; source it instead by typing:
     source $0"
 fi
