@@ -120,6 +120,7 @@ if [ "$ELPS_DIR" != NONE ]; then
     cp -p "$ELPS_DIR"/*_elps.txt $pngDir || die "could not copy ellipse files from '$ELPS_DIR' to '$pngDir'"
 fi
 
+unxz   $sfDir/*.xz >/dev/null 2>&1
 gunzip $sfDir/*.gz >/dev/null 2>&1
 funzip $sfDir/*.fz >/dev/null 2>&1
 (
