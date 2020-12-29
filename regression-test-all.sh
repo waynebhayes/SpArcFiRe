@@ -16,7 +16,7 @@ PATH=`pwd`:`pwd`/scripts:$PATH
 export PATH
 
 #SpArcFiRe ONLY!!
-source setup.sh
+source setup.bash
 
 NUM_FAILS=0
 STDBUF=''
