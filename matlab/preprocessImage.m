@@ -1,4 +1,3 @@
-
 function [img, imgNoUsm, gxyParams, fitParams, exactCtrR, exactCtrC, fromOrigImg, masked] = ...
     preprocessImage(img, stgs, starMask, prevFitParams, outputPath, gxyName)
 % Transforms the given image into a standardized/enhanced form for
@@ -90,6 +89,7 @@ if ~useImageStandardization
     fitParams.rotAngle = 0;
     fitParams.muFit = [(size(img, 2) / 2) + 0.5, (size(img, 1) / 2) + 0.5];
     fitParams.cropRad = min(ceil([size(img, 1), size(img, 2)] / 2));
+    gxyParams.cropRad = min(ceil([size(img, 1), size(img, 2)] / 2)); % Added by Matthew P. 1/6/21
     gxyParams.fitParams = fitParams;
     exactCtrR = imgCtrR;
     exactCtrC = imgCtrC;
@@ -423,49 +423,49 @@ ctrC = round(exactCtrC);
 ctrR = round(exactCtrR);
 ctrAdjAmt = 0.5;
 
-%%%%%%%%%%%%%
+%%%%%%%%%%%%% - Redacted by Matthew P. 1/6/21
 
 % ----- 1/31/20 - Matthew
 % Code to print autocrop coordinates to file for galfit use
 % Copying and pasting the crop code here shouldn't affect the later crop
 % but I'll use different variables just in case.
 
-if stgs.useSubpixelCtr
-    xStart = (round(exactCtrR)-cropRad);
-    xEnd = (round(exactCtrR)+cropRad);
-    yStart = (round(exactCtrC)-cropRad);
-    yEnd = (round(exactCtrC)+cropRad);
-else
-    xStart = (ctrR-cropRad);
-    xEnd = (ctrR+cropRad);
-    yStart = (ctrC-cropRad);
-    yEnd = (ctrC+cropRad);
-end
+%if stgs.useSubpixelCtr
+%    xStart = (round(exactCtrR)-cropRad);
+%    xEnd = (round(exactCtrR)+cropRad);
+%    yStart = (round(exactCtrC)-cropRad);
+%    yEnd = (round(exactCtrC)+cropRad);
+%else
+%    xStart = (ctrR-cropRad);
+%    xEnd = (ctrR+cropRad);
+%    yStart = (ctrC-cropRad);
+%    yEnd = (ctrC+cropRad);
+%end
 
 % check if the crop box would go out of range; if so, add more padding
 
-cropRem = min([xStart - 1, size(img, 1) - xEnd,...
-    yStart - 1, size(img, 2) - yEnd]);
+%cropRem = min([xStart - 1, size(img, 1) - xEnd,...
+%    yStart - 1, size(img, 2) - yEnd]);
 
-if cropRem < 0
+%if cropRem < 0
 
-    xStart = xStart + (-cropRem);
-    yStart = yStart + (-cropRem);
+%    xStart = xStart + (-cropRem);
+%    yStart = yStart + (-cropRem);
 
-end
+%end
 
-crop_coord_file = fopen([outputPath '_crop_coord.txt'],'at');
+%crop_coord_file = fopen([outputPath '_crop_coord.txt'],'at');
 % fprintf(crop_coord_file, ['Path to output (for debugging):' outputPath '\n']);
-fprintf(crop_coord_file, '%d\n', xStart, xEnd, yStart, yEnd);
-fprintf(crop_coord_file, '\n');
-fclose(crop_coord_file);
+%fprintf(crop_coord_file, '%d\n', xStart, xEnd, yStart, yEnd);
+%fprintf(crop_coord_file, '\n');
+%fclose(crop_coord_file);
 
-disp('Wrote autocrop coordinates to file.')
+%disp('Wrote autocrop coordinates to file.')
 
-clear xStart
-clear xEnd
-clear yStart
-clear yEnd
+%clear xStart
+%clear xEnd
+%clear yStart
+%clear yEnd
 
 %%%%%%%%%%%%%%
 
@@ -725,6 +725,8 @@ if isempty(prevFitParams) && nonConvFlag
 end
 
 fitParams.cropRad = cropRad;
+gxyParams.cropRad = cropRad; % Added by Matthew P. 1/6/21
+
 if useDeProjectStretch
     fitParams.rotAngle = rotAngle * (pi/180);
 else
