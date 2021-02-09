@@ -1,7 +1,7 @@
 #!/bin/bash
 USAGE="USAGE:
 
-    source ./setup.sh [SpArcFiRe Repo Directory]
+    source ./setup.bash [SpArcFiRe Repo Directory]
 
 This script does not change any files, but sets the environment variable SPARCFIRE_HOME to
 the base of the SpArcFiRe repo---which is usually just the same directory this
@@ -14,7 +14,7 @@ to figure out how to set the environment variable SPARCFIRE_HOME yourself.
 die() { (echo "$USAGE"; echo "FATAL ERROR: $@") >&2; return 1
 }
 
-if [ "`echo $0 | sed 's,.*/,,'`" = setup.sh ]; then
+if [ "`echo $0 | sed 's,.*/,,'`" = setup.bash ]; then
     die "You've run this script; source it instead by typing:
     source $0"
 fi

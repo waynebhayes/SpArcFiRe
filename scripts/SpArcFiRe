@@ -25,7 +25,7 @@ FATAL ERROR: $@" >&2
 }
 warn() { echo "WARNING: $@" >&2
 }
-[ -d "$SPARCFIRE_HOME" ] || die "you forgot to run 'source ./setup.sh SPARCFIRE_REPO_DIRECTORY' from the base of the SpArcFiRe repo"
+[ -d "$SPARCFIRE_HOME" ] || die "you forgot to run 'source ./setup.bash SPARCFIRE_REPO_DIRECTORY' from the base of the SpArcFiRe repo"
 COMMAND_LINE="$0 $@"
 
 [ $# -eq 0 ] && die "Expecting at least 3 arguments"
