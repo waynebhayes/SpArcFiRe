@@ -444,7 +444,7 @@ if ~isempty(gxyName) && outputParams.writeImages
         gxyParams.diskMajAxsAngleRadians, [gxyParams.iptSz(1) - gxyParams.iptCtrXY(2) + 1, ...
         gxyParams.iptCtrXY(1)], gxyParams.iptSz);
     imwrite(clusReproj, [outputPath '-K_clusMask-reprojected.png']);
-    if getenv('GENERATEFITQUALITY')
+    if str2num(getenv('GENERATEFITQUALITY'))
         gxyParams = getGalfitFitQuality(imgOrig, clusReproj, outputPath, gxyParams);
     else
         gxyParams.fitQualityF1 = '';
