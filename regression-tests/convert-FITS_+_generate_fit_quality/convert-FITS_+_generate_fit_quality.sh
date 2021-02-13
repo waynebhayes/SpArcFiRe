@@ -16,9 +16,9 @@ sed 's/[^0-9.EefF-]/ /g' $SPARCFIRE_HOME/regression-tests/convert-FITS_+_generat
 
 paste /tmp/sPaRCfIrE_TC1 /tmp/sPaRCfIrE_TC2 > /tmp/sPaRCfIrE_TCP1
 
-awk '{for(i=1;i<=NF;i++) if(abs($1 $2) > 1.0e-6) print "different"}' > /tmp/sPaRCfIrE_TCP1 /tmp/comp.txt
+awk '{for(i=1;i<=NF;i++) if(abs($1 $2) > 1.0e-6) print "different"}' > /tmp/sPaRCfIrE_TCP1
 
-if ! [ -s "/tmp/comp.txt" ]; then
+if ! [ -s "/tmp/sPaRCfIrE_TCP1" ]; then
 	TEST_RESULT=0
 fi;
 
