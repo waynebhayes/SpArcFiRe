@@ -7,20 +7,22 @@ abs(){
 	return 'scale=8;sqrt($1 - $2) ^ 2)' | bc
 }
 
-#Run test
+
 mkdir -p $SPARCFIRE_HOME/regression-tests/convert-FITS_no_arguments/test_data/G.tmp
 mkdir -p $SPARCFIRE_HOME/regression-tests/convert-FITS_no_arguments/test_data/G.out
 $SPARCFIRE_HOME/scripts/SpArcFiRe -convert-FITS $SPARCFIRE_HOME/regression-tests/convert-FITS_no_arguments/test_data/G.in/ $SPARCFIRE_HOME/regression-tests/convert-FITS_no_arguments/test_data/G.tmp $SPARCFIRE_HOME/regression-tests/convert-FITS_no_arguments/test_data/G.out > convertFits_test.txt 2> convertFITS_err.txt
 
-sed 's/[^0-9.EefF-]/ /g' $SPARCFIRE_HOME/regression-tests/convert-FITS_no_arguments/test_data/G.out/galaxy.csv > /tmp/sPaRCfIrE_TC1
-sed 's/[^0-9.EefF-]/ /g' $SPARCFIRE_HOME/regression-tests/convert-FITS_no_arguments/test_data/test.out/galaxy.csv > /tmp/sPaRCfIrE_TC2
+cut -f11-22,38-40,44-50,51-57,62-83,86-162 -d$','  $SPARCFIRE_HOME/regression-tests/convert-FITS_no_arguments/test_data/G.out/galaxy.csv | sed '1d' > /tmp/test_numbers1
+cut -f11-22,38-40,44-50,51-57,62-83,86-162 -d$','  $SPARCFIRE_HOME/regression-tests/convert-FITS_no_arguments/test_data/test.out/galaxy.csv | sed '1d' > /tmp/test_numbers2
 
-paste /tmp/sPaRCfIrE_TC1 /tmp/sPaRCfIrE_TC2 > /tmp/sPaRCfIrE_TCP1
+sed 's/[^0-9.EefF-]/ /g' /tmp/test_numbers1 > /tmp/sPaRCfIrE_TC1
+sed 's/[^0-9.EefF-]/ /g' /tmp/test_numbers2 > /tmp/sPaRCfIrE_TC2
 
-awk '{for(i=1;i<=NF;i++) if(abs($1 $2) > 1.0e-6) print "different"}' > /tmp/sPaRCfIrE_TCP1 /tmp/comp.txt
+paste /tmp/sPaRCfIrE_TC1 /tmp/sPaRCfIrE_TC2 > /tmp/comp1
 
+awk -F'[-,]' 'function abs(x) {return x < 0 ? -v : v} {for(i=1;i<=NF;i++) if(abs($1-$2) > 1.0e-6) print "abs($1-$2"}' /tmp/comp1 > /tmp/sPaRCfIrE_TCP1
 
-if ! [ -s "comp.txt" ]; then
+if ! [ -s "/tmp/sPaRCfIrE_TCP1" ]; then
 	TEST_RESULT=0
 fi;
 
