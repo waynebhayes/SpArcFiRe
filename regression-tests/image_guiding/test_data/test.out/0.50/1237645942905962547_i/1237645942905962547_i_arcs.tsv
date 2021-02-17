@@ -1,0 +1,3 @@
+gxyName	alenRank	math_initial_theta	pitch_angle	math_initial_radius	relative_theta_start	relative_theta_end	r_start	r_end	used2rev	failed2rev	hasUndefinedEndpoints	arc_length	num_pixels	err_per_len	err_per_pixel	mean_intensity	brt_ratio_score	anovaF_score	clusOutputColor
+1237645942905962547_i	1	3.806789	-4.134528	15.054955	0.000000	5.820827	15.054955	22.930668	0	0	0	109.235429	1351.000000	338.588624	27.376664	0.761110	1.054445	182.035508	[1_0_0]
+1237645942905962547_i	2	8.884182	8.676560	54.138929	0.000000	1.714183	41.677622	54.138929	0	0	0	82.603767	1158.000000	278.739661	19.883373	0.553017	1.092296	159.944971	[0_1_1]
