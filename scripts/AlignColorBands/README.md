@@ -15,7 +15,7 @@ Python 2.7
    - psutil         (5.7.0)
    - scipy          (1.2.3)
 
-It is recommended that you have at least 16GB of memory available, or more specifically MaxImgDimensionX\*MaxImgDimensionY\*800 bytes of memory to run this program. If you have limited memeory, first set -runInParallel 0, if that is not enough, you must lower the -upscaleFactor until it runs sucessfully (note: the lower the upscale factor the less precison in the output).
+It is recommended that you have at least 16GB of memory available, or more specifically, MaxImgDimensionX\*MaxImgDimensionY\*800 bytes of memory to run this program. If you have limited memeory, first set -runInParallel 0, if that is not enough, you must lower the -upscaleFactor until it runs sucessfully (note: the lower the upscale factor the less precison in the output).
 
 ## Setup
 
