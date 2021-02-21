@@ -20,21 +20,25 @@ class GalaxyCenterNotValidError(Exception): pass
 class NoError(Exception): pass
 
 
-def download_fields(RA, DEC, out_path):
+def download_fields(RA, DEC, out_path, frame_path):
     """Attempts to download the 5 waveband field images to out_path.  Returns the
        fields downloaded as fits objects in order of giruz."""
     
-    #print 'Downloading {}...'.format(os.path.basename(out_path))
-
-    proc = subprocess.Popen(['./downloadFields.sh', str(RA), str(DEC), out_path], stdout = subprocess.PIPE, universal_newlines = True)
-    proc.stdout.close()
-    res = proc.wait()
-    if res != 0: raise DownloadFieldsError
+    if frame_path is None:
+        proc = subprocess.Popen(['./downloadFields.sh', str(RA), str(DEC), out_path], stdout = subprocess.PIPE, universal_newlines = True)
+        proc.stdout.close()
+        res = proc.wait()
+        if res != 0: 
+            raise DownloadFieldsError
+    else:
+        out_path = frame_path
 
     fields = [] 
     # return fields as astropy objects
     for f in sorted(os.listdir(out_path)):
-        fields.append(fits.open(os.path.join(out_path, f), ignore_missing_end = True))
+        if 'frame' in f: 
+            fields.append(fits.open(os.path.join(out_path, f), ignore_missing_end = True))
+
     # reverse g and i bands so that i is searched for stars first (it tends to have more)
     fields[0], fields[1] = fields[1], fields[0]
     print 'Finished downloading {} field images.'.format(len(fields))
@@ -119,12 +123,12 @@ def calc_galaxy_center(header, RA, DEC):
     return int(center_x), int(center_y)
        
            
-def save_galaxy_centered(out_path, name, RA, DEC, star_class_prob, min_num_stars):
+def save_galaxy_centered(out_path, name, RA, DEC, star_class_prob, min_num_stars, compress_output, remove_frames, frame_path):
     """ Saves the galaxy centered and with enough stars visible for realignment"""
 
     fields = None
     try:
-        fields = download_fields(RA, DEC, out_path)
+        fields = download_fields(RA, DEC, out_path, frame_path)
         assert len(fields) == 5
         
         '''
@@ -183,17 +187,21 @@ def save_galaxy_centered(out_path, name, RA, DEC, star_class_prob, min_num_stars
                 
                 print 'Recropping images to size', smin
                 for f in os.listdir(out_path): 
-                    os.remove(os.path.join(out_path, f))
+                    if 'frame' not in f:
+                        os.remove(os.path.join(out_path, f))
                 for i in range(5):
                     save_fits(crop_fits(fields[i], gal_centers[i][0], gal_centers[i][1], smin, path, RA, DEC), os.path.join(out_path, '{}_{}.fits'.format(name, color_names[i])))
                 
                 break
         else:
-            for i in range(5): save_fits(result_crops[i], os.path.join(out_path, '{}_{}.fits'.format(name, color_names[i])))
-               
+            for i in range(5): 
+                save_fits(result_crops[i], os.path.join(out_path, '{}_{}.fits'.format(name, color_names[i])))
+    
     except NoError:
+        
         if fields is not None: 
-            for f in fields: f.close()
+            for f in fields: 
+                f.close()
         
         # keep a list of all that failed
         with open(os.path.join('..', 'download_errs.txt'), 'a+') as f:
@@ -201,14 +209,16 @@ def save_galaxy_centered(out_path, name, RA, DEC, star_class_prob, min_num_stars
         shutil.rmtree(out_path)
 
     finally:
-        ''' 
-        # remove original (big) frame files
+         
         if os.path.exists(out_path):
-            for f in os.listdir(out_path):
-                if 'frame' in f:
-                    try: os.remove(os.path.join(out_path, f))
+            for name in os.listdir(os.path.join(out_path)):    
+                if compress_output and 'fits' in name and 'frame' not in name:
+                    print 'Compressing {}'.format(name)
+                    os.system('xz -9 -e {}'.format(os.path.join(out_path, name)))
+                
+                elif 'frame' in name and remove_frames:
+                    try: os.remove(os.path.join(out_path, name))
                     except: pass
-        '''
 
         # if core dumps were generated, remove them
         for f in os.listdir('.'):
@@ -226,8 +236,11 @@ if __name__ == '__main__':
     parser.add_argument('-overwrite', default = 'True', choices = ['True', 'true', '1', 'False', 'false', '0'], help = 'If true then if any galaxies with the same name will be overwritten')
     parser.add_argument('-min_num_stars', default = 10, type = int, help = 'The minimum number of stars needed in at least one waveband image.')
     parser.add_argument('-star_class_prob', default = 0.65, type = float, help = 'The minimum probablity that an object detected counts as a star, should be in range [0, 1].  A galaxy will require min_num_stars at this probability.')
+    parser.add_argument('-compress_output', default = 0, type = int)
+    parser.add_argument('-remove_frames', default = 0, type = int)
+    parser.add_argument('-frame_path', default = None)
     args = parser.parse_args()
-    
+   
     # check that star arguments are valid
     if args.min_num_stars < 0:
         print 'min_num_stars must be >= 0'
@@ -252,5 +265,7 @@ if __name__ == '__main__':
             print out_path, 'already exists and will not be overwritten'
             exit(1)
     os.mkdir(out_path)
-
-    save_galaxy_centered(out_path, args.name, float(args.RA), float(args.DEC), args.star_class_prob, args.min_num_stars) 
+    
+    args.remove_frames = True if args.remove_frames in ('1', 1, 'true', 'True') else False
+    args.compress_output = True if args.compress_output in ('1', 1, 'true', 'True') else False
+    save_galaxy_centered(out_path, args.name, float(args.RA), float(args.DEC), args.star_class_prob, args.min_num_stars, args.compress_output, args.remove_frames, args.frame_path) 
