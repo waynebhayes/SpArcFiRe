@@ -2,7 +2,9 @@
 
 ## About
 
-ShiftGal is a program that alignes inter-color-band images of the same galaxy to a 100th of a pixel accuracy.  A detailed analysis of this program was published in ADD JOURNAL HERE.  
+ShiftGal is a program that alignes inter-color-band images of the same galaxy to a 100th of a pixel accuracy.  A detailed analysis of this program was published in (add link here).  
+
+Credit to Sergey Anatolyevich with the ALGLIB Project for their data processing library. [link](https://www.alglib.net/)
 
 ## Requirements
 
