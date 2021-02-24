@@ -1,0 +1,7 @@
+# based on daofind.param
+#X_IMAGE_DBL
+#Y_IMAGE_DBL
+XWIN_IMAGE
+YWIN_IMAGE
+MAG_BEST
+CLASS_STAR
