@@ -1,5 +1,5 @@
 #include <stdio.h>
-main()
+int main(void)
 {
     int c;
     int inQuote = 0;

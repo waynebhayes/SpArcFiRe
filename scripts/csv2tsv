@@ -1,5 +1,7 @@
 #!/bin/sh
-PATH=$PATH:/home/wayne/bin/bin.`arch`
+DIR="`dirname $0`"
+PATH="$PATH:$SPARCFIRE_HOME/scripts:$DIR"
+export path
 for i
 do
     b=`basename "$i" .csv`
