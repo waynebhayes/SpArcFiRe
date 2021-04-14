@@ -1,4 +1,5 @@
 #!/bin/bash
+die() { echo "FATAL ERROR: $@" >&2; exit 1;}
 case "$1" in
 -use-git-at)
     if [ -f git-at ] && [ `wc -l < git-at` -eq 2 -a `git log -1 --format=%at` -eq `tail -1 git-at` ]; then
@@ -14,6 +15,11 @@ USAGE="USAGE: $0 [ list of tests to run, defaults to regression-tests/*/*.sh ]"
 
 PATH=`pwd`:`pwd`/scripts:$PATH
 export PATH
+
+if [ ! -x scripts/delete-commas-inside-quotes ]; then
+    compile="gcc -o scripts/delete-commas-inside-quotes scripts/delete-commas-inside-quotes.c" || die "please compile scripts/delete-commas-inside-quotes.c"
+    eval $compile || die "please do whatever's needed to compile: '$compile'"
+fi
 
 #SpArcFiRe ONLY!!
 source setup.bash

@@ -1,0 +1,154 @@
+
+fileNames =
+
+  1x14 cell array
+
+  Columns 1 through 3
+
+    'gxyParamsList-pa...'    'gxyParamsList-pa...'    'gxyParamsList-pa...'
+
+  Columns 4 through 6
+
+    'gxyParamsList-pa...'    'gxyParamsList-pa...'    'gxyParamsList-pa...'
+
+  Columns 7 through 9
+
+    'gxyParamsList-pa...'    'gxyParamsList-pa...'    'gxyParamsList-pa...'
+
+  Columns 10 through 12
+
+    'gxyParamsList-pa...'    'gxyParamsList-pa...'    'gxyParamsList-pa...'
+
+  Columns 13 through 14
+
+    'gxyParamsList-pa...'    'gxyParamsList-pa...'
+
+arcClusterColors
+arc_params
+avg_anovaF_score
+avg_brt_ratio_score
+bar_info
+chirality_longest_arc
+fitParams
+fit_state
+iptCtrXY
+length_thresholds
+median_anovaF_score
+median_brt_ratio_score
+name
+noiseMaskUsed
+starMaskUsed
+thres_abs_pang_avgs
+thres_arm_counts
+thres_arm_counts_dco
+thres_pang_avgs
+thres_pang_avgs_domChirality
+warnings
+
+ans =
+
+  101x1 cell array
+
+    'warnings'
+    'badBulgeFitFlag'
+    'bulgeAxisRatio'
+    'bulgeMajAxsLen'
+    'bulgeMajAxsAngle'
+    'bulgeAvgBrt'
+    'bulgeDiskBrtRatio'
+    'numElpsRefits'
+    'starMaskUsed'
+    'noiseMaskUsed'
+    'diskAxisRatio'
+    'diskMinAxsLen'
+    'diskMajAxsLen'
+    'diskMajAxsAngleRadians'
+    'iptCtrXY'
+    'iptSz'
+    'muDist'
+    'muDistProp'
+    'wtdLik'
+    'likOfCtr'
+    'brtUnifScore'
+    'gaussLogLik'
+    'contourBrtRatio'
+    'fitParams'
+    'standardizedCenterR'
+    'standardizedCenterC'
+    'failed2revDuringMergeCheck'
+    'hasDeletedCtrClus'
+    'failed2revDuringSecondaryMerging'
+    'fitQualityF1'
+    'fitQualityPCC'
+    'name'
+    'fit_state'
+    'cpu_time'
+    'wall_time'
+    'failed2revInOutput'
+    'inputCenterR'
+    'inputCenterC'
+    'covarFit'
+    'arc_params'
+    'bar_candidate_available'
+    'bar_used'
+    'bar_info'
+    'avg_brt_ratio_score'
+    'avg_anovaF_score'
+    'median_brt_ratio_score'
+    'median_anovaF_score'
+    'alenAt25pct'
+    'alenAt50pct'
+    'alenAt75pct'
+    'rankAt25pct'
+    'rankAt50pct'
+    'rankAt75pct'
+    'avgArcLength'
+    'minArcLength'
+    'lowerQuartileArcLength'
+    'medianArcLength'
+    'upperQuartileArcLength'
+    'maxArcLength'
+    'totalArcLength'
+    'totalNumArcs'
+    'chirality_votes_maj'
+    'chirality_votes_alenWtd'
+    'alenWtdPangSum'
+    'chirality_longest_arc'
+    'top2_chirality_agreement'
+    'pa_longest'
+    'pa_avg'
+    'pa_avg_abs'
+    'pa_avg_domChiralityOnly'
+    'pa_alenWtd_avg'
+    'paErr_alenWtd_stdev'
+    'pa_alenWtd_avg_abs'
+    'paErr_alenWtd_stdev_abs'
+    'pa_alenWtd_avg_domChiralityOnly'
+    'paErr_alenWtd_stdev_domChiralityOnly'
+    'pa_totBrtWtd'
+    'pa_avgBrtWtd'
+    'pa_alenWtd_median'
+    'pa_alenWtd_lowQuartile'
+    'pa_alenWtd_highQuartile'
+    'pa_alenWtd_lowDecile'
+    'pa_alenWtd_highDecile'
+    'pa_alenWtd_median_domChiralityOnly'
+    'pa_alenWtd_lowQuartile_domChiralityOnly'
+    'pa_alenWtd_highQuartile_domChiralityOnly'
+    'pa_alenWtd_lowDecile_domChiralityOnly'
+    'pa_alenWtd_highDecile_domChiralityOnly'
+    'sorted_agreeing_pangs'
+    'sorted_agreeing_arclengths'
+    'numArcs_largest_length_gap'
+    'numDcoArcs_largest_length_gap'
+    'numArcs_arclength_function_flattening'
+    'numDcoArcs_arclength_function_flattening'
+    'length_thresholds'
+    'thres_arm_counts'
+    'thres_arm_counts_dco'
+    'thres_pang_avgs'
+    'thres_abs_pang_avgs'
+    'thres_pang_avgs_domChirality'
+    'arcClusterColors'
+
+done writing CSV files.

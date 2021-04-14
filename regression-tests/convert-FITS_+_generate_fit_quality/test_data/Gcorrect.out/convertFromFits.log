@@ -1,0 +1,341 @@
+output will be written to /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.tmp/batchConvertFromFits.log
+galaxy-level errors will also be written to /home/john/SpArcFiRe/regression-tests/convert-FITS_+_generate_fit_quality/test_data/G.tmp/batchConvertFromFits.err
+inSfxs given as string; interpreting as single-element array
+qLvl given as string; interpreting as floating point number
+nReps given as string; interpreting as integer
+blackQlvl given as string; interpreting as floating point number
+maskVal given as string, intrepreting as number
+25 matching files, 2 non-matching files
+skipped files: 
+	.
+	..
+25 unique objects
+qLvl is 0.7500
+nReps is 2
+black-level quantile is 0.2500
+using galaxy mask, suffix = _starmask.png, maskVal = 255
+processing: 1237648721789256091
+	reading: /tmp/SF20738/1237648721789256091.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 0.0136
+asinhBeta (if no star masking were used) = 0.0304
+asinhBeta = 0.1822
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0752
+asinhBeta = 0.3988
+processing: 1237653622298509849
+	reading: /tmp/SF20738/1237653622298509849.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 0.0174
+asinhBeta (if no star masking were used) = 0.1011
+asinhBeta = 0.3996
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.1009
+asinhBeta = 0.3551
+processing: 1237654652032712862
+	reading: /tmp/SF20738/1237654652032712862.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 1118.0000
+asinhBeta (if no star masking were used) = 8.0000
+asinhBeta = 25.0000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0859
+asinhBeta = 0.2406
+processing: 1237654948913873117
+	reading: /tmp/SF20738/1237654948913873117.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 1135.0000
+asinhBeta (if no star masking were used) = 9.0000
+asinhBeta = 61.0000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0653
+asinhBeta = 0.3912
+processing: 1237655128770347419
+	reading: /tmp/SF20738/1237655128770347419.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 1094.0000
+asinhBeta (if no star masking were used) = 8.0000
+asinhBeta = 51.0000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0688
+asinhBeta = 0.3884
+processing: 1237657775538372865
+	reading: /tmp/SF20738/1237657775538372865.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 0.0212
+asinhBeta (if no star masking were used) = 0.0950
+asinhBeta = 0.4549
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0709
+asinhBeta = 0.3014
+processing: 1237657776084222119
+	reading: /tmp/SF20738/1237657776084222119.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 1117.0000
+asinhBeta (if no star masking were used) = 9.0000
+asinhBeta = 65.0000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0543
+asinhBeta = 0.3465
+processing: 1237658801501372583
+	reading: /tmp/SF20738/1237658801501372583.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 1129.0000
+asinhBeta (if no star masking were used) = 8.0000
+asinhBeta = 35.0000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.1045
+asinhBeta = 0.4065
+processing: 1237662193991876699
+	reading: /tmp/SF20738/1237662193991876699.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 1114.0000
+asinhBeta (if no star masking were used) = 7.0000
+asinhBeta = 34.0000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0990
+asinhBeta = 0.4267
+processing: 1237662224615932114
+	reading: /tmp/SF20738/1237662224615932114.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 1115.0000
+asinhBeta (if no star masking were used) = 8.0000
+asinhBeta = 47.2500
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0894
+asinhBeta = 0.4676
+processing: 1237662264323211434
+	reading: /tmp/SF20738/1237662264323211434.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 1125.0000
+asinhBeta (if no star masking were used) = 9.0000
+asinhBeta = 63.0000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0582
+asinhBeta = 0.3603
+processing: 1237662302450483506
+	reading: /tmp/SF20738/1237662302450483506.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 1143.0000
+asinhBeta (if no star masking were used) = 9.0000
+asinhBeta = 46.7500
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0786
+asinhBeta = 0.3618
+processing: 1237662534362005987
+	reading: /tmp/SF20738/1237662534362005987.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 1103.0000
+asinhBeta (if no star masking were used) = 7.0000
+asinhBeta = 29.0000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.1160
+asinhBeta = 0.4277
+processing: 1237662662136758436
+	reading: /tmp/SF20738/1237662662136758436.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 1108.0000
+asinhBeta (if no star masking were used) = 8.0000
+asinhBeta = 88.0000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0499
+asinhBeta = 0.4847
+processing: 1237662695962902783
+	reading: /tmp/SF20738/1237662695962902783.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 0.0126
+asinhBeta (if no star masking were used) = 0.0557
+asinhBeta = 0.3746
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0467
+asinhBeta = 0.2776
+processing: 1237664870821855281
+	reading: /tmp/SF20738/1237664870821855281.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 1138.0000
+asinhBeta (if no star masking were used) = 9.0000
+asinhBeta = 63.5000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0505
+asinhBeta = 0.3148
+processing: 1237665428093272108
+	reading: /tmp/SF20738/1237665428093272108.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 0.0111
+asinhBeta (if no star masking were used) = 0.0490
+asinhBeta = 0.2150
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0997
+asinhBeta = 0.3891
+processing: 1237665442066596049
+	reading: /tmp/SF20738/1237665442066596049.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 1099.0000
+asinhBeta (if no star masking were used) = 8.0000
+asinhBeta = 66.0000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0473
+asinhBeta = 0.3450
+processing: 1237665532261695598
+	reading: /tmp/SF20738/1237665532261695598.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 1109.0000
+asinhBeta (if no star masking were used) = 8.0000
+asinhBeta = 52.0000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0754
+asinhBeta = 0.4337
+processing: 1237667323787018444
+	reading: /tmp/SF20738/1237667323787018444.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 1125.0000
+asinhBeta (if no star masking were used) = 8.0000
+asinhBeta = 60.5000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0578
+asinhBeta = 0.3864
+processing: 1237667735031251259
+	reading: /tmp/SF20738/1237667735031251259.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 1120.0000
+asinhBeta (if no star masking were used) = 7.0000
+asinhBeta = 30.0000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.1404
+asinhBeta = 0.5351
+processing: 1237668272437199076
+	reading: /tmp/SF20738/1237668272437199076.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 1100.0000
+asinhBeta (if no star masking were used) = 8.0000
+asinhBeta = 44.0000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0673
+asinhBeta = 0.3279
+processing: 1237668332565496083
+	reading: /tmp/SF20738/1237668332565496083.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 1119.0000
+asinhBeta (if no star masking were used) = 8.0000
+asinhBeta = 60.0000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0466
+asinhBeta = 0.3088
+processing: 1237671262274912400
+	reading: /tmp/SF20738/1237671262274912400.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 1116.0000
+asinhBeta (if no star masking were used) = 8.0000
+asinhBeta = 68.0000
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0624
+asinhBeta = 0.4684
+processing: 1237674603216699671
+	reading: /tmp/SF20738/1237674603216699671.fits
+Warning: The ability to read FITS files with IMREAD may be removed in a future release. Use FITSREAD to import FITS files.
+> In readfits (line 11)
+  In imread/call_format_specific_reader
+  In imread
+  In batchConvertFromFits (line 158)
+blackLevel = 0.0141
+asinhBeta (if no star masking were used) = 0.0271
+asinhBeta = 0.1886
+blackLevel = 0.0000
+asinhBeta (if no star masking were used) = 0.0653
+asinhBeta = 0.4019

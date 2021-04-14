@@ -14,6 +14,8 @@ to figure out how to set the environment variable SPARCFIRE_HOME yourself.
 die() { (echo "$USAGE"; echo "FATAL ERROR: $@") >&2; return 1
 }
 
+[ "$SPARCFIRE_HOME" != "" ] && return
+
 if [ "`echo $0 | sed 's,.*/,,'`" = setup.sh ]; then
     die "You've run this script; source it instead by typing:
     source $0"
