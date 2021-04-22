@@ -4,6 +4,7 @@ awk "`cat $DIR/misc.awk`"'
     BEGIN{MAX_REL_ERR=1e-4}
     {for(i=1;i<=NF;i++)L[ARGIND][FNR][i]=$i}
     END{
+	diff=0;
 	ASSERT(ARGIND==2, "expecting exactly two filenames as input");
 	a=ARGIND;
 	for(l=1;l<=length(L[a]);l++) for(i=1;i<=length(L[a][l]);i++) {
@@ -19,8 +20,9 @@ awk "`cat $DIR/misc.awk`"'
 		    }
 		    else printErrMsg=1 # correct one is zero but new one is not
 		}
-		if(printErrMsg) printf "line %d column %d (%s)\n<%s\n>%s\n",l,i, L[1][1][i], L[1][l][i], L[2][l][i]
+		if(printErrMsg) {diff=1; printf "line %d column %d (%s)\n<%s\n>%s\n",l,i, L[1][1][i], L[1][l][i], L[2][l][i]}
 	    }
 	}
+	exit(diff);
     }' "$@"
-
+exit $?
