@@ -13,7 +13,7 @@ rm -rf $TEST_DIR/G.tmp/*;
 $SPARCFIRE_HOME/scripts/SpArcFiRe -convert-FITS $TEST_DIR/G.in $TEST_DIR/G.tmp $TEST_DIR/G.out -generateFitQuality 1 > fit_quality_test.txt 2> fit_quality_err.txt
 
 csv2tsv $TEST_DIR/G.out/galaxy.csv $TEST_DIR/Gcorrect.out/galaxy.csv
-if regression-diff.sh $TEST_DIR/G.out/galaxy.tsv $TEST_DIR/Gcorrect.out/galaxy.tsv; then
+if regression-diff.sh $TEST_DIR/G.out/galaxy.tsv $TEST_DIR/Gcorrect.out/galaxy.tsv >/dev/null; then
     echo SUCCESS
 else
     echo FAIL; exit 1
