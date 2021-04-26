@@ -16,7 +16,7 @@ do
     $SPARCFIRE_HOME/scripts/SpArcFiRe -guide_dir $TEST_DIR/G.guide $TEST_DIR/G.in $TEST_DIR/G.tmp $TEST_DIR/G.out/$i -imageGuidingThreshold $i > tempImageGuiding.txt;
 
 	       csv2tsv $TEST_DIR/G.out/"$i"/galaxy.csv $TEST_DIR/Gcorrect.out/$i/galaxy.csv
-    regression-diff.sh $TEST_DIR/G.out/"$i"/galaxy.tsv $TEST_DIR/Gcorrect.out/$i/galaxy.tsv || ((++FAIL_NUM))
+    regression-diff.sh $TEST_DIR/G.out/"$i"/galaxy.tsv $TEST_DIR/Gcorrect.out/$i/galaxy.tsv >/dev/null || ((++FAIL_NUM))
 done
 rm -f *_settings.txt
 exit $FAIL_NUM
