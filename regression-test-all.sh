@@ -23,6 +23,7 @@ fi
 
 #SpArcFiRe ONLY!!
 source setup.bash
+make all
 
 NUM_FAILS=0
 STDBUF=''
