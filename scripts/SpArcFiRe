@@ -175,7 +175,7 @@ for i in $sfDir/*; do
     esac
     sizex=`file $pngDir/$b.png | sed -e 's/.*://' -e 's/,//g' | awk '{printf $4}'`
     sizey=`file $pngDir/$b.png | sed -e 's/.*://' -e 's/,//g' | awk '{printf $6}'`
-    if [ "$sizex" -gt 1024 -o "$sizey" -gt 1024 ]; then
+    if echo "0$sizex$sizey" | grep '[^0-9]' >/dev/null || [ "$sizex" -gt 1024 -o "$sizey" -gt 1024 ]; then
 	convert $CONVERT_ARGS $pngDir/$b.png -size 512x512 /tmp/x$$
 	mv /tmp/x$$ $pngDir/$b.png
     fi
