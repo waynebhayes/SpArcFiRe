@@ -1,7 +1,7 @@
 
 fileNames =
 
-  1x14 cell array
+  1x9 cell array
 
   Columns 1 through 3
 
@@ -14,14 +14,6 @@ fileNames =
   Columns 7 through 9
 
     'gxyParamsList-pa...'    'gxyParamsList-pa...'    'gxyParamsList-pa...'
-
-  Columns 10 through 12
-
-    'gxyParamsList-pa...'    'gxyParamsList-pa...'    'gxyParamsList-pa...'
-
-  Columns 13 through 14
-
-    'gxyParamsList-pa...'    'gxyParamsList-pa...'
 
 arcClusterColors
 arc_params
@@ -47,7 +39,7 @@ warnings
 
 ans =
 
-  101x1 cell array
+  102x1 cell array
 
     'warnings'
     'badBulgeFitFlag'
@@ -73,6 +65,7 @@ ans =
     'gaussLogLik'
     'contourBrtRatio'
     'fitParams'
+    'cropRad'
     'standardizedCenterR'
     'standardizedCenterC'
     'failed2revDuringMergeCheck'
