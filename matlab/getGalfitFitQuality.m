@@ -11,6 +11,19 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
 %   imgNoUsm: the preprocessed image, without applying the unsharp mask
 %   gxyParams: structure containing some information about the ellipse fit 
 
+    % Big edits coming in - Matthew 1/12/21
+    % Fixing where GALFIT runs and retaining only the final FITS
+    % for posterity and potential analysis/reporduction
+
+    % Changing outputPath to drop everything into tmp
+    
+    OGoutputPath = outputPath;
+    gal_name = split(string(outputPath), '/');
+    gal_name = gal_name(end);
+    outputPath = '/tmp/galfit_junk/' + gal_name;
+
+    %disp('Checking outputPath - ' + outputPath)
+    outputPath = char(outputPath);
     fitswrite(img, [outputPath '_galfit_input.fits']);
     %galfitTemplateFilename = ['/home/' getenv('USER') '/bin/GalfitTemplates/template.feedme']; %added this to call galfit using correct path
     galfitTemplateFilename = [getenv('SPARCFIRE_HOME') '/scripts/GalfitTemplates/template.feedme'];
@@ -24,7 +37,7 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
     nRows = gxyParams.iptSz(1);
     nCols = gxyParams.iptSz(2);
     text = strrep(text, '$input_name', [outputPath '_galfit_input.fits']);
-    text = strrep(text, '$output_name', [outputPath '_galfit_output.fits']);
+    text = strrep(text, '$output_name', [OGoutputPath '_galfit_output.fits']);
     text = strrep(text, '$x_center', num2str(muFit(1)));
     text = strrep(text, '$y_center', num2str(size(img, 1) - muFit(2) + 1));
     text = strrep(text, '$radius_bulge', num2str(gxyParams.bulgeMajAxsLen / 4));
@@ -44,11 +57,19 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
     % ^Will 9/30/19: This line of code was added a few months ago because of how matlab evaluates path's at compile time
     % see documentation/stuck_try_this.txt for more explanation
     galfitCommand = [getenv('SPARCFIRE_HOME') '/scripts/galfit ' outputPath '.feedme'];
-    system(galfitCommand)
+
+    % Grabbing current directory before cd-ing to tmp
+    former_dir = cd('/tmp/galfit_junk');
+
+    system(galfitCommand);
+
+    %disp(former_dir)
+    %disp(class(former_dir))
+    cd(former_dir);
 
     % Retrieve input/model subtraction
-    model = mat2gray(fitsread([outputPath '_galfit_output.fits'], 'image', 2));
-    residual = mat2gray(fitsread([outputPath '_galfit_output.fits'], 'image', 3));
+    model = mat2gray(fitsread([OGoutputPath '_galfit_output.fits'], 'image', 2));
+    residual = mat2gray(fitsread([OGoutputPath '_galfit_output.fits'], 'image', 3));
     binarizedClusters = imbinarize(rgb2gray(clusReproj), 0.1);
     binarizedModel = imbinarize(model);
     binarizedResidual = imbinarize(residual);
@@ -99,9 +120,10 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
     %imwrite(truePositiveElements, [outputPath '-L5_maskedClustersResidual.png']);
     %imwrite(grouped, [outputPath '-L_fitQuality.png']);
 
-    % Cleanup files
+    % Cleanup files - let's save it for the end shall we? Matthew 1/12/21
     %disp('Removing galfit.* files...')
-    delete([outputPath 'galfit.*']);
+    %delete([outputPath 'galfit.*']);
+    %delete(['galfit.*']); 
     %delete([outputPath '.feedme']);
     %delete([outputPath '_galfit_input.fits']);
     %delete([outputPath '_galfit_output.fits']);

@@ -39,7 +39,7 @@ warnings
 
 ans =
 
-  101x1 cell array
+  102x1 cell array
 
     'warnings'
     'badBulgeFitFlag'
@@ -65,6 +65,7 @@ ans =
     'gaussLogLik'
     'contourBrtRatio'
     'fitParams'
+    'cropRad'
     'standardizedCenterR'
     'standardizedCenterC'
     'failed2revDuringMergeCheck'
