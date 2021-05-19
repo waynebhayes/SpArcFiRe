@@ -52,7 +52,18 @@ iptImgSz = gxyParams.iptSz;
 gxyParams.inputCenterR = iptImgSz(1) - iptCtrXY(2) + 1;
 gxyParams.inputCenterC = iptCtrXY(1);
 
-gxyParams.covarFit = gxyParams.fitParams.covarFit;
+% 5/19 - Sahel's fix for csv's not being generated when
+% image standardization is turned off. This in conjunction
+% with the fixes to reProject now allow us to output csv's 
+% with information in them... mostly arm level. 
+%
+% There are still bugs to hunt in the output of the regular galaxy csv's.
+
+if isfield(gxyParams.fitParams, 'covarFit')
+    gxyParams.covarFit = gxyParams.fitParams.covarFit;
+else
+    gxyParams.covarFit = 0
+end
 
 arcLengths = calcLgspArcLengths(lgspParams, lgspBounds);
 
