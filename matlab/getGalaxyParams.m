@@ -62,7 +62,7 @@ gxyParams.inputCenterC = iptCtrXY(1);
 if isfield(gxyParams.fitParams, 'covarFit')
     gxyParams.covarFit = gxyParams.fitParams.covarFit;
 else
-    gxyParams.covarFit = 0
+    gxyParams.covarFit = 0;
 end
 
 arcLengths = calcLgspArcLengths(lgspParams, lgspBounds);
