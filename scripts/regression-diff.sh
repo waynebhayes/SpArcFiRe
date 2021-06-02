@@ -20,7 +20,7 @@ awk "`cat $DIR/misc.awk`"'
 		    }
 		    else printErrMsg=1 # correct one is zero but new one is not
 		}
-		if(printErrMsg) {diff=1; printf "line %d column %d (%s)\n<%s\n>%s\n",l,i, L[1][1][i], L[1][l][i], L[2][l][i]}
+		if(printErrMsg) {diff=1; printf "line %d column %d (%s)\n<%s\n>%s\n",l,i, L[1][1][i], L[1][l][i], L[2][l][i] >"/dev/stderr"}
 	    }
 	}
 	exit(diff);
