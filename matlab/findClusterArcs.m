@@ -369,12 +369,10 @@ end
 %    %save([outPath,'-meanClusters.mat'],clusMtxs);
 %end
 
+clusMtxsM = mergeClustersByFit(clusMtxs, ctrR, ctrC, barInfo, stgs);
 if imageGuiding
     fprintf('using image guide clustering\n');
-    clusMtxsM = mergeClustersByGuide(clusMtxs, outputPath, stgs.imageGuidingThreshold, guideImageFile);
-else
-    fprintf('using standard clustering\n');
-    clusMtxsM = mergeClustersByFit(clusMtxs, ctrR, ctrC, barInfo, stgs);
+    clusMtxsM = mergeClustersByGuide(clusMtxsM, outputPath, stgs.imageGuidingThreshold, guideImageFile);
 end
 
 
