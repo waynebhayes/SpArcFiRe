@@ -37,7 +37,7 @@ MCR_CACHE_ROOT=/tmp/sparcfire-$USER
 export MCR_CACHE_ROOT
 
 SPARCFIRE_PYTHON="/usr/bin/python2.7"
-FITS_PARAMS="0.25 0.95 2"
+FITS_PARAMS="0.25 0.75 2"
 STARMASK="_starmask.png"
 ELPS_DIR="NONE"
 GUIDE_DIR="NONE"

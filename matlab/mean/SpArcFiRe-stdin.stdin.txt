@@ -1,2 +1,0 @@
-/extra/wayne1/preserve/skylarjh/SDSS/G.tmp 1237645942905438473 .png NONE NONE NONE /extra/wayne1/preserve/skylarjh/SDSS/G.out
-exit
