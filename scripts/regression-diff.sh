@@ -24,7 +24,7 @@ awk "`cat $DIR/misc.awk`"'
 	    }
 	    if(printErrMsg) {
 		++diff;
-		Warn(sprintf("line %d columns (%d,%d) (%s,%s)\n\t<%s\n\t>%s\n",l,col1,col2, L[1][1][col1], L[2][1][col2], L[1][l][col1], L[2][l][col2]))
+		Warn(sprintf("line %d columns %d,%d (%s): \"%s\" <-> \"%s\"",l,col1,col2, varName, L[1][l][col1], L[2][l][col2]))
 	    }
 	}
     }
@@ -32,31 +32,36 @@ awk "`cat $DIR/misc.awk`"'
 	diff=0;
 	ASSERT(ARGIND==2, "expecting exactly two filenames as input");
 	# Check that both files have the same number of columns, especially on the header line
-	if(length(L[1]) != length(L[2])){++diff; Warn(sprintf("\"%s\" has %d lines but \"%s\" has %d",
-	    F[1], length(L[1]), F[2], length(L[2])))}
+	if(length(L[1]) != length(L[2])){++diff; Warn(sprintf("Line count mismatch:\n\t%d lines in \"%s\"\n\t%d lines in \"%s\"", length(L[1]), F[1], length(L[2]), F[2]))}
 
 	if(isarray(varCols)) {
 	    ASSERT(numTSVs==ARGIND, "all files must be TSVs, or none");
 	    headerMismatch=0;
 	    PROCINFO["sorted_in"]="@ind_num_asc"; #traverse for loop based on integer VALUE (not INDEX) of elements
 	    for(i in varCols) if(length(varCols[i])!=numTSVs){
-		Warn(sprintf("\"%s\" is not a header in all input files",i));
+		Warn(sprintf("header column name \"%s\" does not appear in all input files",i));
 		delete varCols[i];
 		++headerMismatch;
 	    }
-	    if(length(L[1][1]) != length(L[2][1])) {++diff; Warn(sprintf("\"%s\" has %d columns but \"%s\" has %d",
-		F[1], length(L[1][1]), F[2], length(L[2][1])))}
-	    else if(!headerMismatch) for(i=0;i<=1;i++) for(j in L[i+1][1]){
-		other=1-i;
-		if(L[i+1][1][j] != L[other+1][1][j]) {
-		    ++diff;
-		    Warn(sprintf("column %d of \"%s\" is named \"%s\", but the other file has name \"%s\" there",
-			j,F[i+1],L[i+1][1][j], L[other+1][1][j]))
+	    if(!headerMismatch) { # only makes sense to compare header column-by-column if they have same # of columns
+		if(length(L[1][1]) != length(L[2][1]))
+		Warn(sprintf("Column count mismatch:\n\t%d columns in \"%s\"\n\t%d columns in \"%s\"",
+		    length(L[1][1]), F[1], length(L[2][1]), F[2]));
+		for(i=0;i<=1;i++) for(j in L[i+1][1]){
+		    other=1-i;
+		    if(L[i+1][1][j] != L[other+1][1][j]) {
+			++diff;
+			Warn(sprintf("column %d of \"%s\" is named \"%s\", but the other file has name \"%s\" there",
+			    j,F[i+1],L[i+1][1][j], L[other+1][1][j]))
+		    }
 		}
 	    }
 	}
 	else
 	    ASSERT(numTSVs==0, "all files must be TSVs, or none");
+
+	if(headerMismatch || diff)
+	    print "\n****************\n****************\n**************** ABOVE ERRORS MAY BE FATAL; REMAINING WARNINGS MAY BE SUPERFLUOUS\n****************\n****************\n" > "/dev/fd/2";
 
 	for(l=2;l<=length(L[1]);l++)
 	    if(numTSVs)
