@@ -61,8 +61,9 @@ awk "`cat $DIR/misc.awk`"'
 	    ASSERT(numTSVs==0, "all files must be TSVs, or none");
 
 	if(isarray(headerMismatch) || diff) {
-	    Warn(sprintf("\n****************\n****************\n**************** ABOVE ERRORS MAY BE FATAL; SUPPRESSING FURTHER WARNINGS\n****************\n****************\n"));
-	    exit(length(headerMismatch)+diff);
+	    headErr = (isarray(headerMismatch)?length(headerMismatch):0);
+	    Warn(sprintf("\n****************\n****************\n**************** ABOVE ERRORS (%d header, %d diff) MAY BE FATAL; SUPPRESSING FURTHER WARNINGS\n****************\n****************\n", headErr, diff));
+	    exit(headErr + diff);
 	}
 
 	for(l=2;l<=length(L[1]);l++)
