@@ -40,8 +40,8 @@ awk "`cat $DIR/misc.awk`"'
 	    PROCINFO["sorted_in"]="@ind_num_asc"; #traverse for loop based on integer VALUE (not INDEX) of elements
 	    for(i in varCols) if(length(varCols[i])!=numTSVs){
 		Warn(sprintf("header column name \"%s\" does not appear in all input files",i));
+		headerMismatch[varCols[i]]=i; # record column number and variable name
 		delete varCols[i];
-		headerMismatch[i]=varCols[i]; # record name and column number
 	    }
 	    if(!isarray(headerMismatch)) { # only makes sense to compare header column-by-column if they have same # of columns
 		if(length(L[1][1]) != length(L[2][1]))
@@ -60,18 +60,14 @@ awk "`cat $DIR/misc.awk`"'
 	else
 	    ASSERT(numTSVs==0, "all files must be TSVs, or none");
 
-	if(isarray(headerMismatch) || diff)
-	    print "\n****************\n****************\n**************** ABOVE ERRORS MAY BE FATAL; REMAINING WARNINGS MAY BE SUPERFLUOUS\n****************\n****************\n" > "/dev/fd/2";
+	if(isarray(headerMismatch) || diff) {
+	    print "\n****************\n****************\n**************** ABOVE ERRORS MAY BE FATAL; SUPPRESSING FURTHER WARNINGS\n****************\n****************\n" > "/dev/fd/1";
+	    exit(length(headerMismatch)+diff);
+	}
 
 	for(l=2;l<=length(L[1]);l++)
 	    if(numTSVs)
-		for(v in varCols) {
-		    CheckCol(l, v, varCols[v][1], varCols[v][2]);
-		    if(v in headerMismatch){
-			Warn(sprintf("Ignoring differences past column %d due to header mismatch %s",headerMismatch[v],v));
-			break;
-		    }
-		}
+		for(v in varCols) CheckCol(l, v, varCols[v][1], varCols[v][2]);
 	    else
 		for(i=1;i<=length(L[1][l]);i++) CheckCol(l, "", i, i)
 	exit(diff);
