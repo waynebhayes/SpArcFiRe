@@ -40,7 +40,7 @@ awk "`cat $DIR/misc.awk`"'
 	    PROCINFO["sorted_in"]="@ind_num_asc"; #traverse for loop based on integer VALUE (not INDEX) of elements
 	    for(i in varCols) if(length(varCols[i])!=numTSVs){
 		Warn(sprintf("header column name \"%s\" does not appear in all input files",i));
-		headerMismatch[varCols[i]]=i; # record column number and variable name
+		++headerMismatch[i]; # record column number (but not variable name)
 		delete varCols[i];
 	    }
 	    if(!isarray(headerMismatch)) { # only makes sense to compare header column-by-column if they have same # of columns
