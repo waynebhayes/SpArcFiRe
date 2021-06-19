@@ -38,10 +38,13 @@ awk "`cat $DIR/misc.awk`"'
 	    ASSERT(numTSVs==ARGIND, "all files must be TSVs, or none");
 	    delete headerMismatch;
 	    PROCINFO["sorted_in"]="@ind_num_asc"; #traverse for loop based on integer VALUE (not INDEX) of elements
-	    for(i in varCols) if(length(varCols[i])!=numTSVs){
-		Warn(sprintf("header column name \"%s\" does not appear in all input files",i));
-		++headerMismatch[i]; # record column number (but not variable name)
-		delete varCols[i];
+	    for(v in varCols) if(length(varCols[v])!=numTSVs){
+		Warn(sprintf("header column name \"%s\" does not appear in all input files",v));
+		delete yes; delete no;
+		for(i=1;i<=ARGC;i++)if(i in varCols[v])yes=yes" "F[i];else no=no" "F[i];
+		Warn(sprintf("It exists in (%s) but is missing in (%s)",yes,no));
+		++headerMismatch[v]; # record column number (but not variable name)
+		delete varCols[v];
 	    }
 	    if(!isarray(headerMismatch)) { # only makes sense to compare header column-by-column if they have same # of columns
 		if(length(L[1][1]) != length(L[2][1]))
