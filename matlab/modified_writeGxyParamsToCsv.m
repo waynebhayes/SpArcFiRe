@@ -43,8 +43,16 @@ end
 if next_file_idx == 1
     error('no gxyParamsList files found')
 end
+
+% Changed by Matthew P. --- 5/15/21
+% Modifying this call so that it doesn't error out immediately
+% just in case there's a bug somewhere else we want to write 
+% what information we *do* have (if it's still retained).
 if ~isfield(sampleGxyParams, 'length_thresholds')
-    error('None of the given galaxies have any detected arcs')
+    warning('None of the given galaxies have any detected arcs')
+    armCountThresholds = [0];
+else
+    armCountThresholds = sampleGxyParams.length_thresholds;
 end
 
 gxyParamsNames = {'badBulgeFitFlag', 'bulgeAxisRatio', 'bulgeMajAxsLen',...
@@ -80,11 +88,14 @@ gxyParamsNames = {'badBulgeFitFlag', 'bulgeAxisRatio', 'bulgeMajAxsLen',...
     % Added cropRad - Matthew P. 1/7/21
 gxyParamsNamesExcluded = setdiff(fields(sampleGxyParams), gxyParamsNames);
 for ii=1:length(gxyParamsNamesExcluded)
-    %disp('Exclusions from gxyParams:\n');
+    % For future debugging purposes this has been placed back in...
+    fprintf('Exclusions from galaxy csv:\n'); 
     fprintf('%s\n', gxyParamsNamesExcluded{ii});
 end
 fields(sampleGxyParams)
-armCountThresholds = sampleGxyParams.length_thresholds;
+% Matthew P. --- 5/15/21
+% Now defined above!
+%armCountThresholds = sampleGxyParams.length_thresholds;
 
 csvFile = fopen([outDir imgSetName '.csv'], 'wt');
 
