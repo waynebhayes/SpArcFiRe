@@ -15,26 +15,47 @@ fileNames =
 
     'gxyParamsList-pa...'    'gxyParamsList-pa...'    'gxyParamsList-pa...'
 
+Exclusions from gxyParams:
 arcClusterColors
+Exclusions from gxyParams:
 arc_params
+Exclusions from gxyParams:
 avg_anovaF_score
+Exclusions from gxyParams:
 avg_brt_ratio_score
+Exclusions from gxyParams:
 bar_info
+Exclusions from gxyParams:
 chirality_longest_arc
+Exclusions from gxyParams:
 fitParams
+Exclusions from gxyParams:
 fit_state
+Exclusions from gxyParams:
 iptCtrXY
+Exclusions from gxyParams:
 length_thresholds
+Exclusions from gxyParams:
 median_anovaF_score
+Exclusions from gxyParams:
 median_brt_ratio_score
+Exclusions from gxyParams:
 name
+Exclusions from gxyParams:
 noiseMaskUsed
+Exclusions from gxyParams:
 starMaskUsed
+Exclusions from gxyParams:
 thres_abs_pang_avgs
+Exclusions from gxyParams:
 thres_arm_counts
+Exclusions from gxyParams:
 thres_arm_counts_dco
+Exclusions from gxyParams:
 thres_pang_avgs
+Exclusions from gxyParams:
 thres_pang_avgs_domChirality
+Exclusions from gxyParams:
 warnings
 
 ans =
@@ -64,8 +85,8 @@ ans =
     'brtUnifScore'
     'gaussLogLik'
     'contourBrtRatio'
-    'fitParams'
     'cropRad'
+    'fitParams'
     'standardizedCenterR'
     'standardizedCenterC'
     'failed2revDuringMergeCheck'

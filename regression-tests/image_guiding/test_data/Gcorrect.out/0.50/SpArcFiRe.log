@@ -3,24 +3,24 @@ Enter 'help' for syntax; blank line or 'exit' or 'quit' exits. Wait for MATLAB t
 Setting up environment variables
 ---
 LD_LIBRARY_PATH is .:/pkg/matlab/R2017a/runtime/glnxa64:/pkg/matlab/R2017a/bin/glnxa64:/pkg/matlab/R2017a/sys/os/glnxa64:/pkg/matlab/R2017a/sys/opengl/lib/glnxa64
-server run ID is 7382745961186239
+server run ID is 7383286375548601
 No fit settings specified. Using defaults.
 applying environment-variable override to "writeSettingsForEveryImage": 0 -> 1
 applying environment-variable override to "generateOrientationFieldPdf": 0 -> 1
 applying environment-variable override to "lookForBulge": 1 -> 1
 applying environment-variable override to "imageGuidingThreshold": -1 -> 0.5
-28-Apr-2021 14:18:28
-server run ID: 7382745961186239
-settings recorded to 7382745961186239_settings.txt
+21-Jun-2021 15:18:04
+server run ID: 7383286375548601
+settings recorded to 7383286375548601_settings.txt
 ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
-1>> running with in_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905438473_g, image_suffix=.png, starmask_suffix=NONE, output_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.out/0.50, guide_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide
+1>> running with in_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905438473_r, image_suffix=.png, starmask_suffix=NONE, output_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.out/0.50, guide_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide
 No ellipse-fitting parameters file given, using default.
 guides specified as a path string, attempting to load from disk 
-guide directory given, will attempt to load guide when loading galaxy images /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide.
-processing 1237645942905438473_g (image 1 of 1, /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.tmp/1237645942905438473_g.png)...
+guide directory given, will attempt to load guide when loading galaxy images /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide.
+processing 1237645942905438473_r (image 1 of 1, /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.tmp/1237645942905438473_r.png)...
 no star mask suffix given, not looking for a star mask
-/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
-using /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_g.png as the guide image
+/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
+using /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_r.png as the guide image
                       groupOutputByProcess: 0
                    groupOutputByInputImage: 1
                 writeSettingsForEveryImage: 1
@@ -61,518 +61,7 @@ using /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/
                      imageGuidingThreshold: 0.5000
 
 calculating orientation field...
-Elapsed time is 11.743004 seconds.
-...done calculating orientation field
-
-ans =
-
-   71.8502   71.1062
-
-12927 nonzero orientation field vectors
-51375 nonzero image pixels
-min_clus_size_for_merge_check = 25
-err_ratio_thres = 2.5000
-performing clustering...
-Time for all clustering steps: 
-Elapsed time is 100.575137 seconds.
-Time for all optimization steps: 
-Elapsed time is 0.384345 seconds.
-using image guide clustering
-Using /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_g.png as guide image.
-Time for arc-merging: 
-Elapsed time is 0.783757 seconds.
-Calculating reprojection...
-...done calculating reprojection
-Total time: 
-Elapsed time is 110.494792 seconds.
-ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
-2>> running with in_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905962547_r, image_suffix=.png, starmask_suffix=NONE, output_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.out/0.50, guide_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide
-No ellipse-fitting parameters file given, using default.
-guides specified as a path string, attempting to load from disk 
-guide directory given, will attempt to load guide when loading galaxy images /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide.
-processing 1237645942905962547_r (image 1 of 1, /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.tmp/1237645942905962547_r.png)...
-no star mask suffix given, not looking for a star mask
-/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
-using /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_r.png as the guide image
-                      groupOutputByProcess: 0
-                   groupOutputByInputImage: 1
-                writeSettingsForEveryImage: 1
-               generateOrientationFieldPdf: 1
-               sleepSecondsAfterImageWrite: 0
-                                    useMex: 1
-                 numOrientationFieldLevels: 3
-                                  mirrorLR: 0
-                   failWhenNoStarmaskFound: 1
-                            useSubpixelCtr: 1
-             deleteClusterContainingCenter: 1
-                            clusSizeCutoff: 150
-                           minMinorAxisLen: 0
-                       fitUsingNonUsmIVals: 1
-                         allowArcBeyond2pi: 1
-                            zeroThetaStart: 1
-          maxHalfGapFillForUndefinedBounds: 3
-    ignoreJaggedBoundaryPixelsDuringMerges: 1
-                           recomputeCenter: 0
-                             paApproxLevel: 0
-                   useImageStandardization: 1
-                                resizeDims: [256 256]
-                                medFiltRad: 1
-                            unsharpMaskAmt: 6
-                          unsharpMaskSigma: 25
-                       useDeProjectStretch: 1
-                               fixToCenter: 0
-                     useTwoStageCtrFinding: 1
-                              lookForBulge: 1
-                  ctrDriftThresForStarMask: 2.5000
-                             barCandCutoff: 7
-                              barDetCutoff: 2
-                                    nhSize: 1
-                                 stopThres: 0.1500
-                         mergeChkMinClusSz: 25
-                       balClusWtsInMerging: 1
-                             errRatioThres: 2.5000
-                     imageGuidingThreshold: 0.5000
-
-calculating orientation field...
-Elapsed time is 12.423662 seconds.
-...done calculating orientation field
-
-ans =
-
-   39.6102   39.5073
-
-12799 nonzero orientation field vectors
-50409 nonzero image pixels
-min_clus_size_for_merge_check = 25
-err_ratio_thres = 2.5000
-performing clustering...
-Time for all clustering steps: 
-Elapsed time is 37.224832 seconds.
-Time for all optimization steps: 
-Elapsed time is 0.295024 seconds.
-using image guide clustering
-Using /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_r.png as guide image.
-Time for arc-merging: 
-Elapsed time is 0.145054 seconds.
-Calculating reprojection...
-...done calculating reprojection
-Total time: 
-Elapsed time is 44.220487 seconds.
-ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
-3>> running with in_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905438473_i, image_suffix=.png, starmask_suffix=NONE, output_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.out/0.50, guide_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide
-No ellipse-fitting parameters file given, using default.
-guides specified as a path string, attempting to load from disk 
-guide directory given, will attempt to load guide when loading galaxy images /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide.
-processing 1237645942905438473_i (image 1 of 1, /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.tmp/1237645942905438473_i.png)...
-no star mask suffix given, not looking for a star mask
-/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
-using /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_i.png as the guide image
-                      groupOutputByProcess: 0
-                   groupOutputByInputImage: 1
-                writeSettingsForEveryImage: 1
-               generateOrientationFieldPdf: 1
-               sleepSecondsAfterImageWrite: 0
-                                    useMex: 1
-                 numOrientationFieldLevels: 3
-                                  mirrorLR: 0
-                   failWhenNoStarmaskFound: 1
-                            useSubpixelCtr: 1
-             deleteClusterContainingCenter: 1
-                            clusSizeCutoff: 150
-                           minMinorAxisLen: 0
-                       fitUsingNonUsmIVals: 1
-                         allowArcBeyond2pi: 1
-                            zeroThetaStart: 1
-          maxHalfGapFillForUndefinedBounds: 3
-    ignoreJaggedBoundaryPixelsDuringMerges: 1
-                           recomputeCenter: 0
-                             paApproxLevel: 0
-                   useImageStandardization: 1
-                                resizeDims: [256 256]
-                                medFiltRad: 1
-                            unsharpMaskAmt: 6
-                          unsharpMaskSigma: 25
-                       useDeProjectStretch: 1
-                               fixToCenter: 0
-                     useTwoStageCtrFinding: 1
-                              lookForBulge: 1
-                  ctrDriftThresForStarMask: 2.5000
-                             barCandCutoff: 7
-                              barDetCutoff: 2
-                                    nhSize: 1
-                                 stopThres: 0.1500
-                         mergeChkMinClusSz: 25
-                       balClusWtsInMerging: 1
-                             errRatioThres: 2.5000
-                     imageGuidingThreshold: 0.5000
-
-calculating orientation field...
-Elapsed time is 12.218366 seconds.
-...done calculating orientation field
-
-ans =
-
-   71.2956   71.6075
-
-10362 nonzero orientation field vectors
-54695 nonzero image pixels
-min_clus_size_for_merge_check = 25
-err_ratio_thres = 2.5000
-performing clustering...
-Time for all clustering steps: 
-Elapsed time is 26.562383 seconds.
-Time for all optimization steps: 
-Elapsed time is 0.155867 seconds.
-using image guide clustering
-Using /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_i.png as guide image.
-Time for arc-merging: 
-Elapsed time is 0.069854 seconds.
-Calculating reprojection...
-...done calculating reprojection
-Total time: 
-Elapsed time is 31.677190 seconds.
-ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
-4>> running with in_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905962547_i, image_suffix=.png, starmask_suffix=NONE, output_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.out/0.50, guide_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide
-No ellipse-fitting parameters file given, using default.
-guides specified as a path string, attempting to load from disk 
-guide directory given, will attempt to load guide when loading galaxy images /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide.
-processing 1237645942905962547_i (image 1 of 1, /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.tmp/1237645942905962547_i.png)...
-no star mask suffix given, not looking for a star mask
-/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
-using /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_i.png as the guide image
-                      groupOutputByProcess: 0
-                   groupOutputByInputImage: 1
-                writeSettingsForEveryImage: 1
-               generateOrientationFieldPdf: 1
-               sleepSecondsAfterImageWrite: 0
-                                    useMex: 1
-                 numOrientationFieldLevels: 3
-                                  mirrorLR: 0
-                   failWhenNoStarmaskFound: 1
-                            useSubpixelCtr: 1
-             deleteClusterContainingCenter: 1
-                            clusSizeCutoff: 150
-                           minMinorAxisLen: 0
-                       fitUsingNonUsmIVals: 1
-                         allowArcBeyond2pi: 1
-                            zeroThetaStart: 1
-          maxHalfGapFillForUndefinedBounds: 3
-    ignoreJaggedBoundaryPixelsDuringMerges: 1
-                           recomputeCenter: 0
-                             paApproxLevel: 0
-                   useImageStandardization: 1
-                                resizeDims: [256 256]
-                                medFiltRad: 1
-                            unsharpMaskAmt: 6
-                          unsharpMaskSigma: 25
-                       useDeProjectStretch: 1
-                               fixToCenter: 0
-                     useTwoStageCtrFinding: 1
-                              lookForBulge: 1
-                  ctrDriftThresForStarMask: 2.5000
-                             barCandCutoff: 7
-                              barDetCutoff: 2
-                                    nhSize: 1
-                                 stopThres: 0.1500
-                         mergeChkMinClusSz: 25
-                       balClusWtsInMerging: 1
-                             errRatioThres: 2.5000
-                     imageGuidingThreshold: 0.5000
-
-calculating orientation field...
-Elapsed time is 9.632260 seconds.
-...done calculating orientation field
-
-ans =
-
-   40.3671   39.2619
-
-11707 nonzero orientation field vectors
-52193 nonzero image pixels
-min_clus_size_for_merge_check = 25
-err_ratio_thres = 2.5000
-performing clustering...
-Time for all clustering steps: 
-Elapsed time is 28.573234 seconds.
-Time for all optimization steps: 
-Elapsed time is 0.215644 seconds.
-using image guide clustering
-Using /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_i.png as guide image.
-Time for arc-merging: 
-Elapsed time is 0.118921 seconds.
-Calculating reprojection...
-...done calculating reprojection
-Total time: 
-Elapsed time is 33.686347 seconds.
-ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
-5>> running with in_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905962547_g, image_suffix=.png, starmask_suffix=NONE, output_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.out/0.50, guide_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide
-No ellipse-fitting parameters file given, using default.
-guides specified as a path string, attempting to load from disk 
-guide directory given, will attempt to load guide when loading galaxy images /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide.
-processing 1237645942905962547_g (image 1 of 1, /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.tmp/1237645942905962547_g.png)...
-no star mask suffix given, not looking for a star mask
-/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
-using /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_g.png as the guide image
-                      groupOutputByProcess: 0
-                   groupOutputByInputImage: 1
-                writeSettingsForEveryImage: 1
-               generateOrientationFieldPdf: 1
-               sleepSecondsAfterImageWrite: 0
-                                    useMex: 1
-                 numOrientationFieldLevels: 3
-                                  mirrorLR: 0
-                   failWhenNoStarmaskFound: 1
-                            useSubpixelCtr: 1
-             deleteClusterContainingCenter: 1
-                            clusSizeCutoff: 150
-                           minMinorAxisLen: 0
-                       fitUsingNonUsmIVals: 1
-                         allowArcBeyond2pi: 1
-                            zeroThetaStart: 1
-          maxHalfGapFillForUndefinedBounds: 3
-    ignoreJaggedBoundaryPixelsDuringMerges: 1
-                           recomputeCenter: 0
-                             paApproxLevel: 0
-                   useImageStandardization: 1
-                                resizeDims: [256 256]
-                                medFiltRad: 1
-                            unsharpMaskAmt: 6
-                          unsharpMaskSigma: 25
-                       useDeProjectStretch: 1
-                               fixToCenter: 0
-                     useTwoStageCtrFinding: 1
-                              lookForBulge: 1
-                  ctrDriftThresForStarMask: 2.5000
-                             barCandCutoff: 7
-                              barDetCutoff: 2
-                                    nhSize: 1
-                                 stopThres: 0.1500
-                         mergeChkMinClusSz: 25
-                       balClusWtsInMerging: 1
-                             errRatioThres: 2.5000
-                     imageGuidingThreshold: 0.5000
-
-calculating orientation field...
-Elapsed time is 12.703292 seconds.
-...done calculating orientation field
-
-ans =
-
-   39.6019   39.6094
-
-19417 nonzero orientation field vectors
-54182 nonzero image pixels
-min_clus_size_for_merge_check = 25
-err_ratio_thres = 2.5000
-performing clustering...
-Time for all clustering steps: 
-Elapsed time is 54.484026 seconds.
-Time for all optimization steps: 
-Elapsed time is 0.499138 seconds.
-using image guide clustering
-Using /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_g.png as guide image.
-Time for arc-merging: 
-Elapsed time is 0.214278 seconds.
-Calculating reprojection...
-...done calculating reprojection
-Total time: 
-Elapsed time is 58.872163 seconds.
-ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
-6>> running with in_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905438473_u, image_suffix=.png, starmask_suffix=NONE, output_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.out/0.50, guide_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide
-No ellipse-fitting parameters file given, using default.
-guides specified as a path string, attempting to load from disk 
-guide directory given, will attempt to load guide when loading galaxy images /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide.
-processing 1237645942905438473_u (image 1 of 1, /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.tmp/1237645942905438473_u.png)...
-no star mask suffix given, not looking for a star mask
-/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
-using /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_u.png as the guide image
-                      groupOutputByProcess: 0
-                   groupOutputByInputImage: 1
-                writeSettingsForEveryImage: 1
-               generateOrientationFieldPdf: 1
-               sleepSecondsAfterImageWrite: 0
-                                    useMex: 1
-                 numOrientationFieldLevels: 3
-                                  mirrorLR: 0
-                   failWhenNoStarmaskFound: 1
-                            useSubpixelCtr: 1
-             deleteClusterContainingCenter: 1
-                            clusSizeCutoff: 150
-                           minMinorAxisLen: 0
-                       fitUsingNonUsmIVals: 1
-                         allowArcBeyond2pi: 1
-                            zeroThetaStart: 1
-          maxHalfGapFillForUndefinedBounds: 3
-    ignoreJaggedBoundaryPixelsDuringMerges: 1
-                           recomputeCenter: 0
-                             paApproxLevel: 0
-                   useImageStandardization: 1
-                                resizeDims: [256 256]
-                                medFiltRad: 1
-                            unsharpMaskAmt: 6
-                          unsharpMaskSigma: 25
-                       useDeProjectStretch: 1
-                               fixToCenter: 0
-                     useTwoStageCtrFinding: 1
-                              lookForBulge: 1
-                  ctrDriftThresForStarMask: 2.5000
-                             barCandCutoff: 7
-                              barDetCutoff: 2
-                                    nhSize: 1
-                                 stopThres: 0.1500
-                         mergeChkMinClusSz: 25
-                       balClusWtsInMerging: 1
-                             errRatioThres: 2.5000
-                     imageGuidingThreshold: 0.5000
-
-calculating orientation field...
-Elapsed time is 9.367912 seconds.
-...done calculating orientation field
-
-ans =
-
-   72.0981   70.7130
-
-40804 nonzero orientation field vectors
-43970 nonzero image pixels
-min_clus_size_for_merge_check = 25
-err_ratio_thres = 2.5000
-performing clustering...
-Time for all clustering steps: 
-Elapsed time is 120.366508 seconds.
-Time for all optimization steps: 
-Elapsed time is 1.207570 seconds.
-using image guide clustering
-Using /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_u.png as guide image.
-Time for arc-merging: 
-Elapsed time is 0.423234 seconds.
-Calculating reprojection...
-...done calculating reprojection
-Total time: 
-Elapsed time is 127.347312 seconds.
-ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
-7>> running with in_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905438473_z, image_suffix=.png, starmask_suffix=NONE, output_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.out/0.50, guide_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide
-No ellipse-fitting parameters file given, using default.
-guides specified as a path string, attempting to load from disk 
-guide directory given, will attempt to load guide when loading galaxy images /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide.
-processing 1237645942905438473_z (image 1 of 1, /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.tmp/1237645942905438473_z.png)...
-no star mask suffix given, not looking for a star mask
-/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
-using /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_z.png as the guide image
-                      groupOutputByProcess: 0
-                   groupOutputByInputImage: 1
-                writeSettingsForEveryImage: 1
-               generateOrientationFieldPdf: 1
-               sleepSecondsAfterImageWrite: 0
-                                    useMex: 1
-                 numOrientationFieldLevels: 3
-                                  mirrorLR: 0
-                   failWhenNoStarmaskFound: 1
-                            useSubpixelCtr: 1
-             deleteClusterContainingCenter: 1
-                            clusSizeCutoff: 150
-                           minMinorAxisLen: 0
-                       fitUsingNonUsmIVals: 1
-                         allowArcBeyond2pi: 1
-                            zeroThetaStart: 1
-          maxHalfGapFillForUndefinedBounds: 3
-    ignoreJaggedBoundaryPixelsDuringMerges: 1
-                           recomputeCenter: 0
-                             paApproxLevel: 0
-                   useImageStandardization: 1
-                                resizeDims: [256 256]
-                                medFiltRad: 1
-                            unsharpMaskAmt: 6
-                          unsharpMaskSigma: 25
-                       useDeProjectStretch: 1
-                               fixToCenter: 0
-                     useTwoStageCtrFinding: 1
-                              lookForBulge: 1
-                  ctrDriftThresForStarMask: 2.5000
-                             barCandCutoff: 7
-                              barDetCutoff: 2
-                                    nhSize: 1
-                                 stopThres: 0.1500
-                         mergeChkMinClusSz: 25
-                       balClusWtsInMerging: 1
-                             errRatioThres: 2.5000
-                     imageGuidingThreshold: 0.5000
-
-calculating orientation field...
-Elapsed time is 11.920126 seconds.
-...done calculating orientation field
-
-ans =
-
-   71.6021   71.6251
-
-23417 nonzero orientation field vectors
-50646 nonzero image pixels
-min_clus_size_for_merge_check = 25
-err_ratio_thres = 2.5000
-performing clustering...
-Time for all clustering steps: 
-Elapsed time is 58.623134 seconds.
-Time for all optimization steps: 
-Elapsed time is 0.794562 seconds.
-using image guide clustering
-Using /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_z.png as guide image.
-Time for arc-merging: 
-Elapsed time is 0.305133 seconds.
-Calculating reprojection...
-...done calculating reprojection
-Total time: 
-Elapsed time is 62.552056 seconds.
-ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
-8>> running with in_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905438473_r, image_suffix=.png, starmask_suffix=NONE, output_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.out/0.50, guide_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide
-No ellipse-fitting parameters file given, using default.
-guides specified as a path string, attempting to load from disk 
-guide directory given, will attempt to load guide when loading galaxy images /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide.
-processing 1237645942905438473_r (image 1 of 1, /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.tmp/1237645942905438473_r.png)...
-no star mask suffix given, not looking for a star mask
-/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
-using /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_r.png as the guide image
-                      groupOutputByProcess: 0
-                   groupOutputByInputImage: 1
-                writeSettingsForEveryImage: 1
-               generateOrientationFieldPdf: 1
-               sleepSecondsAfterImageWrite: 0
-                                    useMex: 1
-                 numOrientationFieldLevels: 3
-                                  mirrorLR: 0
-                   failWhenNoStarmaskFound: 1
-                            useSubpixelCtr: 1
-             deleteClusterContainingCenter: 1
-                            clusSizeCutoff: 150
-                           minMinorAxisLen: 0
-                       fitUsingNonUsmIVals: 1
-                         allowArcBeyond2pi: 1
-                            zeroThetaStart: 1
-          maxHalfGapFillForUndefinedBounds: 3
-    ignoreJaggedBoundaryPixelsDuringMerges: 1
-                           recomputeCenter: 0
-                             paApproxLevel: 0
-                   useImageStandardization: 1
-                                resizeDims: [256 256]
-                                medFiltRad: 1
-                            unsharpMaskAmt: 6
-                          unsharpMaskSigma: 25
-                       useDeProjectStretch: 1
-                               fixToCenter: 0
-                     useTwoStageCtrFinding: 1
-                              lookForBulge: 1
-                  ctrDriftThresForStarMask: 2.5000
-                             barCandCutoff: 7
-                              barDetCutoff: 2
-                                    nhSize: 1
-                                 stopThres: 0.1500
-                         mergeChkMinClusSz: 25
-                       balClusWtsInMerging: 1
-                             errRatioThres: 2.5000
-                     imageGuidingThreshold: 0.5000
-
-calculating orientation field...
-Elapsed time is 10.203051 seconds.
+Elapsed time is 12.586465 seconds.
 ...done calculating orientation field
 
 ans =
@@ -585,26 +74,28 @@ min_clus_size_for_merge_check = 25
 err_ratio_thres = 2.5000
 performing clustering...
 Time for all clustering steps: 
-Elapsed time is 32.195384 seconds.
+Elapsed time is 49.787057 seconds.
 Time for all optimization steps: 
-Elapsed time is 0.159411 seconds.
-using image guide clustering
-Using /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_r.png as guide image.
+Elapsed time is 0.172978 seconds.
 Time for arc-merging: 
-Elapsed time is 0.118054 seconds.
+Elapsed time is 1.483855 seconds.
+using image guide clustering
+Using /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_r.png as guide image.
+Time for arc-merging: 
+Elapsed time is 0.177884 seconds.
 Calculating reprojection...
 ...done calculating reprojection
 Total time: 
-Elapsed time is 37.438787 seconds.
+Elapsed time is 54.029618 seconds.
 ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
-9>> running with in_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905962547_z, image_suffix=.png, starmask_suffix=NONE, output_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.out/0.50, guide_dir=/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide
+2>> running with in_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905438473_z, image_suffix=.png, starmask_suffix=NONE, output_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.out/0.50, guide_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide
 No ellipse-fitting parameters file given, using default.
 guides specified as a path string, attempting to load from disk 
-guide directory given, will attempt to load guide when loading galaxy images /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide.
-processing 1237645942905962547_z (image 1 of 1, /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.tmp/1237645942905962547_z.png)...
+guide directory given, will attempt to load guide when loading galaxy images /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide.
+processing 1237645942905438473_z (image 1 of 1, /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.tmp/1237645942905438473_z.png)...
 no star mask suffix given, not looking for a star mask
-/home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
-using /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_z.png as the guide image
+/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
+using /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_z.png as the guide image
                       groupOutputByProcess: 0
                    groupOutputByInputImage: 1
                 writeSettingsForEveryImage: 1
@@ -645,7 +136,82 @@ using /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/
                      imageGuidingThreshold: 0.5000
 
 calculating orientation field...
-Elapsed time is 10.993243 seconds.
+Elapsed time is 12.369799 seconds.
+...done calculating orientation field
+
+ans =
+
+   71.6021   71.6251
+
+23417 nonzero orientation field vectors
+50646 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 51.843224 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.586142 seconds.
+Time for arc-merging: 
+Elapsed time is 5.091517 seconds.
+using image guide clustering
+Using /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_z.png as guide image.
+Time for arc-merging: 
+Elapsed time is 0.259282 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 59.178942 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
+3>> running with in_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905962547_z, image_suffix=.png, starmask_suffix=NONE, output_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.out/0.50, guide_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide
+No ellipse-fitting parameters file given, using default.
+guides specified as a path string, attempting to load from disk 
+guide directory given, will attempt to load guide when loading galaxy images /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide.
+processing 1237645942905962547_z (image 1 of 1, /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.tmp/1237645942905962547_z.png)...
+no star mask suffix given, not looking for a star mask
+/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
+using /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_z.png as the guide image
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                           recomputeCenter: 0
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+                     imageGuidingThreshold: 0.5000
+
+calculating orientation field...
+Elapsed time is 12.153656 seconds.
 ...done calculating orientation field
 
 ans =
@@ -658,16 +224,468 @@ min_clus_size_for_merge_check = 25
 err_ratio_thres = 2.5000
 performing clustering...
 Time for all clustering steps: 
-Elapsed time is 88.780958 seconds.
+Elapsed time is 78.302508 seconds.
 Time for all optimization steps: 
-Elapsed time is 0.570236 seconds.
-using image guide clustering
-Using /home/portmanm/sparcfire_testing/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_z.png as guide image.
+Elapsed time is 0.644491 seconds.
 Time for arc-merging: 
-Elapsed time is 0.144311 seconds.
+Elapsed time is 12.035206 seconds.
+using image guide clustering
+Using /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_z.png as guide image.
+Time for arc-merging: 
+Elapsed time is 0.187464 seconds.
 Calculating reprojection...
 ...done calculating reprojection
 Total time: 
-Elapsed time is 93.114154 seconds.
+Elapsed time is 92.699971 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
+4>> running with in_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905962547_r, image_suffix=.png, starmask_suffix=NONE, output_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.out/0.50, guide_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide
+No ellipse-fitting parameters file given, using default.
+guides specified as a path string, attempting to load from disk 
+guide directory given, will attempt to load guide when loading galaxy images /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide.
+processing 1237645942905962547_r (image 1 of 1, /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.tmp/1237645942905962547_r.png)...
+no star mask suffix given, not looking for a star mask
+/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
+using /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_r.png as the guide image
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                           recomputeCenter: 0
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+                     imageGuidingThreshold: 0.5000
+
+calculating orientation field...
+Elapsed time is 12.151907 seconds.
+...done calculating orientation field
+
+ans =
+
+   39.6102   39.5073
+
+12799 nonzero orientation field vectors
+50409 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 28.566392 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.258880 seconds.
+Time for arc-merging: 
+Elapsed time is 3.881072 seconds.
+using image guide clustering
+Using /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_r.png as guide image.
+Time for arc-merging: 
+Elapsed time is 0.098840 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 33.983077 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
+5>> running with in_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905438473_i, image_suffix=.png, starmask_suffix=NONE, output_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.out/0.50, guide_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide
+No ellipse-fitting parameters file given, using default.
+guides specified as a path string, attempting to load from disk 
+guide directory given, will attempt to load guide when loading galaxy images /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide.
+processing 1237645942905438473_i (image 1 of 1, /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.tmp/1237645942905438473_i.png)...
+no star mask suffix given, not looking for a star mask
+/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
+using /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_i.png as the guide image
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                           recomputeCenter: 0
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+                     imageGuidingThreshold: 0.5000
+
+calculating orientation field...
+Elapsed time is 12.434784 seconds.
+...done calculating orientation field
+
+ans =
+
+   71.2956   71.6075
+
+10362 nonzero orientation field vectors
+54695 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 22.250575 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.091892 seconds.
+Time for arc-merging: 
+Elapsed time is 0.243423 seconds.
+using image guide clustering
+Using /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_i.png as guide image.
+Time for arc-merging: 
+Elapsed time is 0.105674 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 23.939029 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
+6>> running with in_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905962547_g, image_suffix=.png, starmask_suffix=NONE, output_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.out/0.50, guide_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide
+No ellipse-fitting parameters file given, using default.
+guides specified as a path string, attempting to load from disk 
+guide directory given, will attempt to load guide when loading galaxy images /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide.
+processing 1237645942905962547_g (image 1 of 1, /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.tmp/1237645942905962547_g.png)...
+no star mask suffix given, not looking for a star mask
+/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
+using /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_g.png as the guide image
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                           recomputeCenter: 0
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+                     imageGuidingThreshold: 0.5000
+
+calculating orientation field...
+Elapsed time is 12.351269 seconds.
+...done calculating orientation field
+
+ans =
+
+   39.6019   39.6094
+
+19417 nonzero orientation field vectors
+54182 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 39.919874 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.418514 seconds.
+Time for arc-merging: 
+Elapsed time is 4.262212 seconds.
+using image guide clustering
+Using /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_g.png as guide image.
+Time for arc-merging: 
+Elapsed time is 0.083047 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 45.835610 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
+7>> running with in_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905438473_u, image_suffix=.png, starmask_suffix=NONE, output_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.out/0.50, guide_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide
+No ellipse-fitting parameters file given, using default.
+guides specified as a path string, attempting to load from disk 
+guide directory given, will attempt to load guide when loading galaxy images /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide.
+processing 1237645942905438473_u (image 1 of 1, /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.tmp/1237645942905438473_u.png)...
+no star mask suffix given, not looking for a star mask
+/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
+using /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_u.png as the guide image
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                           recomputeCenter: 0
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+                     imageGuidingThreshold: 0.5000
+
+calculating orientation field...
+Elapsed time is 12.179454 seconds.
+...done calculating orientation field
+
+ans =
+
+   72.0981   70.7130
+
+40804 nonzero orientation field vectors
+43970 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 100.129691 seconds.
+Time for all optimization steps: 
+Elapsed time is 1.057080 seconds.
+Time for arc-merging: 
+Elapsed time is 27.769667 seconds.
+using image guide clustering
+Using /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_u.png as guide image.
+Time for arc-merging: 
+Elapsed time is 0.149685 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 130.470786 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
+8>> running with in_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905962547_i, image_suffix=.png, starmask_suffix=NONE, output_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.out/0.50, guide_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide
+No ellipse-fitting parameters file given, using default.
+guides specified as a path string, attempting to load from disk 
+guide directory given, will attempt to load guide when loading galaxy images /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide.
+processing 1237645942905962547_i (image 1 of 1, /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.tmp/1237645942905962547_i.png)...
+no star mask suffix given, not looking for a star mask
+/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
+using /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_i.png as the guide image
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                           recomputeCenter: 0
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+                     imageGuidingThreshold: 0.5000
+
+calculating orientation field...
+Elapsed time is 12.314131 seconds.
+...done calculating orientation field
+
+ans =
+
+   40.3671   39.2619
+
+11707 nonzero orientation field vectors
+52193 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 25.873473 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.214580 seconds.
+Time for arc-merging: 
+Elapsed time is 2.044815 seconds.
+using image guide clustering
+Using /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide/1237645942905962547_i.png as guide image.
+Time for arc-merging: 
+Elapsed time is 0.084743 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 29.385274 seconds.
+ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
+9>> running with in_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.tmp, image_name=1237645942905438473_g, image_suffix=.png, starmask_suffix=NONE, output_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.out/0.50, guide_dir=/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide
+No ellipse-fitting parameters file given, using default.
+guides specified as a path string, attempting to load from disk 
+guide directory given, will attempt to load guide when loading galaxy images /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide.
+processing 1237645942905438473_g (image 1 of 1, /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.tmp/1237645942905438473_g.png)...
+no star mask suffix given, not looking for a star mask
+/home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide is not a standard SpArcFiRe output directory, not looking at subdirectories
+using /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_g.png as the guide image
+                      groupOutputByProcess: 0
+                   groupOutputByInputImage: 1
+                writeSettingsForEveryImage: 1
+               generateOrientationFieldPdf: 1
+               sleepSecondsAfterImageWrite: 0
+                                    useMex: 1
+                 numOrientationFieldLevels: 3
+                                  mirrorLR: 0
+                   failWhenNoStarmaskFound: 1
+                            useSubpixelCtr: 1
+             deleteClusterContainingCenter: 1
+                            clusSizeCutoff: 150
+                           minMinorAxisLen: 0
+                       fitUsingNonUsmIVals: 1
+                         allowArcBeyond2pi: 1
+                            zeroThetaStart: 1
+          maxHalfGapFillForUndefinedBounds: 3
+    ignoreJaggedBoundaryPixelsDuringMerges: 1
+                           recomputeCenter: 0
+                             paApproxLevel: 0
+                   useImageStandardization: 1
+                                resizeDims: [256 256]
+                                medFiltRad: 1
+                            unsharpMaskAmt: 6
+                          unsharpMaskSigma: 25
+                       useDeProjectStretch: 1
+                               fixToCenter: 0
+                     useTwoStageCtrFinding: 1
+                              lookForBulge: 1
+                  ctrDriftThresForStarMask: 2.5000
+                             barCandCutoff: 7
+                              barDetCutoff: 2
+                                    nhSize: 1
+                                 stopThres: 0.1500
+                         mergeChkMinClusSz: 25
+                       balClusWtsInMerging: 1
+                             errRatioThres: 2.5000
+                     imageGuidingThreshold: 0.5000
+
+calculating orientation field...
+Elapsed time is 9.628727 seconds.
+...done calculating orientation field
+
+ans =
+
+   71.8502   71.1062
+
+12927 nonzero orientation field vectors
+51375 nonzero image pixels
+min_clus_size_for_merge_check = 25
+err_ratio_thres = 2.5000
+performing clustering...
+Time for all clustering steps: 
+Elapsed time is 23.960397 seconds.
+Time for all optimization steps: 
+Elapsed time is 0.219042 seconds.
+Time for arc-merging: 
+Elapsed time is 2.522300 seconds.
+using image guide clustering
+Using /home/portmanm/sparcfire_rebase/regression-tests/image_guiding/test_data/G.guide/1237645942905438473_g.png as guide image.
+Time for arc-merging: 
+Elapsed time is 0.053265 seconds.
+Calculating reprojection...
+...done calculating reprojection
+Total time: 
+Elapsed time is 27.662065 seconds.
 ready for next image (in_dir, image_name, image_suffix, starmask_suffix,guide_dir, output_dir):
 10>> Exiting...
