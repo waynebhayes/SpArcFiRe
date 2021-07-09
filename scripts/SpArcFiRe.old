@@ -48,6 +48,7 @@ WEB=false
 MAXWEB=1024 # maximum linear resolution of web-submitted jobs
 SKIP="/dev/null"
 CONVERT_ARGS=""
+TTY=`tty || echo /dev/null`
 
 for i in "$@"
 do
@@ -195,7 +196,7 @@ ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\
 		EF='NONE'
 	    fi
 	fi
-	echo $pngDir $f .png $SM $EF $outDir; done; echo exit) | tee /dev/tty | randomizeLines |
+	echo $pngDir $f .png $SM $EF $outDir; done; echo exit) | tee $TTY | randomizeLines |
     $HOME/bin/SpArcFiRe-stdin.sh -lookForBulge 1 -writeSettingsForEveryImage 1 -generateOrientationFieldPdf 1 "$@" | tee $outDir/SpArcFiRe.log
 ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\.[Ff][Ii][Tt][Ss]$//' | fgrep -v -f "$SKIP" |
     ( while read f; do
