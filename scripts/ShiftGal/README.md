@@ -2,9 +2,9 @@
 
 ## About
 
-ShiftGal is a program that alignes inter-color-band images of the same galaxy to a 100th of a pixel accuracy.  A detailed analysis of this program was published in (add link here).  
+ShiftGal is a program that alignes inter-color-band images of the same galaxy to a 100th of a pixel accuracy.  A detailed analysis of this program was submitted to MNRAS for publication (link comming soon).  
 
-Credit to Sergey Anatolyevich with the ALGLIB Project for their data processing library. [link](https://www.alglib.net/)
+Credit to Sergey Anatolyevich with the ALGLIB Project for their [data processing library.](https://www.alglib.net/)
 
 ## Requirements
 
@@ -23,21 +23,20 @@ It is recommended that you have at least 16GB of memory available, or more speci
 
 Before running, make sure to have your input images organized as follows:
 
->InputDirectory (Directory)
+>* InputDirectory
+>    * GalaxyOneDirectory
+>        * GalaxyOne_g.fits
+>        * GalaxyOne_i.fits
+>        * GalaxyOne_r.fits
+>        * GalaxyOne_u.fits
+>        * GalaxyOne_z.fits
 >
->--GalaxyOne (Directory)
->----GalaxyOneName_g.fits
->----GalaxyOneName_i.fits
->----GalaxyOneName_r.fits
->----GalaxyOnename_u.fits
->----GalaxyOneName_z.fits
->
->--GalaxyTwo (Directory)
->----GalaxyTwoName_g.fits
->----GalaxyTwoName_i.fits
->----GalaxyTwoName_r.fits
->----GalaxyTwoname_u.fits
->----GalaxyTwoName_z.fits
+>     * GalaxyTwoDirectory
+>        * GalaxyTwo_g.fits
+>        * GalaxyTwo_i.fits
+>        * GalaxyTwo_r.fits
+>        * GalaxyTwo_u.fits
+>        * GalaxyTwo_z.fits
 >...
 
 The fits image names must contain an '_color' in the filename, otherwise ShiftGal will not work correctly.  The images can also be compressed as .fits.xz files and will automatically be decompressed at runtime.
