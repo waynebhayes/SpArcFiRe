@@ -1,4 +1,4 @@
-# AligneBandColors by Anthony Navarrette (antholn1@uci.edu)
+# AlignBandColors by Anthony Navarrette (antholn1@uci.edu)
 
 ## About
 
