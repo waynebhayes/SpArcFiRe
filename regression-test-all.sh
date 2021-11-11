@@ -1,17 +1,21 @@
 #!/bin/bash
 die() { echo "FATAL ERROR: $@" >&2; exit 1;}
-case "$1" in
--use-git-at)
-    if [ -f git-at ] && [ `wc -l < git-at` -eq 2 -a `git log -1 --format=%at` -eq `tail -1 git-at` ]; then
-	echo -n "Repo unchanged; returning same status code as "
-	tail -1 git-at | xargs -I{} date -d @{} +%Y-%m-%d-%H:%M:%S
-	exit `head -1 git-at`
-    fi
-    shift
-    ;;
-esac
+USAGE="USAGE: $0 [-use-git-at]  [ list of tests to run, defaults to regression-tests/*/*.sh ]"
 
-USAGE="USAGE: $0 [ list of tests to run, defaults to regression-tests/*/*.sh ]"
+while [ "X$1" != X ]; do
+    case "$1" in
+    -use-git-at)
+	if [ -f git-at ] && [ `wc -l < git-at` -eq 2 -a `git log -1 --format=%at` -eq `tail -1 git-at` ]; then
+	    echo -n "Repo unchanged; returning same status code as "
+	    tail -1 git-at | xargs -I{} date -d @{} +%Y-%m-%d-%H:%M:%S
+	    exit `head -1 git-at`
+	fi
+	shift
+	;;
+    *) die "unknown option '$1'"
+	exit 1;;
+    esac
+done
 
 PATH=`pwd`:`pwd`/scripts:$PATH
 export PATH
