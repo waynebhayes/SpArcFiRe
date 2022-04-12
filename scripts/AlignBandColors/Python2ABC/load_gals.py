@@ -51,7 +51,7 @@ def get_seg_img(img):
         tmp_path = os.path.join(abc_path, "tmp")
         prev_cwd = os.getcwd()
         os.chdir("./SourceExtractor")
-        proc = subprocess.Popen(['./sex', os.path.join(tmp_path, 'temp_{}_seg.fits'.format(name)), '-CHECKIMAGE_TYPE', 'SEGMENTATION', '-CHECKIMAGE_NAME', os.path.join(tmp_path, 'temp_{}_outseg.fits'.format(name)), '-CATALOG_NAME', os.path.join(tmp_path, 'temp_{}_seg.txt'.format(name))], stderr = subprocess.PIPE) 
+        proc = subprocess.Popen([os.path.join(os.pardir, os.pardir, 'sex'), os.path.join(tmp_path, 'temp_{}_seg.fits'.format(name)), '-CHECKIMAGE_TYPE', 'SEGMENTATION', '-CHECKIMAGE_NAME', os.path.join(tmp_path, 'temp_{}_outseg.fits'.format(name)), '-CATALOG_NAME', os.path.join(tmp_path, 'temp_{}_seg.txt'.format(name))], stderr = subprocess.PIPE) 
         if proc.wait() != 0: 
             raise SextractorError
         os.chdir(prev_cwd)
@@ -80,7 +80,7 @@ def get_sextractor_points(path):
         txt_out = os.path.join(tmp_path, '{}_star_out.txt'.format(name))
         prev_cwd = os.getcwd()
         os.chdir("./SourceExtractor")
-        proc = subprocess.Popen(['./sex', path, '-CATALOG_NAME', txt_out], stderr = subprocess.PIPE)
+        proc = subprocess.Popen([os.path.join(os.pardir, os.pardir, 'sex'), path, '-CATALOG_NAME', txt_out], stderr = subprocess.PIPE)
         if proc.wait() != 0: 
             raise Exception
         os.chdir(prev_cwd)

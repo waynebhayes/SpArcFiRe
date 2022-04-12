@@ -25,7 +25,7 @@ def get_sextractor_points(fits_path : str) -> "[Star]":
     f = None 
     try:
         abc_path    = os.path.abspath(os.path.dirname(__file__))
-        source_path = os.path.join(abc_path, "SourceExtractor", "sex")
+        source_path = os.path.join(abc_path, os.pardir, "sex")
         tmp_path    = os.path.join(abc_path, "tmp")
         txt_path    = os.path.join(tmp_path, f"{os.path.basename(fits_path)}_star_out_{time.time()}.txt")
         
@@ -66,7 +66,7 @@ def get_seg_img(img : "ndarray") -> "ndarray":
         ndarray : 2D array of segmentation image 
     """
     abc_path    = os.path.abspath(os.path.dirname(__file__))
-    source_path = os.path.join(abc_path, "SourceExtractor", "sex")
+    source_path = os.path.join(abc_path, os.pardir, "sex")
     tmp_path    = os.path.join(abc_path, "tmp")
         
     fits_path   = os.path.join(tmp_path, f"tmp_{time.time()}_seg.fits")
