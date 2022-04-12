@@ -1,5 +1,12 @@
 #/bin/bash
 
+#echo "USAGE: source ./setup.sh"
+
+#SE_PATH=`readlink -f SourceExtractor`
+#PATH=$SE_PATH:$PATH
+#echo $PATH
+#export PATH
+
 # These versions are not *required* but have been tested to work correctly
 python3 -m pip install --user numpy==1.22.3
 python3 -m pip install --user astropy==5.0.4

@@ -70,7 +70,7 @@ def estimate_center(img, star, outdir = None, color = 'no color', min_peak_value
     params = '[{}, {}, {}, 1.0, 1.0]'.format(str(centered_img[max_pt]), str(max_pt[1]), str(max_pt[0]))
     lb = '[0.0, {}, {}, 0.0, 0.0]'.format(str(max_pt[1] - np.sqrt(2)), str(max_pt[0] - np.sqrt(2)))
     ub = '[1000.0, {}, {}, 100.0, 100.0]'.format(str(max_pt[1] + np.sqrt(2)), str(max_pt[0] + np.sqrt(2)))
-    proc = subprocess.Popen(['./CurveFit/runFit', x, y, params, lb, ub], stdout = subprocess.PIPE)
+    proc = subprocess.Popen(['./runFit', x, y, params, lb, ub], stdout = subprocess.PIPE)
     #proc = subprocess.Popen(['./CurveFit/runFit', x, y, '[5, 5, 1, 1, 100]'], stdout = subprocess.PIPE)
     
     timeout = 2

@@ -47,20 +47,24 @@ def get_seg_img(img):
     seg = None
     save_fits(img, os.path.join('tmp', 'temp_{}_seg.fits'.format(name)))
     try:
-        proc = subprocess.Popen(['./sex', os.path.join('tmp', 'temp_{}_seg.fits'.format(name)), '-CHECKIMAGE_TYPE', 'SEGMENTATION', '-CHECKIMAGE_NAME', os.path.join('tmp', 'temp_{}_outseg.fits'.format(name)), '-CATALOG_NAME', os.path.join('tmp', 'temp_{}_seg.txt'.format(name))], stderr = subprocess.PIPE) 
+        abc_path = os.path.abspath(os.path.dirname(__file__))
+        tmp_path = os.path.join(abc_path, "tmp")
+        prev_cwd = os.getcwd()
+        os.chdir("./SourceExtractor")
+        proc = subprocess.Popen(['./sex', os.path.join(tmp_path, 'temp_{}_seg.fits'.format(name)), '-CHECKIMAGE_TYPE', 'SEGMENTATION', '-CHECKIMAGE_NAME', os.path.join(tmp_path, 'temp_{}_outseg.fits'.format(name)), '-CATALOG_NAME', os.path.join(tmp_path, 'temp_{}_seg.txt'.format(name))], stderr = subprocess.PIPE) 
         if proc.wait() != 0: 
             raise SextractorError
-    
-        seg = fits.open(os.path.join('tmp', 'temp_{}_outseg.fits'.format(name)), ignore_missing_end = True)
+        os.chdir(prev_cwd)
+        seg = fits.open(os.path.join(tmp_path, 'temp_{}_outseg.fits'.format(name)), ignore_missing_end = True)
         seg_img = seg[0].data
     
     except:
         raise SextractorError
     
     finally:
-        if os.path.exists(os.path.join('tmp', 'temp_{}_seg.fits'.format(name))): os.remove(os.path.join('tmp', 'temp_{}_seg.fits'.format(name)))
-        if os.path.exists(os.path.join('tmp', 'temp_{}_seg.txt'.format(name))): os.remove(os.path.join('tmp', 'temp_{}_seg.txt'.format(name)))
-        if os.path.exists(os.path.join('tmp', 'temp_{}_outseg.fits'.format(name))): os.remove(os.path.join('tmp', 'temp_{}_outseg.fits'.format(name)))
+        if os.path.exists(os.path.join(tmp_path, 'temp_{}_seg.fits'.format(name))): os.remove(os.path.join('tmp', 'temp_{}_seg.fits'.format(name)))
+        if os.path.exists(os.path.join(tmp_path, 'temp_{}_seg.txt'.format(name))): os.remove(os.path.join('tmp', 'temp_{}_seg.txt'.format(name)))
+        if os.path.exists(os.path.join(tmp_path, 'temp_{}_outseg.fits'.format(name))): os.remove(os.path.join('tmp', 'temp_{}_outseg.fits'.format(name)))
         if seg is not None: seg.close()
 
     return seg_img
@@ -71,10 +75,15 @@ def get_sextractor_points(path):
        an array of star objects"""
     f = None 
     try:
-        txt_out = os.path.join('tmp', '{}_star_out.txt'.format(name))
+        abc_path = os.path.abspath(os.path.dirname(__file__))
+        tmp_path = os.path.join(abc_path, "tmp")
+        txt_out = os.path.join(tmp_path, '{}_star_out.txt'.format(name))
+        prev_cwd = os.getcwd()
+        os.chdir("./SourceExtractor")
         proc = subprocess.Popen(['./sex', path, '-CATALOG_NAME', txt_out], stderr = subprocess.PIPE)
         if proc.wait() != 0: 
             raise Exception
+        os.chdir(prev_cwd)
         stars = []
     
         f = open(txt_out, 'r') 
@@ -84,7 +93,7 @@ def get_sextractor_points(path):
 
         return stars
     
-    except:
+    except IndexError:
         raise SextractorError
     
     finally:
@@ -171,7 +180,7 @@ def load_galaxies(in_dir, star_class_perc, outdir):
             if zipped: yield load_galaxy(tmpdir, galname, star_class_perc)
             else: yield load_galaxy(os.path.join(in_dir, galname), galname, star_class_perc)
             
-        except:
+        except IndexError:
             yield galname
         
         finally:

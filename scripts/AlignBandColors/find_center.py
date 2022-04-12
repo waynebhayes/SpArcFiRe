@@ -75,7 +75,7 @@ def estimate_center(img : "ndarray", star : Star, percent_img_to_explore : float
     ub = '[1000.0, {}, {}, 100.0, 100.0]'.format(str(max_pt[1] + np.sqrt(2)), str(max_pt[0] + np.sqrt(2)))
     
     abc_path   = os.path.abspath(os.path.dirname(__file__))
-    curve_path = os.path.join(abc_path, "CurveFit/runFit")
+    curve_path = os.path.join(abc_path, "runFit")
     proc = subprocess.Popen([curve_path, x, y, params, lb, ub], stdout = subprocess.PIPE)
     
     timeout = 20

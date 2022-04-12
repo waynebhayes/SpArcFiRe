@@ -25,13 +25,13 @@ def get_sextractor_points(fits_path : str) -> "[Star]":
     f = None 
     try:
         abc_path    = os.path.abspath(os.path.dirname(__file__))
-        source_path = os.path.join(abc_path, "sex")
+        source_path = os.path.join(abc_path, "SourceExtractor", "sex")
         tmp_path    = os.path.join(abc_path, "tmp")
         txt_path    = os.path.join(tmp_path, f"{os.path.basename(fits_path)}_star_out_{time.time()}.txt")
         
         # In case this is called from not the root directory, use absolute paths
         prev_cwd = os.getcwd()
-        os.chdir(abc_path)
+        os.chdir(os.path.join(abc_path, "SourceExtractor"))
         proc = subprocess.Popen([source_path, fits_path, "-CATALOG_NAME", txt_path], stderr = subprocess.PIPE)
         os.chdir(prev_cwd)
         
@@ -66,7 +66,7 @@ def get_seg_img(img : "ndarray") -> "ndarray":
         ndarray : 2D array of segmentation image 
     """
     abc_path    = os.path.abspath(os.path.dirname(__file__))
-    source_path = os.path.join(abc_path, "sex")
+    source_path = os.path.join(abc_path, "SourceExtractor", "sex")
     tmp_path    = os.path.join(abc_path, "tmp")
         
     fits_path   = os.path.join(tmp_path, f"tmp_{time.time()}_seg.fits")
@@ -77,7 +77,7 @@ def get_seg_img(img : "ndarray") -> "ndarray":
     try:
         save_fits(img, fits_path)
         prev_cwd = os.getcwd()
-        os.chdir(abc_path)
+        os.chdir(os.path.join(abc_path, "SourceExtractor"))
         proc = subprocess.Popen([source_path, fits_path, "-CHECKIMAGE_TYPE", "SEGMENTATION", "-CHECKIMAGE_NAME", seg_path, "-CATALOG_NAME", txt_path], stderr = subprocess.PIPE) 
         os.chdir(prev_cwd)
 
