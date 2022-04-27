@@ -1,45 +1,55 @@
-# AlignBandColors by Anthony Navarrette (antholn1@uci.edu)
+# AlignBandColors by Anthony Navarrette
 
 ## About
 
-AlignBandColors is a program that alignes inter-color-band images of the same galaxy to a 100th of a pixel accuracy.  A detailed analysis of this program was submitted to MNRAS for publication (link comming soon).  
-
-Credit to Sergey Anatolyevich with the ALGLIB Project for their [data processing library.](https://www.alglib.net/)
+AlignBandColors is a program that aligns inter-waveband images of the same galaxy to a 1/30th of a pixel accuracy.  A detailed analysis of this program was published in the Journal of Astronomy and Computing [link tbd].  
 
 ## Requirements
 
-Python 2.7
-   - astropy        (1.4.9)
-   - matplotlib     (2.2.5)
-   - numpy          (1.16.6)
-   - opencv-python  (2.4.5)
-   - Pillow         (6.2.2)
-   - psutil         (5.7.0)
-   - scipy          (1.2.3)
+- Using a x86 Linux based operating system
 
-It is recommended that you have at least 16GB of memory available, or more specifically, MaxImgDimensionX\*MaxImgDimensionY\*800 bytes of memory to run this program. If you have limited memeory, first set -runInParallel 0, if that is not enough, you must lower the -upscaleFactor until it runs sucessfully (note: the lower the upscale factor the less precison in the output).
+- Python 3.10
+   - astropy        (5.0.4)
+   - matplotlib     (3.5.1)
+   - numpy          (1.22.3)
+   - Pillow         (9.1.0)
+   - psutil         (5.9.0)
+   - scipy          (1.8.0)
+
+- [Recommended] 16GB of memory or more
+    - If running into memory limitations, turn `-runInParallel` off
+    - If still running into issues then lower `-upscaleFactor` (this will lead to lower accuracy if less than 100)
 
 ## Setup
 
-Before running, make sure to have your input images organized as follows:
+Install Python 3.10 and run `setup.sh` to install all of the above libraries.
 
->* InputDirectory
->    * GalaxyOneDirectory
->        * GalaxyOne_g.fits
->        * GalaxyOne_i.fits
->        * GalaxyOne_r.fits
->        * GalaxyOne_u.fits
->        * GalaxyOne_z.fits
->
->     * GalaxyTwoDirectory
->        * GalaxyTwo_g.fits
->        * GalaxyTwo_i.fits
->        * GalaxyTwo_r.fits
->        * GalaxyTwo_u.fits
->        * GalaxyTwo_z.fits
->...
+Before running AlignBandColors on images, make sure to have your input images organized as follows:
 
-The fits image names must contain an '_color' in the filename, otherwise ShiftGal will not work correctly.  The images can also be compressed as .fits.xz files and will automatically be decompressed at runtime.
+InputDirectory/  
+|-- GalaxyOne/  
+|  |-- GalaxyOne_u.fits  
+|  |-- GalaxyOne_g.fits  
+|  |-- GalaxyOne_r.fits  
+|-- GalaxyTwo/  
+|  |-- GalaxyTwo_u.fits.xz  
+|  |-- GalaxyTwo_g.fits.xz  
+|  |-- GalaxyTwo_r.fits.xz  
+
+
+The fits image names must contain a '_color' in the filename, otherwise the program will not work correctly.  The images can also be compressed with xz and will automatically be decompressed at runtime (no other compression types are currently supported).
 
 For documentation on command line options, run 
->./runABC.sh -h
+>./abc.sh -h
+
+
+## Version History
+- July 2021
+    - Initial release
+
+- April 2022
+    - Upgraded to Python 3.10 (package versions listed above)
+    - Added option for waveband labels (-colorsToProcess [COLORS]) 
+    - Fixed issue with updating non-SDSS FITS headers
+    - Updated output data to be stored in a CSV
+
