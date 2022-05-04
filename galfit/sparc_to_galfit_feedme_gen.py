@@ -7,9 +7,16 @@
 
 # # MINI README
 # 
-# Please place this script into the directory which contains the folders for your input, temporary, and output files for SpArcFiRe typically denoted: sparcfire-in, sparcfire-tmp, and sparcfire-out. GALFIT will also be run from that same directory if you choose to use the control script included in the repo. I recommend running this alone *once* before running the big script to ensure everything is in its right place. After you confirm that this works without any errors the first time around, feel free to run the control script from then on. 
+# Please place this script into the directory which contains the folders 
+# for your input, temporary, and output files for SpArcFiRe typically denoted: 
+# sparcfire-in, sparcfire-tmp, and sparcfire-out. GALFIT will also be run from 
+# that same directory if you choose to use the control script included in the repo.
+# I recommend running this alone *once* before running the big script to ensure 
+# everything is in its right place. After you confirm that this works without any 
+# errors the first time around, feel free to run the control script from then on. 
 # 
-# Running from the overarching directory is a temporary measure which will be remedied upon completion of the entire control script and full integration with SpArcFiRe. 
+# Running from the overarching directory is a temporary measure which will be 
+# remedied upon completion of the entire control script and full integration with SpArcFiRe. 
 # 
 # TO RUN: `python sparc_to_galfit_feedme_gen.py`
 # 
