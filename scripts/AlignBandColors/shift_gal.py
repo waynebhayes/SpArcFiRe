@@ -90,7 +90,7 @@ def filter_stars(src : "[Star]", trg : "[Star]", min_gamma : float = 1,
     return m_src, m_trg
 
 
-def find_like_points(src : "[Star]", trg : "[Star]", max_dist = 5) -> "([Source Stars], [Target Stars])":
+def find_like_points(src : "[Star]", trg : "[Star]", max_dist) -> "([Source Stars], [Target Stars])":
     """
     Finds stars in the target list that correspond with the source list.
 
@@ -228,7 +228,7 @@ def shift_img(gal : "ndarray", vector : "[x, y]", upscale_factor : int, gal_dict
     return upscale
 
 
-def get_galaxy_vectors(galaxy : "Galaxy", template_color : str, min_stars_all : int, ignore_sigma : bool = True) -> OrderedDict:
+def get_galaxy_vectors(galaxy : "Galaxy", template_color : str, min_stars_all : int, max_star_dist : float, ignore_sigma : bool = True) -> OrderedDict:
     """
     Calculates the shift needed for each galaxy for alignment to template_color.
 
@@ -236,6 +236,7 @@ def get_galaxy_vectors(galaxy : "Galaxy", template_color : str, min_stars_all : 
         galaxy         (Galaxy) : Galaxy object with images present
         template_color (str)    : Color to shift all other wavebands too match
         min_stars_all  (int)    : Minimum number of stars needed in all wavebands
+        max_star_dist  (float)  : Maximums distance betwen pairs of source and target stars
         ignore_sigma   (bool)   : Whether to ignore calculated shifts of individual
                                   stars that are too far from the mean 
 
@@ -254,7 +255,7 @@ def get_galaxy_vectors(galaxy : "Galaxy", template_color : str, min_stars_all : 
         # Otherwise filter out stars and find the average vector between them
         else: 
             # Find stars that are near eachother in both images 
-            m_src, m_trg = find_like_points(galaxy.stars_dict[template_color], stars)
+            m_src, m_trg = find_like_points(galaxy.stars_dict[template_color], stars, max_star_dist)
             
             # If not enough points in it match the template, skip it
             if len(m_src) < min_stars_all:
@@ -362,7 +363,7 @@ def save_output(outdir : str, galaxy : "Galaxy", shifted_imgs : dict, shift_vect
 
 
 def process_galaxy(galaxy : "Galaxy", out_dir : str, border_size : float, min_stars_template : int, min_stars_all : int, upscale_factor : int, 
-                   crop_images : bool, run_in_parallel : bool, max_memory : int, compressOutput : bool, colors : tuple) -> None:
+                   crop_images : bool, run_in_parallel : bool, max_memory : int, compressOutput : bool, colors : tuple, max_star_dist : float) -> None:
     """
     Runs AlignBandColor alignment process on the given galaxy and saves the output
     
@@ -378,7 +379,8 @@ def process_galaxy(galaxy : "Galaxy", out_dir : str, border_size : float, min_st
         run_in_parallel    (bool)   : Whether or not to run all image alignments in parallel
         max_memory         (int)    : Maximum memory to use (in bytes)
         compressOutput     (bool)   : Whether or not to compress the output images (using xz)
-        colors             (tuple)  : The waveband colors to look for
+        colors             (tuple)  : The waveband colors to look for in file struture
+        max_star_dist      (float)  : The maximum allowable distance between pairs of source and target stars
     """
     global csv_out
 
@@ -401,7 +403,7 @@ def process_galaxy(galaxy : "Galaxy", out_dir : str, border_size : float, min_st
        
         print(f"Reference waveband chosen is {template_color} with {len(galaxy.stars_dict[template_color])} stars")
         
-        shift_vectors = get_galaxy_vectors(galaxy, template_color, min_stars_all)
+        shift_vectors = get_galaxy_vectors(galaxy, template_color, min_stars_all, max_star_dist)
        
         # Crop the images to be only the galaxy
         if crop_images:
@@ -496,6 +498,8 @@ if __name__ == "__main__":
     parser.add_argument('-runInParallel', default = '0', choices = bool_choices, help = 'Will process wavebands in parallel, this requires the system to have enough memory to store all upscaled wavebands simultaneously.')
 
     parser.add_argument("-colorsToProcess", default = "ugriz", type = str, help = "The waveband colors to process, with each character being a color.  Defaults to 'ugriz' which correspond to wavebands u, g, r, i, and z")
+
+    parser.add_argument("-maxStarDist", default = 1.5, type = float, help = "Maximum distance between pairs of stars that are allowed")
     
     mem = virtual_memory().total / 1024.0**3
     parser.add_argument('-maxMemory', default = mem, type = float, help = 'The maximum amount of memory (in GB) the process can use.  At least 16GB is recommended but more will be needed for larger images and larger upscale factors.')
@@ -562,7 +566,7 @@ if __name__ == "__main__":
             print(f"Failed to load {gal}, continuing...")
             continue
         
-        process_galaxy(gal, args.outDir, args.borderSize, args.minStarsTemplate, args.minStarsAll, args.upscaleFactor, args.cropImages, args.runInParallel, args.maxMemory * 1024**3, args.compressOutput, colors)
+        process_galaxy(gal, args.outDir, args.borderSize, args.minStarsTemplate, args.minStarsAll, args.upscaleFactor, args.cropImages, args.runInParallel, args.maxMemory * 1024**3, args.compressOutput, colors, args.maxStarDist)
         print()
 
     csv_out.close()
