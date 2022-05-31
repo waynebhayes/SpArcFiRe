@@ -484,7 +484,8 @@ if __name__ == "__main__":
         feedme_list.append("F) ./sparcfire-tmp/galfit_masks/" + gname + "_star-rm.fits") #I hate to make this verbose but I have no other choice in this case...
         feedme_list.append("G) ./constraints.txt")
         feedme_list.append("H) " + x1crop + " " + x2crop + " " + y1crop + " " + y2crop)
-        feedme_list.append("K) 10  10") 
+        feedme_list.append("K) 60  60") # 20 seeing diameters, 2" for SDSS, pixel scale - 1 pixel:0.4 arcseconds... 
+                                        # this is probably fine, Chien Peng uses this in an SDSS example
         feedme_list.append("J) 24.8") # SDSS
         feedme_list.append("K) 0.396  0.396") # SDSS
         feedme_list.append("O) regular")
