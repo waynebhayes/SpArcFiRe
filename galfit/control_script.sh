@@ -241,6 +241,7 @@ rm *.png
 # Running a script to compare input to galfit and output
 # See comparison_params.csv for *just* the differences
 # Each galaxy folder contains the input, output, and difference in a text file galfit_io_compare
+echo "Running in_out_comparison.py"
 $python in_out_comparison.py $in_dir $tmp_dir $out_dir
 
 # For running fitspng on all galfit output assuming all in one folder
