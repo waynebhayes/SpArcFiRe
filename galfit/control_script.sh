@@ -171,6 +171,8 @@ if [ ${#masks[@]} -ne ${#files[@]} ]; then
 	echo "Star Masking"
 	cd star_removal # Unfortunately sextractor does not seem to play nice with a single directory so unfortunately we must cd
 	echo "running sextractor"
+	# IF THIS FAILS IT'S LIKELY BECAUSE THE DIRECTORIES NEED TO BE ABSOLUTE PATHS
+	# TODO: FIX THIS 
 	$python remove_stars_with_sextractor.py $in_dir/ $tmp_dir/galfit_masks/
 	cd ..
 else
