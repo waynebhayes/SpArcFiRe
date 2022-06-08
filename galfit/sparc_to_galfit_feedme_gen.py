@@ -474,6 +474,11 @@ def quick_build_template():
 
 if __name__ == "__main__":
 
+    # FOR NOW (aka TODO) force >python 3.6 for f string compatibility
+    out_str = """\t Python3.6 or greater required! Exitting without generating feedmes... 
+                if feedmes have already been generated, galfit will run with those.\n"""
+    assert sys.version_info >= (3, 6), out_str
+
     count = 0
     paths_to_feedme = []
     
