@@ -219,6 +219,12 @@ do
 	silent fitspng -fr "1,150" -o "${gal_name}_out.png" "${gal_path_fits}[2]"
 	silent fitspng -fr "1,150" -o "${gal_name}_residual.png" "${gal_path_fits}[3]"
 	
+	# Adding these lines for easy comment/uncomment if fitspng won't cooperate
+	# using the previous settings
+	#silent fitspng -o "${gal_name}.png" "${gal_path_fits}[1]"
+        #silent fitspng -o "${gal_name}_out.png" "${gal_path_fits}[2]"
+        #silent fitspng -o "${gal_name}_residual.png" "${gal_path_fits}[3]"
+	
 	# Combining the three with Sparcfire's images using ImageMagick
 	silent montage "${gal_name}.png" "${gal_name}_out.png" "${gal_name}_residual.png" "${spout}/${gal_name}/${gal_name}-A_input.png" "${spout}/${gal_name}/${gal_name}-C_preproc.png" "${spout}/${gal_name}/${gal_name}-J_logSpiralArcs-merged.png" -geometry 150x125+2+4 "${gal_name}_combined.png"
 
