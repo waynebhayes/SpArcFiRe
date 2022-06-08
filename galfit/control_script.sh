@@ -123,6 +123,7 @@ if silent type -P python3; then
 	python=python3
 elif silent type -P python2.7; then
 	python=python2.7
+	echo -e "Python version is 2.7. Feedme gen will NOT be able to run (currently needs >3.6). Proceeding anyway.\n"
 elif silent type -P python; then 
 	python=python
 else
