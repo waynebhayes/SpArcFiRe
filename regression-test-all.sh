@@ -27,7 +27,9 @@ fi
 
 #SpArcFiRe ONLY!!
 source setup.bash
-make all
+
+# This now happens in the SpArcFiRe script
+# make all
 
 NUM_FAILS=0
 STDBUF=''

@@ -114,6 +114,9 @@ case "$SKIP" in
 *) SKIP="$cwd/$SKIP";;
 esac
 
+# Make csv2tsv and any other files that may need compiling
+(cd $SPARCFIRE_HOME && make all) || die "could not compile files via 'make'. Is '$SPARCFIRE_HOME' correctly set?"
+
 # copy only the necessary (non-skip) files to sfDir
 (cd "$inDir" && (ls | fgrep -v -f "$SKIP" | xargs --no-run-if-empty $SPARCFIRE_HOME/scripts/reverse-cp.sh $sfDir)) || die "could not copy files from '$inDir' to $sfDir"
 

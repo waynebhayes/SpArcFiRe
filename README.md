@@ -103,7 +103,7 @@ Some arm segments might circle around a galaxy completely, by default SpArcFiRe 
 
 **-useImageStandardization &lt;0 | 1> {Default is 1}**
 
-If set to 0 the intermediate image steps are not saved as files, this does not affect arc output.
+If set to 0, sparcfire does not perform an auto-crop and the images are not resized to the default 256x256. We recommend turning this option off when sparcfire's auto-crop routine fails or otherwise 'zooms in' too far.
 
 **-resizeDims WIDTH HEIGHT {Default is 250 250}**
 
