@@ -96,14 +96,18 @@ Command: `download-sample-fits.bash`
 Usage: To test out SpArcFiRe you will need some input, this command downloads 3 sample fits files and places them in the input folder.
 
 ## Section 4: Running SpArcFiRe
-TODO: Write
+After the WSL Setup is complete, we are now ready to run SpArcFiRe.
 
+First navigate to the SpArcFiRe directory and check your setup is valid:
+```
+cd ~/SpArcFiRe
+source ./setup.bash ~/SpArcFiRe
+```
 
-
-
+Now figure out what SpArcFiRe command line arguments you want to use (for more information, see our README.md). If you want to run SpArcFiRe with the defult command line arguments, you can run SpArcFiRe with the command: ~/bin/wschallo/SpArcFiRe-run.sh
 
 
 ## References:
 [^1]: [WSL](https://docs.microsoft.com/en-us/windows/wsl/install)
 [^2]: [Cloning a Github Repo](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
-[^2]: [MATLAB]([https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository](https://www.mathworks.com/help/compiler_sdk/dotnet/install-the-matlab-runtime.html))
+[^3]: [MATLAB](https://www.mathworks.com/help/compiler_sdk/dotnet/install-the-matlab-runtime.html)
