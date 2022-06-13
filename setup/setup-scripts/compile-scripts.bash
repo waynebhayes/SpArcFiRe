@@ -1,4 +1,4 @@
 #!/bin/bash
 
 #1) Compile delete-commas-inside-quotes script for csvtotsv
-gcc -o ~/bin/delete-commas-inside-quotes ~/bin/delete-commas-inside-quotes.c
+gcc -o ~/SpArcFiRe/scripts/delete-commas-inside-quotes ~/SpArcFiRe/scripts/delete-commas-inside-quotes.c
