@@ -8,15 +8,15 @@ WSL (or Windows Subsystem for Linux) is a compatiablity layer that enables you t
 In this instruction set, we will cover:
 1. [Installing WSL](https://github.com/cora-schallock/SpArcFiRe/blob/master/setup/windows-setup.md#section-1-installing-wsl)
 2. [Using WSL Terminal and Cloning SpArcFiRe repo](https://github.com/cora-schallock/SpArcFiRe/blob/master/setup/windows-setup.md#section-2-using-wsl-terminal-and-cloning-sparcfire-repo)
-3. Setting up SpArcFiRe for WSL
-    - Installing MATLAB Runtime
-    - Installing Python2.7
-    - Installing GCC
-    - Compiling Scripts
-    - Creating a Symbolic Link to SpArcFiRe
-    - Setting up SpArcFiRe Directories
-    - Downloading Sample Fits Files
-4. Running SpArcFiRe
+3. [Setting up SpArcFiRe for WSL](https://github.com/cora-schallock/SpArcFiRe/blob/master/setup/windows-setup.md#section-3-setting-up-sparcfire-for-wsl)
+    - [Installing MATLAB Runtime](https://github.com/cora-schallock/SpArcFiRe/blob/master/setup/windows-setup.md#install-matlabs-runtime-compiler-version-r2017a)
+    - [Installing Python2.7](https://github.com/cora-schallock/SpArcFiRe/blob/master/setup/windows-setup.md#install-python27-and-python-libraries-numpy-astropy-scipy-pillow)
+    - [Installing GCC](https://github.com/cora-schallock/SpArcFiRe/blob/master/setup/windows-setup.md#install-gcc-a-c-compiler)
+    - [Compiling Scripts](https://github.com/cora-schallock/SpArcFiRe/blob/master/setup/windows-setup.md#compile-the-c-scripts)
+    - [Creating a Symbolic Link to SpArcFiRe](https://github.com/cora-schallock/SpArcFiRe/blob/master/setup/windows-setup.md#creating-a-symbolic-link-to-sparcfire)
+    - [Setting up SpArcFiRe Directories](https://github.com/cora-schallock/SpArcFiRe/blob/master/setup/windows-setup.md#creating-a-symbolic-link-to-sparcfire)
+    - [Downloading Sample Fits Files](https://github.com/cora-schallock/SpArcFiRe/blob/master/setup/windows-setup.md#setting-up-sparcfire-directories)
+4. [Running SpArcFiRe](https://github.com/cora-schallock/SpArcFiRe/blob/master/setup/windows-setup.md#section-4-running-sparcfire)
 
 ## Section 1: Installing WSL
 To install WSL, follow [the instructions here.](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
@@ -57,7 +57,7 @@ But the Good News: I have provided scripts to do all the steps above automatical
 **Important Note:** By running this script you are agreeing to MATLAB's terms and conditions [^3] and copy of which can be found [here](https://github.com/cora-schallock/SpArcFiRe/blob/master/setup/licenses/MCR_license.txt).
 Begin by navigating to the setup directory: `cd SpArcFiRe/setup/`
 Now type the command: `./run-full-wsl-setup.bash`
-If there was an issue, take a look at the step by step instructions (you may just have to run a single step again). If everything works, congrats, now it is time to run SpArcFiRe
+If there was an issue, take a look at the step by step instructions (you may just have to run a single step again). If everything works, congrats, now it is time to [run SpArcFiRe](https://github.com/cora-schallock/SpArcFiRe/blob/master/setup/windows-setup.md#section-4-running-sparcfire)
 
 ### Step-Step-Setup:
 **Important Note:** Please make sure you are in the following directory before running any of these commands: `cd ~/SpArcFiRe/scripts/setup-scripts/`
@@ -96,7 +96,7 @@ Command: `download-sample-fits.bash`
 Usage: To test out SpArcFiRe you will need some input, this command downloads 3 sample fits files and places them in the input folder.
 
 ## Section 4: Running SpArcFiRe
-After the WSL Setup is complete, we are now ready to run SpArcFiRe.
+After the [WSL Setup is complete](https://github.com/cora-schallock/SpArcFiRe/blob/master/setup/windows-setup.md#section-3-setting-up-sparcfire-for-wsl), we are now ready to run SpArcFiRe.
 
 First navigate to the SpArcFiRe directory and check your setup is valid:
 ```
@@ -104,7 +104,7 @@ cd ~/SpArcFiRe
 source ./setup.bash ~/SpArcFiRe
 ```
 
-Now figure out what SpArcFiRe command line arguments you want to use (for more information, see our README.md). If you want to run SpArcFiRe with the defult command line arguments, you can run SpArcFiRe with the command: ~/bin/wschallo/SpArcFiRe-run.sh
+Now figure out what SpArcFiRe command line arguments you want to use (for more information, see our README.md). If you want to run SpArcFiRe with the defult command line arguments, you can run SpArcFiRe with the command: `~/bin/wschallo/SpArcFiRe-run.sh`
 
 
 ## References:
