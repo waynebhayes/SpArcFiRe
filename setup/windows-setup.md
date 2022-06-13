@@ -1,3 +1,4 @@
-## SpArcFiRe for Windows
+# SpArcFiRe for Windows
 
-### Place holder
+## Part 1: Setup:
+[wsl](https://docs.microsoft.com/en-us/windows/wsl/install)
