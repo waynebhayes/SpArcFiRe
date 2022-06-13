@@ -103,8 +103,12 @@ First navigate to the SpArcFiRe directory and check your setup is valid:
 cd ~/SpArcFiRe
 source ./setup.bash ~/SpArcFiRe
 ```
+If you want to run SpArcFiRe with the defult command line arguments, you can run SpArcFiRe with the command: `~/bin/wschallo/SpArcFiRe-run.sh`
 
-Now figure out what SpArcFiRe command line arguments you want to use (for more information, see our README.md). If you want to run SpArcFiRe with the defult command line arguments, you can run SpArcFiRe with the command: `~/bin/wschallo/SpArcFiRe-run.sh`
+This command is equiallent to running:
+"$HOME"/SpArcFiRe/scripts/SpArcFiRe -convert-FITS $HOME/SDSS/G.in $HOME/SDSS/G.tmp $HOME/SDSS/G.out  -generateFitQuality 0 -writeBulgeMask 1
+
+If you want to run SpArcFiRe with different command line arguments, please see our [README.md](https://github.com/waynebhayes/SpArcFiRe#readme)).
 
 
 ## References:
