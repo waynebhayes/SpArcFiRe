@@ -12,11 +12,14 @@ sudo ./setup-scripts/install-python2-plus-libraries.bash
 #3) Install gcc:
 sudo ./setup-scripts/install-gcc.bash
 
-#4) Create symbolic link: "$HOME"/bin -> SpArcFiRe/scripts
+#4) Compile c scripts:
+./setup-scripts/compile-scripts.bash
+
+#5) Create symbolic link: "$HOME"/bin -> SpArcFiRe/scripts
 sudo ./setup-scripts/create-symbolic-link.bash
 
-#5) Create dir structure:
+#6) Create dir structure:
 ./setup-scripts/setup-dirs.bash
 
-#6) Download sample fits:
+#7) Download sample fits:
 ./setup-scripts/download-sample-fits.bash
