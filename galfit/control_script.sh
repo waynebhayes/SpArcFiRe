@@ -123,6 +123,7 @@ if silent type -P python3; then
 	python=python3
 elif silent type -P python2.7; then
 	python=python2.7
+	echo -e "Python version is 2.7. Feedme gen will NOT be able to run (currently needs >3.6). Proceeding anyway.\n"
 elif silent type -P python; then 
 	python=python
 else
@@ -171,6 +172,8 @@ if [ ${#masks[@]} -ne ${#files[@]} ]; then
 	echo "Star Masking"
 	cd star_removal # Unfortunately sextractor does not seem to play nice with a single directory so unfortunately we must cd
 	echo "running sextractor"
+	# IF THIS FAILS IT'S LIKELY BECAUSE THE DIRECTORIES NEED TO BE ABSOLUTE PATHS
+	# TODO: FIX THIS 
 	$python remove_stars_with_sextractor.py $in_dir/ $tmp_dir/galfit_masks/
 	cd ..
 else
@@ -217,6 +220,12 @@ do
 	silent fitspng -fr "1,150" -o "${gal_name}_out.png" "${gal_path_fits}[2]"
 	silent fitspng -fr "1,150" -o "${gal_name}_residual.png" "${gal_path_fits}[3]"
 	
+	# Adding these lines for easy comment/uncomment if fitspng won't cooperate
+	# using the previous settings
+	#silent fitspng -o "${gal_name}.png" "${gal_path_fits}[1]"
+        #silent fitspng -o "${gal_name}_out.png" "${gal_path_fits}[2]"
+        #silent fitspng -o "${gal_name}_residual.png" "${gal_path_fits}[3]"
+	
 	# Combining the three with Sparcfire's images using ImageMagick
 	silent montage "${gal_name}.png" "${gal_name}_out.png" "${gal_name}_residual.png" "${spout}/${gal_name}/${gal_name}-A_input.png" "${spout}/${gal_name}/${gal_name}-C_preproc.png" "${spout}/${gal_name}/${gal_name}-J_logSpiralArcs-merged.png" -geometry 150x125+2+4 "${gal_name}_combined.png"
 
@@ -239,6 +248,7 @@ rm *.png
 # Running a script to compare input to galfit and output
 # See comparison_params.csv for *just* the differences
 # Each galaxy folder contains the input, output, and difference in a text file galfit_io_compare
+echo "Running in_out_comparison.py"
 $python in_out_comparison.py $in_dir $tmp_dir $out_dir
 
 # For running fitspng on all galfit output assuming all in one folder
