@@ -4,7 +4,7 @@
 sudo apt-get update
 
 #1) Install MRC:
-sudo ./setup-scripts/install-mcr.bash
+sudo ./setup-scripts/install-mrc.bash
 
 #2) Install Python 2.7 plus Libraries:
 sudo ./setup-scripts/install-python2-plus-libraries.bash
