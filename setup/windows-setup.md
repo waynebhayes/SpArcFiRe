@@ -50,8 +50,8 @@ Now I have good news, and bad news. First the bad news, we have to all of the fo
 * Downloading Sample Fits Files (for testing)
 
 But the Good News: I have provided scripts to do all the steps above automatically. I have provided two versions of the instructions:
-* Full WSL Setup - which runs all setup steps (use this for a quick setup)
-* Step-Step-Setup - shows the inidivual set up steps (use this to pick and choose what to run/debug)
+* [Full WSL Setup](https://github.com/cora-schallock/SpArcFiRe/blob/master/setup/windows-setup.md#full-setup) - which runs all setup steps (use this for a quick setup)
+* [Step-Step-Setup](https://github.com/cora-schallock/SpArcFiRe/blob/master/setup/windows-setup.md#step-step-setup) - shows the inidivual set up steps (use this to pick and choose what to run/debug)
 
 ### Full Setup:
 **Important Note:** By running this script you are agreeing to MATLAB's terms and conditions [^3] and copy of which can be found [here](https://github.com/cora-schallock/SpArcFiRe/blob/master/setup/licenses/MCR_license.txt).
