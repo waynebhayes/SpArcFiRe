@@ -35,7 +35,10 @@ sudo apt-get install git -y
 ```
 A few things to note: both these commands require sudo to run. For those not familiar, sudo is essentially the same as Administartor on Windows. The first command gets the most recent packages avalible, and the second command install git (essentially how you can use github on the command line).
 
-After installing git, make sure you are in your home directory, and then you can clone the repo [^2].
+After installing git, make sure you are in your home directory, and then you can clone the repo using the bellow command [^2].
+```
+git clone https://github.com/waynebhayes/SpArcFiRe.git
+```
 
 ## Section 3: Setting up SpArcFiRe for WSL
 Now that you have cloned the SpArcFiRe repo, we are ready to setup SpArcFiRe for WSL.
