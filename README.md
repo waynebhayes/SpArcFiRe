@@ -4,6 +4,9 @@ The "documentation" directory contains the original paper and some other (possib
 The documentaton below is up-to-date as of March 2020.
 If you have any questions, please email whayes@uci.edu, or jeenglis@uci.edu
 
+## Installation ##
+### Windows ###
+[This document](https://github.com/waynebhayes/SpArcFiRe/blob/master/setup/windows-setup.md) will guide you in setting up SpArcFiRe on your system.
 
 ## How to Use SpArcFiRe ##
 
