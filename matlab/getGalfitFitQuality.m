@@ -61,7 +61,7 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
     galfitCommand = [getenv('SPARCFIRE_HOME') '/scripts/galfit ' outputPath '.feedme'];
 
     % Grabbing current directory before cd-ing to tmp
-    former_dir = cd('/tmp/galfit_junk');
+    former_dir = cd(outputPath);
 
     system(galfitCommand);
 
