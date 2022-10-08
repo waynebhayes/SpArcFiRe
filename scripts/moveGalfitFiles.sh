@@ -17,10 +17,11 @@
 GJUNK="/tmp/galfit_junk"
 
 #echo "Moving Galfit Files"
-echo "Deleting GALFIT Files from $GJUNK..."
+echo "Deleting GALFIT Files matching $GJUNK..."
+#find /tmp/ -type d -name "$GJUNK*" 2>/dev/null
 
-trap "/bin/rm -rf $GJUNK" 0 1 2 3 15
-mkdir $GJUNK
+trap "/bin/rm -rf $GJUNK*" 0 1 2 3 15
+#mkdir $GJUNK
 
 #for file in $(find "$INDIR" -iregex '.*/galfit\.[0-9]+')
 #do
