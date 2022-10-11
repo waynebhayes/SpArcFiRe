@@ -15,6 +15,8 @@ import os
 import random
 import scipy.ndimage as ndimage
 import scipy.stats as stats
+# This and astropy likely need to be pip installed
+# Along with csv2tsv for regression tests
 import imageio
 import shutil
 import subprocess
