@@ -13,9 +13,9 @@ import logging
 import numpy as np
 import os
 import random
-import scipy.misc
 import scipy.ndimage as ndimage
 import scipy.stats as stats
+import imageio
 import shutil
 import subprocess
 import sys
@@ -92,7 +92,7 @@ def gen_sextractor_segmentation(in_filepath, tmp_catalog_filepath, tmp_seg_filep
         return None
     logger.info("reading input and SExtractor-segmentation images")
     seg_img = fits.getdata(tmp_seg_filepath)
-    return seg_img.astype(np.int)
+    return seg_img.astype(int)
     
 def remove_nonconnected_cmpts(seg_img):
     objvals = np.sort(np.unique(seg_img))
@@ -119,14 +119,14 @@ def clean_seg_img(seg_img):
     weights = np.ones(9)
     weights[4] = 1.1 # break ties in favor of the center element
     def filt_fxn(arr):
-        freqs = np.bincount(arr.astype(np.int), weights=weights)
+        freqs = np.bincount(arr.astype(int), weights=weights)
         if len(freqs) > (nobj+1):
             freqs = freqs[0:-1] # don't count out-of-bounds pixels
         return np.argmax(freqs)
     
     # special value for out-of-bounds entries so they can be ignored
     padval = nobj+1 
-    seg_img = ndimage.filters.generic_filter(seg_img, filt_fxn, size=3, 
+    seg_img = ndimage.generic_filter(seg_img, filt_fxn, size=3, 
         mode='constant', cval=padval)
         
 #    plt.matshow(seg_img, cmap=cm.get_cmap('hsv')); plt.colorbar(); plt.title('after segimg cleaning')
@@ -374,7 +374,7 @@ def create_star_mask_ctrcontig(seg_img, ctr_r, ctr_c):
         maxlbl = stats.mode(ccs[ccs != 0])[0][0]
         assert maxlbl != 0
         ctrlbl = maxlbl
-        print maxlbl
+        print(maxlbl)
     star_mask = (ccs != ctrlbl)
     return star_mask
         
@@ -383,7 +383,8 @@ def create_star_mask_ctrcontig(seg_img, ctr_r, ctr_c):
 # /mnt/share/in /mnt/share/out
 if __name__ == '__main__':
     if len(sys.argv) != 3:
-        print "usage: remove_stars_with_sextractor in_dir out_dir"
+        print("usage: remove_stars_with_sextractor in_dir out_dir")
+        sys.exit()
     
     in_dirpath = sys.argv[1]
     out_dirpath = sys.argv[2]
@@ -507,7 +508,7 @@ if __name__ == '__main__':
                 fits.writeto(out_filepath, out_img)
                 logger.info("wrote {0}".format(out_filepath))
             
-            scipy.misc.imsave(os.path.join(out_dirpath, in_imgname + '_starmask.png'), mask_levels)
+            imageio.imwrite(os.path.join(out_dirpath, in_imgname + '_starmask.png'), mask_levels)
         except Exception as e:
             logger.warning("could not create starmask for " + in_imgname)
             logger.warning(e)
