@@ -22,7 +22,7 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
     gal_name = gal_name(end);
 
     [status, outputPath] = system('mktemp -d /tmp/galfit_junk.XXXXXX');
-    outputPath = outputPath + gal_name;
+    outputPath = outputPath + '/' + gal_name;
 
     %disp('Checking outputPath - ' + outputPath)
     outputPath = char(outputPath);
