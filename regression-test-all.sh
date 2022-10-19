@@ -1,6 +1,8 @@
 #!/bin/bash
-die() { echo "FATAL ERROR: $@" >&2; exit 1;}
 USAGE="USAGE: $0 [-use-git-at]  [ list of tests to run, defaults to regression-tests/*/*.sh ]"
+NL='
+'
+die() { echo "$USAGE${NL}FATAL ERROR: $@" >&2; exit 1;}
 
 while [ "X$1" != X ]; do
     case "$1" in
@@ -26,7 +28,7 @@ if [ ! -x scripts/delete-commas-inside-quotes ]; then
 fi
 
 #SpArcFiRe ONLY!!
-source setup.bash
+source setup.bash || die "setup failed"
 
 # This now happens in the SpArcFiRe script
 # make all
