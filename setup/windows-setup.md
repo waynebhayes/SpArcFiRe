@@ -113,6 +113,8 @@ This command is equiallent to running:
 
 If you want to run SpArcFiRe with different command line arguments, please see our [README.md](https://github.com/waynebhayes/SpArcFiRe#readme)).
 
+## Section 5: Debugging Issues
+Please refer to the debugging list in the [windows-debug.md](https://github.com/waynebhayes/SpArcFiRe/blob/master/setup/windows-debug.md) file.
 
 ## References:
 [^1]: [WSL](https://docs.microsoft.com/en-us/windows/wsl/install)

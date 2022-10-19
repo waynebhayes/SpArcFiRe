@@ -15,6 +15,9 @@
 # 
 # To run the control script: `bash control_script.sh`
 
+# In[5]:
+
+
 import numpy as np
 from math import log
 import glob
@@ -23,7 +26,8 @@ import subprocess
 import random
 import pandas as pd
 import os
-from sys import argv
+import sys
+from astropy.io import fits
 
 
 # # To convert autocrop image to fits
@@ -48,25 +52,34 @@ from sys import argv
 #         print("Check Sparcfire output or directories. Cannot proceed.")
 #         raise SystemExit("Quitting.")
 
+# In[21]:
+
+
 # Grabbing filepath from command line
-def command_line(run_as_script = True):
+def command_line(): # = True):
     
     in_dir_out = "sparcfire-in"
     tmp_dir_out = "sparcfire-tmp"
     out_dir_out = "sparcfire-out"
         
-    if not run_as_script:
-        return in_dir_out, tmp_dir_out, out_dir_out
+    #if not run_as_script:
+    #    return in_dir_out, tmp_dir_out, out_dir_out
     
-    if len(argv) != 4: # including name of python script
-        print(f"No path given. Defaulting to using {in_dir_out}\n{tmp_dir_out}\n{out_dir_out}")
-        
-    else:
-        in_dir_out = argv[1]
-        tmp_dir_out = argv[2]
-        out_dir_out = argv[3]
-        
+    try:
+        if len(sys.argv) != 4: # including name of python script
+            print(f"No path given. Defaulting to using: \n{in_dir_out}\n{tmp_dir_out}\n{out_dir_out}")
+
+        else:
+            in_dir_out = argv[1]
+            tmp_dir_out = argv[2]
+            out_dir_out = argv[3]
+    except:
+        pass
+
     return in_dir_out, tmp_dir_out, out_dir_out
+
+
+# In[7]:
 
 
 # Grabbing the file names
@@ -97,9 +110,12 @@ def get_galaxy_names_list(path_to_sparc_in):
     else:
         filenames_out = [os.path.splitext(s)[0] for s in filenames_read]
         galaxy_names_out = [os.path.basename(s) for s in filenames_out]
-        filenames_out = [s.replace("in", "out") for s in filenames_out]
+        filenames_out = [s.replace("-in", "-out") for s in filenames_out]
         
     return filenames_read, galaxy_names_out, filenames_out
+
+
+# In[8]:
 
 
 def path_join(path='.', name='', file_ext=''):
@@ -114,9 +130,17 @@ def path_join(path='.', name='', file_ext=''):
     
     return file_path
 
+
+# In[9]:
+
+
 def scale_var(x, scale = 1):
     # Scales
     return float(x)*scale
+
+
+# In[10]:
+
 
 def galaxy_information(galaxy_name, galaxy_path):
    
@@ -131,24 +155,26 @@ def galaxy_information(galaxy_name, galaxy_path):
         print("Can't open to read: ", csv_filename)
         print("Check Sparcfire output or directories. Proceeding with default values.")
 
-        bulge_rad_out = '2'
-        bulge_axis_ratio_out = '0.5'
-        bulge_rot_angle_out = '1'
+        bulge_rad_out = 2
+        bulge_axis_ratio_out = 0.5
+        bulge_rot_angle_out = 1
         
-        crop_rad_out = '30' # New!
+        crop_rad_out = 30 # New!
         
-        center_pos_x_out = '30'
-        center_pos_y_out = '30'
-        disk_maj_axs_len_out = "30"
-        pos_angle_sersic_out = "1"
-        pos_angle_power_out = '30'
-        axis_ratio_out = "0.5"
-        max_arc_length_out = '30'
+        center_pos_x_out = 30
+        center_pos_y_out = 30
+        disk_maj_axs_len_out = 30
+        pos_angle_sersic_out = 1
+        pos_angle_power_out = 30
+        axis_ratio_out = 0.5
+        max_arc_length_out = 30
         chirality = 0
         chirality_2 = 0
+        a_ratio = 1
+        alpha_out = 1
         # spin_parity handled by if 
         est_arcs_out = 2
-        inclination = '30'
+        inclination = 30
         bar_cand = 'FALSE'
 
     else:
@@ -267,6 +293,9 @@ def galaxy_information(galaxy_name, galaxy_path):
             )
 
 
+# In[11]:
+
+
 def arc_information(galaxy_name, galaxy_path, num_arms = 2):
 
     try:
@@ -277,9 +306,9 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2):
         print("Can't open to read: ", arcs_filename)
         print("Check Sparcfire output or directories. Proceeding with default values.")
         
-        inner_rad = '0'
-        outer_rad = '20'
-        cumul_rot_out = '60'
+        inner_rad = 0
+        outer_rad = 20
+        cumul_rot_out = 60
 
     else:
         reader = csv.DictReader(arcs_file)
@@ -329,6 +358,9 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2):
     return inner_rad, outer_rad, cumul_rot_out #, alpha_out
 
 
+# In[12]:
+
+
 def csv_sdss_info(galaxy_names): # to grab petromag and also psf parameter things
     
     gname_info = {}
@@ -343,13 +375,13 @@ def csv_sdss_info(galaxy_names): # to grab petromag and also psf parameter thing
         print("Check Sparcfire output or directories. Proceeding with default values.")
 
         # Defaults go here
-        run = '0'
-        rerun = '0'
-        cam = '0'
-        field = '0'
-        row = '0'
-        col = '0'
-        pmag = '16'
+        run = 0
+        rerun = 0
+        cam = 0
+        field = 0
+        row = 0
+        col = 0
+        pmag = 16
         
         for gname in galaxy_names:
             gname_info[gname] = [run, rerun, cam, field, row, col, pmag]
@@ -368,13 +400,13 @@ def csv_sdss_info(galaxy_names): # to grab petromag and also psf parameter thing
                 #print(star_df.loc[:, 'name'])
                 print("Can't find the galaxy:", gname, "in our repository.")
                 print("Proceeding with default values and no PSF.")
-                run_out = '0'
-                rerun_out = '0'
-                camcol_out = '0'
-                field_out = '0'
-                rowc_out = '0'
-                colc_out = '0'
-                petromag_out = '16'
+                run_out = 0
+                rerun_out = 0
+                camcol_out = 0
+                field_out = 0
+                rowc_out = 0
+                colc_out = 0
+                petromag_out = 16
 
             else:
                 galaxy_band = gname[-1]
@@ -392,6 +424,30 @@ def csv_sdss_info(galaxy_names): # to grab petromag and also psf parameter thing
     return gname_info
 
 
+# In[13]:
+
+
+def write_starmask_ascii(starmask_filepath):
+    with fits.open(starmask_filepath) as sm:
+        mask_data = sm[0].data
+        mask_indices = np.dstack(np.where(mask_data == 0))
+        mask_indices = mask_indices.reshape(mask_indices.shape[1], 2).astype(str)
+
+    gname = os.path.basename(starmask_filepath).split("_star-rm")[0]
+    starmask_ascii_name = os.path.join(os.path.split(starmask_filepath)[0], f"{gname}_starmask.txt")
+
+    # To avoid some file I/O
+    if not mask_indices.size: return starmask_ascii_name
+
+    with open(starmask_ascii_name, "w") as sma:
+        _ = [sma.write(' '.join(i) + "\n") for i in mask_indices]
+
+    return starmask_ascii_name
+
+
+# In[14]:
+
+
 def write_to_feedme(path, list_in):
     
     file_path = os.path.join(".", path, "autogen_feedme_galfit.in")
@@ -401,6 +457,9 @@ def write_to_feedme(path, list_in):
         _ = [g.write(f"{value}\n") for value in list_in]
         
     return file_path
+
+
+# In[15]:
 
 
 def rebuild_template_dict(example_file_path):
@@ -422,6 +481,9 @@ def rebuild_template_dict(example_file_path):
     # Taken from the template itself and copied/pasted 
     galfit_dict["fill"] = len("sersic                 ")-1 # -1 because I leave a space in format
     return galfit_dict
+
+
+# In[16]:
 
 
 def quick_build_template():
@@ -472,6 +534,9 @@ def quick_build_template():
     return galfit_template_dict
 
 
+# In[22]:
+
+
 if __name__ == "__main__":
 
     # FOR NOW (aka TODO) force >python 3.6 for f string compatibility
@@ -482,7 +547,7 @@ if __name__ == "__main__":
     count = 0
     paths_to_feedme = []
     
-    in_dir, tmp_dir, out_dir = command_line() 
+    in_dir, tmp_dir, out_dir = command_line()
     filenames_in, galaxy_names, filenames_out = get_galaxy_names_list(in_dir)
     
     psf_info = csv_sdss_info(galaxy_names)
@@ -497,20 +562,21 @@ if __name__ == "__main__":
         # scale = (float(x2crop)-float(x1crop))/256 - from old implementation
         # ************
         
-        bulge_rad, bulge_axis_ratio, pos_angle_bulge,
-        crop_rad, center_pos_x, center_pos_y,
-        disk_maj_axs_len, pos_angle_disk, pos_angle_power,
-        axis_ratio, max_arc, spin_dir,
-        est_arcs, inclination, bar_candidate,
+        bulge_rad, bulge_axis_ratio, pos_angle_bulge, \
+        crop_rad, center_pos_x, center_pos_y, \
+        disk_maj_axs_len, pos_angle_disk, pos_angle_power, \
+        axis_ratio, max_arc, spin_dir, \
+        est_arcs, inclination, bar_candidate, \
         alpha = galaxy_information(gname, galaxy)
         
         center_pos_x = float(center_pos_x)
         center_pos_y = float(center_pos_y)
         crop_rad = float(crop_rad)
         
-        x1crop = center_pos_x - crop_rad
-        x2crop = center_pos_x + crop_rad
-        # It's a square so we can just use x1, x2
+        x1crop = round(center_pos_x - crop_rad)
+        x2crop = round(center_pos_x + crop_rad)        
+        y1crop = round(center_pos_y - crop_rad)
+        y2crop = round(center_pos_y + crop_rad)
     
         in_rad, out_rad, cumul_rot = arc_information(gname, galaxy, num_arms = est_arcs)
     
@@ -526,7 +592,6 @@ if __name__ == "__main__":
             print("bar_candidate is neither TRUE nor FALSE in the TSV. Check sparcfire output.")
             print("Defaulting the average inner distance to the arms.")
     
-    
         # Initializing Feedme
         feedme_list = []
         
@@ -541,21 +606,21 @@ if __name__ == "__main__":
         feedme_list.append(f"#{run}{camcol}{field}; HDU: z{psf_row}{psf_col}")
         feedme_list.append("")
         # Image and Galfit Control Param
-        feedme_list.append(f"A) ./{filenames_in[count]}")
+        feedme_list.append(f"A) {filenames_in[count]}")
         feedme_list.append(f"B) {tmp_dir}/galfits/{gname}_out.fits")
         feedme_list.append(f"C) none")
         feedme_list.append(f"D) {tmp_dir}/psf_files/{gname}_psf.fits")
         feedme_list.append(f"E) 1")
         feedme_list.append(f"F) {tmp_dir}/galfit_masks/{gname}_star-rm.fits")
         feedme_list.append(f"G) none")  #./constraints.txt"
-        feedme_list.append(f"H) {x1crop:.1f} {x2crop:.1f} {x1crop:.1f} {x2crop:.1f}") # Square!
+        feedme_list.append(f"H) {x1crop:d} {x2crop:d} {y1crop:d} {y2crop:d}")
         feedme_list.append(f"I) 50 50") # psf FWHM ~= 1, Chien recommends 40-80 times this value
         feedme_list.append(f"J) 24.8") # SDSS
         feedme_list.append(f"K) 0.396  0.396") # SDSS
         feedme_list.append(f"O) regular")
         feedme_list.append(f"P) 0")
         feedme_list.append("")
-            
+        
         # Sersic 1
         # Fixing as much as I can here... it's not exactly a priority.
         feedme_list.append(f"# Component number: 1")
@@ -584,7 +649,7 @@ if __name__ == "__main__":
         feedme_list.append("6) 0  0")    
         feedme_list.append("7) 0  0")    
         feedme_list.append("8) 0  0")    
-        feedme_list.append(f"9) 0.6 1")  # Fixing this to 0.5 to give the arms the best chance to form
+        feedme_list.append(f"9) 0.6 1")  # Starting this at 0.6 to give the arms the best chance to form
         #(f"9) {axis_ratio - 0.3} 1 {gt['9']}")
         feedme_list.append(f"10) {pos_angle_disk:.2f} 1") #90  1") # fixing this to 'normal' 0 so that we can JUST rotate power function
         feedme_list.append("")
@@ -643,6 +708,12 @@ if __name__ == "__main__":
                 # Sneakily do this at the end since 0) sky is just component name
                 if "sky" in str_split[1]:
                     extra = "sky"
-    
+        #_ = [print(i) for i in formatted_feedme]
         paths_to_feedme.append(write_to_feedme(galaxy, formatted_feedme)) # do I need paths_to_feedme? I used to use it for something...
+
+
+# In[40]:
+
+
+#!jupyter nbconvert --to script notebook_feedme_gen.ipynb
 
