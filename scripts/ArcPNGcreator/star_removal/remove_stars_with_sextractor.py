@@ -15,6 +15,8 @@ import os
 import random
 import scipy.ndimage as ndimage
 import scipy.stats as stats
+# This and astropy likely need to be pip installed
+# Along with csv2tsv for regression tests
 import imageio
 import shutil
 import subprocess
@@ -69,7 +71,7 @@ def restore_padding(img, pad_amts):
 
 def gen_sextractor_segmentation(in_filepath, tmp_catalog_filepath, tmp_seg_filepath):
     logger.info("running SExtractor")
-    sextractor_args = ['sex', in_filepath,
+    sextractor_args = ['source-extractor', in_filepath, #'sex', in_filepath,
 	    '-c', sextractor_configfile, 
 	    '-CHECKIMAGE_TYPE', 'SEGMENTATION',
 	    '-CHECKIMAGE_NAME', tmp_seg_filepath,
@@ -390,7 +392,11 @@ if __name__ == '__main__':
     out_dirpath = sys.argv[2]
     
     keep_seg_img = False
-    write_masked_img = False
+    
+    # Matthew 4/7
+    #Change False to True in order to retain FITS images. Tried converting from
+    #png to fits but the orientation is all weird.
+    write_masked_img = True 
     
     logging.basicConfig(
         filename=os.path.join(out_dirpath, "remove_stars_with_sextractor.log"), 
@@ -493,10 +499,14 @@ if __name__ == '__main__':
             (star_mask, star_mask_aggressive, isobj) = create_star_mask(
                 seg_img, ctr_r, ctr_c)
             mask_levels = np.zeros(star_mask.shape)
+            
+            #Matthew 4/7
+            #On the out_img =... 
+            #line I also removed a ~ which dentoes invert/complement operation. This seems to work for star_mask only.
             mask_levels[isobj] = 1
             mask_levels[star_mask] = 2
             mask_levels[star_mask_aggressive] = 3
-            out_img = depad_img * ~star_mask
+            out_img = depad_img * star_mask # Aggressive mask with ~star_mask_aggressive
             if removed_padding:
                 out_img = restore_padding(out_img, removed_padding)
                 assert np.all(in_img.shape == out_img.shape)
