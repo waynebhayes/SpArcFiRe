@@ -243,7 +243,7 @@ do
 	cp $gal_path_fits "${gal_path_out}/"
 
 	# Moving galfit output into output folder
-	mv galfit.* "${gal_path_out}/"
+	silent mv galfit.* "${gal_path_out}/"
 
 done
 
@@ -260,7 +260,7 @@ rm *.png
 # Each galaxy folder contains the input, output, and difference in a text file galfit_io_compare
 echo "Running in_out_comparison.py"
 # TODO: This needs to be updated
-$python in_out_comparison.py $in_dir $tmp_dir $out_dir
+#$python in_out_comparison.py $in_dir $tmp_dir $out_dir
 
 # For running fitspng on all galfit output assuming all in one folder
 # Keep the below line in case of desire to parallelize... which will be strong
