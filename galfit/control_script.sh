@@ -139,6 +139,10 @@ else
 	echo -e "You can find information on fitspng at http://integral.physics.muni.cz/fitspng/\n"
 fi
 
+# Also writing in default variable value for fitspng
+# fitspng_param="1,150"
+fitspng_param="0.25,1" # Default values
+
 # ***************************************************************
 
 # Making some directories and cleaning them
@@ -221,9 +225,10 @@ do
 	#echo $gal_path_fitspng
 
 	# Converting fits to png for easy viewing and their residuals
-	silent fitspng -fr "1,150" -o "${gal_name}.png" "${gal_path_fits}[1]"
-	silent fitspng -fr "1,150" -o "${gal_name}_out.png" "${gal_path_fits}[2]"
-	silent fitspng -fr "1,150" -o "${gal_name}_residual.png" "${gal_path_fits}[3]"
+    # TODO: Drop these in tmp dir
+	silent fitspng -fr "$fitspng_param" -o "${gal_name}.png" "${gal_path_fits}[1]"
+	silent fitspng -fr "$fitspng_param" -o "${gal_name}_out.png" "${gal_path_fits}[2]"
+	silent fitspng -fr "$fitspng_param" -o "${gal_name}_residual.png" "${gal_path_fits}[3]"
 	
 	# Adding these lines for easy comment/uncomment if fitspng won't cooperate
 	# using the previous settings
