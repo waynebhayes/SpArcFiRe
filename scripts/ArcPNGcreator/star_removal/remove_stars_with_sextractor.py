@@ -71,7 +71,7 @@ def restore_padding(img, pad_amts):
 
 def gen_sextractor_segmentation(in_filepath, tmp_catalog_filepath, tmp_seg_filepath):
     logger.info("running SExtractor")
-    sextractor_args = ['source-extractor', in_filepath, #'sex', in_filepath,
+    sextractor_args = ['sex', in_filepath, #'source-extractor', in_filepath,
 	    '-c', sextractor_configfile, 
 	    '-CHECKIMAGE_TYPE', 'SEGMENTATION',
 	    '-CHECKIMAGE_NAME', tmp_seg_filepath,
