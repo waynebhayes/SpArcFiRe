@@ -500,13 +500,10 @@ if __name__ == '__main__':
                 seg_img, ctr_r, ctr_c)
             mask_levels = np.zeros(star_mask.shape)
             
-            #Matthew 4/7
-            #On the out_img =... 
-            #line I also removed a ~ which dentoes invert/complement operation. This seems to work for star_mask only.
             mask_levels[isobj] = 1
             mask_levels[star_mask] = 2
             mask_levels[star_mask_aggressive] = 3
-            out_img = depad_img * star_mask # Aggressive mask with ~star_mask_aggressive
+            out_img = depad_img * ~star_mask_aggressive # Less aggressive mask use: star_mask (NOT ~star_mask for galfit at least)
             if removed_padding:
                 out_img = restore_padding(out_img, removed_padding)
                 assert np.all(in_img.shape == out_img.shape)
