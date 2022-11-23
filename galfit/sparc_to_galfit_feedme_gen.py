@@ -58,9 +58,9 @@ from astropy.io import fits
 # Grabbing filepath from command line
 def command_line(): # = True):
     
-    in_dir_out = "sparcfire-in"
-    tmp_dir_out = "sparcfire-tmp"
-    out_dir_out = "sparcfire-out"
+    in_dir_out = os.path.join(os.getcwd(), "sparcfire-in")
+    tmp_dir_out = os.path.join(os.getcwd(), "sparcfire-tmp")
+    out_dir_out = os.path.join(os.getcwd(), "sparcfire-out")
         
     #if not run_as_script:
     #    return in_dir_out, tmp_dir_out, out_dir_out
@@ -705,8 +705,8 @@ if __name__ == "__main__":
         # ---- Fourier modes. May need to add more at some point (?)
         feedme_list.append(f"F1) {f1:.2f} 45  1  1") # Need to experiment with amplitude and phase angle for better understanding of this
         feedme_list.append(f"F3) {f3:.3f} 25  1  1")
-        feedme_list.append(f"#F4) {f4:.3f} 4  1  1")
-        feedme_list.append(f"#F5) {f5:.3f} 6  1  1")  
+        #feedme_list.append(f"#F4) {f4:.3f} 4  1  1")
+        #feedme_list.append(f"#F5) {f5:.3f} 6  1  1")  
         feedme_list.append("")
     
         # Sky -- Necessary?
@@ -729,6 +729,11 @@ if __name__ == "__main__":
                 # Sneakily do this at the end since 0) sky is just component name
                 if "sky" in str_split[1]:
                     extra = "sky"
+                    
+            elif i.startswith("#"):
+                formatted_feedme.append("")
+                formatted_feedme.append(i)
+                
         #_ = [print(i) for i in formatted_feedme]
         paths_to_feedme.append(write_to_feedme(galaxy, formatted_feedme)) # do I need paths_to_feedme? I used to use it for something...
 
