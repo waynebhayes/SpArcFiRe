@@ -71,7 +71,7 @@ def restore_padding(img, pad_amts):
 
 def gen_sextractor_segmentation(in_filepath, tmp_catalog_filepath, tmp_seg_filepath):
     logger.info("running SExtractor")
-    sextractor_args = ['sex', in_filepath, #'source-extractor', in_filepath,
+    sextractor_args = ['sex', in_filepath, #['source-extractor', in_filepath, #'sex', in_filepath,
 	    '-c', sextractor_configfile, 
 	    '-CHECKIMAGE_TYPE', 'SEGMENTATION',
 	    '-CHECKIMAGE_NAME', tmp_seg_filepath,
@@ -499,26 +499,37 @@ if __name__ == '__main__':
             (star_mask, star_mask_aggressive, isobj) = create_star_mask(
                 seg_img, ctr_r, ctr_c)
             mask_levels = np.zeros(star_mask.shape)
+            galfit_mask_levels = np.zeros(star_mask.shape)
             
-	    # Matthew 11/22
-	    # Changing the out_img seems to only modify the output fits file
-            # so this is safe to modify for sparcfire's general use
+            #Matthew 11/29
+            # As it turns out, the fits image generation in this method is no longer necessary
+            # Also I've introduced the galfit_mask_levels to fix the aggressive masking
+            # old aggressive masking left only the galaxy, new actually masks individual sources
+            # ... as is the intention for when it's used in sparcfire. This is good for calculating
+            # the residuals and I bet for providing a better fit.
             mask_levels[isobj] = 1
             mask_levels[star_mask] = 2
             mask_levels[star_mask_aggressive] = 3
-            out_img = depad_img * ~star_mask_aggressive # Less aggressive mask use: star_mask (NOT ~star_mask for galfit at least)
-
+            
+            galfit_mask_levels[isobj] = 1
+            galfit_mask_levels[star_mask_aggressive] = 0
+        
+            #out_img = depad_img * (star_mask + ~star_mask_aggressive) # Aggressive mask with ~star_mask_aggressive
             if removed_padding:
-                out_img = restore_padding(out_img, removed_padding)
-                assert np.all(in_img.shape == out_img.shape)
+                #out_img = restore_padding(out_img, removed_padding)
+                #assert np.all(in_img.shape == out_img.shape)
                 mask_levels = restore_padding(mask_levels, removed_padding)
-            
+                
             assert in_filename.endswith(fits_suffix)
-            if write_masked_img:
-                out_filepath = os.path.join(out_dirpath, in_imgname + '_star-rm.fits')
-                fits.writeto(out_filepath, out_img)
-                logger.info("wrote {0}".format(out_filepath))
             
+            if write_masked_img:
+                out_filepath = os.path.join(out_dirpath, in_imgname)
+                fits.writeto(out_filepath +  '_star-rm.fits', galfit_mask_levels)
+                #fits.writeto(out_filepath + '_star-mask.fits', depad_img * star_mask)
+                #fits.writeto(out_filepath + '_star-mask-aggressive.fits', depad_img * star_mask_aggressive)
+                
+                logger.info("wrote {0}".format(out_filepath))
+                
             imageio.imwrite(os.path.join(out_dirpath, in_imgname + '_starmask.png'), mask_levels)
         except Exception as e:
             logger.warning("could not create starmask for " + in_imgname)
