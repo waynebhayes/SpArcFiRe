@@ -15,7 +15,7 @@
 # 
 # To run the control script: `bash control_script.sh`
 
-# In[2]:
+# In[1]:
 
 
 import numpy as np
@@ -52,15 +52,15 @@ from astropy.io import fits
 #         print("Check Sparcfire output or directories. Cannot proceed.")
 #         raise SystemExit("Quitting.")
 
-# In[3]:
+# In[2]:
 
 
 # Grabbing filepath from command line
-def command_line(): # = True):
+def command_line(top_dir = os.getcwd()): # = True):
     
-    in_dir_out = os.path.join(os.getcwd(), "sparcfire-in")
-    tmp_dir_out = os.path.join(os.getcwd(), "sparcfire-tmp")
-    out_dir_out = os.path.join(os.getcwd(), "sparcfire-out")
+    in_dir_out = os.path.join(top_dir, "sparcfire-in")
+    tmp_dir_out = os.path.join(top_dir, "sparcfire-tmp")
+    out_dir_out = os.path.join(top_dir, "sparcfire-out")
         
     #if not run_as_script:
     #    return in_dir_out, tmp_dir_out, out_dir_out
@@ -79,7 +79,7 @@ def command_line(): # = True):
     return in_dir_out, tmp_dir_out, out_dir_out
 
 
-# In[4]:
+# In[3]:
 
 
 # Grabbing the file names
@@ -115,7 +115,7 @@ def get_galaxy_names_list(path_to_sparc_in):
     return filenames_read, galaxy_names_out, filenames_out
 
 
-# In[5]:
+# In[4]:
 
 
 def path_join(path='.', name='', file_ext=''):
@@ -131,7 +131,7 @@ def path_join(path='.', name='', file_ext=''):
     return file_path
 
 
-# In[6]:
+# In[5]:
 
 
 def scale_var(x, scale = 1):
@@ -139,7 +139,7 @@ def scale_var(x, scale = 1):
     return float(x)*scale
 
 
-# In[8]:
+# In[6]:
 
 
 def galaxy_information(galaxy_name, galaxy_path):
@@ -301,7 +301,7 @@ def galaxy_information(galaxy_name, galaxy_path):
             )
 
 
-# In[10]:
+# In[7]:
 
 
 def arc_information(galaxy_name, galaxy_path, num_arms = 2):
@@ -378,7 +378,7 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2):
     return inner_rad, outer_rad, cumul_rot_out #, alpha_out
 
 
-# In[11]:
+# In[8]:
 
 
 def csv_sdss_info(galaxy_names): # to grab petromag and also psf parameter things
@@ -444,7 +444,7 @@ def csv_sdss_info(galaxy_names): # to grab petromag and also psf parameter thing
     return gname_info
 
 
-# In[13]:
+# In[9]:
 
 
 def write_starmask_ascii(starmask_filepath):
@@ -465,12 +465,12 @@ def write_starmask_ascii(starmask_filepath):
     return starmask_ascii_name
 
 
-# In[14]:
+# In[10]:
 
 
-def write_to_feedme(path, list_in):
+def write_to_feedme(path, list_in, feedme_name = "autogen_feedme_galfit.in"):
     
-    file_path = os.path.join(".", path, "autogen_feedme_galfit.in")
+    file_path = os.path.join(".", path, feedme_name)
 #    file_path = "/".join([".", path, ""]) + 'autogen_feedme_galfit.in'
     with open(file_path, 'w') as g:
         #for value in list_in:
@@ -479,7 +479,7 @@ def write_to_feedme(path, list_in):
     return file_path
 
 
-# In[15]:
+# In[11]:
 
 
 def rebuild_template_dict(example_file_path):
@@ -503,7 +503,7 @@ def rebuild_template_dict(example_file_path):
     return galfit_dict
 
 
-# In[16]:
+# In[12]:
 
 
 def quick_build_template():
@@ -554,31 +554,30 @@ def quick_build_template():
     return galfit_template_dict
 
 
-# In[13]:
+# In[28]:
 
 
-if __name__ == "__main__":
+def write_to_feedmes(top_dir = ""):
     
-    # FOR NOW (aka TODO) force >python 3.6 for f string compatibility
-    out_str = """\t Python3.6 or greater required! Exitting without generating feedmes... 
-                if feedmes have already been generated, galfit will run with those.\n"""
-    assert sys.version_info >= (3, 6), out_str
+    if top_dir:
+        in_dir, tmp_dir, out_dir = command_line(top_dir)
+    else:
+        in_dir, tmp_dir, out_dir = command_line()
 
-    count = 0
-    paths_to_feedme = []
-    
-    in_dir, tmp_dir, out_dir = command_line()
-    filenames_in, galaxy_names, filenames_out = get_galaxy_names_list(in_dir)
+    filenames_fits_in, galaxy_names, folders_out = get_galaxy_names_list(in_dir)
     
     psf_info = csv_sdss_info(galaxy_names)
     
-    for galaxy in filenames_out:
+    count = 0
+    paths_to_feedme = []
+    
+    for galaxy in folders_out:
     
         gname = galaxy_names[count]
         print(gname)
         
         if(os.path.basename(galaxy) != gname):
-            print("uh oh")
+            print("uh oh naming went wrong")
             sys.exit()
         
         # From old implementation - 1/19/21
@@ -626,10 +625,10 @@ if __name__ == "__main__":
         feedme_list.append(f"#{run}{camcol}{field}; HDU: z{psf_row}{psf_col}")
         feedme_list.append("")
         # Image and Galfit Control Param
-        feedme_list.append(f"A) {filenames_in[count]}")
+        feedme_list.append(f"A) {filenames_fits_in[count]}")
         feedme_list.append(f"B) {tmp_dir}/galfits/{gname}_out.fits")
         feedme_list.append(f"C) none")
-        feedme_list.append(f"D) {tmp_dir}/psf_files/{gname}_psf.fits")
+        feedme_list.append(f"D) none #{tmp_dir}/psf_files/{gname}_psf.fits")
         feedme_list.append(f"E) 1")
         feedme_list.append(f"F) {tmp_dir}/galfit_masks/{gname}_star-rm.fits")
         feedme_list.append(f"G) none")  #./constraints.txt"
@@ -656,6 +655,7 @@ if __name__ == "__main__":
         # see https://ned.ipac.caltech.edu/level5/Sept11/Buta/Buta9.html
         feedme_list.append(f"9) {axis_ratio:.2f} 1")  
         feedme_list.append(f"10) {pos_angle_bulge:.2f} 1") 
+        feedme_list.append(f"Z) 0") # Leaving option to skip if desired
         feedme_list.append("")
     
         # Sersic 2
@@ -735,11 +735,21 @@ if __name__ == "__main__":
                 formatted_feedme.append(i)
                 
         #_ = [print(i) for i in formatted_feedme]
-        paths_to_feedme.append(write_to_feedme(galaxy, formatted_feedme)) # do I need paths_to_feedme? I used to use it for something...
+        #paths_to_feedme.append(write_to_feedme(galaxy, formatted_feedme)) # do I need paths_to_feedme? I used to use it for something...
+        paths_to_feedme.append(write_to_feedme(galaxy, formatted_feedme, feedme_name = gname + ".in")) # do I need paths_to_feedme? I used to use it for something...
 
 
-# In[12]:
+# In[ ]:
 
 
-#get_ipython().system('jupyter nbconvert --to script notebook_feedme_gen.ipynb')
+if __name__ == "__main__":
+    
+    # FOR NOW (aka TODO) force >python 3.6 for f string compatibility
+    out_str = """\t Python3.6 or greater required! Exitting without generating feedmes... 
+                if feedmes have already been generated, galfit will run with those.\n"""
+    assert sys.version_info >= (3, 6), out_str
 
+    # count = 0
+    # paths_to_feedme = []
+    
+    write_to_feedmes()

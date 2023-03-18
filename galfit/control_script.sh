@@ -204,7 +204,8 @@ do
 	#echo $gal_path
 
 	#Modifying path to feedme to run GALFIT
-	feedme_path="${gal_path_out}/autogen_feedme_galfit.in"
+	feedme_path="${gal_path_out}/${gal_name}.in"
+    #echo $feedme_path
 
 	# TODO: GENERATE PSF HERE -- TO DO, text necessary in feedme, need to write separate script to download all psfield files
 	# Rather check for PSF here and generate it if its not here... implement as a function
@@ -225,7 +226,6 @@ do
 	#echo $gal_path_fitspng
 
 	# Converting fits to png for easy viewing and their residuals
-    # TODO: Drop these in tmp dir
 	silent fitspng -fr "$fitspng_param" -o "${gal_name}.png" "${gal_path_fits}[1]"
 	silent fitspng -fr "$fitspng_param" -o "${gal_name}_out.png" "${gal_path_fits}[2]"
 	silent fitspng -fr "$fitspng_param" -o "${gal_name}_residual.png" "${gal_path_fits}[3]"
@@ -237,6 +237,7 @@ do
     #silent fitspng -o "${gal_name}_residual.png" "${gal_path_fits}[3]"
 	
 	# Combining the three with Sparcfire's images using ImageMagick
+    # TODO: drop these in tmp dir
 	silent montage "${gal_name}.png" "${gal_name}_out.png" "${gal_name}_residual.png" "${spout}/${gal_name}/${gal_name}-A_input.png" "${spout}/${gal_name}/${gal_name}-C_preproc.png" "${spout}/${gal_name}/${gal_name}-J_logSpiralArcs-merged.png" -geometry 150x125+2+4 "${gal_name}_combined.png"
 
 	# Moving successful fit into output folder
