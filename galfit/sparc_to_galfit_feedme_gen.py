@@ -536,8 +536,8 @@ def quick_build_template():
             "10" : "#  Position angle (PA) [deg: Up=0, Left=90]"
             "Z" : "#  Skip this model in output image?  (yes=1, no=0)"
             "R0" : "#  PA rotation func. (power, log, none)"
-            "R1" : "#  Bar radius [pixels]"
-            "R2" : "#  Spiral outer (i.e. asymptotic) radius [pixels]"
+            "R1" : "#  Spiral inner radius [pixels]"
+            "R2" : "#  Spiral outer radius [pixels]"
             "R3" : "#  Cumul. rotation out to outer radius [degrees]"
             "R4" : "#  Asymptotic spiral powerlaw "
             "R9" : "#  Inclination to L.o.S. [degrees]"
@@ -655,7 +655,7 @@ def write_to_feedmes(top_dir = ""):
         # see https://ned.ipac.caltech.edu/level5/Sept11/Buta/Buta9.html
         feedme_list.append(f"9) {axis_ratio:.2f} 1")  
         feedme_list.append(f"10) {pos_angle_bulge:.2f} 1") 
-        feedme_list.append(f"Z) 0") # Leaving option to skip if desired
+        feedme_list.append(f"Z) 0") # Skipping but still optimizing on 
         feedme_list.append("")
     
         # Sersic 2
@@ -748,8 +748,5 @@ if __name__ == "__main__":
     out_str = """\t Python3.6 or greater required! Exitting without generating feedmes... 
                 if feedmes have already been generated, galfit will run with those.\n"""
     assert sys.version_info >= (3, 6), out_str
-
-    # count = 0
-    # paths_to_feedme = []
     
-    write_to_feedmes()
+    write_to_feedmes() #top_dir = "/home/portmanm/...")
