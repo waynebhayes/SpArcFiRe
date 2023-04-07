@@ -79,6 +79,10 @@ case $key in
 	rerun=1
     shift # past argument
     ;;
+    -ds|--distrib-slurm)
+	slurm=1
+    shift # past argument
+    ;;
     -p|--path)
 	# Checking if empty... just in case
 	[ -z "$2" ] && echo "No in_dir given, using default..." || in_dir="$2"
@@ -139,10 +143,6 @@ else
 	echo -e "You can find information on fitspng at http://integral.physics.muni.cz/fitspng/\n"
 fi
 
-# Also writing in default variable value for fitspng
-# fitspng_param="1,150"
-fitspng_param="0.25,1" # Default values
-
 # ***************************************************************
 
 # Making some directories and cleaning them
@@ -189,6 +189,14 @@ else
 	echo -e "Star Masks already ran. Proceeding.\n"
 fi
 
+
+if [ ! -z "$slurm" ]; then
+    slurm_file="$PWD/slurm_cmd_file"
+    silent rm $slurm_file
+    touch $slurm_file
+    chmod a+x $slurm_file
+fi
+
 for item in ${files[@]}
 do
 	# Removing '.fits'
@@ -204,16 +212,19 @@ do
 	#echo $gal_path
 
 	#Modifying path to feedme to run GALFIT
-	feedme_path="${gal_path_out}/${gal_name}.in"
-    #echo $feedme_path
+	feedme_path="${gal_path_out}/autogen_feedme_galfit.in"
 
 	# TODO: GENERATE PSF HERE -- TO DO, text necessary in feedme, need to write separate script to download all psfield files
 	# Rather check for PSF here and generate it if its not here... implement as a function
 
-	echo "Galfitting $feedme_path with" "$run_galfit"
-	$run_galfit -imax "$max_it" "$feedme_path"
+	#echo "Galfitting $feedme_path with" "$run_galfit"
+        if [ ! -z "$slurm" ]; then
+           #echo "Piping to slurm..."
+           echo $run_galfit -imax "$max_it" "$feedme_path" >> $slurm_file
+	   continue
+        fi
 	
-	# Adding re-run if chosen 
+      	# Adding re-run if chosen 
 	
 	if [ ! -z "$rerun" ] && [ -f "./galfit.01" ]; then
 	    echo "Re-running GALFIT..."
@@ -226,9 +237,9 @@ do
 	#echo $gal_path_fitspng
 
 	# Converting fits to png for easy viewing and their residuals
-	silent fitspng -fr "$fitspng_param" -o "${gal_name}.png" "${gal_path_fits}[1]"
-	silent fitspng -fr "$fitspng_param" -o "${gal_name}_out.png" "${gal_path_fits}[2]"
-	silent fitspng -fr "$fitspng_param" -o "${gal_name}_residual.png" "${gal_path_fits}[3]"
+	silent fitspng -fr "1,150" -o "${gal_name}.png" "${gal_path_fits}[1]"
+	silent fitspng -fr "1,150" -o "${gal_name}_out.png" "${gal_path_fits}[2]"
+	silent fitspng -fr "1,150" -o "${gal_name}_residual.png" "${gal_path_fits}[3]"
 	
 	# Adding these lines for easy comment/uncomment if fitspng won't cooperate
 	# using the previous settings
@@ -237,22 +248,35 @@ do
     #silent fitspng -o "${gal_name}_residual.png" "${gal_path_fits}[3]"
 	
 	# Combining the three with Sparcfire's images using ImageMagick
-    # TODO: drop these in tmp dir
 	silent montage "${gal_name}.png" "${gal_name}_out.png" "${gal_name}_residual.png" "${spout}/${gal_name}/${gal_name}-A_input.png" "${spout}/${gal_name}/${gal_name}-C_preproc.png" "${spout}/${gal_name}/${gal_name}-J_logSpiralArcs-merged.png" -geometry 150x125+2+4 "${gal_name}_combined.png"
 
 	# Moving successful fit into output folder
 	cp $gal_path_fits "${gal_path_out}/"
 
 	# Moving galfit output into output folder
-	silent mv galfit.* "${gal_path_out}/"
+    # TODO: Doesn't work for slurm...
+    # Can galfit output a different name? If not, use a little script to name them
+    # via input file in first/second line
+	#mv galfit.* "${gal_path_out}/"
 
 done
-
+#exit
+if [ ! -z "$slurm" ]; then
+    slurm_run_name="GALFITTING"
+    echo "Running with slurm"
+    cat $slurm_file | ~wayne/bin/distrib_slurm $slurm_run_name -M all
+    #TODO: Modify png_fix to take in, tmp, out dir as args
+    png_fix.sh
+    rm -r "$HOME/SLURM_turds/$slurm_run_name"
+    #TODO: Find a way to match galfit.* files to their appropriate folder
+    exit
+fi
 # For future use in analysis
-cp $tmp_dir/galfits/*.fits $out_dir/all_galfit_out/
+#cp $tmp_dir/galfits/*.fits $out_dir/all_galfit_out/
 
 # Cleaning up 
 silent rm galfit.* fit.log
+
 mv *_combined.png $out_dir/all_galfit_out/galfit_png/
 rm *.png
 
@@ -261,7 +285,7 @@ rm *.png
 # Each galaxy folder contains the input, output, and difference in a text file galfit_io_compare
 echo "Running in_out_comparison.py"
 # TODO: This needs to be updated
-#$python in_out_comparison.py $in_dir $tmp_dir $out_dir
+$python in_out_comparison.py $in_dir $tmp_dir $out_dir
 
 # For running fitspng on all galfit output assuming all in one folder
 # Keep the below line in case of desire to parallelize... which will be strong

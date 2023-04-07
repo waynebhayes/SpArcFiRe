@@ -58,7 +58,7 @@ the script(s) won't work.***
 <h3> JUST THE FEEDME PARAMETERS </h3>
 
 `python sparc_to_galfit_feedme_gen.py`
-(it was written in python3 but should work in python2 as well)
+(it must be run in Python >3.6 to work with f-string implementation)
 
 We recommend running this alone upon first installation to ensure it works correctly.
 
