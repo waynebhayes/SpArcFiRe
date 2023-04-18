@@ -17,13 +17,13 @@ of star masking, (and soon) PSFs, which are stored separately. For these reasons
 **control_script.sh** to handle all the nuts and bolts. To reiterate, for the components and parameters, you may run
 **sparc_to_galfit_feedme_gen.py** alone. 
 
-There is now an additional script, *in_out_comparison.py* which compares our automatically generated input with GALFIT's output to 
+~~There is now an additional script, *in_out_comparison.py* which compares our automatically generated input with GALFIT's output to 
 determine where it may be improved. A version of this will be used for error detection in the future but for now, it simply offers
-the user a chance to see how much the two differ. *in_out_comparison.py* outputs two types of files: 
-* one file per galaxy and located in the galaxy's folder which contains the parameter information from the input, output, and the difference 
-between the two as a text file called *galfit_io_compare.txt*
-* one file which contains *all* of the difference values between the two for every galaxy but just the differences. This is called
-*comparison_params.csv* and will be generated in the folder *all_galfit_out*. 
+the user a chance to see how much the two differ. *in_out_comparison.py* outputs two types of files: ~~
+* ~~one file per galaxy and located in the galaxy's folder which contains the parameter information from the input, output, and the difference 
+between the two as a text file called *galfit_io_compare.txt*~~
+* ~~one file which contains *all* of the difference values between the two for every galaxy but just the differences. This is called
+*comparison_params.csv* and will be generated in the folder *all_galfit_out*. ~~
 
 ---
 
@@ -80,7 +80,7 @@ the masks, PSF files, and galfits (just in case GALFIT 'explodes') while the con
 error catching burden when tidying up! 
 
 You can also find all of the above in the individual galaxy folders - with the exception of PNGs and the overall comparison between
-galaxies; there is instead a single text file, *galfit_io_compare.txt* which contains the input, output, and difference between the two.
+galaxies.~~; there is instead a single text file, *galfit_io_compare.txt* which contains the input, output, and difference between the two.~~
 
 ---
 
