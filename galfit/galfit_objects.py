@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[17]:
 
 
 import os
 import sys
 from os.path import join as pj
 from copy import deepcopy
+from IPython import get_ipython
 
 
-# In[2]:
+# In[5]:
 
 
 class GalfitComponent:
@@ -140,6 +141,9 @@ class GalfitComponent:
             # *args for writing in additional classes at the same time (save I/O)
             comp_names = [c.component_name for c in args]
             with_fourier = "fourier" in comp_names
+            
+            # Arbitrary #
+            fourier_index = 1000
             if with_fourier:
                 fourier_index = comp_names.index("fourier")
             
@@ -162,7 +166,7 @@ class GalfitComponent:
     #     return self.__dict__.iteritems()
 
 
-# In[3]:
+# In[19]:
 
 
 class Sersic(GalfitComponent):
@@ -203,6 +207,7 @@ class Sersic(GalfitComponent):
         params = in_line.split("])")[1]
         params = " ".join(params.split())
         params = params.split()
+        params = [i.strip("*") for i in params]
         self.magnitude        = float(params[0])
         self.effective_radius = float(params[1])
         self.sersic_index     = float(params[2])
@@ -210,7 +215,7 @@ class Sersic(GalfitComponent):
         self.position_angle   = float(params[4])
 
 
-# In[4]:
+# In[20]:
 
 
 class Power(GalfitComponent):
@@ -254,6 +259,7 @@ class Power(GalfitComponent):
         params = in_line.split("]")[2] 
         params = " ".join(params.split())
         params = params.split()
+        params = [i.strip("*") for i in params]
         self.cumul_rot          = float(params[0])
         self.powerlaw           = float(params[1])
         # Some dashed line here...
@@ -261,7 +267,7 @@ class Power(GalfitComponent):
         self.sky_position_angle = float(params[4])
 
 
-# In[5]:
+# In[8]:
 
 
 class Fourier(GalfitComponent):
@@ -296,7 +302,7 @@ class Fourier(GalfitComponent):
                              for i, n in enumerate(self.param_values.keys())}
 
 
-# In[6]:
+# In[21]:
 
 
 class Sky(GalfitComponent):
@@ -327,12 +333,13 @@ class Sky(GalfitComponent):
         params = in_line.split("]")[1]
         params = " ".join(params.split())
         params = params.split()
+        params = [i.strip("*") for i in params]
         self.sky_background = float(params[0])
         self.dsky_dx = float(params[1])
         self.dsky_dy = float(params[1])
 
 
-# In[7]:
+# In[10]:
 
 
 class GalfitHeader(GalfitComponent):
@@ -408,7 +415,7 @@ class GalfitHeader(GalfitComponent):
 """
 
 
-# In[8]:
+# In[11]:
 
 
 if __name__ == "__main__":
@@ -431,7 +438,7 @@ if __name__ == "__main__":
     header.to_file("tester.in", bulge, disk, arms, fourier, sky)
 
 
-# In[9]:
+# In[24]:
 
 
 # For reading from galfit stdout to update classes
@@ -444,7 +451,7 @@ def update_components(input_text, bulge, disk, arms, fourier, sky):
     sky1     = deepcopy(sky)
     
     s_count = 0
-    by_line = input_text.split("\n")
+    by_line = input_text.splitlines()
     for line in by_line:
         if line.strip().startswith("sersic"):
             if s_count == 0:
@@ -474,7 +481,7 @@ def update_components(input_text, bulge, disk, arms, fourier, sky):
     return bulge1, disk1, arms1, fourier1, sky1
 
 
-# In[10]:
+# In[13]:
 
 
 if __name__ == "__main__":
@@ -510,7 +517,20 @@ COUNTDOWN = 0"""
     
 
 
-# In[11]:
+# In[14]:
+
+
+# For debugging purposes
+def in_notebook():
+    ip = get_ipython()
+    
+    if ip:
+        return True
+    else:
+        return False
+
+
+# In[15]:
 
 
 def export_to_py(notebook_name, output_filename = ""):
@@ -519,9 +539,7 @@ def export_to_py(notebook_name, output_filename = ""):
     if not notebook_name.endswith(".ipynb"):
         notebook_name += ".ipynb"
     
-    ip = get_ipython()
-    
-    if ip:
+    if in_notebook():
         print(f"Converting {notebook_name}")
         
         result = get_ipython().getoutput('jupyter nbconvert --to script {notebook_name}')
@@ -539,7 +557,7 @@ def export_to_py(notebook_name, output_filename = ""):
                 print("Output from nbconvert: ", *result)
 
 
-# In[12]:
+# In[ ]:
 
 
 if __name__ == "__main__":
