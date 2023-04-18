@@ -3,7 +3,7 @@
 
 # **Author: Matthew Portman**
 # 
-# **Date (Github date will likely be more accurate): 6/1/22**
+# **Date (Github date will likely be more accurate): 4/17/23**
 
 # # MINI README
 # 
@@ -11,7 +11,7 @@
 # 
 # Running from the overarching directory is a temporary measure which will be remedied upon completion of the entire control script and full integration with SpArcFiRe. 
 # 
-# TO RUN: `python sparc_to_galfit_feedme_gen.py`
+# TO RUN: `python3 sparc_to_galfit_feedme_gen.py`
 # 
 # To run the control script: `bash control_script.sh`
 
@@ -26,8 +26,13 @@ import subprocess
 import random
 import pandas as pd
 import os
+from os.path import join as pj
+
 import sys
 from astropy.io import fits
+
+from galfit_objects import *
+from copy import deepcopy
 
 
 # # To convert autocrop image to fits
@@ -464,10 +469,6 @@ def write_starmask_ascii(starmask_filepath):
 
     return starmask_ascii_name
 
-
-# In[10]:
-
-
 def write_to_feedme(path, list_in, feedme_name = "autogen_feedme_galfit.in"):
     
     file_path = os.path.join(".", path, feedme_name)
@@ -477,84 +478,7 @@ def write_to_feedme(path, list_in, feedme_name = "autogen_feedme_galfit.in"):
         _ = [g.write(f"{value}\n") for value in list_in]
         
     return file_path
-
-
-# In[11]:
-
-
-def rebuild_template_dict(example_file_path):
-    galfit_dict = {}
-    sky = "#  Sky background at center of fitting region [ADUs]"
-    add = ""
-    with open(example_file_path, 'r') as e:
-        for line in e.readlines():
-            try:
-                l_num = i.strip().split(")")
-                if len(l_num) > 1:
-                    comment = i[i.index("#"):]
-                    if comment == sky:
-                        add = "sky"
-                    galfit_dict[add + l_num[0]] = comment
-            except:
-                pass
-    
-    # Taken from the template itself and copied/pasted 
-    galfit_dict["fill"] = len("sersic                 ")-1 # -1 because I leave a space in format
-    return galfit_dict
-
-
-# In[12]:
-
-
-def quick_build_template():
-    galfit_template_dict = eval(
-        """{"# IMAGE and GALFIT CONTROL PARAMETERS" : "# IMAGE and GALFIT CONTROL PARAMETERS"
-            "A" : "# Input data image (FITS file)"
-            "B" : "# Output data image block"
-            "C" : "# Sigma image name (made from data if blank or 'none') "
-            "D" : "# Input PSF image and (optional) diffusion kernel"
-            "E" : "# PSF fine sampling factor relative to data "
-            "F" : "# Bad pixel mask (FITS image or ASCII coord list)"
-            "G" : "# File with parameter constraints (ASCII file) "
-            "H" : "# Image region to fit (xmin xmax ymin ymax)"
-            "I" : "# Size of the convolution box (x y)"
-            "J" : "# Magnitude photometric zeropoint "
-            "K" : "# Plate scale (dx dy)   [arcsec per pixel]"
-            "O" : "# Display type (regular, curses, both)"
-            "P" : "# Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps"
-            "# INITIAL FITTING PARAMETERS" : "# INITIAL FITTING PARAMETERS"
-            "# Component number: 1" : "# Component number: 1"
-            "0" : "#  Component type"
-            "1" : "#  Position x, y"
-            "3" : "#  Integrated magnitude "
-            "4" : "#  R_e (effective radius)   [pix]"
-            "5" : "#  Sersic index n (de Vaucouleurs n=4) "
-            "6" : "#     ----- "
-            "7" : "#     ----- "
-            "8" : "#     ----- "
-            "9" : "#  Axis ratio (b/a)  "
-            "10" : "#  Position angle (PA) [deg: Up=0, Left=90]"
-            "Z" : "#  Skip this model in output image?  (yes=1, no=0)"
-            "R0" : "#  PA rotation func. (power, log, none)"
-            "R1" : "#  Spiral inner radius [pixels]"
-            "R2" : "#  Spiral outer radius [pixels]"
-            "R3" : "#  Cumul. rotation out to outer radius [degrees]"
-            "R4" : "#  Asymptotic spiral powerlaw "
-            "R9" : "#  Inclination to L.o.S. [degrees]"
-            "R10" : "#  Sky position angle"
-            "F1" : "#  Azim. Fourier mode 1, amplitude, & phase angle"
-            "F3" : "#  Azim. Fourier mode 3, amplitude, & phase angle"
-            "F4" : "#  Azim. Fourier mode 4, amplitude, & phase angle"
-            "F5" : "#  Azim. Fourier mode 5, amplitude, & phase angle"
-            "sky1" : "#  Sky background at center of fitting region [ADUs]"
-            "sky2" : "#  dsky/dx (sky gradient in x)     [ADUs/pix]"
-            "sky3" : "#  dsky/dy (sky gradient in y)     [ADUs/pix]"
-            "skyZ" : "#  Skip this model in output image?  (yes=1, no=0)"
-            "fill" : 22}""".replace("\n",","))
-    return galfit_template_dict
-
-
-# In[28]:
+# In[17]:
 
 
 def write_to_feedmes(top_dir = ""):
@@ -569,7 +493,7 @@ def write_to_feedmes(top_dir = ""):
     psf_info = csv_sdss_info(galaxy_names)
     
     count = 0
-    paths_to_feedme = []
+    paths_to_feedme = {}
     
     for galaxy in folders_out:
     
@@ -586,7 +510,12 @@ def write_to_feedmes(top_dir = ""):
         # scale = (float(x2crop)-float(x1crop))/256 - from old implementation
         # ************
         
-        bulge_rad, bulge_axis_ratio, pos_angle_bulge,             crop_rad, center_pos_x, center_pos_y,             disk_maj_axs_len, pos_angle_disk, pos_angle_power,             axis_ratio, max_arc, spin_dir,             est_arcs, inclination, bar_candidate,             alpha = galaxy_information(gname, galaxy)
+        bulge_rad, bulge_axis_ratio, pos_angle_bulge, \
+            crop_rad, center_pos_x, center_pos_y, \
+            disk_maj_axs_len, pos_angle_disk, pos_angle_power, \
+            axis_ratio, max_arc, spin_dir, \
+            est_arcs, inclination, bar_candidate, \
+            alpha = galaxy_information(gname, galaxy)
         
         center_pos_x = float(center_pos_x)
         center_pos_y = float(center_pos_y)
@@ -610,133 +539,90 @@ def write_to_feedmes(top_dir = ""):
             print(bar_candidate)
             print("bar_candidate is neither TRUE nor FALSE in the TSV. Check sparcfire output.")
             print("Defaulting the average inner distance to the arms.")
-    
-        # Initializing Feedme
-        feedme_list = []
         
-        # Initialize template dict
-        gt = quick_build_template() # galfit template
-        #gt = rebuild_template_dict("./m51.feedme")
-    
         #To reconstruct the z PSF (i.e., the 5th HDU) at the position (row, col) = (500, 600) from run 1336, column 2, field 51 you’d say:
         #read_PSF psField-001336-2-0051.fit 5 500.0 600.0 foo.fit
         run, rerun, camcol, field, psf_row, psf_col, petromag = psf_info[gname]
-
-        feedme_list.append(f"#{run}{camcol}{field}; HDU: z{psf_row}{psf_col}")
-        feedme_list.append("")
-        # Image and Galfit Control Param
-        feedme_list.append(f"A) {filenames_fits_in[count]}")
-        feedme_list.append(f"B) {tmp_dir}/galfits/{gname}_out.fits")
-        feedme_list.append(f"C) none")
-        feedme_list.append(f"D) none #{tmp_dir}/psf_files/{gname}_psf.fits")
-        feedme_list.append(f"E) 1")
-        feedme_list.append(f"F) {tmp_dir}/galfit_masks/{gname}_star-rm.fits")
-        feedme_list.append(f"G) none")  #./constraints.txt"
-        feedme_list.append(f"H) {x1crop:d} {x2crop:d} {y1crop:d} {y2crop:d}")
-        feedme_list.append(f"I) 50 50") # psf FWHM ~= 1, Chien recommends 40-80 times this value
-        feedme_list.append(f"J) 24.8") # SDSS
-        feedme_list.append(f"K) 0.396  0.396") # SDSS
-        feedme_list.append(f"O) regular")
-        feedme_list.append(f"P) 0")
-        feedme_list.append("")
         
-        # Sersic 1
-        # Fixing as much as I can here... it's not exactly a priority.
-        feedme_list.append(f"# Component number: 1")
-        feedme_list.append(f"0) sersic")
-        feedme_list.append(f"1) {center_pos_x:.1f} {center_pos_y:.1f} 0 0")
-        feedme_list.append(f"3) {float(petromag) - 1:.2f} 1") # Initial guess goes here
-        feedme_list.append(f"4) {bulge_rad:.2f} 1") 
-        feedme_list.append(f"5) 4  1") # According to other paper GALFIT usually doesn't have a problem with the index
-        feedme_list.append("6) 0  0")    
-        feedme_list.append("7) 0  0")    
-        feedme_list.append("8) 0  0")    
-        # According to other papers, bulge (esp. in spiral galaxies) averages to about 2 so this is a good starting place
-        # see https://ned.ipac.caltech.edu/level5/Sept11/Buta/Buta9.html
-        feedme_list.append(f"9) {axis_ratio:.2f} 1")  
-        feedme_list.append(f"10) {pos_angle_bulge:.2f} 1") 
-        feedme_list.append(f"Z) 0") # Skipping but still optimizing on 
-        feedme_list.append("")
-    
-        # Sersic 2
-        feedme_list.append("# Component number: 2")
-        feedme_list.append(f"0) sersic")
-        feedme_list.append(f"1) {center_pos_x:.1f} {center_pos_y:.1f} 0 0")
-        feedme_list.append(f"3) {float(petromag) - 3:.2f} 1") 
-        feedme_list.append(f"4) {disk_maj_axs_len:.2f} 1") # Use this for effective radius? Also 0 this one out? Will have to see how well it works in practice
-        feedme_list.append(f"5) 4  1") # Classical disk follows Sersic n = 1 so good place to start (per Readme Exponential profile)
-                                      # According to comparison tests, this usually ends up much higher probably due to the spiral.
-        feedme_list.append("6) 0  0")    
-        feedme_list.append("7) 0  0")    
-        feedme_list.append("8) 0  0")    
-        feedme_list.append(f"9) 0.6 1")  # Fixing this to 0.6 to give the arms the best chance to form
-        #(f"9) {axis_ratio - 0.3} 1 {gt['9']}")
-        feedme_list.append(f"10) {pos_angle_disk:.2f} 1") #90  1") # fixing this to 'normal' 0 so that we can JUST rotate power function
-        #feedme_list.append(f"10) 90  1") # fixing this to 'normal' 0 so that we can JUST rotate power function
-        feedme_list.append("")
-    
-        # Power
-        feedme_list.append("R0) power")
-        feedme_list.append(f"R1) {in_rad:.2f} 0") # Chosen based on where *detection* of arms usually start
-        feedme_list.append(f"R2) {out_rad:.2f} 0")
-        feedme_list.append(f"R3) {spin_dir}{cumul_rot:.2f} 1") # See calc above
-        feedme_list.append(f"R4) {alpha:.2f} 1") # Another good thing to automate via Sparcfire 
-        feedme_list.append(f"R9) {inclination:.2f} 1") # see if can't 0 this one out... 
-        feedme_list.append(f"R10) 90  1")#+ pos_angle_power + " 1") # Always more to discover, looks like all the images are mirrored across the y axis.
-
-        f1 = 0.05
-        f3 = 0.02
-        f4 = 0.005
-        f5 = 0.001
-        if est_arcs <= 2:
-            f3 -= 0.015
-            f5 = 0
-            f4 = 0
-        elif est_arcs == 3:
-            f3 += 0.03
-            f4 += 0.005
-            f5 = 0
-        elif est_arcs >= 4:
-            f3 += 0.03
-            f4 += 0.015
-            f5 += 0.014
-        else:
-            print("Something went wrong with the estimation of arcs! Check chirality_votes_maj in csv. Proceeding")
-        # ---- Fourier modes. May need to add more at some point (?)
-        feedme_list.append(f"F1) {f1:.2f} 45  1  1") # Need to experiment with amplitude and phase angle for better understanding of this
-        feedme_list.append(f"F3) {f3:.3f} 25  1  1")
-        #feedme_list.append(f"#F4) {f4:.3f} 4  1  1")
-        #feedme_list.append(f"#F5) {f5:.3f} 6  1  1")  
-        feedme_list.append("")
-    
-        # Sky -- Necessary?
-        feedme_list.append(f"# Component number: 3")
-        feedme_list.append(f"0) sky")
-        feedme_list.append(f"1) 1000  1")
-        feedme_list.append(f"2) 0  1")
-        feedme_list.append(f"3) 0  1")
-                       
+        header = GalfitHeader(input_menu_file = gname,
+                              extra_header_info = f"{run}{camcol}{field}; HDU: z{psf_row}{psf_col}",
+                              galaxy_name = gname,
+                              input_image = f"{filenames_fits_in[count]}",
+                              output_image = pj(tmp_dir, "galfits", f"{gname}_out.fits"),
+                              pixel_mask = pj(tmp_dir, "galfit_masks", f"{gname}_star-rm.fits"),
+                              region_to_fit = (x1crop, x2crop, y1crop, y2crop),
+                              optimize = 0
+                             )      
+        
+        bulge = Sersic(component_number = 1, 
+                       position = (center_pos_x, center_pos_y),
+                       magnitude = float(petromag) - 1,
+                       effective_radius = bulge_rad,
+                       # According to other paper GALFIT usually doesn't have a problem with the index
+                       sersic_index = 4,
+                       axis_ratio = axis_ratio,
+                       position_angle = pos_angle_bulge
+                      )
+        
+        disk  = Sersic(component_number = 2, 
+                       position = (center_pos_x, center_pos_y),
+                       magnitude = float(petromag) - 3,
+                       effective_radius = disk_maj_axs_len,
+                       # According to comparison tests, this usually ends up much higher than classical probably due to the spiral.
+                       sersic_index = 4,
+                       # Fixing this to 0.6 to give the arms the best chance to form
+                       axis_ratio = 0.6,
+                       position_angle = pos_angle_disk
+                      )       
+        
+        arms  = Power(inner_rad = in_rad, # Chosen based on where *detection* of arms usually start
+                      outer_rad = out_rad,
+                      cumul_rot = float(f"{spin_dir}{cumul_rot}"),
+                      powerlaw = alpha,
+                      inclination = inclination,
+                      sky_position_angle = 90 # pos_angle_power
+                     )
+        
+        fourier = Fourier()
+        sky   = Sky(component_number = 3)
+        
+        # Previously used for Fourier modes
+        
+#         f1 = 0.05
+#         f3 = 0.02
+#         f4 = 0.005
+#         f5 = 0.001
+#         if est_arcs <= 2:
+#             f3 -= 0.015
+#             f5 = 0
+#             f4 = 0
+#         elif est_arcs == 3:
+#             f3 += 0.03
+#             f4 += 0.005
+#             f5 = 0
+#         elif est_arcs >= 4:
+#             f3 += 0.03
+#             f4 += 0.015
+#             f5 += 0.014
+#         else:
+#             print("Something went wrong with the estimation of arcs! Check chirality_votes_maj in csv. Proceeding")
+        
+        
         count += 1
         
-        formatted_feedme = []
-        extra = ""
-        for i in feedme_list:
-            if i and not i.startswith("#"):
-                str_split = i.split(")")
-                component = extra + str_split[0]
-                formatted_feedme.append(f"{i:<{gt['fill']}} {gt[component]}")
-                
-                # Sneakily do this at the end since 0) sky is just component name
-                if "sky" in str_split[1]:
-                    extra = "sky"
-                    
-            elif i.startswith("#"):
-                formatted_feedme.append("")
-                formatted_feedme.append(i)
-                
-        #_ = [print(i) for i in formatted_feedme]
-        #paths_to_feedme.append(write_to_feedme(galaxy, formatted_feedme)) # do I need paths_to_feedme? I used to use it for something...
-        paths_to_feedme.append(write_to_feedme(galaxy, formatted_feedme, feedme_name = gname + ".in")) # do I need paths_to_feedme? I used to use it for something...
+        header.to_file(pj(galaxy, f"{gname}.in"), 
+                       bulge, 
+                       disk, 
+                       arms, 
+                       fourier, 
+                       sky)
+        
+        paths_to_feedme[gname] = pj(galaxy, f"{gname}.in")
+        
+    return paths_to_feedme
+        #write_to_feedme(galaxy, bulge_feedme, feedme_name = gname + "_bulge.in")
+        #write_to_feedme(galaxy, disk_feedme, feedme_name = gname + "_disk.in")
+        #paths_to_feedme.append(write_to_feedme(galaxy, formatted_feedme, feedme_name = gname + ".in")) # do I need paths_to_feedme? I used to use it for something...
 
 
 # In[ ]:
@@ -749,4 +635,12 @@ if __name__ == "__main__":
                 if feedmes have already been generated, galfit will run with those.\n"""
     assert sys.version_info >= (3, 6), out_str
     
-    write_to_feedmes() #top_dir = "/home/portmanm/...")
+    write_to_feedmes(top_dir = "/home/portmanm/run6_1000_galfit_two_fit")
+
+
+# In[15]:
+
+
+if __name__ == "__main__":
+    export_to_py("notebook_feedme_gen", output_filename = "sparc_to_galfit_feedme_gen.py")
+
