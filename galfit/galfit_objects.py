@@ -7,6 +7,7 @@
 import os
 import sys
 from os.path import join as pj
+from os.path import exists
 from copy import deepcopy
 from IPython import get_ipython
 
@@ -557,7 +558,7 @@ def export_to_py(notebook_name, output_filename = ""):
                 print("Output from nbconvert: ", *result)
 
 
-# In[ ]:
+# In[25]:
 
 
 if __name__ == "__main__":

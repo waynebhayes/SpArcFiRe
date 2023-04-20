@@ -15,7 +15,7 @@
 # 
 # To run the control script: `bash control_script.sh`
 
-# In[1]:
+# In[2]:
 
 
 import numpy as np
@@ -57,7 +57,7 @@ from copy import deepcopy
 #         print("Check Sparcfire output or directories. Cannot proceed.")
 #         raise SystemExit("Quitting.")
 
-# In[2]:
+# In[3]:
 
 
 # Grabbing filepath from command line
@@ -84,7 +84,7 @@ def command_line(top_dir = os.getcwd()): # = True):
     return in_dir_out, tmp_dir_out, out_dir_out
 
 
-# In[3]:
+# In[4]:
 
 
 # Grabbing the file names
@@ -120,7 +120,7 @@ def get_galaxy_names_list(path_to_sparc_in):
     return filenames_read, galaxy_names_out, filenames_out
 
 
-# In[4]:
+# In[5]:
 
 
 def path_join(path='.', name='', file_ext=''):
@@ -136,7 +136,7 @@ def path_join(path='.', name='', file_ext=''):
     return file_path
 
 
-# In[5]:
+# In[6]:
 
 
 def scale_var(x, scale = 1):
@@ -144,7 +144,7 @@ def scale_var(x, scale = 1):
     return float(x)*scale
 
 
-# In[6]:
+# In[7]:
 
 
 def galaxy_information(galaxy_name, galaxy_path):
@@ -306,7 +306,7 @@ def galaxy_information(galaxy_name, galaxy_path):
             )
 
 
-# In[7]:
+# In[8]:
 
 
 def arc_information(galaxy_name, galaxy_path, num_arms = 2):
@@ -383,7 +383,7 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2):
     return inner_rad, outer_rad, cumul_rot_out #, alpha_out
 
 
-# In[8]:
+# In[9]:
 
 
 def csv_sdss_info(galaxy_names): # to grab petromag and also psf parameter things
@@ -449,7 +449,7 @@ def csv_sdss_info(galaxy_names): # to grab petromag and also psf parameter thing
     return gname_info
 
 
-# In[9]:
+# In[10]:
 
 
 def write_starmask_ascii(starmask_filepath):
@@ -478,10 +478,10 @@ def write_to_feedme(path, list_in, feedme_name = "autogen_feedme_galfit.in"):
         _ = [g.write(f"{value}\n") for value in list_in]
         
     return file_path
-# In[17]:
+# In[11]:
 
 
-def write_to_feedmes(top_dir = ""):
+def write_to_feedmes(top_dir = "", single_galaxy_name = ""):
     
     if top_dir:
         in_dir, tmp_dir, out_dir = command_line(top_dir)
@@ -493,11 +493,18 @@ def write_to_feedmes(top_dir = ""):
     psf_info = csv_sdss_info(galaxy_names)
     
     count = 0
-    paths_to_feedme = {}
+    feedme_info_out = {}
     
     for galaxy in folders_out:
     
-        gname = galaxy_names[count]
+        if single_galaxy_name:
+            gname = single_galaxy_name
+            galaxy = pj(out_dir, gname)
+            # Alternatively
+            # galaxy = folders_out[galaxy_names.index(gname)]
+        else:
+            gname = galaxy_names[count]
+            
         print(gname)
         
         if(os.path.basename(galaxy) != gname):
@@ -617,14 +624,31 @@ def write_to_feedmes(top_dir = ""):
                        fourier, 
                        sky)
         
-        paths_to_feedme[gname] = pj(galaxy, f"{gname}.in")
+        feedme_info_out[gname] = {"path"    : pj(galaxy, f"{gname}.in"),
+                                  "header"  : header,
+                                  "bulge"   : bulge,
+                                  "disk"    : disk,
+                                  "arms"    : arms,
+                                  "fourier" : fourier,
+                                  "sky"     : sky
+                                 }
         
-    return paths_to_feedme
+        if single_galaxy_name:
+            break
+        
+    return feedme_info_out
         #write_to_feedme(galaxy, bulge_feedme, feedme_name = gname + "_bulge.in")
         #write_to_feedme(galaxy, disk_feedme, feedme_name = gname + "_disk.in")
         #paths_to_feedme.append(write_to_feedme(galaxy, formatted_feedme, feedme_name = gname + ".in")) # do I need paths_to_feedme? I used to use it for something...
 
-
+# For debugging purposes
+def in_notebook():
+    ip = get_ipython()
+    
+    if ip:
+        return True
+    else:
+        return False
 # In[ ]:
 
 
@@ -635,10 +659,14 @@ if __name__ == "__main__":
                 if feedmes have already been generated, galfit will run with those.\n"""
     assert sys.version_info >= (3, 6), out_str
     
-    write_to_feedmes(top_dir = "/home/portmanm/run6_1000_galfit_two_fit")
+    cwd = os.getcwd()
+    if in_notebook():
+        cwd = cwd.replace("ics-home", username)
+        
+    write_to_feedmes(top_dir = cwd)
 
 
-# In[15]:
+# In[12]:
 
 
 if __name__ == "__main__":
