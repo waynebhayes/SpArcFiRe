@@ -321,6 +321,15 @@ if __name__ == "__main__":
     galaxy_names = [os.path.basename(i).rstrip(".fits") 
                 for i in input_filenames]
     
+    # Backing up old fits
+    # So we can check for new ones
+    # and also backup previous runs if there's an accidental overwrite
+    for gname in galaxy_names:
+        new_out = pj(out_dir, gname, f"{gname}_galfit_out.fits")
+        old_out = pj(out_dir, gname, f"{gname}_galfit_out_old.fits")
+        if exists(pj(out_dir, gname, new_out)):
+            shutil.move(new_out, old_out)
+
     kwargs_main = {"cwd"          : cwd,
                    "in_dir"       : in_dir,
                    "tmp_dir"      : tmp_dir,
@@ -430,7 +439,7 @@ if __name__ == "__main__":
         _ = sp(f"rm -r \"$HOME/SLURM_turds/{slurm_run_name}\"", capture_output = False)
 
 
-# In[38]:
+# In[ ]:
 
 
 if __name__ == "__main__":

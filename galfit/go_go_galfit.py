@@ -89,8 +89,8 @@ def main(**kwargs):
     
     # Should some directory structure change in the future
     tmp_fits_dir = kwargs.get("tmp_fits_dir", pj(tmp_dir, "galfits"))
-    tmp_png      = kwargs.get("tmp_png_dir", pj(tmp_dir, "galfit_png"))
-    out_png      = kwargs.get("out_png_dir", pj(out_dir, "galfit_png"))
+    tmp_png_dir  = kwargs.get("tmp_png_dir", pj(tmp_dir, "galfit_png"))
+    out_png_dir  = kwargs.get("out_png_dir", pj(out_dir, "galfit_png"))
     
     # Of course the important things
     num_steps = int(kwargs.get("num_steps", 2))
@@ -134,13 +134,6 @@ def main(**kwargs):
         # if gname != "1237667783896924233":
         #     continue
         print(gname)
-        
-        # So we can check for new ones
-        # and also backup previous runs if there's an accidental overwrite
-        new_out = pj(out_dir, gname, f"{gname}_galfit_out.fits")
-        old_out = pj(out_dir, gname, f"{gname}_galfit_out_old.fits")
-        if exists(pj(out_dir, gname, new_out)):
-            shutil.move(new_out, old_out)
         
         # This doesn't change
         header  = feedme_info[gname]["header"]
@@ -232,7 +225,7 @@ def main(**kwargs):
                                 {tmp_png_path}_out.png \
                                 {tmp_png_path}_residual.png \
                                 -tile 3x1 -geometry \"175x175+2+0<\" \
-                                {pj(out_png, gname)}_combined.png"
+                                {pj(out_png_dir, gname)}_combined.png"
         
         _ = sp(montage_cmd)
         
@@ -240,7 +233,7 @@ def main(**kwargs):
             ext_num = galfit_out.split(".")[-1]
             shutil.move(galfit_out, pj(out_dir, gname, f"{gname}_galfit.{ext_num}"))
         
-        shutil.copy2(tmp_fits_path, new_out)
+        shutil.copy2(tmp_fits_path, pj(out_dir, gname, f"{gname}_galfit_out.fits"))
         
         print()
         
