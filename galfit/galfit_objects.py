@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[17]:
+# In[26]:
 
 
 import os
@@ -12,7 +12,7 @@ from copy import deepcopy
 from IPython import get_ipython
 
 
-# In[5]:
+# In[38]:
 
 
 class GalfitComponent:
@@ -134,7 +134,7 @@ class GalfitComponent:
         return output_str
 
     def to_file(self, filename, *args):
-        with open(filename, "w+") as f:
+        with open(filename, "w") as f:
             f.write("\n")
             f.write(str(self))
             f.write("\n")
@@ -350,7 +350,7 @@ class GalfitHeader(GalfitComponent):
         # If not fully specified, will use galaxy_name as default so it's good to use
         # it as an argument even if I am specifying each individually
         self.input_image     = kwargs.get("input_image", f"{galaxy_name}.fits")
-        self.output_image    = kwargs.get("output_image", f"{galaxy_name}_out.fits")
+        self.output_image    = kwargs.get("output_image", f"{galaxy_name}_galfit_out.fits")
         self.sigma_image     = kwargs.get("sigma_image", "none")
         self.psf             = kwargs.get("psf", "none") # May add gname to this
         self.fine_sampling   = kwargs.get("fine_sampling", 1)
@@ -558,7 +558,7 @@ def export_to_py(notebook_name, output_filename = ""):
                 print("Output from nbconvert: ", *result)
 
 
-# In[25]:
+# In[ ]:
 
 
 if __name__ == "__main__":

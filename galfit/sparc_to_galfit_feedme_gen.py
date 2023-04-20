@@ -26,7 +26,7 @@ import subprocess
 import random
 import pandas as pd
 import os
-from os.path import join as pj
+#from os.path import join as pj
 
 import sys
 from astropy.io import fits
@@ -56,6 +56,14 @@ from copy import deepcopy
 #         print("Cannot convert to FITS:", autocrop_img_filename)
 #         print("Check Sparcfire output or directories. Cannot proceed.")
 #         raise SystemExit("Quitting.")
+
+# In[27]:
+
+
+y = ["aa", "bb", "cc"]
+x = y[2:]
+x
+
 
 # In[3]:
 
@@ -555,7 +563,7 @@ def write_to_feedmes(top_dir = "", single_galaxy_name = ""):
                               extra_header_info = f"{run}{camcol}{field}; HDU: z{psf_row}{psf_col}",
                               galaxy_name = gname,
                               input_image = f"{filenames_fits_in[count]}",
-                              output_image = pj(tmp_dir, "galfits", f"{gname}_out.fits"),
+                              output_image = pj(tmp_dir, "galfits", f"{gname}_galfit_out.fits"),
                               pixel_mask = pj(tmp_dir, "galfit_masks", f"{gname}_star-rm.fits"),
                               region_to_fit = (x1crop, x2crop, y1crop, y2crop),
                               optimize = 0
@@ -666,9 +674,10 @@ if __name__ == "__main__":
     write_to_feedmes(top_dir = cwd)
 
 
-# In[12]:
+# In[ ]:
 
 
 if __name__ == "__main__":
-    export_to_py("notebook_feedme_gen", output_filename = "sparc_to_galfit_feedme_gen.py")
+    if in_notebook():
+        export_to_py("notebook_feedme_gen", output_filename = "sparc_to_galfit_feedme_gen.py")
 

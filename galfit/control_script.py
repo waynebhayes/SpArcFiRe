@@ -28,7 +28,7 @@
 # For controlling galfitting via sparcfire
 
 # ***************************************************************
-# In[ ]:
+# In[23]:
 
 
 from galfit_objects import *
@@ -90,13 +90,16 @@ if __name__ == "__main__":
     parser.add_argument('-S', '--slurm',
                         dest     = 'slurm',
                         action   = 'store_const',
-                        const    = True, 
+                        const    = True,
+                        # Soon to be the other way around
+                        default  = False,
                         help     = 'Run GALFITs using Slurm.')
 
     parser.add_argument('-drS', '--dont-remove-slurm',
                         dest     = 'dont_remove_slurm',
                         action   = 'store_const',
-                        const    = False, 
+                        const    = True,
+                        default  = False,
                         help     = 'Choose NOT to remove all old slurm files (they may contain basic info about each fit but there will be a bunch!)')
     
     
@@ -104,6 +107,8 @@ if __name__ == "__main__":
                         dest     = 'steps', 
                         action   = 'store',
                         type     = int,
+                        choices  = range(1,4),
+                        default  = 2,
                         help     = 'Run GALFIT using step-by-step component selection (up to 3), i.e. \n \
                                     1: Bulge + Disk + Arms,\n \
                                     2: Bulge -> Bulge + Disk + Arms,\n \
@@ -113,7 +118,9 @@ if __name__ == "__main__":
     parser.add_argument('-R', '--rerun-galfit',
                         dest     = 'rerun', 
                         action   = 'store_const',
-                        const    = True, 
+                        const    = True,
+                        # Python cannot convert 'False' to a boolean... it's true *cries*
+                        default  = "",
                         help     = 'Run GALFIT again after the final fit to hopefully refine said fit.')
     
     parser.add_argument(dest     = 'paths',
@@ -129,11 +136,11 @@ if __name__ == "__main__":
         dont_remove_slurm = args.dont_remove_slurm
         rerun = args.rerun
         
-        if num_steps not in range(1,4):
-            print("The number of steps you selected cannot be used!")
-            print("Using two.")
-            print()
-            num_steps = 2
+        # if num_steps not in range(1,4):
+        #     print("The number of steps you selected cannot be used!")
+        #     print("Using two.")
+        #     print()
+        #     num_steps = 2
 
         if len(args.paths) == 3:
             in_dir, tmp_dir, out_dir = args.paths[0], args.paths[1], args.paths[2]
@@ -148,7 +155,7 @@ if __name__ == "__main__":
             
     else:
         slurm = False
-        rerun = False
+        rerun = ""
         num_steps = 2
         
         cwd = cwd.replace("ics-home", username)
@@ -201,22 +208,22 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     # Setting up paths and variables
-    tmp_galfits = pj(tmp_dir, "galfits")
-    tmp_masks   = pj(tmp_dir, "galfit_masks")
-    tmp_psf     = pj(tmp_dir, "psf_files")
-    tmp_png     = pj(tmp_dir, "galfit_png")
+    tmp_fits_dir = pj(tmp_dir, "galfits")
+    tmp_masks_dir   = pj(tmp_dir, "galfit_masks")
+    tmp_psf_dir     = pj(tmp_dir, "psf_files")
+    tmp_png_dir     = pj(tmp_dir, "galfit_png")
     
     #all_galfit_out = pj(out_dir, "all_galfit_out")
-    out_png        = pj(out_dir, "galfit_png")
+    out_png_dir     = pj(out_dir, "galfit_png")
     
     # Remove old
     try:
-        shutil.rmtree(tmp_galfits)
+        shutil.rmtree(tmp_fits_dir)
     except OSError as e:
         pass
     
     # Making sub-directories
-    _ = [os.mkdir(i) for i in (tmp_galfits, tmp_masks, tmp_psf, tmp_png, out_png) if not exists(i)]
+    _ = [os.mkdir(i) for i in (tmp_fits_dir, tmp_masks_dir, tmp_psf_dir, tmp_png_dir, out_png_dir) if not exists(i)]
     
     # makedirs will make both at once, handy!
     #if not exists(out_png): os.makedirs(out_png)
@@ -230,12 +237,12 @@ if __name__ == "__main__":
 if __name__ == "__main__":    
     # Grabbing list of file names and masks with bash variable expansion
     input_filenames = glob.glob(pj(in_dir, "*.fits"))
-    star_masks      = glob.glob(pj(tmp_masks, "*_star-rm.fits"))
+    star_masks      = glob.glob(pj(tmp_masks_dir, "*_star-rm.fits"))
     
     if star_masks:
-        sp(f"mv {pj(tmp_dir,'*_star-rm.fits')} {tmp_masks}")
+        sp(f"mv {pj(tmp_dir,'*_star-rm.fits')} {tmp_masks_dir}")
         
-    star_masks      = glob.glob(pj(tmp_masks, "*_star-rm.fits"))        
+    star_masks      = glob.glob(pj(tmp_masks_dir, "*_star-rm.fits"))        
     
     try:
         if exists(pj(cwd, "star_removal")):
@@ -252,7 +259,7 @@ if __name__ == "__main__":
         os.chdir(star_removal_path)
         if len(input_filenames) != len(star_masks):
             print("Generating starmasks...")
-            out_text = sp(f"python3 {pj(star_removal_path, 'remove_stars_with_sextractor.py')} {in_dir} {tmp_masks}")
+            out_text = sp(f"python3 {pj(star_removal_path, 'remove_stars_with_sextractor.py')} {in_dir} {tmp_masks_dir}")
 
             if out_text.stderr.strip():
                 print(f"Something went wrong running 'remove_stars_with_sextractor.py'! Printing debug info...")
@@ -273,6 +280,43 @@ if __name__ == "__main__":
 # In[ ]:
 
 
+def write_to_slurm(cwd, kwargs_main, galfit_script_name = "go_go_galfit.py", slurm_file = "slurm_cmd_file"):
+    _, _, run_python = go_go_galfit.check_programs()
+    kwargs_in    = deepcopy(kwargs_main)
+    
+    print(f"Generating distrib-slurm input file in {cwd}: {slurm_file}")
+    with open(pj(cwd, slurm_file), "w") as scf:
+        for gname in kwargs_main["galaxy_names"]:
+            kwargs_in["galaxy_names"] = gname
+
+            cmd_str = ""
+            for k,v in kwargs_in.items():
+                cmd_str += f"{k}={v} "
+            # Good thing dictionaries retain order now, *whistles innocently*
+            scf.write(f"{run_python} {galfit_script_name} {cmd_str}\n")
+
+    sp(f"chmod a+x {slurm_file}", capture_output = False)
+
+
+# In[41]:
+
+
+def check_galfit_out_hangups(galaxy_names, tmp_fits_dir, out_dir, kwargs_main):
+    # For hang-ups, check if final copy has occurred
+    # Check for file which indicates galfit outputs nothing at all
+    # This avoids conflating ones which han'vet run and ones which have nothing to show for it
+    kwargs_main["galaxy_names"] = [gname for gname in galaxy_names 
+                                   if not exists(f"{pj(out_dir, gname, gname)}_galfit_out.fits")
+                                   and not exists(f"{pj(tmp_fits_dir, 'failed_' + gname)}_galfit_out.fits")]
+    
+    # because of mutability I don't need to do this but
+    # because it's good practice...
+    return kwargs_main
+
+
+# In[ ]:
+
+
 if __name__ == "__main__":
     galaxy_names = [os.path.basename(i).rstrip(".fits") 
                 for i in input_filenames]
@@ -285,27 +329,45 @@ if __name__ == "__main__":
                    "rerun"        : rerun,
                    "galaxy_names" : galaxy_names
                   }
-
+    
 #    raise(AssertionError())
     # One at a time
     if slurm:
         slurm_file = "slurm_cmd_file"
-        print(f"Generating distrib-slurm input file in {cwd}: {slurm_file}")
-        with open(pj(cwd, slurm_file), "w") as scf:
-            for gname in galaxy_names:
-                kwargs_main["galaxy_names"] = gname
+        write_to_slurm(cwd, kwargs_main, slurm_file = slurm_file)
+#         print(f"Generating distrib-slurm input file in {cwd}: {slurm_file}")
+#         with open(pj(cwd, slurm_file), "w") as scf:
+#             for gname in galaxy_names:
+#                 kwargs_main["galaxy_names"] = gname
                 
-                cmd_str = ""
-                for k,v in kwargs_main.items():
-                    cmd_str += f"{k}={v} "
-                # Good thing dictionaries retain order now, *whistles innocently*
-                scf.write(f"{run_python} go_go_galfit.py {cmd_str}\n")
+#                 cmd_str = ""
+#                 for k,v in kwargs_main.items():
+#                     cmd_str += f"{k}={v} "
+#                 # Good thing dictionaries retain order now, *whistles innocently*
+#                 scf.write(f"{run_python} go_go_galfit.py {cmd_str}\n")
         
-        sp(f"chmod a+x {slurm_file}", capture_output = False)
+#         sp(f"chmod a+x {slurm_file}", capture_output = False)
         
         print("Running with slurm")
         slurm_run_name = "GALFITTING"
-        sp(f"cat {slurm_file} | ~wayne/bin/distrib_slurm {slurm_run_name} -M all", capture_output = False)
+        timeout = 5 # Minutes
+        slurm_run_cmd = f"cat {slurm_file} | ~wayne/bin/distrib_slurm {slurm_run_name} -M all"
+        sp(f"{slurm_run_cmd} -t {timeout}", capture_output = False)
+        
+        kwargs_main = check_galfit_out_hangups(galaxy_names, tmp_fits_dir, out_dir, kwargs_main)
+        
+        count = 2
+        while kwargs_main["galaxy_names"] and count < 10:
+            print("Did not finish all galaxies, slurming again, increasing timeout...")
+            write_to_slurm(cwd, kwargs_main, slurm_file = slurm_file)
+            
+            timeout *= count
+            sp(f"{slurm_run_cmd} -t {timeout}", capture_output = False)    
+            kwargs_main = check_galfit_out_hangups(galaxy_names, tmp_fits_dir, out_dir, kwargs_main)
+            count += 1
+            
+        #os.stat("file").st_size == 0
+        #sp(f"")
             
 #             run_galfit.main(cwd          = cwd,
 #                             in_dir       = in_dir,
@@ -323,13 +385,43 @@ if __name__ == "__main__":
                                      run_python = run_python)
         # TODO: Use failures for something later? Maybe write to a file?
 
+boom = """Numerical Recipes run-time error...
+gaussj: Singular Matrix-1
+...now exiting to system...
 
+                 __/~*##$%@@@******~\-__
+               /f=r/~_-~ _-_ --_.^-~--\=b\
+             4fF / */  .o  ._-__.__/~-. \*R\
+            /fF./  . /- /' /|/|  \_  * *\ *\R\
+           (iC.I+ '| - *-/00  |-  \  )  ) )|RB
+           (I| (  [  / -|/^^\ |   )  /_/ | *)B
+           (I(. \ `` \   \m_m_|~__/ )_ .-~ F/
+            \b\\=_.\_b`-+-~x-_/ .. ,._/ , F/
+             ~\_\= =  =-*###%#x==-#  *=- =/
+                ~\**U/~  | i i | ~~~\===~
+                        | I I \\
+                       / // i\ \\
+                  (   [ (( I@) )))  )
+                       \_\_VYVU_/
+                         || * |
+                        /* /I\ *~~\
+                      /~-/*  / \ \ ~~M~\
+            ____----=~ // /WVW\* \|\ ***===--___
+
+   Doh!  GALFIT crashed because at least one of the model parameters
+   is bad.  The most common causes are: effective radius too small/big,
+   component is too far outside of fitting region (also check fitting
+   region), model mag too faint, axis ratio too small, Sersic index
+   too small/big, Nuker powerlaw too small/big.  If frustrated or
+   problem should persist, email for help or report problem to:
+                     Chien.Y.Peng@gmail.com"""
 # ## Tidying Up in case anything is leftover
 
 # In[ ]:
 
 
 if __name__ == "__main__":
+    print("\nDone! Cleaning up...")
     _ = sp("rm galfit.* fit.log") # , capture_output = False)
     _ = sp("rm *.png") # , capture_output = False)
     
@@ -338,7 +430,7 @@ if __name__ == "__main__":
         _ = sp(f"rm -r \"$HOME/SLURM_turds/{slurm_run_name}\"", capture_output = False)
 
 
-# In[14]:
+# In[38]:
 
 
 if __name__ == "__main__":
