@@ -430,7 +430,7 @@ gaussj: Singular Matrix-1
 
 
 if __name__ == "__main__":
-    print("\nDone! Cleaning up...")
+    print("Done! Cleaning up...")
     _ = sp("rm galfit.* fit.log") # , capture_output = False)
     _ = sp("rm *.png") # , capture_output = False)
     
@@ -439,10 +439,10 @@ if __name__ == "__main__":
         _ = sp(f"rm -r \"$HOME/SLURM_turds/{slurm_run_name}\"", capture_output = False)
 
 
-# In[ ]:
+# In[45]:
 
 
 if __name__ == "__main__":
-    if in_notebook():
-        export_to_py("control_script_debug", output_filename = "control_script.py")
+    # in_notebook() is checked in the export function
+    export_to_py("control_script_debug", output_filename = "control_script.py")
 

@@ -113,9 +113,10 @@ class GalfitComponent:
                 if len(f"{self.param_prefix}{num}") >= 3: 
                     line = line.lstrip()
                     
-                # For a bit of spacing in R10
-                if len(line.split()[0]) >= 4: 
-                    line = line[:4] + line[5:]
+                # # For a bit of spacing in R10
+                # This does not play nice with galfit *smacks forehead*
+                # if len(line.split()[0]) >= 4: 
+                #     line = line[:4] + line[5:]
                 
             else:
                 # position #, fourier, etc.
@@ -256,6 +257,7 @@ class Power(GalfitComponent):
         # example
         # power   :     [0.00]   [23.51]  219.64     -0.16     ---  -44.95   -15.65
         # does not include inner/outer rad
+        # Assumes those are the only ones fixed
         
         params = in_line.split("]")[2] 
         params = " ".join(params.split())
@@ -268,7 +270,7 @@ class Power(GalfitComponent):
         self.sky_position_angle = float(params[4])
 
 
-# In[8]:
+# In[41]:
 
 
 class Fourier(GalfitComponent):
@@ -297,7 +299,7 @@ class Fourier(GalfitComponent):
         # fourier : (1:  0.06,   -6.67)   (3:  0.05,    0.18)
         
         # rstrip avoids a hanging ) later
-        params = in_line.lstrip("fourier : ").rstrip(")").replace(" ", "").split(")(")
+        params = in_line.lstrip("fourier : ").replace(" ", "").rstrip(")").split(")(")
         
         self.param_values = {n: eval(f"({params[i].split(':')[1]})")
                              for i, n in enumerate(self.param_values.keys())}
@@ -478,7 +480,7 @@ def update_components(input_text, bulge, disk, arms, fourier, sky):
     
         comp.update_from_log(line)
         comp.update_param_values()
-        
+    
     return bulge1, disk1, arms1, fourier1, sky1
 
 

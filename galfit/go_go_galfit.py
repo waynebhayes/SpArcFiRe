@@ -24,10 +24,14 @@ def check_programs():
 
     return run_galfit, run_fitspng, run_python
 
-def check_update(log_out, galfit_num, components, base_galfit_cmd, rerun = ""):
+def check_update(log_out, galfit_num, components, base_galfit_cmd, rerun = "", header = None, path_to_feedme = ""):
+    
+    if rerun:
+       assert str(header) and path_to_feedme, "header/path_to_feedme as input to 'check_update' cannot be None/empty, yell at the programmer!"
     
     #run_galfit, _, _ = check_programs()
     #base_galfit_cmd = f"{run_galfit} -imax {max_it}"
+    initial_components = deepcopy(components)
     
     # Put this here (for now) so it's easier to examine other components
     # of CompletedProcess from subprocess should I desire
@@ -55,16 +59,24 @@ def check_update(log_out, galfit_num, components, base_galfit_cmd, rerun = ""):
         
         if rerun:
             print("Rerunning GALFIT...")
-            # TODO: This will run into issues with race conditions
-            run_galfit_cmd = f"{base_galfit_cmd} galfit.{galfit_num}"
+            # String comparison until I implement subtraction ;)
+            # Use this to generically determine which components were optimized
+            updated_components = [comp for comp, icomp in zip(components, initial_components) if str(comp) != str(icomp)]
+            
+            # run_galfit_cmd = f"{base_galfit_cmd} galfit.{galfit_num}"
+            header.to_file(f"{path_to_feedme}", *updated_components)
+            run_galfit_cmd = f"{base_galfit_cmd} {path_to_feedme}"
+            
             galfit_num = f"{int(galfit_num) + 1:0>2}"
             out_text = sp(run_galfit_cmd)
-            # Recursion... but forcing false to avoid rerunning over and over
+            
+            # Recursion... to update components but forcing false to avoid rerunning over and over
             components, galfit_num = check_update(out_text, 
                                                   galfit_num, 
                                                   components, 
                                                   base_galfit_cmd, 
-                                                  rerun = "")
+                                                  rerun  = ""
+                                                  )
             
     elif any(line.startswith(failure) for line in last_out_lines):
         print(f"Galfit failed this run!")
@@ -112,9 +124,11 @@ def main(**kwargs):
     # automatically distributes processes, we don't have to worry about it
     # Also this way we can take in one less variable (slurm)
     gname = ""
+    slurm = False
     print(galaxy_names)
     if len(galaxy_names) == 1:
         gname = galaxy_names[0]
+        slurm = True
         
     print("Running feedme generator...")
     feedme_info = write_to_feedmes(top_dir = cwd, single_galaxy_name = gname)
@@ -153,13 +167,6 @@ def main(**kwargs):
             run_galfit_cmd = f"{base_galfit_cmd} {feedme_info[gname]['path']}"
             final_out_text = sp(run_galfit_cmd)
             
-            # Dropping this here for rerun
-            _, _ = check_update(final_out_text, 
-                                galfit_num, 
-                                components, 
-                                base_galfit_cmd, 
-                                rerun = rerun)
-            
         elif num_steps >= 2:
             bulge_in = pj(out_dir, gname, f"{gname}_bulge.in")
             header.to_file(bulge_in, bulge, sky)
@@ -172,7 +179,10 @@ def main(**kwargs):
                                                   galfit_num, 
                                                   components, 
                                                   base_galfit_cmd, 
-                                                  rerun = rerun)
+                                                  rerun = rerun,
+                                                  header = header,
+                                                  path_to_feedme = feedme_info[gname]['path']
+                                                 )
             
             if num_steps == 3:
                 disk_in = pj(out_dir, gname, f"{gname}_disk.in")
@@ -186,13 +196,26 @@ def main(**kwargs):
                                                       galfit_num, 
                                                       components, 
                                                       base_galfit_cmd, 
-                                                      rerun = rerun)
+                                                      rerun = rerun,
+                                                      header = header,
+                                                      path_to_feedme = feedme_info[gname]['path']
+                                                     )
                 
             # Overwrite original... for now 
             header.to_file(f"{feedme_info[gname]['path']}", *components)
             run_galfit_cmd = f"{base_galfit_cmd} {feedme_info[gname]['path']}"
             print("Bulge + Disk + Arms")
             final_out_text = sp(run_galfit_cmd)
+            
+        # Dropping this here for final rerun for all num_steps       
+        _, _ = check_update(final_out_text, 
+                            galfit_num, 
+                            components, 
+                            base_galfit_cmd, 
+                            rerun = rerun,
+                            header = header,
+                            path_to_feedme = feedme_info[gname]['path']
+                           )
         
         tmp_png_path  = pj(tmp_png_dir, gname)
         tmp_fits_path = pj(tmp_fits_dir, f"{gname}_galfit_out.fits")
@@ -229,10 +252,12 @@ def main(**kwargs):
         
         _ = sp(montage_cmd)
         
-        for galfit_out in glob.glob(pj(cwd, "galfit.*")):
-            ext_num = galfit_out.split(".")[-1]
-            shutil.move(galfit_out, pj(out_dir, gname, f"{gname}_galfit.{ext_num}"))
-        
+        # No point in doing this with slurm because race conditions
+        if not slurm:
+            for galfit_out in glob.glob(pj(cwd, "galfit.*")):
+                ext_num = galfit_out.split(".")[-1]
+                shutil.move(galfit_out, pj(out_dir, gname, f"{gname}_galfit.{ext_num}"))
+
         shutil.copy2(tmp_fits_path, pj(out_dir, gname, f"{gname}_galfit_out.fits"))
         
         print()

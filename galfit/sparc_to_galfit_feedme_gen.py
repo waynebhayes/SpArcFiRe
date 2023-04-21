@@ -674,10 +674,10 @@ if __name__ == "__main__":
     write_to_feedmes(top_dir = cwd)
 
 
-# In[ ]:
+# In[30]:
 
 
 if __name__ == "__main__":
-    if in_notebook():
-        export_to_py("notebook_feedme_gen", output_filename = "sparc_to_galfit_feedme_gen.py")
+    # in_notebook() is checked in the export function
+    export_to_py("notebook_feedme_gen", output_filename = "sparc_to_galfit_feedme_gen.py")
 
