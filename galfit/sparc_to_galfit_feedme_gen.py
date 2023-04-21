@@ -486,7 +486,7 @@ def write_to_feedme(path, list_in, feedme_name = "autogen_feedme_galfit.in"):
         _ = [g.write(f"{value}\n") for value in list_in]
         
     return file_path
-# In[39]:
+# In[42]:
 
 
 def write_to_feedmes(top_dir = "", single_galaxy_name = ""):
@@ -562,12 +562,12 @@ def write_to_feedmes(top_dir = "", single_galaxy_name = ""):
         header = GalfitHeader(input_menu_file = gname,
                               extra_header_info = f"{run}{camcol}{field}; HDU: z{psf_row}{psf_col}",
                               galaxy_name = gname,
-                              input_image = f"{filenames_fits_in[count]}",
+                              input_image = pj(in_dir, f"{gname}.fits"),
                               output_image = pj(tmp_dir, "galfits", f"{gname}_galfit_out.fits"),
                               pixel_mask = pj(tmp_dir, "galfit_masks", f"{gname}_star-rm.fits"),
                               region_to_fit = (x1crop, x2crop, y1crop, y2crop),
                               optimize = 0
-                             )      
+                             )
         
         bulge = Sersic(component_number = 1, 
                        position = (center_pos_x, center_pos_y),
@@ -670,7 +670,7 @@ if __name__ == "__main__":
     write_to_feedmes(top_dir = cwd)
 
 
-# In[40]:
+# In[ ]:
 
 
 if __name__ == "__main__":

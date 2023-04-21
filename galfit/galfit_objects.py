@@ -274,7 +274,7 @@ class Power(GalfitComponent):
         self.sky_position_angle = float(params[4])
 
 
-# In[5]:
+# In[33]:
 
 
 class Fourier(GalfitComponent):
@@ -305,7 +305,7 @@ class Fourier(GalfitComponent):
         # rstrip avoids a hanging ) later
         params = in_line.lstrip("fourier : ").replace(" ", "").rstrip(")").split(")(")
         
-        self.param_values = {n: eval(f"({params[i].split(':')[1]})")
+        self.param_values = {n: eval(f"({params[i].split(':')[1].replace('*', '')})")
                              for i, n in enumerate(self.param_values.keys())}
 
 
@@ -468,7 +468,7 @@ class ComponentContainer:
         return out_str
 
 
-# In[18]:
+# In[28]:
 
 
 class FeedmeContainer(ComponentContainer):
@@ -482,7 +482,7 @@ class FeedmeContainer(ComponentContainer):
         return vars(self)
     
     def __str__(self):
-        out_str = f"{str(header)}\n" + "\n".join(str(comp) for comp in ComponentContainer.to_list(self))
+        out_str = f"{str(self.header)}\n" + "\n".join(str(comp) for comp in ComponentContainer.to_list(self))
         return out_str
         
     def to_file(self, *args):
@@ -496,7 +496,7 @@ class FeedmeContainer(ComponentContainer):
         pass
 
 
-# In[10]:
+# In[36]:
 
 
 class GalfitOutput(FeedmeContainer):
@@ -504,8 +504,8 @@ class GalfitOutput(FeedmeContainer):
         
         FeedmeContainer.__init__(self, **kwargs)
         
-        # May use stderr later
-        galfit_out_text = galfit_out_obj.stdout
+        galfit_out_text = galfit_out_obj.stdout        
+        err_text = galfit_out_obj.stderr
         
         # Default to this so it doesn't break if no text is fed in
         self.success = False
@@ -527,14 +527,15 @@ class GalfitOutput(FeedmeContainer):
                 
             elif any(line.strip().startswith(failure) for line in last_out_lines):
                 print(f"Galfit failed this run!")
+                last_out_lines = '\n'.join(last_out_lines)
+                print(f"{last_out_lines}")
                 self.success = False
                 # For debugging
                 # print(galfit_out_text)
 
             else:
                 print(f"Did not detect either '{success}' or '{failure}' in galfit output. Something must have gone terribly wrong! Printing output...")
-                last_out_lines = '\n'.join(last_out_lines)
-                print(f"{last_out_lines}")
+                print(f"{err_text}")
                 self.success = False
         
         if galfit_out_text:
