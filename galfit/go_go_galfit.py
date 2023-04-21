@@ -24,72 +24,29 @@ def check_programs():
 
     return run_galfit, run_fitspng, run_python
 
-def check_update(log_out, galfit_num, components, base_galfit_cmd, rerun = "", header = None, path_to_feedme = ""):
+def rerun_galfit(galfit_output, base_galfit_cmd, *args):
     
-    if rerun:
-       assert str(header) and path_to_feedme, "header/path_to_feedme as input to 'check_update' cannot be None/empty, yell at the programmer!"
-    
-    #run_galfit, _, _ = check_programs()
-    #base_galfit_cmd = f"{run_galfit} -imax {max_it}"
-    initial_components = deepcopy(components)
-    
-    # Put this here (for now) so it's easier to examine other components
-    # of CompletedProcess from subprocess should I desire
-    # i.e. I don't have to find it somewhere below
-    log_out = log_out.stdout
-    # Race condition issue
-    #if exists(f"galfit.{galfit_num}"):
-    
-    # I don't like checking for the full line because there are embedded quotes
-    # and one is a backtick I think...: Fit summary is now being saved into `fit.log'.
-    # To be safe I just check the first part
-    success = "Fit summary is now being saved"
-    failure = "...now exiting to system..."
-    
-    # Constrain to last 30 lines to save search time
-    last_out_lines = log_out.split("\n")[-30:]
-    if any(line.startswith(success) for line in last_out_lines):
-        final_model = log_out.split("Iteration")[-1]
+    if galfit_output.success:   
+        # don't use this anymore
+        #galfit_num = f"{int(galfit_output.galfit_num) + 1:0>2}"
+        
+        print("Re-running GALFIT...")
+        # String comparison until I implement subtraction ;)
+        # Use this to generically determine which components were optimized
+        updated_components = (comp for comp, icomp in zip(galfit_output.to_tuple(), args) if str(comp) != str(icomp))
 
-        # bulge, disk, arms, fourier, sky
-        components = update_components(final_model, 
-                                       *components)
+        # run_galfit_cmd = f"{base_galfit_cmd} galfit.{galfit_num}"
+        galfit_output.to_file(*updated_components)
         
-        galfit_num = f"{int(galfit_num) + 1:0>2}"
-        
-        if rerun:
-            print("Rerunning GALFIT...")
-            # String comparison until I implement subtraction ;)
-            # Use this to generically determine which components were optimized
-            updated_components = [comp for comp, icomp in zip(components, initial_components) if str(comp) != str(icomp)]
-            
-            # run_galfit_cmd = f"{base_galfit_cmd} galfit.{galfit_num}"
-            header.to_file(f"{path_to_feedme}", *updated_components)
-            run_galfit_cmd = f"{base_galfit_cmd} {path_to_feedme}"
-            
-            galfit_num = f"{int(galfit_num) + 1:0>2}"
-            out_text = sp(run_galfit_cmd)
-            
-            # Recursion... to update components but forcing false to avoid rerunning over and over
-            components, galfit_num = check_update(out_text, 
-                                                  galfit_num, 
-                                                  components, 
-                                                  base_galfit_cmd, 
-                                                  rerun  = ""
-                                                  )
-            
-    elif any(line.startswith(failure) for line in last_out_lines):
-        print(f"Galfit failed this run!")
-        # For debugging
-        #print(log_out)
-        #print("Expect output .# files to be less one albeit not necessarily missing this one.")
-        
+        run_galfit_cmd = f"{base_galfit_cmd} {galfit_output.path_to_feedme}"
+
+        #galfit_num = f"{int(galfit_output.galfit_num) + 1:0>2}"
+        galfit_output = GalfitOutput(sp(run_galfit_cmd), **galfit_output.to_dict())
+       
     else:
-        print(f"Did not detect either '{success}' or '{failure}' in galfit output. Something must have gone terribly wrong! Printing output...")
-        last_out_lines = '\n'.join(last_out_lines)
-        print(f"{last_out_lines}")
-        
-    return components, galfit_num
+        print("Galfit failed!")
+
+    return galfit_output
 
 def main(**kwargs):
     
@@ -150,76 +107,70 @@ def main(**kwargs):
         print(gname)
         
         # This doesn't change
-        header  = feedme_info[gname]["header"]
+        header  = feedme_info[gname].header
+        feedme_path = feedme_info[gname].path_to_feedme
+        # feedme_info[gname] is a FeedmeContainer object
         
-        # These get *really* updated
-        bulge   = feedme_info[gname]["bulge"]
-        disk    = feedme_info[gname]["disk"]
-        arms    = feedme_info[gname]["arms"]
-        fourier = feedme_info[gname]["fourier"]
-        sky     = feedme_info[gname]["sky"]
-        
-        components = (bulge, disk, arms, fourier, sky)
-        
-        galfit_num = "01"
+        initial_components = feedme_info[gname].extract_components()
+               
+        # Note to self, GalfitOutput is *just* for handling output
+        # It does not retain the input state fed into Galfit
+        # And the input dict is *before* output but will be updated *by* output
+        #initial_galfit = GalfitOutput(subprocess.CompletedProcess("",0), **components_dict)
         
         if num_steps == 1:
             run_galfit_cmd = f"{base_galfit_cmd} {feedme_info[gname]['path']}"
-            final_out_text = sp(run_galfit_cmd)
+            final_galfit_output = GalfitOutput(sp(run_galfit_cmd), **feedme_info[gname].to_dict())
             
         elif num_steps >= 2:
             bulge_in = pj(out_dir, gname, f"{gname}_bulge.in")
-            header.to_file(bulge_in, bulge, sky)
+            header.to_file(bulge_in, initial_components.bulge, initial_components.sky)
             
             run_galfit_cmd = f"{base_galfit_cmd} {bulge_in}"
             print("Bulge")
-            out_text = sp(run_galfit_cmd)
+            galfit_output = GalfitOutput(sp(run_galfit_cmd), **feedme_info[gname].to_dict())
             
-            components, galfit_num = check_update(out_text, 
-                                                  galfit_num, 
-                                                  components, 
-                                                  base_galfit_cmd, 
-                                                  rerun = rerun,
-                                                  header = header,
-                                                  path_to_feedme = feedme_info[gname]['path']
-                                                 )
-            
+            if rerun:
+                galfit_output = rerun_galfit(galfit_output,
+                                             base_galfit_cmd,
+                                             initial_components.bulge, initial_components.sky
+                                            )
+
             if num_steps == 3:
                 disk_in = pj(out_dir, gname, f"{gname}_disk.in")
-                header.to_file(disk_in, bulge, disk, sky)
+                
+                # Note initial components disk and galfit output the rest
+                # Those are updated!
+                header.to_file(disk_in, galfit_output.bulge, initial_components.disk, galfit_output.sky)
                 
                 run_galfit_cmd = f"{base_galfit_cmd} {disk_in}"
                 print("Bulge + Disk")
-                out_text = sp(run_galfit_cmd)
+                galfit_output = GalfitOutput(sp(run_galfit_cmd), **galfit_output.to_dict())
                 
-                components, galfit_num = check_update(out_text, 
-                                                      galfit_num, 
-                                                      components, 
-                                                      base_galfit_cmd, 
-                                                      rerun = rerun,
-                                                      header = header,
-                                                      path_to_feedme = feedme_info[gname]['path']
-                                                     )
-                
+                if rerun:
+                    galfit_output = rerun_galfit(galfit_output,
+                                                 base_galfit_cmd,
+                                                 galfit_output.bulge, initial_components.disk, galfit_output.sky
+                                                )
+    
             # Overwrite original... for now 
-            header.to_file(f"{feedme_info[gname]['path']}", *components)
-            run_galfit_cmd = f"{base_galfit_cmd} {feedme_info[gname]['path']}"
+            # Also good thing dicts retain order, this frequently comes up
+            galfit_output.to_file()
+            run_galfit_cmd = f"{base_galfit_cmd} {feedme_path}"
             print("Bulge + Disk + Arms")
-            final_out_text = sp(run_galfit_cmd)
+            final_galfit_output = GalfitOutput(sp(run_galfit_cmd), **galfit_output.to_dict())
             
         # Dropping this here for final rerun for all num_steps       
-        _, _ = check_update(final_out_text, 
-                            galfit_num, 
-                            components, 
-                            base_galfit_cmd, 
-                            rerun = rerun,
-                            header = header,
-                            path_to_feedme = feedme_info[gname]['path']
-                           )
-        
+        if rerun:
+            _ = rerun_galfit(final_galfit_output, 
+                             base_galfit_cmd,
+                             *galfit_output.to_list()
+                            )
+
         tmp_png_path  = pj(tmp_png_dir, gname)
         tmp_fits_path = pj(tmp_fits_dir, f"{gname}_galfit_out.fits")
         
+        # Alternatively, if not final_galfit_output.success and not galfit_output.success:
         if not exists(f"{tmp_fits_path}"):
             print(f"{gname} completely failed!!!")
             # This file avoids conflating ones which han'vet run and ones which have nothing to show for it

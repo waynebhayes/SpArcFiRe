@@ -1,18 +1,19 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[26]:
+# In[1]:
 
 
 import os
 import sys
 from os.path import join as pj
 from os.path import exists
+import subprocess
 from copy import deepcopy
 from IPython import get_ipython
 
 
-# In[38]:
+# In[24]:
 
 
 class GalfitComponent:
@@ -52,6 +53,9 @@ class GalfitComponent:
         # sub-classes. Just leaving here for documentation
         # Used to update from stdout i.e. what we see in fit.log
         # Requires outside function to loop through log file
+        
+        # NOTE: These necessarily round to two digits because that's
+        # all Galfit outputs to stdout
         print("Did this get properly overwritten?")
         pass
         
@@ -168,7 +172,7 @@ class GalfitComponent:
     #     return self.__dict__.iteritems()
 
 
-# In[19]:
+# In[3]:
 
 
 class Sersic(GalfitComponent):
@@ -182,7 +186,7 @@ class Sersic(GalfitComponent):
         self.position_angle = kwargs.get("position_angle", 0)
         #self.skip = kwargs.get("skip", 0)
         
-        param_dict = deepcopy(self.__dict__)
+        param_dict = deepcopy(vars(self))
         
         GalfitComponent.__init__(self, component_name = "sersic", component_number = component_number)
         
@@ -217,7 +221,7 @@ class Sersic(GalfitComponent):
         self.position_angle   = float(params[4])
 
 
-# In[20]:
+# In[4]:
 
 
 class Power(GalfitComponent):
@@ -232,7 +236,7 @@ class Power(GalfitComponent):
         self.sky_position_angle = kwargs.get("sky_position_angle", 45)
         #self.skip = kwargs.get("skip", 0)
         
-        param_dict = deepcopy(self.__dict__)
+        param_dict = deepcopy(vars(self))
         
         GalfitComponent.__init__(self, component_name = "power", param_prefix = "R")
         
@@ -270,7 +274,7 @@ class Power(GalfitComponent):
         self.sky_position_angle = float(params[4])
 
 
-# In[41]:
+# In[5]:
 
 
 class Fourier(GalfitComponent):
@@ -305,7 +309,7 @@ class Fourier(GalfitComponent):
                              for i, n in enumerate(self.param_values.keys())}
 
 
-# In[21]:
+# In[6]:
 
 
 class Sky(GalfitComponent):
@@ -314,7 +318,7 @@ class Sky(GalfitComponent):
         self.dsky_dx = kwargs.get("dsky_dx", 0)
         self.dsky_dy = kwargs.get("dsky_dy", 0)
         
-        param_dict = deepcopy(self.__dict__)
+        param_dict = deepcopy(vars(self))
         
         GalfitComponent.__init__(self, component_name = "sky", component_number = component_number)
         
@@ -342,7 +346,7 @@ class Sky(GalfitComponent):
         self.dsky_dy = float(params[1])
 
 
-# In[10]:
+# In[7]:
 
 
 class GalfitHeader(GalfitComponent):
@@ -418,6 +422,164 @@ class GalfitHeader(GalfitComponent):
 """
 
 
+# In[25]:
+
+
+class ComponentContainer:
+    def __init__(self, **kwargs):
+        self.bulge   = kwargs.get("bulge", Sersic(1))
+        self.disk    = kwargs.get("disk", Sersic(2))
+        self.arms    = kwargs.get("arms", Power())
+        self.fourier = kwargs.get("fourier", Fourier())
+        self.sky     = kwargs.get("sky", Sky(3))
+        
+    def to_dict(self):
+        # Order matters
+        return {"bulge"   : self.bulge,
+                "disk"    : self.disk,
+                "arms"    : self.arms,
+                "fourier" : self.fourier,
+                "sky"     : self.sky}
+    
+    def to_tuple(self):
+        #self.header,
+        return (self.bulge,
+                self.disk,
+                self.arms,
+                self.fourier,
+                self.sky
+               )
+    
+    def to_list(self):
+        #self.header,
+        return [self.bulge,
+                self.disk,
+                self.arms,
+                self.fourier,
+                self.sky
+               ]
+       
+    # This is more for the daughter classes
+    def extract_components(self):
+        return ComponentContainer(**vars(self))
+    
+    def __str__():
+        out_str = "\n".join(str(comp) for comp in ComponentContainer.to_list(self))
+        return out_str
+
+
+# In[18]:
+
+
+class FeedmeContainer(ComponentContainer):
+    def __init__(self, **kwargs):
+        ComponentContainer.__init__(self, **kwargs)
+        # The path to the feedme that *generated* the components
+        self.header  = kwargs.get("header", GalfitHeader())
+        self.path_to_feedme = kwargs.get("path_to_feedme", "")
+    
+    def to_dict(self):
+        return vars(self)
+    
+    def __str__(self):
+        out_str = f"{str(header)}\n" + "\n".join(str(comp) for comp in ComponentContainer.to_list(self))
+        return out_str
+        
+    def to_file(self, *args):
+        if args:
+            self.header.to_file(self.path_to_feedme, *args)
+        else:
+            self.header.to_file(self.path_to_feedme, *ComponentContainer.to_list(self))
+        
+    # TODO
+    def from_file(self):
+        pass
+
+
+# In[10]:
+
+
+class GalfitOutput(FeedmeContainer):
+    def __init__(self, galfit_out_obj = subprocess.CompletedProcess("", 0), **kwargs):
+        
+        FeedmeContainer.__init__(self, **kwargs)
+        
+        # May use stderr later
+        galfit_out_text = galfit_out_obj.stdout
+        
+        # Default to this so it doesn't break if no text is fed in
+        self.success = False
+        
+        # This is more for cleaning up some functions elsewhere
+        # self.galfit_num = kwargs.get("galfit_num", "01")
+        
+        def check_success(self, galfit_out_text) -> None:
+            # I don't like checking for the full line because there are embedded quotes
+            # and one is a backtick I think...: Fit summary is now being saved into `fit.log'.
+            # To be safe I just check the first part
+            success = "Fit summary is now being saved"
+            failure = "...now exiting to system..."
+
+            # Constrain to last 30 lines to save search time
+            last_out_lines = galfit_out_text.split("\n")[-30:]
+            if any(line.strip().startswith(success) for line in last_out_lines):
+                self.success = True
+                
+            elif any(line.strip().startswith(failure) for line in last_out_lines):
+                print(f"Galfit failed this run!")
+                self.success = False
+                # For debugging
+                # print(galfit_out_text)
+
+            else:
+                print(f"Did not detect either '{success}' or '{failure}' in galfit output. Something must have gone terribly wrong! Printing output...")
+                last_out_lines = '\n'.join(last_out_lines)
+                print(f"{last_out_lines}")
+                self.success = False
+        
+        if galfit_out_text:
+            check_success(self, galfit_out_text)
+
+        # For reading from galfit stdout to update classes
+        def update_components(self, galfit_out_text) -> None: #, bulge, disk, arms, fourier, sky):
+            
+            last_it = galfit_out_text.split("Iteration")[-1]
+
+            s_count = 0
+            by_line = last_it.splitlines()
+            for line in by_line:
+                if line.strip().startswith("sersic"):
+                    if s_count == 0:
+                        comp = self.bulge
+                        s_count += 1 
+                    else:
+                        comp = self.disk               
+
+                elif line.strip().startswith("power"):
+                    comp = self.arms
+
+                elif line.strip().startswith("fourier"):
+                    # Fourier never follows the rules...
+                    # By how the class operates, we don't
+                    # need to do this, but to be consistent...
+                    comp = self.fourier
+
+                elif line.strip().startswith("sky"):
+                    comp = self.sky
+
+                else:
+                    continue
+
+                comp.update_from_log(line)
+                comp.update_param_values()
+
+        if self.success:
+            update_components(self, galfit_out_text)
+            
+    def __str__(self, galfit_out_text) -> str:
+        return(galfit_out_text)
+
+
 # In[11]:
 
 
@@ -441,86 +603,159 @@ if __name__ == "__main__":
     header.to_file("tester.in", bulge, disk, arms, fourier, sky)
 
 
-# In[24]:
+# In[12]:
 
 
-# For reading from galfit stdout to update classes
-def update_components(input_text, bulge, disk, arms, fourier, sky):
+# if __name__ == "__main__":
+#     # Testing additional functionality
     
-    bulge1   = deepcopy(bulge)
-    disk1    = deepcopy(disk)
-    arms1    = deepcopy(arms)
-    fourier1 = deepcopy(fourier)
-    sky1     = deepcopy(sky)
+#     out_str = """Iteration : 12    Chi2nu: 3.571e-01     dChi2/Chi2: -3.21e-08   alamda: 1e+02
+#  sersic    : (  [62.90],  [62.90])  14.11     13.75    0.30    0.63    60.82
+#  sky       : [ 63.00,  63.00]  1130.51  -4.92e-02  1.00e-02
+#  sersic    : (  [62.90],  [62.90])  14.19     12.43    1.45    0.62   100.55
+#    power   :     [0.00]   [23.51]  219.64     -0.16     ---  -44.95   -15.65
+#    fourier : (1:  0.06,   -6.67)   (3:  0.05,    0.18)
+# COUNTDOWN = 0"""
     
-    s_count = 0
-    by_line = input_text.splitlines()
-    for line in by_line:
-        if line.strip().startswith("sersic"):
-            if s_count == 0:
-                comp = bulge1
-                s_count += 1 
-            else:
-                comp = disk1               
-            
-        elif line.strip().startswith("power"):
-            comp = arms1
-            
-        elif line.strip().startswith("fourier"):
-            # Fourier never follows the rules...
-            # By how the class operates, we don't
-            # need to do this, but to be consistent...
-            comp = fourier1
-            
-        elif line.strip().startswith("sky"):
-            comp = sky1
-        
-        else:
-            continue
+#     bulge1, disk1, arms1, fourier1, sky1 = update_components(out_str, 
+#                                                              bulge, 
+#                                                              disk, 
+#                                                              arms, 
+#                                                              fourier, 
+#                                                              sky)
+#     # Checking difference
+#     # Use subtraction! When it's done
+#     print(bulge)
+#     print(disk)
+#     print(arms)
+#     print(fourier)
+#     print(sky)
+#     print("="*80)
+#     print(bulge1)
+#     print(disk1)
+#     print(arms1)
+#     print(fourier1)
+#     print(sky1)
     
-        comp.update_from_log(line)
-        comp.update_param_values()
-    
-    return bulge1, disk1, arms1, fourier1, sky1
 
 
 # In[13]:
 
 
 if __name__ == "__main__":
-    # Testing additional functionality
-    
-    out_str = """Iteration : 12    Chi2nu: 3.571e-01     dChi2/Chi2: -3.21e-08   alamda: 1e+02
- sersic    : (  [62.90],  [62.90])  14.11     13.75    0.30    0.63    60.82
- sky       : [ 63.00,  63.00]  1130.51  -4.92e-02  1.00e-02
- sersic    : (  [62.90],  [62.90])  14.19     12.43    1.45    0.62   100.55
-   power   :     [0.00]   [23.51]  219.64     -0.16     ---  -44.95   -15.65
-   fourier : (1:  0.06,   -6.67)   (3:  0.05,    0.18)
-COUNTDOWN = 0"""
-    
-    bulge1, disk1, arms1, fourier1, sky1 = update_components(out_str, 
-                                                             bulge, 
-                                                             disk, 
-                                                             arms, 
-                                                             fourier, 
-                                                             sky)
-    # Checking difference
-    # Use subtraction! When it's done
-    print(bulge)
-    print(disk)
-    print(arms)
-    print(fourier)
-    print(sky)
-    print("="*80)
-    print(bulge1)
-    print(disk1)
-    print(arms1)
-    print(fourier1)
-    print(sky1)
-    
+    example_feedme = FeedmeContainer(path_to_feedme = "somewhere/out_there", 
+                                     header         = header, 
+                                     bulge          = bulge, 
+                                     disk           = disk, 
+                                     arms           = arms, 
+                                     fourier        = fourier, 
+                                     sky            = sky)
+    feedme_components = example_feedme.extract_components()
+    print(feedme_components.to_list())
+    _ = [print("Key:", k) for k in example_feedme.to_dict().keys()]
+    print(str(example_feedme))
 
 
 # In[14]:
+
+
+if __name__ == "__main__":
+    
+    good_example = """Iteration : 6     Chi2nu: 3.205e-01     dChi2/Chi2: -2.24e-08   alamda: 1e+02
+     sersic    : (  [67.38],  [67.77])  13.19     15.54    0.34    0.62   -19.23
+     sersic    : (  [67.38],  [67.77])  14.58      8.89    1.56    0.68    30.23
+       power   :     [0.00]   [22.01]   78.86     -2.39     ---   39.74    22.52
+       fourier : (1:  0.15,   46.48)   (3:  0.10,  -33.06)
+     sky       : [ 67.00,  68.00]  1133.43  1.16e-02  -1.35e-02
+    COUNTDOWN = 6
+
+    Iteration : 7     Chi2nu: 3.205e-01     dChi2/Chi2: -2.24e-08   alamda: 1e+03
+     sersic    : (  [67.38],  [67.77])  13.19     15.54    0.34    0.62   -19.23
+     sersic    : (  [67.38],  [67.77])  14.58      8.89    1.56    0.68    30.23
+       power   :     [0.00]   [22.01]   78.86     -2.39     ---   39.74    22.52
+       fourier : (1:  0.15,   46.48)   (3:  0.10,  -33.06)
+     sky       : [ 67.00,  68.00]  1133.43  1.16e-02  -1.35e-02
+    COUNTDOWN = 5
+
+    Iteration : 8     Chi2nu: 3.205e-01     dChi2/Chi2: -2.24e-08   alamda: 1e+04
+     sersic    : (  [67.38],  [67.77])  13.19     15.54    0.34    0.62   -19.23
+     sersic    : (  [67.38],  [67.77])  14.58      8.89    1.56    0.68    30.23
+       power   :     [0.00]   [22.01]   78.86     -2.39     ---   39.74    22.52
+       fourier : (1:  0.15,   46.48)   (3:  0.10,  -33.06)
+     sky       : [ 67.00,  68.00]  1133.43  1.16e-02  -1.35e-02
+    COUNTDOWN = 4
+
+    Iteration : 9     Chi2nu: 3.205e-01     dChi2/Chi2: -3.33e-08   alamda: 1e+03
+     sersic    : (  [67.38],  [67.77])  13.19     15.54    0.34    0.62   -19.23
+     sersic    : (  [67.38],  [67.77])  14.58      8.89    1.56    0.68    30.23
+       power   :     [0.00]   [22.01]   78.86     -2.39     ---   39.74    22.52
+       fourier : (1:  0.15,   46.48)   (3:  0.10,  -33.06)
+     sky       : [ 67.00,  68.00]  1133.43  1.16e-02  -1.35e-02
+    COUNTDOWN = 3
+
+    Iteration : 10    Chi2nu: 3.205e-01     dChi2/Chi2: -3.33e-08   alamda: 1e+04
+     sersic    : (  [67.38],  [67.77])  13.19     15.54    0.34    0.62   -19.23
+     sersic    : (  [67.38],  [67.77])  14.58      8.89    1.56    0.68    30.23
+       power   :     [0.00]   [22.01]   78.86     -2.39     ---   39.74    22.52
+       fourier : (1:  0.15,   46.48)   (3:  0.10,  -33.06)
+     sky       : [ 67.00,  68.00]  1133.43  1.16e-02  -1.35e-02
+    COUNTDOWN = 2
+
+    Iteration : 11    Chi2nu: 3.205e-01     dChi2/Chi2: -8.01e-08   alamda: 1e+03
+     sersic    : (  [67.38],  [67.77])  13.19     15.54    0.34    0.62   -19.23
+     sersic    : (  [67.38],  [67.77])  14.58      8.89    1.56    0.68    30.23
+       power   :     [0.00]   [22.01]   78.86     -2.39     ---   39.74    22.52
+       fourier : (1:  0.15,   46.48)   (3:  0.10,  -33.06)
+     sky       : [ 67.00,  68.00]  1133.43  1.16e-02  -1.35e-02
+    COUNTDOWN = 1
+
+    Iteration : 12    Chi2nu: 3.205e-01     dChi2/Chi2: 1.75e-08    alamda: 1e+04
+     sersic    : (  [67.38],  [67.77])  13.19     15.54    0.34    0.62   -19.23
+     sersic    : (  [67.38],  [67.77])  14.58      8.89    1.56    0.68    30.23
+       power   :     [0.00]   [22.01]   78.86     -2.39     ---   39.74    22.52
+       fourier : (1:  0.15,   46.48)   (3:  0.10,  -33.06)
+     sky       : [ 67.00,  68.00]  1133.43  1.16e-02  -1.35e-02
+    COUNTDOWN = 0
+
+
+    Fit summary is now being saved into `fit.log'.
+
+    """
+
+    bad_example = "\n".join(good_example.split("\n")[:-3] + ["...now exiting to system...\n"])
+    
+    dummy_obj = subprocess.CompletedProcess("", 0)
+    dummy_obj.stdout = bad_example
+    
+    print("Checking the bad example")
+    
+    bad_output  = GalfitOutput(dummy_obj)
+    print(bad_output.bulge)
+    print(bad_output.disk)
+    print(bad_output.arms)
+    print(bad_output.fourier)
+    print(bad_output.sky)
+    print(f"Did the bad example succeed? {bad_output.success}")
+    
+    print("="*80)
+    
+    print("And now checking the 'good' example (these should all be updated from the default values)\n")
+    dummy_obj.stdout = good_example
+    good_output = GalfitOutput(dummy_obj)
+    
+    print(good_output.bulge)
+    print(good_output.disk)
+    print(good_output.arms)
+    print(good_output.fourier)
+    print(good_output.sky)
+    print(f"Did the good example succeed? {good_output.success}")
+    
+    print("="*80)
+    print("Testing extraction into ComponentContainer...")
+    _ = [print(str(comp)) for comp in good_output.extract_components().to_list()]
+
+
+# In[15]:
 
 
 # For debugging purposes
@@ -533,7 +768,7 @@ def in_notebook():
         return False
 
 
-# In[15]:
+# In[16]:
 
 
 def export_to_py(notebook_name, output_filename = ""):

@@ -15,7 +15,7 @@
 # 
 # To run the control script: `bash control_script.sh`
 
-# In[2]:
+# In[36]:
 
 
 import numpy as np
@@ -486,7 +486,7 @@ def write_to_feedme(path, list_in, feedme_name = "autogen_feedme_galfit.in"):
         _ = [g.write(f"{value}\n") for value in list_in]
         
     return file_path
-# In[11]:
+# In[39]:
 
 
 def write_to_feedmes(top_dir = "", single_galaxy_name = ""):
@@ -625,21 +625,17 @@ def write_to_feedmes(top_dir = "", single_galaxy_name = ""):
         
         count += 1
         
-        header.to_file(pj(galaxy, f"{gname}.in"), 
-                       bulge, 
-                       disk, 
-                       arms, 
-                       fourier, 
-                       sky)
+        container = FeedmeContainer(path_to_feedme = pj(galaxy, f"{gname}.in"),
+                                    header         = header,
+                                    bulge          = bulge, 
+                                    disk           = disk,
+                                    arms           = arms,
+                                    fourier        = fourier,
+                                    sky            = sky)
         
-        feedme_info_out[gname] = {"path"    : pj(galaxy, f"{gname}.in"),
-                                  "header"  : header,
-                                  "bulge"   : bulge,
-                                  "disk"    : disk,
-                                  "arms"    : arms,
-                                  "fourier" : fourier,
-                                  "sky"     : sky
-                                 }
+        container.to_file()
+        
+        feedme_info_out[gname] = container
         
         if single_galaxy_name:
             break
@@ -674,7 +670,7 @@ if __name__ == "__main__":
     write_to_feedmes(top_dir = cwd)
 
 
-# In[30]:
+# In[40]:
 
 
 if __name__ == "__main__":
