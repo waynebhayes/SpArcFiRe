@@ -14,8 +14,8 @@ while [ "X$1" != X ]; do
 	fi
 	shift
 	;;
-    *) die "unknown option '$1'"
-	exit 1;;
+    *) [ -f "$1" ] || die "unknown option '$1'"
+	break ;;
     esac
 done
 

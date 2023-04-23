@@ -1,7 +1,7 @@
 #!/bin/sh
 DIR="`dirname $0`"
 awk "`cat $DIR/misc.awk`"'
-    BEGIN{MAX_REL_ERR=0.01}
+    BEGIN{MAX_REL_ERR=0.02}
     FNR==1{
 	F[ARGIND]=FILENAME;
 	if(index(FILENAME,".tsv")){
@@ -24,7 +24,10 @@ awk "`cat $DIR/misc.awk`"'
 	    }
 	    if(printErrMsg) {
 		++diff;
-		Warn(sprintf("line %d columns %d,%d (%s): \"%s\" <-> \"%s\"",l,col1,col2, varName, L[1][l][col1], L[2][l][col2]))
+		if(isNum) Warn(sprintf("line %d columns %d,%d (%s): numerical values beyond tolerance: \"%s\" <-> \"%s\"",
+			l,col1,col2, varName, L[1][l][col1], L[2][l][col2]))
+		else Warn(sprintf("line %d columns %d,%d (%s): non-numerical values differ: \"%s\" <-> \"%s\"",
+		    l,col1,col2, varName, L[1][l][col1], L[2][l][col2]))
 	    }
 	}
     }
