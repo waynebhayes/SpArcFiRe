@@ -20,7 +20,8 @@ awk "`cat $DIR/misc.awk`"'
 		    rel_err = (L[1][l][col1] - L[2][l][col1])/L[2][l][col2];
 		    if(ABS(rel_err) > MAX_REL_ERR) printErrMsg=1
 		}
-		else printErrMsg=1 # correct one is zero but new one is not
+		else if(ABS(L[1][l][col1])>1e-12) # correct one is zero and new one is sig larger than machine EPS.
+		    printErrMsg=1
 	    }
 	    if(printErrMsg) {
 		++diff;
