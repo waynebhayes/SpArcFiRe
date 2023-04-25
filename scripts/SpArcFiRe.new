@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 HOME=/home/sparcfire   # Make this the base of your SpArcFiRe distribution.
 export HOME
 COMMAND_LINE="$0 $@"
