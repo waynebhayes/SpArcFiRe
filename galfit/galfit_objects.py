@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[303]:
 
 
 import os
@@ -13,7 +13,7 @@ from copy import deepcopy
 from IPython import get_ipython
 
 
-# In[24]:
+# In[304]:
 
 
 class GalfitComponent:
@@ -26,54 +26,47 @@ class GalfitComponent:
         self.component_name = component_name
         self.component_number = component_number
         self.param_prefix = param_prefix
-        self.param_numbers = [0]
         
         key = "Component type"
         self.param_desc = {key : key}
         
         # tuple in value for printing
+        self.param_numbers = {0 : key}
         self.param_values = {key : component_name} #(component_name, "")}
         self.param_fix = {key : ""}
         
+# ==========================================================================================================
+
     def add_skip(self, skip_val = 0):
         key = "skip"
-        self.param_numbers.append("Z")
+        self.param_numbers["Z"] = key
         self.param_values[key] = skip_val
         self.param_desc[key] = "Skip this model in output image?  (yes=1, no=0)"
         self.param_fix[key] = ""
         
+# ==========================================================================================================
+
+    def update_values(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+        
+# ==========================================================================================================
+
     def update_param_values(self):
         # Values are the only thing that will change via instance.param_name
         # We need to update the dictionary that holds all of them since I use
         # a deepcopy to save myself some lines of code/typing (cheeky)
         self.param_values.update({k:v for k,v in self.__dict__.items() if k in self.param_values})
         
-    def update_from_log(self, in_line:str):
-        # This is a dummy function which is overwritten in all
-        # sub-classes. Just leaving here for documentation
-        # Used to update from stdout i.e. what we see in fit.log
-        # Requires outside function to loop through log file
-        
-        # NOTE: These necessarily round to two digits because that's
-        # all Galfit outputs to stdout
-        print("Did this get properly overwritten?")
-        pass
-        
-    # TODO: Import parameters from pandas
-    def from_pandas(self):
-        pass
-    
-    # TODO: Export parameters from pandas
-    def to_pandas(self):
-        pass
-    
+# ==========================================================================================================
+
     def check_lengths(self):
         
         if not all(len(ec) == len(self.param_numbers) for ec in (self.param_numbers, self.param_values, self.param_desc, self.param_fix)):
             print("Length of array containing parameter numbers, values, and descriptions must be the same!")
             
             print("param_numbers:", end = " ")
-            print(*self.param_numbers, sep = "\n")
+            print(*self.param_numbers.keys(), sep = "\n")
             
             print("param_values:", end = " ")
             print(*self.param_values.keys(), sep = "\n")
@@ -85,11 +78,15 @@ class GalfitComponent:
             print(*self.param_desc.keys(), sep = "\n")
             
             raise(AssertionError())
-    
+            
+# ==========================================================================================================
+
     # TODO: Add comparison function via subtract
     def __sub__(self):
         pass
     
+# ==========================================================================================================
+  
     def __str__(self):
         output_str = ""
         num_type = ".4f"
@@ -105,7 +102,7 @@ class GalfitComponent:
         
         self.check_lengths()
         
-        for num, val, fix, desc in zip(self.param_numbers, self.param_values.values(), self.param_fix.values(), self.param_desc.values()):
+        for num, val, fix, desc in zip(self.param_numbers.keys(), self.param_values.values(), self.param_fix.values(), self.param_desc.values()):
             # Skip component type
             if isinstance(val, (int, float)):
                 if isinstance(num, str):
@@ -138,41 +135,185 @@ class GalfitComponent:
 
         return output_str
 
-    def to_file(self, filename, *args):
-        with open(filename, "w") as f:
-            f.write("\n")
-            f.write(str(self))
-            f.write("\n")
+# ==========================================================================================================
+    
+    def update_from_log(self, in_line:str):
+        # This is a dummy function which is overwritten in all
+        # sub-classes. Just leaving here for documentation
+        # Used to update from stdout i.e. what we see in fit.log
+        # Requires outside function to loop through log file
+        
+        # NOTE: These necessarily round to two digits because that's
+        # all Galfit outputs to stdout
+        print("Did this get properly overwritten?")
+        
+# ==========================================================================================================
+
+    # TODO: Import parameters from pandas
+    def from_pandas(self):
+        pass
+
+# ==========================================================================================================
+
+    # TODO: Export parameters from pandas
+    def to_pandas(self):
+        pass
+    
+# ==========================================================================================================
+    
+    def from_file(self, filename):
+        # This function handles grabbing and storing the values from galfit files (input and output???)
+        # It's written to generally handle both and stores everything in a dict of dicts
+        # See parameter_names list for the corresponding labels
+        # {Component: {Parameter : Value}}
+    
+        try: 
+            # Grabbing the filename
+            #input_filename = glob_name(galaxy_path, '', filename) 
+            input_file = open(filename,'r')
+
+        except FileNotFoundError:
+            print(f"Can't open to read the file, {filename}. Check name/permissions/directory.")
+            return None
             
-            # *args for writing in additional classes at the same time (save I/O)
-            comp_names = [c.component_name for c in args]
-            with_fourier = "fourier" in comp_names
+        except OSError as ose:
+            print(f"Something went wrong! {ose}")
+            return None
+
+        input_in = input_file.readlines()
+        input_file.close()
+
+        # Need component number for dual sersic
+        try:
+            c_num = self.component_number
+        except:
+            # For Power or Fourier
+            c_num = 2
+
+        component_start = False
+        function_start  = False
+        
+        for line in input_in:
+            # Empty
+            if not line.strip():
+                component_start = False
+                function_start  = False
+                continue
+                
+            c_str = f"# Component number: {c_num}"
+            if line.startswith(c_str):
+                component_start = True
+                continue
+
+            # This handy trick replaces all multi-spaces with a single space
+            # Hence the weird syntax
+            # Somewhere on stack overflow...
+            # " ".join(line.split())
+            try:
+                split_line = " ".join(line.strip().split()).split()
+            except ValueError:
+                # Empty
+                component_start = False
+                function_start  = False
+                continue
             
-            # Arbitrary #
-            fourier_index = 1000
-            if with_fourier:
-                fourier_index = comp_names.index("fourier")
+            line_num = split_line[0].strip(f"{self.param_prefix})")
+
+            # Don't need the name since this is used independently by each component class
+            if line_num == "0" and self.component_name == split_line[1].strip():
+                # assert self.component_name == split_line[1].strip(), "The component name does not match the line " \ 
+                #                                                      "being read in. Something went wrong!"
+                function_start = True
+                continue
+
+            if self.component_name == "header" and "IMAGE and GALFIT CONTROL PARAMETERS" in line:
+                component_start = True
+                function_start  = True
+                continue
             
-            for i, component in enumerate(args):
-                f.write(str(component))
-                if i != fourier_index - 1:
-                    f.write("\n")
+            if not all((component_start, function_start)):
+                continue
+
+            # Special cases...
+            if line_num == "1" and self.component_name == "sersic":
+                line_num = int(line_num)
+                value = (float(split_line[1]), float(split_line[2]))
+                fix   = (int(split_line[3]), int(split_line[4]))
+
+            elif line_num in ["1", "3"] and self.component_name == "fourier":
+                line_num = int(line_num)
+                value = (float(split_line[1]), float(split_line[2]))
+                fix   = (int(split_line[3]), int(split_line[4]))
+                
+            elif self.component_name == "header":
+                value = split_line[1]
+                fix = ""
+                if line_num in ("E", "J", "P"):
+                    value = float(value)
+                
+                elif line_num == "H":
+                    value = (int(split_line[1]), int(split_line[2]))
+                    fix = (int(split_line[3]), int(split_line[4]))
                     
-            f.write("="*80 + "\n")
+                elif line_num in ("I", "K"):
+                    value = (float(split_line[1]), float(split_line[2]))
+
+            else:
+                line_num = int(line_num)
+                value = float(split_line[1])
+                fix   = int(split_line[2])
+
+            key = self.param_numbers[line_num]
+            self.param_values[key] = value
+            self.param_fix[key] = fix
+
+        self.update_values(**self.param_values)
+
+# ==========================================================================================================
+
+    def to_file(self, filename, *args):
+        try:
+            with open(filename, "w") as f:
+                f.write("\n")
+                f.write(str(self))
+                f.write("\n")
+
+                # *args for writing in additional classes at the same time (save I/O)
+                comp_names = [c.component_name for c in args]
+                with_fourier = "fourier" in comp_names
+
+                # Arbitrary #
+                fourier_index = 1000
+                if with_fourier:
+                    fourier_index = comp_names.index("fourier")
+
+                for i, component in enumerate(args):
+                    f.write(str(component))
+                    if i != fourier_index - 1:
+                        f.write("\n")
+
+                f.write("="*80 + "\n")
+                
+        except FileNotFoundError:
+            print(f"Can't open to write the file, {filename}. Check permissions/directory.")
             
-        # Either 
-        # instance.param_name = #
-        # instance.update_param_values()
-        # or
-        # instance.param_values["param_name"] = #
-        # works
+        except OSError as ose:
+            print(f"Something went wrong! {ose}")
+    
+    
+    # Either 
+    # instance.param_name = #
+    # instance.update_param_values()
+    # or
+    # instance.param_values["param_name"] = #
+    # works
             
     # #https://stackoverflow.com/a/35282351
     # def __iter__(self):
     #     return self.__dict__.iteritems()
 
 
-# In[3]:
+# In[305]:
 
 
 class Sersic(GalfitComponent):
@@ -190,7 +331,10 @@ class Sersic(GalfitComponent):
         
         GalfitComponent.__init__(self, component_name = "sersic", component_number = component_number)
         
-        self.param_numbers += [1,3,4,5,9,10]
+        self.param_numbers.update(dict(
+                                       zip([1,3,4,5,9,10], param_dict.keys())
+                                      )
+                                  )
         
         self.param_values.update(param_dict)
                 
@@ -221,7 +365,7 @@ class Sersic(GalfitComponent):
         self.position_angle   = float(params[4])
 
 
-# In[4]:
+# In[306]:
 
 
 class Power(GalfitComponent):
@@ -240,7 +384,10 @@ class Power(GalfitComponent):
         
         GalfitComponent.__init__(self, component_name = "power", param_prefix = "R")
         
-        self.param_numbers += [1,2,3,4,9,10]
+        self.param_numbers.update(dict(
+                                       zip([1,2,3,4,9,10], param_dict.keys())
+                                      )
+                                  )
         
         self.param_values.update(param_dict)
         
@@ -274,7 +421,7 @@ class Power(GalfitComponent):
         self.sky_position_angle = float(params[4])
 
 
-# In[33]:
+# In[307]:
 
 
 class Fourier(GalfitComponent):
@@ -282,7 +429,7 @@ class Fourier(GalfitComponent):
         GalfitComponent.__init__(self, component_name = "fourier", param_prefix = "F")      
         # normal rules don't apply here
         # Still use inheritance for the other functions
-        self.param_numbers = []
+        self.param_numbers = {}
         self.param_values = {}
         self.param_desc = {}
         self.param_fix = {}
@@ -291,7 +438,7 @@ class Fourier(GalfitComponent):
 
             for num, values in n.items():
                 key = f"{self.param_prefix}{num}"
-                self.param_numbers.append(num)
+                self.param_numbers[num] = key
                 self.param_values[key] = values
                 self.param_desc[key] = f"Azim. Fourier mode {num}, amplitude, & phase angle"
                 self.param_fix[key] = "1 1"
@@ -309,7 +456,7 @@ class Fourier(GalfitComponent):
                              for i, n in enumerate(self.param_values.keys())}
 
 
-# In[6]:
+# In[308]:
 
 
 class Sky(GalfitComponent):
@@ -322,7 +469,10 @@ class Sky(GalfitComponent):
         
         GalfitComponent.__init__(self, component_name = "sky", component_number = component_number)
         
-        self.param_numbers += [1,2,3]
+        self.param_numbers.update(dict(
+                                       zip([1,2,3], param_dict.keys())
+                                      )
+                                  )
         
         self.param_values.update(param_dict)
         
@@ -346,7 +496,7 @@ class Sky(GalfitComponent):
         self.dsky_dy = float(params[1])
 
 
-# In[7]:
+# In[309]:
 
 
 class GalfitHeader(GalfitComponent):
@@ -374,7 +524,10 @@ class GalfitHeader(GalfitComponent):
         # Still use inheritance for the other functions
         GalfitComponent.__init__(self, component_name = "header", param_prefix = "")
 
-        self.param_numbers = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "O", "P"]    
+        self.param_numbers = dict(
+                                  zip(["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "O", "P"], header_dict.keys())
+                                  )
+                                  
         
         self.param_values = deepcopy(header_dict)
         # For region to fit, otherwise the 'fix' is empty
@@ -422,7 +575,7 @@ class GalfitHeader(GalfitComponent):
 """
 
 
-# In[25]:
+# In[310]:
 
 
 class ComponentContainer:
@@ -458,17 +611,21 @@ class ComponentContainer:
                 self.fourier,
                 self.sky
                ]
+    
+    def update_components(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
        
     # This is more for the daughter classes
     def extract_components(self):
         return ComponentContainer(**vars(self))
     
-    def __str__():
+    def __str__(self):
         out_str = "\n".join(str(comp) for comp in ComponentContainer.to_list(self))
         return out_str
 
 
-# In[28]:
+# In[311]:
 
 
 class FeedmeContainer(ComponentContainer):
@@ -496,7 +653,7 @@ class FeedmeContainer(ComponentContainer):
         pass
 
 
-# In[36]:
+# In[312]:
 
 
 class GalfitOutput(FeedmeContainer):
@@ -581,7 +738,7 @@ class GalfitOutput(FeedmeContainer):
         return(galfit_out_text)
 
 
-# In[11]:
+# In[313]:
 
 
 if __name__ == "__main__":
@@ -594,17 +751,42 @@ if __name__ == "__main__":
     fourier = Fourier()
     sky   = Sky(3)
     
-    print(header)
-    print(bulge)
-    print(disk)
-    print(arms)
-    print(fourier)
-    print(sky)
+    container = FeedmeContainer(**{"header"  : header,
+                                      "bulge"   : bulge,
+                                      "disk"    : disk,
+                                      "arms"    : arms,
+                                      "fourier" : fourier,
+                                      "sky"     : sky}
+                                )
     
-    header.to_file("tester.in", bulge, disk, arms, fourier, sky)
+    print(container)
+    
+    container.to_file("tester.in") #, bulge, disk, arms, fourier, sky)
 
 
-# In[12]:
+# In[316]:
+
+
+# Testing from_file
+if __name__ == "__main__":
+    
+    header = GalfitHeader(galaxy_name = "fake_name")
+    container.update_components(header = header)
+    # bulge = Sersic(1)
+    # disk  = Sersic(2)
+    # arms  = Power()
+    # fourier = Fourier()
+    # sky   = Sky(3)
+    
+    
+    for comp in (header, bulge, disk, arms, fourier, sky):
+        print(comp.component_name)
+        comp.from_file("good_output.in")
+    
+    print(str(container))
+
+
+# In[70]:
 
 
 # if __name__ == "__main__":
@@ -640,7 +822,7 @@ if __name__ == "__main__":
     
 
 
-# In[13]:
+# In[56]:
 
 
 if __name__ == "__main__":
@@ -657,7 +839,7 @@ if __name__ == "__main__":
     print(str(example_feedme))
 
 
-# In[14]:
+# In[76]:
 
 
 if __name__ == "__main__":
@@ -754,6 +936,8 @@ if __name__ == "__main__":
     print("="*80)
     print("Testing extraction into ComponentContainer...")
     _ = [print(str(comp)) for comp in good_output.extract_components().to_list()]
+    
+    good_output.header.to_file("good_output.in", good_output.bulge, good_output.disk, good_output.arms, good_output.fourier, good_output.sky)
 
 
 # In[15]:
