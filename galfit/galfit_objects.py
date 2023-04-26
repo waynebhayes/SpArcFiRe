@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[969]:
+# In[45]:
 
 
 import os
@@ -14,7 +14,7 @@ from IPython import get_ipython
 from astropy.io import fits
 
 
-# In[970]:
+# In[46]:
 
 
 class GalfitComponent:
@@ -194,7 +194,8 @@ class GalfitComponent:
             input_in = dict(input_file[image_num].header)
             keys = list(input_in.keys())
             
-            # Really just for power and fourier function but technically this makes it more generalizable
+            # Power and Fourier now require component number (for the component they modify) at instantiation
+            # Should not affect output so here try/except is for anything else
             try:
                 feed_in  = {key : value for idx, (key, value) in enumerate(input_in.items()) 
                             if keys.index(self.start_dict) < idx <= keys.index(self.end_dict)}
@@ -315,7 +316,7 @@ class GalfitComponent:
     #     return self.__dict__.iteritems()
 
 
-# In[971]:
+# In[47]:
 
 
 class Sersic(GalfitComponent):
@@ -441,7 +442,7 @@ class Sersic(GalfitComponent):
         self.position_angle   = float(params[4])
 
 
-# In[972]:
+# In[48]:
 
 
 if __name__ == "__main__":
@@ -475,12 +476,11 @@ if __name__ == "__main__":
     print(bulge)
 
 
-# In[973]:
+# In[49]:
 
 
 class Power(GalfitComponent):
-    def __init__(self, **kwargs):
-        
+    def __init__(self, component_number, **kwargs):
         #self.component_type = "power"
         self.inner_rad          = float(kwargs.get("inner_rad", 0))
         self.outer_rad          = float(kwargs.get("outer_rad", 20))
@@ -492,7 +492,10 @@ class Power(GalfitComponent):
         
         param_dict = deepcopy(vars(self))
         
-        GalfitComponent.__init__(self, component_type = "power", param_prefix = "R")
+        GalfitComponent.__init__(self, component_type = "power", 
+                                 param_prefix = "R", 
+                                 component_number = component_number
+                                )
         
         self.param_numbers.update(dict(
                                        zip([1,2,3,4,9,10], param_dict.keys())
@@ -516,8 +519,8 @@ class Power(GalfitComponent):
         
         # For reading from file
         # 2_ may not always be the case but that's why I have a try except in there ;)
-        self.start_dict = f"2_ROTF"
-        self.end_dict   = f"2_SPA"
+        self.start_dict = f"{self.component_number}_ROTF"
+        self.end_dict   = f"{self.component_number}_SPA"
         
         self.start_text = f"{self.param_prefix}0) power"
         # end kept at defult
@@ -596,7 +599,7 @@ class Power(GalfitComponent):
         self.sky_position_angle = float(params[4])
 
 
-# In[974]:
+# In[50]:
 
 
 if __name__ == "__main__":
@@ -616,7 +619,7 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
  '2_INCL': '40.8043 +/- 2.7380',
  '2_SPA': '24.3010 +/- 4.5444'}""")
 
-    arms = Power()
+    arms = Power(2)
     arms.from_file_helper(bogus_list)
     arms.update_param_values()
     print(arms)
@@ -626,12 +629,17 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
     print(arms)
 
 
-# In[975]:
+# In[51]:
 
 
 class Fourier(GalfitComponent):
-    def __init__(self, n = {1 : (0.05, 45), 3 : (0.05, 25)}):
-        GalfitComponent.__init__(self, component_type = "fourier", param_prefix = "F")      
+    # kwargs is a placeholder
+    def __init__(self, component_number, n = {1 : (0.05, 45), 3 : (0.05, 25)}, **kwargs):
+        GalfitComponent.__init__(self, 
+                                 component_type = "fourier", 
+                                 param_prefix = "F",
+                                 component_number = component_number
+                                )
         # normal rules don't apply here
         # Still use inheritance for the other functions
         self.param_numbers = {}
@@ -643,8 +651,8 @@ class Fourier(GalfitComponent):
         
         p_numbers = list(self.param_numbers.keys())
         # For reading from file
-        self.start_dict = f"2_F{p_numbers[0]}"
-        self.end_dict   = f"2_F{p_numbers[-1]}PA"
+        self.start_dict = f"{self.component_number}_F{p_numbers[0]}"
+        self.end_dict   = f"{self.component_number}_F{p_numbers[-1]}PA"
         
         self.start_text = f"F{p_numbers[0]}"
         self.end_text   = f"{self.param_prefix}{p_numbers[-1]}"
@@ -729,7 +737,7 @@ class Fourier(GalfitComponent):
                              for i, n in enumerate(self.param_values.keys())}
 
 
-# In[976]:
+# In[52]:
 
 
 if __name__ == "__main__":
@@ -741,7 +749,7 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
  '2_F3': '0.0979 +/- 0.0104',
  '2_F3PA': '-35.1366 +/- 4.4060'}""")
 
-    fourier = Fourier()
+    fourier = Fourier(2)
     fourier.from_file_helper(bogus_list)
     fourier.update_param_values()
     print(fourier)
@@ -751,7 +759,7 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
     print(fourier)
 
 
-# In[977]:
+# In[53]:
 
 
 class Sky(GalfitComponent):
@@ -852,7 +860,7 @@ class Sky(GalfitComponent):
         self.dsky_dy = float(params[1])
 
 
-# In[978]:
+# In[54]:
 
 
 if __name__ == "__main__":
@@ -879,7 +887,7 @@ if __name__ == "__main__":
     print(sky)
 
 
-# In[979]:
+# In[55]:
 
 
 class GalfitHeader(GalfitComponent):
@@ -1033,7 +1041,7 @@ class GalfitHeader(GalfitComponent):
         return
 
 
-# In[980]:
+# In[56]:
 
 
 if __name__ == "__main__":
@@ -1071,15 +1079,15 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps""".
     print(header)
 
 
-# In[981]:
+# In[61]:
 
 
 class ComponentContainer:
     def __init__(self, **kwargs):
         self.bulge   = kwargs.get("bulge", Sersic(1))
         self.disk    = kwargs.get("disk", Sersic(2))
-        self.arms    = kwargs.get("arms", Power())
-        self.fourier = kwargs.get("fourier", Fourier())
+        self.arms    = kwargs.get("arms", Power(2))
+        self.fourier = kwargs.get("fourier", Fourier(2))
         self.sky     = kwargs.get("sky", Sky(3))
         
     def to_dict(self):
@@ -1121,7 +1129,7 @@ class ComponentContainer:
         return out_str
 
 
-# In[1017]:
+# In[62]:
 
 
 class FeedmeContainer(ComponentContainer):
@@ -1256,7 +1264,7 @@ class FeedmeContainer(ComponentContainer):
         #_ = [c.update_param_values() for c in self.to_list()]        
 
 
-# In[1018]:
+# In[63]:
 
 
 class GalfitOutput(FeedmeContainer):
@@ -1341,7 +1349,7 @@ class GalfitOutput(FeedmeContainer):
         return(galfit_out_text)
 
 
-# In[1019]:
+# In[64]:
 
 
 if __name__ == "__main__":
@@ -1350,8 +1358,8 @@ if __name__ == "__main__":
     header = GalfitHeader(galaxy_name = "tester")
     bulge = Sersic(1, position = (25,25))
     disk  = Sersic(2, position = (25,25))
-    arms  = Power()
-    fourier = Fourier()
+    arms  = Power(2)
+    fourier = Fourier(2)
     sky   = Sky(3)
     
     container = FeedmeContainer(**{"header"  : header,
@@ -1369,7 +1377,7 @@ if __name__ == "__main__":
     container.to_file() #, bulge, disk, arms, fourier, sky)
 
 
-# In[1020]:
+# In[65]:
 
 
 # Testing from_file
@@ -1399,7 +1407,7 @@ if __name__ == "__main__":
     print(str(container))
 
 
-# In[901]:
+# In[18]:
 
 
 # if __name__ == "__main__":
@@ -1435,7 +1443,7 @@ if __name__ == "__main__":
     
 
 
-# In[707]:
+# In[19]:
 
 
 if __name__ == "__main__":
@@ -1452,7 +1460,7 @@ if __name__ == "__main__":
     print(str(example_feedme))
 
 
-# In[708]:
+# In[20]:
 
 
 if __name__ == "__main__":
@@ -1553,7 +1561,7 @@ if __name__ == "__main__":
     good_output.header.to_file("good_output.in", good_output.bulge, good_output.disk, good_output.arms, good_output.fourier, good_output.sky)
 
 
-# In[709]:
+# In[21]:
 
 
 # For debugging purposes
@@ -1566,7 +1574,7 @@ def in_notebook():
         return False
 
 
-# In[710]:
+# In[22]:
 
 
 def export_to_py(notebook_name, output_filename = ""):
@@ -1593,7 +1601,7 @@ def export_to_py(notebook_name, output_filename = ""):
                 print("Output from nbconvert: ", *result)
 
 
-# In[711]:
+# In[23]:
 
 
 if __name__ == "__main__":
