@@ -1,9 +1,17 @@
-from galfit_objects import *
 from sparc_to_galfit_feedme_gen import *
 import shutil
 import subprocess
 # from os.path import join as pj
 # from os.path import exists
+
+import sys
+import os
+
+_HOME_DIR = os.path.expanduser("~")
+sys.path.append(f'{_HOME_DIR}/GalfitModule')
+from Objects.Components import *
+from Objects.Containers import *
+from Functions.HelperFunctions import *
 
 def sp(cmd_str, capture_output = True):
     # Because it is a pain in the butt to call subprocess with all those commands every time
@@ -41,7 +49,7 @@ def rerun_galfit(galfit_output, base_galfit_cmd, *args):
         run_galfit_cmd = f"{base_galfit_cmd} {galfit_output.path_to_feedme}"
 
         #galfit_num = f"{int(galfit_output.galfit_num) + 1:0>2}"
-        galfit_output = GalfitOutput(sp(run_galfit_cmd), **galfit_output.to_dict())
+        galfit_output = OutputContainer(sp(run_galfit_cmd), **galfit_output.to_dict())
        
     else:
         print("Galfit failed!")
@@ -82,13 +90,17 @@ def main(**kwargs):
     # Also this way we can take in one less variable (slurm)
     gname = ""
     slurm = False
-    print(galaxy_names)
     if len(galaxy_names) == 1:
         gname = galaxy_names[0]
         slurm = True
         
     print("Running feedme generator...")
-    feedme_info = write_to_feedmes(top_dir = cwd, single_galaxy_name = gname)
+    feedme_info = write_to_feedmes(top_dir = cwd,
+                                   #single_galaxy_name = gname,
+                                   in_dir  = in_dir,
+                                   tmp_dir = tmp_dir,
+                                   out_dir = out_dir
+                                   )
     
     max_it = 150
     base_galfit_cmd = f"{run_galfit} -imax {max_it}"
@@ -113,14 +125,14 @@ def main(**kwargs):
         
         initial_components = feedme_info[gname].extract_components()
                
-        # Note to self, GalfitOutput is *just* for handling output
+        # Note to self, OutputContainer is *just* for handling output
         # It does not retain the input state fed into Galfit
         # And the input dict is *before* output but will be updated *by* output
-        #initial_galfit = GalfitOutput(subprocess.CompletedProcess("",0), **components_dict)
+        #initial_galfit = OutputContainer(subprocess.CompletedProcess("",0), **components_dict)
         
         if num_steps == 1:
             run_galfit_cmd = f"{base_galfit_cmd} {feedme_info[gname]['path']}"
-            final_galfit_output = GalfitOutput(sp(run_galfit_cmd), **feedme_info[gname].to_dict())
+            final_galfit_output = OutputContainer(sp(run_galfit_cmd), **feedme_info[gname].to_dict())
             
         elif num_steps >= 2:
             bulge_in = pj(out_dir, gname, f"{gname}_bulge.in")
@@ -128,7 +140,7 @@ def main(**kwargs):
             
             run_galfit_cmd = f"{base_galfit_cmd} {bulge_in}"
             print("Bulge")
-            galfit_output = GalfitOutput(sp(run_galfit_cmd), **feedme_info[gname].to_dict())
+            galfit_output = OutputContainer(sp(run_galfit_cmd), **feedme_info[gname].to_dict())
             
             if rerun:
                 galfit_output = rerun_galfit(galfit_output,
@@ -145,7 +157,7 @@ def main(**kwargs):
                 
                 run_galfit_cmd = f"{base_galfit_cmd} {disk_in}"
                 print("Bulge + Disk")
-                galfit_output = GalfitOutput(sp(run_galfit_cmd), **galfit_output.to_dict())
+                galfit_output = OutputContainer(sp(run_galfit_cmd), **galfit_output.to_dict())
                 
                 if rerun:
                     galfit_output = rerun_galfit(galfit_output,
@@ -158,7 +170,7 @@ def main(**kwargs):
             galfit_output.to_file()
             run_galfit_cmd = f"{base_galfit_cmd} {feedme_path}"
             print("Bulge + Disk + Arms")
-            final_galfit_output = GalfitOutput(sp(run_galfit_cmd), **galfit_output.to_dict())
+            final_galfit_output = OutputContainer(sp(run_galfit_cmd), **galfit_output.to_dict())
             
         # Dropping this here for final rerun for all num_steps       
         if rerun:

@@ -15,7 +15,7 @@
 # 
 # To run the control script: `bash control_script.sh`
 
-# In[36]:
+# In[2]:
 
 
 import numpy as np
@@ -26,13 +26,17 @@ import subprocess
 import random
 import pandas as pd
 import os
+from copy import deepcopy
 #from os.path import join as pj
 
 import sys
 from astropy.io import fits
 
-from galfit_objects import *
-from copy import deepcopy
+_HOME_DIR = os.path.expanduser("~")
+sys.path.append(f'{_HOME_DIR}/GalfitModule')
+from Objects.Components import *
+from Objects.Containers import FeedmeContainer
+from Functions.HelperFunctions import *
 
 
 # # To convert autocrop image to fits
@@ -57,30 +61,22 @@ from copy import deepcopy
 #         print("Check Sparcfire output or directories. Cannot proceed.")
 #         raise SystemExit("Quitting.")
 
-# In[27]:
-
-
-y = ["aa", "bb", "cc"]
-x = y[2:]
-x
-
-
 # In[3]:
 
 
 # Grabbing filepath from command line
-def command_line(top_dir = os.getcwd()): # = True):
+def command_line(top_dir = os.getcwd(), **kwargs): # = True):
     
-    in_dir_out = os.path.join(top_dir, "sparcfire-in")
-    tmp_dir_out = os.path.join(top_dir, "sparcfire-tmp")
-    out_dir_out = os.path.join(top_dir, "sparcfire-out")
+    in_dir_out  = kwargs.get("in_dir", pj(top_dir, "sparcfire-in"))
+    tmp_dir_out = kwargs.get("tmp_dir", pj(top_dir, "sparcfire-tmp"))
+    out_dir_out = kwargs.get("out_dir", pj(top_dir, "sparcfire-out"))
         
     #if not run_as_script:
     #    return in_dir_out, tmp_dir_out, out_dir_out
     
     try:
         if len(sys.argv) != 4: # including name of python script
-            print(f"No path given. Defaulting to using: \n{in_dir_out}\n{tmp_dir_out}\n{out_dir_out}")
+            print(f"Using: \n{in_dir_out}\n{tmp_dir_out}\n{out_dir_out} to generate feedme.")
 
         else:
             in_dir_out = argv[1]
@@ -89,26 +85,26 @@ def command_line(top_dir = os.getcwd()): # = True):
     except:
         pass
 
-    return in_dir_out, tmp_dir_out, out_dir_out
+    return ap(in_dir_out), ap(tmp_dir_out), ap(out_dir_out)
 
 
 # In[4]:
 
 
 # Grabbing the file names
-def get_galaxy_names_list(path_to_sparc_in):
+def get_galaxy_names_list(in_dir, tmp_dir, out_dir):
 
     try:
-        filenames_read = glob.glob(path_to_sparc_in + "/*.fits") # Previously hardcoded
+        filenames_read = glob.glob(in_dir + "/*.fits") # Previously hardcoded
     
     #except:
         # Feel free to hardcode this 
         #print("Please input the full path to the input directory for the SpArcFiRe run and include the trailing /")
         #print("e.g. /home/usr/sparcfire-in/")
-        #path_to_sparc_in = input()
+        #in_dir = input()
     
         #try:
-            #filenames_in = glob.glob(path_to_sparc_in + "*.fits")
+            #filenames_in = glob.glob(in_dir + "*.fits")
 
         #except:
             #print("See instructions above or check your directory path. Could not glob.")
@@ -121,11 +117,12 @@ def get_galaxy_names_list(path_to_sparc_in):
         raise SystemExit("Exitting.")
         
     else:
-        filenames_out = [os.path.splitext(s)[0] for s in filenames_read]
-        galaxy_names_out = [os.path.basename(s) for s in filenames_out]
-        filenames_out = [s.replace("-in", "-out") for s in filenames_out]
+        gnames_out  = [os.path.basename(s).split(".")[0] 
+                      for s in filenames_read 
+                      if exists(pj(out_dir, os.path.basename(s).split(".")[0]))]
+        folders_out = [pj(out_dir, gname) for gname in gnames_out ]
         
-    return filenames_read, galaxy_names_out, filenames_out
+    return filenames_read, gnames_out, folders_out
 
 
 # In[5]:
@@ -133,7 +130,7 @@ def get_galaxy_names_list(path_to_sparc_in):
 
 def path_join(path='.', name='', file_ext=''):
     
-    file_path = os.path.join(path, name + file_ext)
+    file_path = pj(path, name + file_ext)
 
     # deprecated
     # "./" + path + '/' + name + file_ext
@@ -158,6 +155,7 @@ def scale_var(x, scale = 1):
 def galaxy_information(galaxy_name, galaxy_path):
    
     bulge_rad_out = 2
+    bulge_angle = 30
     bulge_axis_ratio_out = 0.5
     bulge_rot_angle_out = 1
 
@@ -166,17 +164,26 @@ def galaxy_information(galaxy_name, galaxy_path):
     center_pos_x_out = 30
     center_pos_y_out = 30
     disk_maj_axs_len_out = 30
+    disk_angle = 30
+    
     pos_angle_sersic_out = 1
     pos_angle_power_out = 30
+    
     axis_ratio_out = 0.5
+    avg_arc_length_out = 30
     max_arc_length_out = 30
+    
     chirality = 0
     chirality_2 = 0
+    chirality_3 = 0
+    
     a_ratio = 1
     alpha_out = 1
+    pitch_angle = 20
     # spin_parity handled by if 
     est_arcs_out = 2
     inclination = 30
+    
     bar_cand = 'FALSE'
     spin_parity = random.choice(['','-'])
     
@@ -195,29 +202,29 @@ def galaxy_information(galaxy_name, galaxy_path):
 #        csv_in = list(reader)
         for row in reader:
             # if sparcfire fails
-            if "input rejected" in row['fit_state']:
+            if "input rejected" in row.get('fit_state', ""):
                 break
                 
             # Already accounted for, no need to scale
-            center_pos_x_out = row['inputCenterR']
-            center_pos_y_out = row['inputCenterC']
+            center_pos_x_out = row.get('inputCenterR', center_pos_x_out)
+            center_pos_y_out = row.get('inputCenterC', center_pos_y_out)
             
-            crop_rad_out = row['cropRad']
+            crop_rad_out = row.get('cropRad', crop_rad_out)
             
             global scale_fact # Making this global since I'm now grabbing the necessary info from the csv
             scale_fact = 2*float(crop_rad_out)/256
             
-            bulge_rad_out = scale_var(row['bulgeMajAxsLen'], scale_fact)
-            bulge_axis_ratio_out = row['bulgeAxisRatio']
+            bulge_rad_out = scale_var(row.get('bulgeMajAxsLen', bulge_rad_out/scale_fact), scale_fact)
+            bulge_axis_ratio_out = row.get('bulgeAxisRatio', bulge_axis_ratio_out)
             
             # Scaled down, may scale down a bit further to better reflect the *half* radius
-            disk_maj_axs_len_out = scale_var(row['diskMajAxsLen'], scale_fact) 
+            disk_maj_axs_len_out = scale_var(row.get('diskMajAxsLen', disk_maj_axs_len_out/scale_fact), scale_fact) 
             
             # Angles don't need to scale
-            bulge_angle = np.degrees(float(row['bulgeMajAxsAngle']))
-            disk_angle = np.degrees(float(row['diskMajAxsAngleRadians']))
+            bulge_angle = np.degrees(float(row.get('bulgeMajAxsAngle', np.radians(bulge_angle))))
+            disk_angle = np.degrees(float(row.get('diskMajAxsAngleRadians', np.radians(disk_angle))))
             
-            a_ratio = float(row['diskAxisRatio'])
+            a_ratio = float(row.get('diskAxisRatio', a_ratio))
             
             if disk_angle < 0: 
                 inclination = np.degrees(np.arccos(a_ratio))
@@ -241,25 +248,25 @@ def galaxy_information(galaxy_name, galaxy_path):
             #inclination = inclination
 
             # GRABBING ARC STATISTICS
-            avg_arc_length_out = scale_var(row['avgArcLength'], scale_fact)
+            avg_arc_length_out = scale_var(row.get('avgArcLength', avg_arc_length_out/scale_fact), scale_fact)
             #med_arc_length = row['medianArcLength'][:6]
-            max_arc_length_out = scale_var(row['maxArcLength'], scale_fact)
+            max_arc_length_out = scale_var(row.get('maxArcLength', max_arc_length_out/scale_fact), scale_fact)
             
             # Grabbing chirality
-            chirality = row['chirality_maj']
-            chirality_2 = row['chirality_alenWtd']
-            chirality_3 = row['chirality_longestArc']
+            chirality = row.get('chirality_maj', chirality)
+            chirality_2 = row.get('chirality_alenWtd', chirality_2)
+            chirality_3 = row.get('chirality_longestArc', chirality_3)
             
             # For estimating number of real arcs to influence fourier modes
             # This seems to be a much better way to do it
-            est_arcs_out = int(row['rankAt50pct'])
+            est_arcs_out = int(row.get('rankAt50pct', est_arcs_out))
             #est_arcs_out = min(int(est_arcs_out[1]),int(est_arcs_out[-2]))
             
             # bar candidate: r_in = 0 according to Chien
-            bar_cand = row['bar_candidate_available']
+            bar_cand = row.get('bar_candidate_available', bar_cand)
             
             # Grabbing PA absolute average from dominant chirality
-            pitch_angle = abs(float(row['pa_alenWtd_avg_domChiralityOnly']))
+            pitch_angle = abs(float(row.get('pa_alenWtd_avg_domChiralityOnly', pitch_angle)))
             #print(pitch_angle)
             
             # Based on linear regression from test set:
@@ -486,42 +493,47 @@ def write_to_feedme(path, list_in, feedme_name = "autogen_feedme_galfit.in"):
         _ = [g.write(f"{value}\n") for value in list_in]
         
     return file_path
-# In[42]:
+# In[4]:
 
 
-def write_to_feedmes(top_dir = "", single_galaxy_name = ""):
+def write_to_feedmes(top_dir = "", **kwargs):
     
     if top_dir:
         in_dir, tmp_dir, out_dir = command_line(top_dir)
     else:
         in_dir, tmp_dir, out_dir = command_line()
-
-    filenames_fits_in, galaxy_names, folders_out = get_galaxy_names_list(in_dir)
+        
+    in_dir = kwargs.get("in_dir", in_dir)
+    tmp_dir = kwargs.get("tmp_dir", tmp_dir)
+    out_dir = kwargs.get("out_dir", out_dir)
+    
+    _, galaxy_names, gfolders = get_galaxy_names_list(in_dir, tmp_dir, out_dir)
     
     psf_info = csv_sdss_info(galaxy_names)
     
-    count = 0
     feedme_info_out = {}
     
-    for galaxy in folders_out:
+    for gfolder in gfolders:
     
-        if single_galaxy_name:
-            gname = single_galaxy_name
-            galaxy = pj(out_dir, gname)
-            # Alternatively
-            # galaxy = folders_out[galaxy_names.index(gname)]
-        else:
-            gname = galaxy_names[count]
+        # if single_galaxy_name:
+        #     gname = single_galaxy_name
+        #     #gfolder = pj(out_dir, gname)
+        #     # Alternatively
+        #     # galaxy = folders_out[galaxy_names.index(gname)]
+        # else:
+        #     gname = galaxy_names[count]
+        
+        gname = os.path.basename(gfolder)
             
         print(gname)
         
-        if(os.path.basename(galaxy) != gname):
+        if(os.path.basename(gfolder) != gname):
             print("uh oh naming went wrong")
             sys.exit()
         
         # From old implementation - 1/19/21
         # ************
-        # x1crop, x2crop, y1crop, y2crop = autocrop_grab(gname, galaxy)
+        # x1crop, x2crop, y1crop, y2crop = autocrop_grab(gname, gfolder)
         # scale = (float(x2crop)-float(x1crop))/256 - from old implementation
         # ************
         
@@ -530,7 +542,7 @@ def write_to_feedmes(top_dir = "", single_galaxy_name = ""):
             disk_maj_axs_len, pos_angle_disk, pos_angle_power, \
             axis_ratio, max_arc, spin_dir, \
             est_arcs, inclination, bar_candidate, \
-            alpha = galaxy_information(gname, galaxy)
+            alpha = galaxy_information(gname, gfolder)
         
         center_pos_x = float(center_pos_x)
         center_pos_y = float(center_pos_y)
@@ -541,7 +553,7 @@ def write_to_feedmes(top_dir = "", single_galaxy_name = ""):
         y1crop = round(center_pos_y - crop_rad)
         y2crop = round(center_pos_y + crop_rad)
     
-        in_rad, out_rad, cumul_rot = arc_information(gname, galaxy, num_arms = est_arcs)
+        in_rad, out_rad, cumul_rot = arc_information(gname, gfolder, num_arms = est_arcs)
     
         #cumul_rot = (cumul_rot + float(pos_angle_disk)) % 360 #+ float(pos_angle_power) 
     
@@ -590,7 +602,8 @@ def write_to_feedmes(top_dir = "", single_galaxy_name = ""):
                        position_angle = pos_angle_disk
                       )       
         
-        arms  = Power(inner_rad = in_rad, # Chosen based on where *detection* of arms usually start
+        arms  = Power(component_number = 2,
+                      inner_rad = in_rad, # Chosen based on where *detection* of arms usually start
                       outer_rad = out_rad,
                       cumul_rot = float(f"{spin_dir}{cumul_rot}"),
                       powerlaw = alpha,
@@ -598,7 +611,7 @@ def write_to_feedmes(top_dir = "", single_galaxy_name = ""):
                       sky_position_angle = 90 # pos_angle_power
                      )
         
-        fourier = Fourier()
+        fourier = Fourier(component_number = 2)
         sky   = Sky(component_number = 3)
         
         # Previously used for Fourier modes
@@ -623,9 +636,9 @@ def write_to_feedmes(top_dir = "", single_galaxy_name = ""):
 #             print("Something went wrong with the estimation of arcs! Check chirality_votes_maj in csv. Proceeding")
         
         
-        count += 1
+        # count += 1
         
-        container = FeedmeContainer(path_to_feedme = pj(galaxy, f"{gname}.in"),
+        container = FeedmeContainer(path_to_feedme = pj(gfolder, f"{gname}.in"),
                                     header         = header,
                                     bulge          = bulge, 
                                     disk           = disk,
@@ -637,13 +650,13 @@ def write_to_feedmes(top_dir = "", single_galaxy_name = ""):
         
         feedme_info_out[gname] = container
         
-        if single_galaxy_name:
-            break
+        # if single_galaxy_name:
+        #     break
         
     return feedme_info_out
-        #write_to_feedme(galaxy, bulge_feedme, feedme_name = gname + "_bulge.in")
-        #write_to_feedme(galaxy, disk_feedme, feedme_name = gname + "_disk.in")
-        #paths_to_feedme.append(write_to_feedme(galaxy, formatted_feedme, feedme_name = gname + ".in")) # do I need paths_to_feedme? I used to use it for something...
+        #write_to_feedme(gfolder, bulge_feedme, feedme_name = gname + "_bulge.in")
+        #write_to_feedme(gfolder, disk_feedme, feedme_name = gname + "_disk.in")
+        #paths_to_feedme.append(write_to_feedme(gfolder, formatted_feedme, feedme_name = gname + ".in")) # do I need paths_to_feedme? I used to use it for something...
 
 # For debugging purposes
 def in_notebook():

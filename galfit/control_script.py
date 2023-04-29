@@ -31,7 +31,15 @@
 # In[23]:
 
 
-from galfit_objects import *
+import sys
+import os
+
+_HOME_DIR = os.path.expanduser("~")
+sys.path.append(f'{_HOME_DIR}/GalfitModule')
+from Objects.Components import *
+from Objects.Containers import *
+from Functions.HelperFunctions import *
+
 # This should give me numpy and pandas and whatnot
 # also gives this, from os.path import join as pj
 from sparc_to_galfit_feedme_gen import *
@@ -43,19 +51,18 @@ from IPython import get_ipython
 import subprocess
 
 # For debugging purposes
-def in_notebook():
-    ip = get_ipython()
+# def in_notebook():
+#     ip = get_ipython()
     
-    if ip:
-        return True
-    else:
-        return False
+#     if ip:
+#         return True
+#     else:
+#         return False
 # In[ ]:
 
-
-def sp(cmd_str, capture_output = True):
-    # Because it is a pain in the butt to call subprocess with all those commands every time
-    return subprocess.run(cmd_str, capture_output = capture_output, text = True, shell = True, executable="/bin/bash")
+# def sp(cmd_str, capture_output = True):
+#     # Because it is a pain in the butt to call subprocess with all those commands every time
+#     return subprocess.run(cmd_str, capture_output = capture_output, text = True, shell = True, executable="/bin/bash")
 
 
 # In[ ]:
@@ -144,6 +151,7 @@ if __name__ == "__main__":
 
         if len(args.paths) == 3:
             in_dir, tmp_dir, out_dir = args.paths[0], args.paths[1], args.paths[2]
+            #print(f"Paths are, {in_dir}, {tmp_dir}, {out_dir}")
         else:
             in_dir = pj(cwd, "sparcfire-in")
             tmp_dir = pj(cwd, "sparcfire-tmp")
@@ -164,6 +172,11 @@ if __name__ == "__main__":
         out_dir = pj(cwd, "sparcfire-out")
         
         sys.path.append(pj(user_home, ".local", "bin"))
+        
+    # Making these absolute paths
+    in_dir = ap(in_dir)
+    tmp_dir = ap(tmp_dir)
+    out_dir = ap(out_dir)
 
 
 # ## Checking file directories and installed programs
@@ -237,12 +250,12 @@ if __name__ == "__main__":
 if __name__ == "__main__":    
     # Grabbing list of file names and masks with bash variable expansion
     input_filenames = glob.glob(pj(in_dir, "*.fits"))
-    star_masks      = glob.glob(pj(tmp_masks_dir, "*_star-rm.fits"))
+    star_masks      = glob.glob(pj(tmp_dir, "*_star-rm.fits"))
     
     if star_masks:
         sp(f"mv {pj(tmp_dir,'*_star-rm.fits')} {tmp_masks_dir}")
         
-    star_masks      = glob.glob(pj(tmp_masks_dir, "*_star-rm.fits"))        
+    star_masks = glob.glob(pj(tmp_masks_dir, "*_star-rm.fits"))        
     
     try:
         if exists(pj(cwd, "star_removal")):
@@ -359,9 +372,12 @@ if __name__ == "__main__":
         
         print("Running with slurm")
         slurm_run_name = "GALFITTING"
-        timeout = 5 # Minutes
+        timeout = 2 # Minutes
         slurm_run_cmd = f"cat {slurm_file} | ~wayne/bin/distrib_slurm {slurm_run_name} -M all"
-        sp(f"{slurm_run_cmd} -t {timeout}", capture_output = False)
+        try:
+            sp(f"{slurm_run_cmd} -t {timeout}", capture_output = False, timeout = 60*(timeout + 1))
+        except subprocess.TimeoutExpired:
+            pass
         
         kwargs_main = check_galfit_out_hangups(galaxy_names, tmp_fits_dir, out_dir, kwargs_main)
         
@@ -371,7 +387,11 @@ if __name__ == "__main__":
             write_to_slurm(cwd, kwargs_main, slurm_file = slurm_file)
             
             timeout *= count
-            sp(f"{slurm_run_cmd} -t {timeout}", capture_output = False)    
+            try:
+                sp(f"{slurm_run_cmd} -t {timeout}", capture_output = False, timeout = 60*(timeout + 1))
+            except subprocess.TimeoutExpired:
+                pass
+            
             kwargs_main = check_galfit_out_hangups(galaxy_names, tmp_fits_dir, out_dir, kwargs_main)
             count += 1
             
@@ -394,7 +414,8 @@ if __name__ == "__main__":
                                      run_python = run_python)
         # TODO: Use failures for something later? Maybe write to a file?
 
-boom = """Numerical Recipes run-time error...
+    # Unused but here for a good time
+    boom = """Numerical Recipes run-time error...
 gaussj: Singular Matrix-1
 ...now exiting to system...
 
