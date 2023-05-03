@@ -1,0 +1,74 @@
+INFO:remove_stars_with_sextractor:not keeping segmentation images
+INFO:remove_stars_with_sextractor:will write masked images (in addition to masks)
+WARNING:remove_stars_with_sextractor:output directory already exists .
+INFO:remove_stars_with_sextractor:in directory is: temp-in
+INFO:remove_stars_with_sextractor:out directory is: .
+INFO:remove_stars_with_sextractor:created temporary directory: ./star-rm_tmp_683057278
+INFO:remove_stars_with_sextractor:found 8 FITS files in temp-in
+INFO:remove_stars_with_sextractor:processing: 1237650760785330301.fits
+INFO:remove_stars_with_sextractor:input image dimensions: (104, 104)
+INFO:remove_stars_with_sextractor:segmentation image dimensions (depadded): (104, 104)
+INFO:remove_stars_with_sextractor:running SExtractor
+INFO:remove_stars_with_sextractor:SExtractor finished
+INFO:remove_stars_with_sextractor:reading input and SExtractor-segmentation images
+INFO:remove_stars_with_sextractor:removed segmentation image
+INFO:remove_stars_with_sextractor:SExtractor found 2 objects
+WARNING:remove_stars_with_sextractor:no object found at the center, looking for object nearest center
+WARNING:remove_stars_with_sextractor:could not create starmask for 1237650760785330301
+WARNING:remove_stars_with_sextractor:cannot convert float infinity to integer
+INFO:remove_stars_with_sextractor:processing: 1237658492287648150.fits
+INFO:remove_stars_with_sextractor:input image dimensions: (45, 45)
+INFO:remove_stars_with_sextractor:segmentation image dimensions (depadded): (45, 45)
+INFO:remove_stars_with_sextractor:running SExtractor
+INFO:remove_stars_with_sextractor:SExtractor finished
+INFO:remove_stars_with_sextractor:reading input and SExtractor-segmentation images
+INFO:remove_stars_with_sextractor:removed segmentation image
+INFO:remove_stars_with_sextractor:SExtractor found 1 objects
+WARNING:remove_stars_with_sextractor:no object found at the center, looking for object nearest center
+WARNING:remove_stars_with_sextractor:could not create starmask for 1237658492287648150
+WARNING:remove_stars_with_sextractor:cannot convert float infinity to integer
+INFO:remove_stars_with_sextractor:processing: 1237661357007437897.fits
+INFO:remove_stars_with_sextractor:input image dimensions: (2498, 2498)
+INFO:remove_stars_with_sextractor:segmentation image dimensions (depadded): (2498, 2498)
+INFO:remove_stars_with_sextractor:running SExtractor
+INFO:remove_stars_with_sextractor:SExtractor finished
+INFO:remove_stars_with_sextractor:reading input and SExtractor-segmentation images
+INFO:remove_stars_with_sextractor:removed segmentation image
+INFO:remove_stars_with_sextractor:SExtractor found 2057 objects
+INFO:remove_stars_with_sextractor:not keeping segmentation images
+INFO:remove_stars_with_sextractor:will write masked images (in addition to masks)
+WARNING:remove_stars_with_sextractor:output directory already exists .
+INFO:remove_stars_with_sextractor:in directory is: temp-in
+INFO:remove_stars_with_sextractor:out directory is: .
+INFO:remove_stars_with_sextractor:created temporary directory: ./star-rm_tmp_745524846
+INFO:remove_stars_with_sextractor:found 8 FITS files in temp-in
+INFO:remove_stars_with_sextractor:processing: 1237650760785330301.fits
+INFO:remove_stars_with_sextractor:input image dimensions: (104, 104)
+INFO:remove_stars_with_sextractor:segmentation image dimensions (depadded): (104, 104)
+INFO:remove_stars_with_sextractor:running SExtractor
+INFO:remove_stars_with_sextractor:SExtractor finished
+INFO:remove_stars_with_sextractor:reading input and SExtractor-segmentation images
+INFO:remove_stars_with_sextractor:removed segmentation image
+INFO:remove_stars_with_sextractor:SExtractor found 2 objects
+WARNING:remove_stars_with_sextractor:no object found at the center, looking for object nearest center
+WARNING:remove_stars_with_sextractor:could not create starmask for 1237650760785330301
+WARNING:remove_stars_with_sextractor:cannot convert float infinity to integer
+INFO:remove_stars_with_sextractor:processing: 1237658492287648150.fits
+INFO:remove_stars_with_sextractor:input image dimensions: (45, 45)
+INFO:remove_stars_with_sextractor:segmentation image dimensions (depadded): (45, 45)
+INFO:remove_stars_with_sextractor:running SExtractor
+INFO:remove_stars_with_sextractor:SExtractor finished
+INFO:remove_stars_with_sextractor:reading input and SExtractor-segmentation images
+INFO:remove_stars_with_sextractor:removed segmentation image
+INFO:remove_stars_with_sextractor:SExtractor found 1 objects
+WARNING:remove_stars_with_sextractor:no object found at the center, looking for object nearest center
+WARNING:remove_stars_with_sextractor:could not create starmask for 1237658492287648150
+WARNING:remove_stars_with_sextractor:cannot convert float infinity to integer
+INFO:remove_stars_with_sextractor:processing: 1237661357007437897.fits
+INFO:remove_stars_with_sextractor:input image dimensions: (2498, 2498)
+INFO:remove_stars_with_sextractor:segmentation image dimensions (depadded): (2498, 2498)
+INFO:remove_stars_with_sextractor:running SExtractor
+INFO:remove_stars_with_sextractor:SExtractor finished
+INFO:remove_stars_with_sextractor:reading input and SExtractor-segmentation images
+INFO:remove_stars_with_sextractor:removed segmentation image
+INFO:remove_stars_with_sextractor:SExtractor found 2057 objects

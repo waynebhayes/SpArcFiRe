@@ -1,3 +1,3 @@
-
-galfit/.ipynb_checkpoints/notebook_feedme_gen-checkpoint.ipynb
-.DS_Store
+*.DS_Store
+*cpython-*
+*-checkpoint*

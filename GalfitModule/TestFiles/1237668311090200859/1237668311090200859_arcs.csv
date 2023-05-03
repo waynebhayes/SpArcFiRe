@@ -1,0 +1,3 @@
+gxyName,alenRank,math_initial_theta,pitch_angle,math_initial_radius,relative_theta_start,relative_theta_end,r_start,r_end,used2rev,failed2rev,hasUndefinedEndpoints,arc_length,num_pixels,err_per_len,err_per_pixel,mean_intensity,brt_ratio_score,anovaF_score,clusOutputColor
+1237668311090200859,1,10.059288,-21.620670,55.539716,0.000000,1.956326,55.539716,120.600003,0,0,0,176.573562,2456.000000,189.481694,13.622743,0.376826,1.069026,103.728180,[1 0 0]
+1237668311090200859,2,7.042632,-6.648768,78.325301,0.000000,0.981336,78.325301,87.817577,0,0,0,81.983597,703.000000,24.903724,2.904263,0.382899,1.056892,106.511435,[0 1 1]
