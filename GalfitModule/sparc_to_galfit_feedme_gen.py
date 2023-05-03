@@ -15,7 +15,7 @@
 # 
 # To run the control script: `bash control_script.sh`
 
-# In[2]:
+# In[4]:
 
 
 import numpy as np
@@ -29,22 +29,45 @@ from copy import deepcopy
 
 import os
 from os.path import join as pj
+from os.path import exists
 
 import sys
 from astropy.io import fits
 
+
+# In[5]:
+
+
+# For debugging purposes
+from IPython import get_ipython
+def in_notebook():
+    ip = get_ipython()
+    
+    if ip:
+        return True
+    else:
+        return False
+
+
+# In[7]:
+
+
 _HOME_DIR = os.path.expanduser("~")
-try:
-    _SPARCFIRE_DIR = os.environ["SPARCFIRE_HOME"]
-    _MODULE_DIR = pj(_SPARCFIRE_DIR, "GalfitModule")
-except KeyError:
-    # print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
-    # print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
-    _MODULE_DIR = pj(_HOME_DIR, "GalfitModule")
+if in_notebook():
+    _SPARCFIRE_DIR = pj(_HOME_DIR, "sparcfire_matt") 
+    _MODULE_DIR    = pj(_SPARCFIRE_DIR, "GalfitModule")
+else:
+    try:
+        _SPARCFIRE_DIR = os.environ["SPARCFIRE_HOME"]
+        _MODULE_DIR = pj(_SPARCFIRE_DIR, "GalfitModule")
+    except KeyError:
+        print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
+        print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
+        _MODULE_DIR = pj(_HOME_DIR, "GalfitModule")
     
 sys.path.append(_MODULE_DIR)
-from Objects.Components import *
-from Objects.Containers import FeedmeContainer
+from Classes.Components import *
+from Classes.Containers import FeedmeContainer
 from Functions.HelperFunctions import *
 
 

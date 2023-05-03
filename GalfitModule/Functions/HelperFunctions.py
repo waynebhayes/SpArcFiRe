@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[17]:
+# In[7]:
 
 
 import os
@@ -14,25 +14,14 @@ from os.path import exists
 import shutil
 import subprocess
 from copy import deepcopy
-from IPython import get_ipython
 from astropy.io import fits
 
-_HOME_DIR = os.path.expanduser("~")
-try:
-    _SPARCFIRE_DIR = os.environ["SPARCFIRE_HOME"]
-    _MODULE_DIR = pj(_SPARCFIRE_DIR, "GalfitModule")
-except KeyError:
-    print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
-    print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
-    _MODULE_DIR = pj(_HOME_DIR, "GalfitModule")
 
-sys.path.append(_MODULE_DIR)
-
-
-# In[10]:
+# In[6]:
 
 
 # For debugging purposes
+from IPython import get_ipython
 def in_notebook():
     ip = get_ipython()
     
@@ -40,6 +29,25 @@ def in_notebook():
         return True
     else:
         return False
+
+
+# In[5]:
+
+
+_HOME_DIR = os.path.expanduser("~")
+if in_notebook():
+    _SPARCFIRE_DIR = pj(_HOME_DIR, "sparcfire_matt") 
+    _MODULE_DIR    = pj(_SPARCFIRE_DIR, "GalfitModule")
+else:
+    try:
+        _SPARCFIRE_DIR = os.environ["SPARCFIRE_HOME"]
+        _MODULE_DIR = pj(_SPARCFIRE_DIR, "GalfitModule")
+    except KeyError:
+        print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
+        print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
+        _MODULE_DIR = pj(_HOME_DIR, "GalfitModule")
+
+sys.path.append(_MODULE_DIR)
 
 
 # In[11]:
@@ -106,7 +114,7 @@ def sp(cmd_str, capture_output = True, timeout = None):
                           executable="/bin/bash")
 
 
-# In[ ]:
+# In[18]:
 
 
 if __name__ == "__main__":

@@ -4,18 +4,20 @@ import os
 from os.path import join as pj
 # from os.path import exists
 
-_HOME_DIR = os.path.expanduser("~")
+_HOME_DIR = os.path.expanduser("~")    
+
 try:
     _SPARCFIRE_DIR = os.environ["SPARCFIRE_HOME"]
     _MODULE_DIR = pj(_SPARCFIRE_DIR, "GalfitModule")
 except KeyError:
-    # print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
-    # print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
+    print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
+    print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
     _MODULE_DIR = pj(_HOME_DIR, "GalfitModule")
     
 sys.path.append(_MODULE_DIR)
-from Objects.Components import *
-from Objects.Containers import *
+    
+from Classes.Components import *
+from Classes.Containers import *
 from Functions.HelperFunctions import *
 from sparc_to_galfit_feedme_gen import *
 
@@ -201,7 +203,6 @@ def main(**kwargs):
                              *galfit_output.to_list()
                             )
         
-        print("Verbose?")
         if verbose:
             print(str(final_galfit_output))
 

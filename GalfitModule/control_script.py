@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# In[ ]:
+
+
+
+
+
 # **Author: Matthew Portman**
 # 
 # **Date (Github date will likely be more accurate): 4/17/23**
@@ -37,21 +43,43 @@ from os.path import join as pj
 
 import argparse
 import shutil
-from IPython import get_ipython
 import subprocess
 
+
+# In[3]:
+
+
+# For debugging purposes
+from IPython import get_ipython
+def in_notebook():
+    ip = get_ipython()
+    
+    if ip:
+        return True
+    else:
+        return False
+
+
+# In[8]:
+
+
 _HOME_DIR = os.path.expanduser("~")
-try:
-    _SPARCFIRE_DIR = os.environ["SPARCFIRE_HOME"]
-    _MODULE_DIR = pj(_SPARCFIRE_DIR, "GalfitModule")
-except KeyError:
-    # print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
-    # print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
-    _MODULE_DIR = pj(_HOME_DIR, "GalfitModule")
+if in_notebook():
+    _SPARCFIRE_DIR = pj(_HOME_DIR, "sparcfire_matt") 
+    _MODULE_DIR    = pj(_SPARCFIRE_DIR, "GalfitModule")
+else:
+    try:
+        _SPARCFIRE_DIR = os.environ["SPARCFIRE_HOME"]
+        _MODULE_DIR = pj(_SPARCFIRE_DIR, "GalfitModule")
+    except KeyError:
+        print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
+        print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
+        _MODULE_DIR = pj(_HOME_DIR, "GalfitModule")
     
 sys.path.append(_MODULE_DIR)
-from Objects.Components import *
-from Objects.Containers import *
+
+from Classes.Components import *
+from Classes.Containers import *
 from Functions.HelperFunctions import *
 
 # This should give me numpy and pandas and whatnot
@@ -376,13 +404,13 @@ def check_galfit_out_hangups(tmp_fits_dir, out_dir, kwargs_main):
     return kwargs_main
 
 
-# In[ ]:
+# In[12]:
 
 
 def write_failed(cwd, failures = []):
     fail_filename = "galfit_failed.txt"
     fail_filepath = pj(cwd, fail_filename)
-    print(f"{failures} galaxies failed. Writing the list of these to {fail_filepath}")
+    print(f"{len(failures)} galax(y)ies completely failed. Writing the list of these to {fail_filepath}")
     with open(fail_filepath, "w") as ff:
         ff.writelines("\n".join(failures))
 
