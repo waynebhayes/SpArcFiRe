@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[ ]:
 
 
 import os
@@ -14,7 +14,7 @@ from IPython import get_ipython
 from astropy.io import fits
 
 
-# In[2]:
+# In[ ]:
 
 
 # For debugging purposes
@@ -28,7 +28,7 @@ def in_notebook():
         return False
 
 
-# In[3]:
+# In[ ]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -49,7 +49,7 @@ sys.path.append(_MODULE_DIR)
 from Functions.HelperFunctions import *
 
 
-# In[4]:
+# In[ ]:
 
 
 class GalfitComponent:
@@ -351,7 +351,7 @@ class GalfitComponent:
     #     return self.__dict__.iteritems()
 
 
-# In[5]:
+# In[ ]:
 
 
 class Sersic(GalfitComponent):
@@ -477,7 +477,7 @@ class Sersic(GalfitComponent):
         self.position_angle   = float(params[4])
 
 
-# In[6]:
+# In[ ]:
 
 
 class Power(GalfitComponent):
@@ -600,7 +600,7 @@ class Power(GalfitComponent):
         self.sky_position_angle = float(params[4])
 
 
-# In[7]:
+# In[ ]:
 
 
 class Fourier(GalfitComponent):
@@ -708,7 +708,7 @@ class Fourier(GalfitComponent):
                              for i, n in enumerate(self.param_values.keys())}
 
 
-# In[8]:
+# In[ ]:
 
 
 class Sky(GalfitComponent):
@@ -809,7 +809,7 @@ class Sky(GalfitComponent):
         self.dsky_dy = float(params[1])
 
 
-# In[9]:
+# In[ ]:
 
 
 class GalfitHeader(GalfitComponent):
@@ -963,7 +963,7 @@ class GalfitHeader(GalfitComponent):
         return
 
 
-# In[10]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1001,7 +1001,7 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps""".
     print(header)
 
 
-# In[11]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1035,7 +1035,7 @@ if __name__ == "__main__":
     print(bulge)
 
 
-# In[12]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1065,7 +1065,7 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
     print(arms)
 
 
-# In[13]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1087,7 +1087,7 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
     print(fourier)
 
 
-# In[14]:
+# In[ ]:
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[4]:
 
 
 import os
@@ -14,7 +14,7 @@ from IPython import get_ipython
 from astropy.io import fits
 
 
-# In[2]:
+# In[5]:
 
 
 # For debugging purposes
@@ -28,7 +28,7 @@ def in_notebook():
         return False
 
 
-# In[3]:
+# In[6]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -51,7 +51,7 @@ from Classes.Components import *
 from Functions.HelperFunctions import *
 
 
-# In[4]:
+# In[7]:
 
 
 class ComponentContainer:
@@ -101,7 +101,7 @@ class ComponentContainer:
         return out_str
 
 
-# In[5]:
+# In[33]:
 
 
 class FeedmeContainer(ComponentContainer):
@@ -127,15 +127,16 @@ class FeedmeContainer(ComponentContainer):
         else:
             self.header.to_file(self.path_to_feedme, *ComponentContainer.to_list(self))
             
-    def from_file(self, filename):
+    def from_file(self, obj_in):
         # This function handles grabbing and storing the values from galfit files (input and output???)
         # It's written to generally handle both and stores everything in the respective component objects
-
-        def from_fits(self, filename = filename):
+        # obj_in could be a filename or a dict (per fitshandler)
+        
+        def open_file(self, open_type, filename = obj_in):
             try: 
                 # Grabbing the filename
                 #input_filename = glob_name(galaxy_path, '', filename) 
-                input_file = fits.open(filename)
+                input_file = open_type(filename)
 
             except FileNotFoundError:
                 print(f"Can't open to read the file, {filename}. Check name/permissions/directory.")
@@ -144,15 +145,18 @@ class FeedmeContainer(ComponentContainer):
             except OSError as ose:
                 print(f"Something went wrong! {ose}")
                 return None
-        
-            input_in = dict(input_file[2].header)
-            input_keys = list(input_in.keys())
+            
+            return input_file
+
+        def from_fits(self, input_dict = obj_in):
+            
+            input_keys = list(input_dict.keys())
             
             component_list = self.to_list()
             component_num = 0
             send_to_helper = {}
             
-            for idx, (key, value) in enumerate(input_in.items()):
+            for idx, (key, value) in enumerate(input_dict.items()):
                 component = component_list[component_num]
                 
                 try:
@@ -186,19 +190,7 @@ class FeedmeContainer(ComponentContainer):
                     
             return
         
-        def from_text(self, filename = filename):
-            try: 
-                # Grabbing the filename
-                #input_filename = glob_name(galaxy_path, '', filename) 
-                input_file = open(filename,'r')
-
-            except FileNotFoundError:
-                print(f"Can't open to read the file, {filename}. Check name/permissions/directory.")
-                return None
-
-            except OSError as ose:
-                print(f"Something went wrong! {ose}")
-                return None
+        def from_text(self, input_file):
             
             component_list = self.to_list()
             component_num = 0
@@ -221,22 +213,29 @@ class FeedmeContainer(ComponentContainer):
                     component_num += 1
                     
                     if component_num == len(component_list): break
-                    
-            input_file.close()
         
             return
         
-        ext = os.path.splitext(filename)[1]
-        if ext == ".fits":
+        # 
+        if isinstance(obj_in, dict):
             from_fits(self)
+            
+        elif os.path.splitext(obj_in)[1] == ".fits":
+            input_file = open_file(self, fits.open)
+            input_dict = dict(input_file[2].header)
+            from_fits(self, input_dict)
+            input_file.close()
+            
         else:
-            from_text(self)
+            input_file = open_file(self, open)
+            from_text(self, input_file)
+            input_file.close()
             
         _ = [c.update_param_values() for c in self.to_list()]
         #_ = [c.update_param_values() for c in self.to_list()]
 
 
-# In[6]:
+# In[34]:
 
 
 class OutputContainer(FeedmeContainer):
@@ -339,7 +338,7 @@ class OutputContainer(FeedmeContainer):
             return ""
 
 
-# In[7]:
+# In[35]:
 
 
 if __name__ == "__main__":
@@ -368,7 +367,7 @@ if __name__ == "__main__":
     container.to_file() #, bulge, disk, arms, fourier, sky)
 
 
-# In[8]:
+# In[36]:
 
 
 # Testing from_file
@@ -409,7 +408,7 @@ if __name__ == "__main__":
     
 
 
-# In[9]:
+# In[37]:
 
 
 # if __name__ == "__main__":
@@ -445,7 +444,7 @@ if __name__ == "__main__":
     
 
 
-# In[10]:
+# In[38]:
 
 
 if __name__ == "__main__":
@@ -462,7 +461,7 @@ if __name__ == "__main__":
     print(str(example_feedme))
 
 
-# In[11]:
+# In[39]:
 
 
 if __name__ == "__main__":

@@ -53,9 +53,10 @@ sys.path.append(_MODULE_DIR)
 
 from Functions.HelperFunctions import *
 from Classes.Components import *
+from Classes.Containers import *
 
 
-# In[4]:
+# In[23]:
 
 
 class HDU:
@@ -72,9 +73,17 @@ class HDU:
                 "header" : header,
                 "data"   : data
                }
+    
+    def __str__(self):
+        header_str = ""
+        for k,v in self.header.items():
+            header_str += f"{k} = {v}\n"
+            
+        output_str = f"{self.name}\n{header_str}Img size: {np.shape(self.data)}"
+        return output_str
 
 
-# In[5]:
+# In[20]:
 
 
 class FitsFile:
@@ -125,6 +134,8 @@ class FitsFile:
         self.all_hdu  = {name : hdu}
         self.file = file_in
         
+        # Wait is for continuing to use the file in some other capacity
+        # i.e. for outputfits below to grab more info
         if not wait:
             file_in.close(verbose = True)
         
@@ -247,7 +258,7 @@ class FitsFile:
             setattr(self, key, value)
 
 
-# In[6]:
+# In[21]:
 
 
 class OutputFits(FitsFile):
@@ -256,7 +267,7 @@ class OutputFits(FitsFile):
         
         FitsFile.__init__(self, filepath = filepath, wait = True)
         
-        # by default we already have observation
+        # by initializing FitsFile we already have observation
         if not names:
             names = ["model", "residual"]
             
@@ -275,6 +286,12 @@ class OutputFits(FitsFile):
         
         # Dict is very redundant here but just for funsies
         self.header = dict(self.model.header)
+        _header = GalfitHeader()
+        # Can call the helper directly since we're just using the header dict
+        _header.from_file_helper(self.header)
+        self.feedme = FeedmeContainer(path_to_feedme = filepath, header = _header)
+        self.feedme.from_file(self.header)
+        
         self.data = self.model.data
         
         self.close()
@@ -285,10 +302,8 @@ class OutputFits(FitsFile):
         
         
     def masked_residual(self, mask):
-        _header = GalfitHeader()
-        # Can call the helper directly since we're just using the header dict
-        _header.from_file_helper(self.header)
-        crop_box = _header.region_to_fit
+
+        crop_box = self.feedme.header.region_to_fit
 
         # To adjust for python indexing
         box_min, box_max = crop_box[0] - 1, crop_box[1]
@@ -318,31 +333,37 @@ class OutputFits(FitsFile):
         return self.masked_residual_normalized
 
 
-# In[7]:
+# In[26]:
 
 
 # Testing from_file
 if __name__ == "__main__":
     
-    real_in = pj(_MODULE_DIR, "TestFiles", "1237671124296532233.fits")
-    real_out = pj(_MODULE_DIR, "TestFiles", "1237671124296532233", "1237671124296532233_galfit_out.fits")
+    obs = pj(_MODULE_DIR, "TestFiles", "1237671124296532233.fits")
+    model = pj(_MODULE_DIR, "TestFiles", "1237671124296532233", "1237671124296532233_galfit_out.fits")
     
-    test_in  = FitsFile(real_in)
-    test_out = OutputFits(real_out)
+    test_obs   = FitsFile(obs)
+    test_model = OutputFits(model)
     
-    _header = GalfitHeader()
-    _header.from_file_helper(test_out.header)
+    print(test_obs.observation)
+    print()
+    print(test_model.feedme)
+    print()
+    print(test_model.model)
     
-    crop_box = _header.region_to_fit
-    # To adjust for python indexing
-    box_min, box_max = crop_box[0] - 1, crop_box[1]
+#     _header = GalfitHeader()
+#     _header.from_file_helper(test_out.header)
+    
+#     crop_box = _header.region_to_fit
+#     # To adjust for python indexing
+#     box_min, box_max = crop_box[0] - 1, crop_box[1]
         
-    print(np.shape(test_in.data[box_min:box_max, box_min:box_max]))
-    print(np.shape(test_out.observation.data))
-    print(np.shape(test_out.data))
+#     print(np.shape(test_in.data[box_min:box_max, box_min:box_max]))
+#     print(np.shape(test_out.observation.data))
+#     print(np.shape(test_out.data))
 
 
-# In[ ]:
+# In[27]:
 
 
 if __name__ == "__main__":
