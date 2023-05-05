@@ -245,6 +245,9 @@ def main(**kwargs):
                                     {pj(out_png_dir, gname)}_combined.png"
 
             _ = sp(montage_cmd, capture_output = capture_output)
+            # Drop a copy in the sparfire-out folder of each galaxy for ease of navigating/viewing
+            shutil.copy2(f"{pj(out_png_dir, gname)}_combined.png", pj(out_dir, gname))
+                
         else:
             print("Skipping fitspng conversion... there is likely a library (libcfitsio) issue.")
 

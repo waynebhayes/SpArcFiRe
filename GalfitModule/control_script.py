@@ -60,7 +60,7 @@ def in_notebook():
         return False
 
 
-# In[8]:
+# In[4]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -404,15 +404,16 @@ def check_galfit_out_hangups(tmp_fits_dir, out_dir, kwargs_main):
     return kwargs_main
 
 
-# In[12]:
+# In[1]:
 
 
 def write_failed(cwd, failures = []):
-    fail_filename = "galfit_failed.txt"
-    fail_filepath = pj(cwd, fail_filename)
-    print(f"{len(failures)} galax(y)ies completely failed. Writing the list of these to {fail_filepath}")
-    with open(fail_filepath, "w") as ff:
-        ff.writelines("\n".join(failures))
+    if failures:
+        fail_filename = "galfit_failed.txt"
+        fail_filepath = pj(cwd, fail_filename)
+        print(f"{len(failures)} galax(y)ies completely failed. Writing the list of these to {fail_filepath}")
+        with open(fail_filepath, "w") as ff:
+            ff.writelines("\n".join(failures))
 
 
 # In[ ]:
