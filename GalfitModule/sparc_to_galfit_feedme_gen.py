@@ -15,7 +15,7 @@
 # 
 # To run the control script: `bash control_script.sh`
 
-# In[4]:
+# In[3]:
 
 
 import numpy as np
@@ -35,7 +35,7 @@ import sys
 from astropy.io import fits
 
 
-# In[5]:
+# In[4]:
 
 
 # For debugging purposes
@@ -49,7 +49,7 @@ def in_notebook():
         return False
 
 
-# In[7]:
+# In[5]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -373,7 +373,7 @@ def galaxy_information(galaxy_name, galaxy_path):
             )
 
 
-# In[27]:
+# In[7]:
 
 
 def arc_information(galaxy_name, galaxy_path, num_arms = 2):
@@ -410,7 +410,7 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2):
             # one message per galaxy instead of doing it for arcs and galaxy info
             return inner_rad, outer_rad, cumul_rot_out #, alpha_out
 
-        while count < num_arms:
+        while i < num_arms:
             try:
                 _ = arcs_in[i]['pitch_angle']
             except IndexError as ie:
@@ -421,7 +421,7 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2):
                 continue
 
             # Rudimentary weighting scheme
-            weight = num_arms - count
+            weight = (num_arms - i)/num_arms
             
             try:
                 theta_sum += (np.degrees(float(arcs_in[i]['math_initial_theta'])) % 360) * weight
@@ -440,9 +440,9 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2):
         # starting point of the arms which is the hard part... 
         
         # Averaging, tack on 180 to limit some of the craziness
-        weight_div = 1/np.math.factorial(num_arms)
+        weight_div = 1/max(1,count-1) #1/np.math.factorial(count)
         cumul_rot_out = max((abs(theta_sum)*weight_div) % 180, 60.0) # NOT A STRING
- 
+
         inner_rad = inner_rad*weight_div # Averaging the inner distance to both arcs
         outer_rad = outer_rad*weight_div # Averaging outer distance
         
