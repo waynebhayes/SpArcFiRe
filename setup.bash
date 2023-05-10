@@ -17,7 +17,7 @@ fail() { echo "$@" >&2; return 1
 [ "$SPARCFIRE_HOME" != "" ] && return
 
 if [ "`echo $0 | sed 's,.*/,,'`" = setup.sh ]; then
-    fail "$SETUP_USAGE 
+    fail "$SETUP_USAGE
     SETUP ERROR: You've run this script; source it instead by typing:
     source $0"
 fi
@@ -33,19 +33,19 @@ case $# in
 esac
 if [ "$SPARCFIRE_HOME" = . ]; then SPARCFIRE_HOME=`/bin/pwd`; fi
 
-echo -n "Checking you have Python 3 installed"
-if python --version | fgrep 3 2>/dev/null; then
+echo -n "Checking you have Python 2.7 installed"
+if python --version | fgrep 2.7 2>/dev/null; then
     PYTHON=python
-elif python3 --version 2>/dev/null; then
-    PYTHON=python3
+elif python2.7 --version 2>/dev/null; then
+    PYTHON=python2.7
 else
-    fail "$SETUP_USAGE${NL} SETUP ERROR: You need to install Python 3, and have the executable called python3"
+    fail "$SETUP_USAGE${NL} SETUP ERROR: You need to install Python 2.7, and have the executable called python2.7"
 fi
-echo "Your python3 is called $PYTHON:"
+echo "Your python2.7 is called $PYTHON:"
 $PYTHON --version
 
 PIP_NEED='numpy|Pillow|scipy|astropy'
-PIP_HAVE=`(pip3 list; $PYTHON -m pip list) 2>/dev/null | awk '{print $1}' | sort -u | egrep "$PIP_NEED"`
+PIP_HAVE=`(pip2 list; $PYTHON -m pip list) 2>/dev/null | awk '{print $1}' | sort -u | egrep "$PIP_NEED"`
 if [ `echo "$PIP_HAVE" | wc -l` -eq 4 ]; then
     echo "SUCCESS! SPARCFIRE_HOME set to $SPARCFIRE_HOME. Now adding $SPARCFIRE_HOME/scripts to PATH."
     export PATH="$SPARCFIRE_HOME/scripts:$PATH"

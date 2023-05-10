@@ -372,11 +372,11 @@ if __name__ == "__main__":
                     
             print("Generating starmasks...")
             os.chdir(star_removal_path)
-            out_text = sp(f"python3 {pj(star_removal_path, 'remove_stars_with_sextractor.py')} {need_masks_dir} {tmp_masks_dir}", capture_output = capture_output)
+            out_text = sp(f"python3 {pj(star_removal_path, 'remove_stars_with_sextractor.py3')} {need_masks_dir} {tmp_masks_dir}", capture_output = capture_output)
             os.chdir(cwd)
             
             if out_text.stderr:
-                print(f"Something went wrong running 'remove_stars_with_sextractor.py'! Printing debug info...")
+                print(f"Something went wrong running 'remove_stars_with_sextractor.py3'! Printing debug info...")
                 print(out_text)
                 #print(type(out_text.stderr))
             else:

@@ -152,14 +152,14 @@ $FITS && $COMPUTE_STARMASK && (
     fi
     cd $SPARCFIRE_HOME/scripts/ArcPNGcreator/star_removal
     case `hostname` in
-    theory-monster*) $SPARCFIRE_PYTHON remove_stars_with_sextractor.py "$sfDir" "$pngDir" ;;
+    theory-monster*) $SPARCFIRE_PYTHON remove_stars_with_sextractor.py2 "$sfDir" "$pngDir" ;;
     bayonet-06*) 
         #source $SPARCFIRE_HOME/scripts/SpArcFiRe-pyvenv-bayonet-06/bin/activate;
-        $SPARCFIRE_PYTHON remove_stars_with_sextractor-bayonet-06.py "$sfDir" "$pngDir";;
+        $SPARCFIRE_PYTHON remove_stars_with_sextractor-bayonet-06.py2 "$sfDir" "$pngDir";;
         #source deactivate;;
     *) 
         #source $SPARCFIRE_HOME/scripts/SpArcFiRe-pyvenv/bin/activate;
-        $SPARCFIRE_PYTHON remove_stars_with_sextractor.py "$sfDir" "$pngDir";; 
+        $SPARCFIRE_PYTHON remove_stars_with_sextractor.py2 "$sfDir" "$pngDir";; 
         #source deactivate;;
     esac
 )
