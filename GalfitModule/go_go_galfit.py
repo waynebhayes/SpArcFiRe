@@ -10,8 +10,8 @@ try:
     _SPARCFIRE_DIR = os.environ["SPARCFIRE_HOME"]
     _MODULE_DIR = pj(_SPARCFIRE_DIR, "GalfitModule")
 except KeyError:
-    print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
-    print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
+    # print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
+    # print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
     _MODULE_DIR = pj(_HOME_DIR, "GalfitModule")
     
 sys.path.append(_MODULE_DIR)

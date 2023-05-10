@@ -45,8 +45,8 @@ else:
         _SPARCFIRE_DIR = os.environ["SPARCFIRE_HOME"]
         _MODULE_DIR = pj(_SPARCFIRE_DIR, "GalfitModule")
     except KeyError:
-        print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
-        print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
+        # print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
+        # print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
         _MODULE_DIR = pj(_HOME_DIR, "GalfitModule")
 
 sys.path.append(_MODULE_DIR)
@@ -56,7 +56,7 @@ from Classes.Components import *
 from Classes.Containers import *
 
 
-# In[23]:
+# In[4]:
 
 
 class HDU:
@@ -83,7 +83,7 @@ class HDU:
         return output_str
 
 
-# In[20]:
+# In[5]:
 
 
 class FitsFile:
@@ -258,7 +258,7 @@ class FitsFile:
             setattr(self, key, value)
 
 
-# In[21]:
+# In[6]:
 
 
 class OutputFits(FitsFile):
@@ -333,7 +333,7 @@ class OutputFits(FitsFile):
         return self.masked_residual_normalized
 
 
-# In[26]:
+# In[7]:
 
 
 # Testing from_file
@@ -363,7 +363,7 @@ if __name__ == "__main__":
 #     print(np.shape(test_out.data))
 
 
-# In[27]:
+# In[8]:
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[7]:
+# In[1]:
 
 
 import os
@@ -17,7 +17,7 @@ from copy import deepcopy
 from astropy.io import fits
 
 
-# In[6]:
+# In[2]:
 
 
 # For debugging purposes
@@ -31,7 +31,7 @@ def in_notebook():
         return False
 
 
-# In[5]:
+# In[3]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -43,14 +43,14 @@ else:
         _SPARCFIRE_DIR = os.environ["SPARCFIRE_HOME"]
         _MODULE_DIR = pj(_SPARCFIRE_DIR, "GalfitModule")
     except KeyError:
-        print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
-        print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
+        # print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
+        # print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
         _MODULE_DIR = pj(_HOME_DIR, "GalfitModule")
 
 sys.path.append(_MODULE_DIR)
 
 
-# In[11]:
+# In[4]:
 
 
 def export_to_py(notebook_name, output_filename = ""):
@@ -77,7 +77,7 @@ def export_to_py(notebook_name, output_filename = ""):
                 print("Output from nbconvert: ", *result)
 
 
-# In[12]:
+# In[5]:
 
 
 def check_programs():
@@ -101,7 +101,7 @@ global run_python
 run_galfit, run_fitspng, run_python = check_programs()
 
 
-# In[15]:
+# In[6]:
 
 
 def sp(cmd_str, capture_output = True, timeout = None):
@@ -114,7 +114,7 @@ def sp(cmd_str, capture_output = True, timeout = None):
                           executable="/bin/bash")
 
 
-# In[18]:
+# In[ ]:
 
 
 if __name__ == "__main__":

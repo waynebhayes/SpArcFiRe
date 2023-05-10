@@ -15,7 +15,7 @@
 # 
 # To run the control script: `bash control_script.sh`
 
-# In[3]:
+# In[1]:
 
 
 import numpy as np
@@ -35,7 +35,7 @@ import sys
 from astropy.io import fits
 
 
-# In[4]:
+# In[2]:
 
 
 # For debugging purposes
@@ -49,7 +49,7 @@ def in_notebook():
         return False
 
 
-# In[5]:
+# In[3]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -61,8 +61,8 @@ else:
         _SPARCFIRE_DIR = os.environ["SPARCFIRE_HOME"]
         _MODULE_DIR = pj(_SPARCFIRE_DIR, "GalfitModule")
     except KeyError:
-        print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
-        print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
+        # print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
+        # print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
         _MODULE_DIR = pj(_HOME_DIR, "GalfitModule")
     
 sys.path.append(_MODULE_DIR)
@@ -183,7 +183,7 @@ def scale_var(x, scale = 1):
     return float(x)*scale
 
 
-# In[35]:
+# In[20]:
 
 
 def galaxy_information(galaxy_name, galaxy_path):
@@ -254,6 +254,10 @@ def galaxy_information(galaxy_name, galaxy_path):
                 print(f"SpArcFiRe likely failed on this galaxy, {ve}. Proceeding with default values...")
                 break
 
+            except TypeError as ve:
+                print(f"SpArcFiRe likely failed on this galaxy, {ve}. Proceeding with default values...")
+                break
+                
             global scale_fact # Making this global since I'm now grabbing the necessary info from the csv
             scale_fact = 2*crop_rad_out/256
             
@@ -373,7 +377,7 @@ def galaxy_information(galaxy_name, galaxy_path):
             )
 
 
-# In[7]:
+# In[18]:
 
 
 def arc_information(galaxy_name, galaxy_path, num_arms = 2):
@@ -440,8 +444,9 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2):
         # starting point of the arms which is the hard part... 
         
         # Averaging, tack on 180 to limit some of the craziness
-        weight_div = 1/max(1,count-1) #1/np.math.factorial(count)
-        cumul_rot_out = max((abs(theta_sum)*weight_div) % 180, 60.0) # NOT A STRING
+        # Galfit tends to like the outer_rad smaller, hence larger divisor
+        weight_div = 1/max(1, count + 1) #1/np.math.factorial(count)
+        cumul_rot_out = max((abs(theta_sum)*weight_div) % 180, 45.0) # NOT A STRING
 
         inner_rad = inner_rad*weight_div # Averaging the inner distance to both arcs
         outer_rad = outer_rad*weight_div # Averaging outer distance
@@ -451,7 +456,7 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2):
         try:
             inner_rad = scale_var(inner_rad, scale_fact)
             outer_rad = scale_var(outer_rad, scale_fact)
-        except ValueError:
+        except ValueError as ve:
             pass
 
     return inner_rad, outer_rad, cumul_rot_out #, alpha_out

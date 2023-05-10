@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[1]:
 
 
 import os
@@ -14,7 +14,7 @@ from IPython import get_ipython
 from astropy.io import fits
 
 
-# In[ ]:
+# In[2]:
 
 
 # For debugging purposes
@@ -28,7 +28,7 @@ def in_notebook():
         return False
 
 
-# In[ ]:
+# In[3]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -40,8 +40,8 @@ else:
         _SPARCFIRE_DIR = os.environ["SPARCFIRE_HOME"]
         _MODULE_DIR = pj(_SPARCFIRE_DIR, "GalfitModule")
     except KeyError:
-        print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
-        print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
+        # print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
+        # print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
         _MODULE_DIR = pj(_HOME_DIR, "GalfitModule")
 
 sys.path.append(_MODULE_DIR)
@@ -49,7 +49,7 @@ sys.path.append(_MODULE_DIR)
 from Functions.HelperFunctions import *
 
 
-# In[ ]:
+# In[4]:
 
 
 class GalfitComponent:
@@ -351,7 +351,7 @@ class GalfitComponent:
     #     return self.__dict__.iteritems()
 
 
-# In[ ]:
+# In[5]:
 
 
 class Sersic(GalfitComponent):
@@ -477,7 +477,7 @@ class Sersic(GalfitComponent):
         self.position_angle   = float(params[4])
 
 
-# In[ ]:
+# In[6]:
 
 
 class Power(GalfitComponent):
@@ -600,7 +600,7 @@ class Power(GalfitComponent):
         self.sky_position_angle = float(params[4])
 
 
-# In[ ]:
+# In[7]:
 
 
 class Fourier(GalfitComponent):
@@ -708,7 +708,7 @@ class Fourier(GalfitComponent):
                              for i, n in enumerate(self.param_values.keys())}
 
 
-# In[ ]:
+# In[8]:
 
 
 class Sky(GalfitComponent):
@@ -809,7 +809,7 @@ class Sky(GalfitComponent):
         self.dsky_dy = float(params[1])
 
 
-# In[ ]:
+# In[9]:
 
 
 class GalfitHeader(GalfitComponent):
@@ -963,7 +963,7 @@ class GalfitHeader(GalfitComponent):
         return
 
 
-# In[ ]:
+# In[10]:
 
 
 if __name__ == "__main__":
@@ -1001,7 +1001,7 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps""".
     print(header)
 
 
-# In[ ]:
+# In[11]:
 
 
 if __name__ == "__main__":
@@ -1035,7 +1035,7 @@ if __name__ == "__main__":
     print(bulge)
 
 
-# In[ ]:
+# In[12]:
 
 
 if __name__ == "__main__":
@@ -1065,7 +1065,7 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
     print(arms)
 
 
-# In[ ]:
+# In[13]:
 
 
 if __name__ == "__main__":
@@ -1087,7 +1087,7 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
     print(fourier)
 
 
-# In[ ]:
+# In[14]:
 
 
 if __name__ == "__main__":
@@ -1114,7 +1114,7 @@ if __name__ == "__main__":
     print(sky)
 
 
-# In[ ]:
+# In[15]:
 
 
 if __name__ == "__main__":

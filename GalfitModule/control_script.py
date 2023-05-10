@@ -34,7 +34,7 @@
 # For controlling galfitting via sparcfire
 
 # ***************************************************************
-# In[2]:
+# In[6]:
 
 
 import sys
@@ -88,7 +88,7 @@ from sparc_to_galfit_feedme_gen import *
 import go_go_galfit
 
 
-# In[6]:
+# In[7]:
 
 
 if __name__ == "__main__":
@@ -324,12 +324,16 @@ if __name__ == "__main__":
     output_folders  = glob.glob(pj(out_dir, "123*/"))
     star_masks      = glob.glob(pj(tmp_dir, "*_star-rm.fits"))
     
-    
     if star_masks and not restart:
         sp(f"mv {pj(tmp_dir,'*_star-rm.fits')} {tmp_masks_dir}", capture_output = capture_output)
         
     star_masks = glob.glob(pj(tmp_masks_dir, "*_star-rm.fits"))
-    
+
+
+# In[6]:
+
+
+if __name__ == "__main__":
     if not restart:
 #         try:
 #             star_removal_path = pj(os.environ["SPARCFIRE_HOME"], "star_removal")
@@ -344,15 +348,34 @@ if __name__ == "__main__":
         
         # Compare against output folders because extra observations may be in input directory
         # GALFIT can only run on what's there... I mean there are defaults for SpArcFiRe
-        # but this is the more appropriate choice
+        # but this is the more appropriate choice. 
         if len(output_folders) != len(star_masks):
-
+            
+            print("The temp directory has a different number of star masks than the number of output directories.") 
+            need_masks_dir = pj(tmp_dir, "need_masks")
+            if not exists(need_masks_dir):
+                os.mkdir(need_masks_dir)
+                
+            galaxy_folder_names = [os.path.basename(i.rstrip("/")) for i in output_folders]
+            star_mask_names = [os.path.basename(i) for i in star_masks]
+                  
+            for gname in galaxy_folder_names:
+                star_mask_filename = f"{gname}_star-rm.fits"
+                if star_mask_filename not in star_mask_names:
+                    try:
+                        shutil.copy2(pj(in_dir, f"{gname}.fits"), need_masks_dir)
+                    except FileNotFoundError:
+                        print(f"Could not find {gname} in {in_dir}. Continuing...")
+                else:
+                    # To remove extras, print out the rest of this list
+                    star_mask_names.remove(star_mask_filename)
+                    
             print("Generating starmasks...")
             os.chdir(star_removal_path)
-            out_text = sp(f"python3 {pj(star_removal_path, 'remove_stars_with_sextractor.py')} {in_dir} {tmp_masks_dir}", capture_output = capture_output)
+            out_text = sp(f"python3 {pj(star_removal_path, 'remove_stars_with_sextractor.py')} {need_masks_dir} {tmp_masks_dir}", capture_output = capture_output)
             os.chdir(cwd)
             
-            if out_text.stderr.strip():
+            if out_text.stderr:
                 print(f"Something went wrong running 'remove_stars_with_sextractor.py'! Printing debug info...")
                 print(out_text)
                 #print(type(out_text.stderr))
@@ -362,7 +385,7 @@ if __name__ == "__main__":
                 
         else:
             print("Star masks have already been generated, proceeding.")
-            print()        
+            print()    
 
 
 # ## Galfitting/Slurming!
@@ -554,7 +577,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[ ]:
+# In[5]:
 
 
 if __name__ == "__main__":
