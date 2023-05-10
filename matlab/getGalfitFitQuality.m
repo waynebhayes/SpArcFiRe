@@ -20,7 +20,9 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
     OGoutputPath = outputPath;
     gal_name = split(string(outputPath), '/');
     gal_name = gal_name(end);
-    outputPath = '/tmp/galfit_junk/' + gal_name;
+
+    [status, outputPath] = system('mktemp -d /tmp/galfit_junk.XXXXXX');
+    outputPath = outputPath + '/' + gal_name;
 
     %disp('Checking outputPath - ' + outputPath)
     outputPath = char(outputPath);
@@ -59,7 +61,7 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
     galfitCommand = [getenv('SPARCFIRE_HOME') '/scripts/galfit ' outputPath '.feedme'];
 
     % Grabbing current directory before cd-ing to tmp
-    former_dir = cd('/tmp/galfit_junk');
+    former_dir = cd(outputPath);
 
     system(galfitCommand);
 

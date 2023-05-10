@@ -10,15 +10,18 @@
 
 # TODO: Check if the generateFitQuality variable has been set so that this is safer
 
-INDIR=$1 #original directory that the script was called from
-BASEOUTDIR=$2 #directory where all of SpArcFiRe's output directories are
-gjunk="/tmp/galfit_junk"
+#INDIR=$1 #original directory that the script was called from
+#BASEOUTDIR=$2 #directory where all of SpArcFiRe's output directories are
+# Dropping in some code for making a temp directory for future reference
+# TMPDIR=`mktemp -d /tmp/galfit_junk.XXXXXX`
+GJUNK="/tmp/galfit_junk"
 
 #echo "Moving Galfit Files"
-echo "Deleting GALFIT Files from $gjunk..."
+echo "Deleting GALFIT Files matching $GJUNK..."
+#find /tmp/ -type d -name "$GJUNK*" 2>/dev/null
 
-rm -rf $gjunk
-mkdir $gjunk
+trap "/bin/rm -rf $GJUNK*" 0 1 2 3 15
+#mkdir $GJUNK
 
 #for file in $(find "$INDIR" -iregex '.*/galfit\.[0-9]+')
 #do
