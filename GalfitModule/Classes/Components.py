@@ -122,7 +122,7 @@ class GalfitComponent:
             print("param_desc:", end = " ")
             print(*self.param_desc.keys(), sep = "\n")
             
-            raise(AssertionError())
+            raise(Exception())
             
 # ==========================================================================================================
 
@@ -185,7 +185,7 @@ class GalfitComponent:
         
         # NOTE: These necessarily round to two digits because that's
         # all Galfit outputs to stdout
-        print("Did this get properly overwritten?")
+        print("Did this get properly overwritten from base in GalfitComponent?")
         
 # ==========================================================================================================
 
@@ -967,6 +967,24 @@ class GalfitHeader(GalfitComponent):
 
 
 if __name__ == "__main__":
+    from RegTest.RegTest import *
+
+
+# In[11]:
+
+
+# Unit Test for GalfitComponent
+if __name__ == "__main__":
+    component = GalfitComponent()
+    print("Testing default values of base class GalfitComponent...")
+    for k,v in component.__dict__.items():
+        print(k,v)
+
+
+# In[12]:
+
+
+if __name__ == "__main__":
     bogus_list = """A) /home/portmanm/run6_1000_galfit_two_fit/sparcfire-in/1237667783385612464.fits      # Input data image (FITS file)
 B) /home/portmanm/run6_1000_galfit_two_fit/sparcfire-tmp/galfits/1237667783385612464_out.fits      # Output data image block
 C) none                # Sigma image name (made from data if blank or "none")
@@ -995,13 +1013,14 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps""".
     header.from_file_helper(bogus_list)
     header.update_param_values()
     print(header)
+    header.to_file(f"{base_out}_header.txt")
 
     header.from_file_helper(bogus_dict)
     header.update_param_values()
     print(header)
 
 
-# In[11]:
+# In[13]:
 
 
 if __name__ == "__main__":
@@ -1029,13 +1048,14 @@ if __name__ == "__main__":
     bulge.from_file_helper(bogus_list)
     bulge.update_param_values()
     print(bulge)
+    bulge.to_file(f"{base_out}_Sersic.txt")
 
     bulge.from_file_helper(bogus_dict)
     bulge.update_param_values()
     print(bulge)
 
 
-# In[12]:
+# In[14]:
 
 
 if __name__ == "__main__":
@@ -1058,6 +1078,7 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
     arms = Power(2)
     arms.from_file_helper(bogus_list)
     arms.update_param_values()
+    arms.to_file(f"{base_out}_Power.txt")
     print(arms)
 
     arms.from_file_helper(bogus_dict)
@@ -1065,7 +1086,7 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
     print(arms)
 
 
-# In[13]:
+# In[15]:
 
 
 if __name__ == "__main__":
@@ -1080,6 +1101,7 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
     fourier = Fourier(2)
     fourier.from_file_helper(bogus_list)
     fourier.update_param_values()
+    fourier.to_file(f"{base_out}_Fourier.txt")
     print(fourier)
 
     fourier.from_file_helper(bogus_dict)
@@ -1087,7 +1109,7 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
     print(fourier)
 
 
-# In[14]:
+# In[16]:
 
 
 if __name__ == "__main__":
@@ -1107,6 +1129,7 @@ if __name__ == "__main__":
     sky = Sky(3)
     sky.from_file_helper(bogus_list)
     sky.update_param_values()
+    sky.to_file(f"{base_out}_Sky.txt")
     print(sky)
 
     sky.from_file_helper(bogus_dict)
@@ -1114,7 +1137,7 @@ if __name__ == "__main__":
     print(sky)
 
 
-# In[15]:
+# In[17]:
 
 
 if __name__ == "__main__":
