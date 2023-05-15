@@ -131,7 +131,7 @@ if __name__ == "__main__":
     stdout_file   = "UnitTestStdOuput.txt"
     # writeout_file = "UnitTestWriteOuput.txt"
     
-    stdout_dest   = pj(TEST_OUTPUT_DIR, out_file)
+    stdout_dest   = pj(TEST_OUTPUT_DIR, stdout_file)
     # writeout_dest = pj(_MODULE_DIR, "RegTest", "TestOutput", writeout_file)
     
     touch_stdout   = sp(f"touch {stdout_dest}")
@@ -145,7 +145,7 @@ if __name__ == "__main__":
         raise(Exception())
 
 
-# In[ ]:
+# In[24]:
 
 
 if __name__ == "__main__":
