@@ -1,0 +1,39 @@
+
+#  Input menu file: .in
+
+#  
+
+================================================================================
+# IMAGE and GALFIT CONTROL PARAMETERS
+A) /home/portmanm/run6_1000_galfit_two_fit/sparcfire-in/1237667783385612464.fits # Input data image (FITS file)
+B) /home/portmanm/run6_1000_galfit_two_fit/sparcfire-tmp/galfits/1237667783385612464_out.fits # Output data image block
+C) none                 # Sigma image name (made from data if blank or 'none')
+D) none                 # Input PSF image and (optional) diffusion kernel
+E) 1                    # PSF fine sampling factor relative to data
+F) /home/portmanm/run6_1000_galfit_two_fit/sparcfire-tmp/galfit_masks/1237667783385612464_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
+G) none                 # File with parameter constraints (ASCII file)
+H) 43      111 43 111   # Image region to fit (xmin xmax ymin ymax)
+I) 50      50           # Size of the convolution box (x y)
+J) 24.8                 # Magnitude photometric zeropoint
+K) 0.396   0.396        # Plate scale (dx dy)   [arcsec per pixel]
+O) regular              # Display type (regular, curses, both)
+P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
+
+# INITIAL FITTING PARAMETERS
+#
+#   For component type, the allowed functions are: 
+#       sersic, expdisk, edgedisk, devauc, king, nuker, psf, 
+#       gaussian, moffat, ferrer, and sky. 
+#  
+#   Hidden parameters will only appear when they're specified:
+#       Bn (n=integer, Bending Modes).
+#       C0 (diskyness/boxyness), 
+#       Fn (n=integer, Azimuthal Fourier Modes).
+#       R0-R10 (coordinate rotation, for creating spiral structures).
+#       To, Ti, T0-T10 (truncation function).
+# 
+# ------------------------------------------------------------------------------
+#   par)    par value(s)    fit toggle(s)    # parameter description 
+# ------------------------------------------------------------------------------
+
+================================================================================

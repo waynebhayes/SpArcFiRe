@@ -393,7 +393,7 @@ if __name__ == '__main__':
     
     keep_seg_img = False
     
-    # Matthew 4/7
+    # Matthew 4/7/23
     #Change False to True in order to retain FITS images. Tried converting from
     #png to fits but the orientation is all weird.
     write_masked_img = True 

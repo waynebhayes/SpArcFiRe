@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[2]:
 
 
 import os
@@ -17,7 +17,7 @@ from copy import deepcopy
 from astropy.io import fits
 
 
-# In[2]:
+# In[3]:
 
 
 # For debugging purposes
@@ -31,7 +31,7 @@ def in_notebook():
         return False
 
 
-# In[3]:
+# In[4]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -50,7 +50,7 @@ else:
 sys.path.append(_MODULE_DIR)
 
 
-# In[4]:
+# In[5]:
 
 
 def export_to_py(notebook_name, output_filename = ""):
@@ -77,7 +77,7 @@ def export_to_py(notebook_name, output_filename = ""):
                 print("Output from nbconvert: ", *result)
 
 
-# In[5]:
+# In[6]:
 
 
 def check_programs():
@@ -101,7 +101,7 @@ global run_python
 run_galfit, run_fitspng, run_python = check_programs()
 
 
-# In[6]:
+# In[7]:
 
 
 def sp(cmd_str, capture_output = True, timeout = None):
@@ -114,7 +114,38 @@ def sp(cmd_str, capture_output = True, timeout = None):
                           executable="/bin/bash")
 
 
-# In[ ]:
+# In[22]:
+
+
+if __name__ == "__main__":
+    from RegTest.RegTest import *
+
+
+# In[23]:
+
+
+# Unit test for sp
+# The components and things will overwrite files rather than append
+# so the second touch is unnecessary
+if __name__ == "__main__":
+    stdout_file   = "UnitTestStdOuput.txt"
+    # writeout_file = "UnitTestWriteOuput.txt"
+    
+    stdout_dest   = pj(TEST_OUTPUT_DIR, stdout_file)
+    # writeout_dest = pj(_MODULE_DIR, "RegTest", "TestOutput", writeout_file)
+    
+    touch_stdout   = sp(f"touch {stdout_dest}")
+    # touch_writeout = sp(f"touch {writeout_dest}")
+    
+    # if touch_stdout.stderr or touch_writeout.stderr:
+    if touch_stdout.stderr:
+        print("Touch failed in HelperFunctions unit test.")
+        print(touch_stdout.stderr)
+        # print(touch_writeout.stderr)
+        raise(Exception())
+
+
+# In[24]:
 
 
 if __name__ == "__main__":

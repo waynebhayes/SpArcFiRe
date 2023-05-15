@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[4]:
+# In[1]:
 
 
 import os
@@ -14,7 +14,7 @@ from IPython import get_ipython
 from astropy.io import fits
 
 
-# In[5]:
+# In[2]:
 
 
 # For debugging purposes
@@ -28,7 +28,7 @@ def in_notebook():
         return False
 
 
-# In[6]:
+# In[3]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -51,7 +51,7 @@ from Classes.Components import *
 from Functions.HelperFunctions import *
 
 
-# In[7]:
+# In[4]:
 
 
 class ComponentContainer:
@@ -101,7 +101,7 @@ class ComponentContainer:
         return out_str
 
 
-# In[33]:
+# In[5]:
 
 
 class FeedmeContainer(ComponentContainer):
@@ -121,11 +121,14 @@ class FeedmeContainer(ComponentContainer):
         out_str = f"{str(self.header)}\n" + "\n".join(str(comp) for comp in ComponentContainer.to_list(self))
         return out_str
         
-    def to_file(self, *args):
+    def to_file(self, *args, filename = ""):
+        if not filename:
+            filename = self.path_to_feedme
+            
         if args:
-            self.header.to_file(self.path_to_feedme, *args)
+            self.header.to_file(filename, *args)
         else:
-            self.header.to_file(self.path_to_feedme, *ComponentContainer.to_list(self))
+            self.header.to_file(filename, *ComponentContainer.to_list(self))
             
     def from_file(self, obj_in):
         # This function handles grabbing and storing the values from galfit files (input and output???)
@@ -235,7 +238,7 @@ class FeedmeContainer(ComponentContainer):
         #_ = [c.update_param_values() for c in self.to_list()]
 
 
-# In[34]:
+# In[6]:
 
 
 class OutputContainer(FeedmeContainer):
@@ -338,11 +341,28 @@ class OutputContainer(FeedmeContainer):
             return ""
 
 
-# In[35]:
+# In[7]:
 
 
 if __name__ == "__main__":
     # Testing basic functionality
+    
+    container = ComponentContainer()
+    print(container)
+
+
+# In[8]:
+
+
+if __name__ == "__main__":
+    from RegTest.RegTest import *
+
+
+# In[9]:
+
+
+# Testing FeedmeContainer kwargs and to_file
+if __name__ == "__main__":
     
     header = GalfitHeader(galaxy_name = "tester")
     bulge = Sersic(1, position = (25,25))
@@ -360,17 +380,15 @@ if __name__ == "__main__":
                                 )
     
     #print(container)
-    _TEST_FILES_DIR = pj(_MODULE_DIR, "TestFiles")
+    container.path_to_feedme = pj(TEST_OUTPUT_DIR, f"{base_out}_FeedmeContainer.in")
     
-    container.path_to_feedme = pj(_TEST_FILES_DIR, "tester.in")
-    
-    container.to_file() #, bulge, disk, arms, fourier, sky)
+    container.to_file()
 
 
-# In[36]:
+# In[ ]:
 
 
-# Testing from_file
+# Testing FeedmeContainer from_file
 if __name__ == "__main__":
     
     header = GalfitHeader(galaxy_name = "fake_name")
@@ -380,19 +398,9 @@ if __name__ == "__main__":
     # arms  = Power()
     # fourier = Fourier()
     # sky   = Sky(3)
-    
-    example_fits = pj(_TEST_FILES_DIR, "1237667911674691747", "1237667911674691747_galfit_out.fits")
-    example_feedme = pj(_TEST_FILES_DIR, "1237667911674691747", "1237667911674691747.in")
-    
-    #for comp in (header, bulge, disk, arms, fourier, sky):
-    #for comp in (fourier, sky):
-        #comp.from_file("good_output.in")
-        #print(comp.component_type)
-        #comp.from_file(real)
-        #print(comp)
-    
-    #container.from_file("good_output.in")
-    #print(str(container))
+
+    example_fits = pj(TEST_DATA_DIR, "1237667911674691747", "1237667911674691747_galfit_out.fits")
+    example_feedme = pj(TEST_DATA_DIR, "1237667911674691747", "1237667911674691747.in")
     
     print("These are feedme -> output\n")
     
@@ -403,12 +411,10 @@ if __name__ == "__main__":
     print("*"*80)
     
     container.from_file(example_fits)
-    print(str(container))
-    
-    
+    print(str(container))    
 
 
-# In[37]:
+# In[ ]:
 
 
 # if __name__ == "__main__":
@@ -444,9 +450,10 @@ if __name__ == "__main__":
     
 
 
-# In[38]:
+# In[ ]:
 
 
+# Testing extraction into FeedmeContainer attributes
 if __name__ == "__main__":
     example_feedme = FeedmeContainer(path_to_feedme = "somewhere/out_there", 
                                      header         = header, 
@@ -457,13 +464,16 @@ if __name__ == "__main__":
                                      sky            = sky)
     feedme_components = example_feedme.extract_components()
     print(feedme_components.to_list())
+    print()
     _ = [print("Key:", k) for k in example_feedme.to_dict().keys()]
+    print()
     print(str(example_feedme))
 
 
-# In[39]:
+# In[ ]:
 
 
+# Testing OutputContainer
 if __name__ == "__main__":
     
     good_example = """Iteration : 6     Chi2nu: 3.205e-01     dChi2/Chi2: -2.24e-08   alamda: 1e+02
@@ -547,7 +557,13 @@ if __name__ == "__main__":
     
     print("And now checking the 'good' example (these should all be updated from the default values)\n")
     dummy_obj.stdout = good_example
+    print("(this should produce failure text since we didn't store text)")
+    good_output = OutputContainer(dummy_obj)
+    print(good_output)
+    print("\nNow it should succeed... Re-printing output text.\n")
     good_output = OutputContainer(dummy_obj, store_text = True)
+    print(good_output)
+    print()
     
     print(good_output.bulge)
     print(good_output.disk)
@@ -561,26 +577,12 @@ if __name__ == "__main__":
     print("Testing extraction into ComponentContainer...")
     _ = [print(str(comp)) for comp in good_output.extract_components().to_list()]
     
-    output_filename = pj(_TEST_FILES_DIR, "good_output.in")
-    good_output.header.to_file(output_filename, good_output.bulge, good_output.disk, good_output.arms, good_output.fourier, good_output.sky)
+    output_filename = pj(TEST_OUTPUT_DIR, f"{base_out}_OutputContainer.in")
+    good_output.to_file(filename = output_filename)
+    #good_output.header.to_file(output_filename, good_output.bulge, good_output.disk, good_output.arms, good_output.fourier, good_output.sky)
 
 
-# In[12]:
-
-
-if __name__ == "__main__":    
-    print("Checking out text")
-    good_output = OutputContainer(dummy_obj, store_text = True)
-    print(str(good_output))
-    
-    print("*"*80)
-    print("*"*80)
-    
-    good_output = OutputContainer(dummy_obj)
-    print(str(good_output))
-
-
-# In[40]:
+# In[ ]:
 
 
 if __name__ == "__main__":

@@ -83,7 +83,7 @@ class HDU:
         return output_str
 
 
-# In[5]:
+# In[36]:
 
 
 class FitsFile:
@@ -97,10 +97,11 @@ class FitsFile:
         self.name     = name
         self.filepath = filepath
         
-        # rstrip will remove galfit_out if its there, if not, no error no worries ;)
-        # warning, this will strip any non-numbers with those substrings...
-        # hence why it's an option to feed the name directly in! ha... haha...
-        self.gname    = kwargs.get("gname", os.path.basename(filepath).rstrip("_galfit_out.fits"))
+        # Use split over rstrip in case a waveband designation is given
+        # (rstrip will remove any character that matches in the substring)
+        # i.e. 12345678910_g would lose the _g for "_galfit_out.fits"
+        # TODO: Replace rstrip with split in the rest of these scripts...
+        self.gname    = kwargs.get("gname", os.path.basename(filepath).split("_galfit_out.fits")[0])
         # self.num_hdu  = 0
         # self.num_imgs = 1
         
@@ -177,6 +178,8 @@ class FitsFile:
         tmp_png_path  = kwargs.get("tmp_png_path", tmp_png_path)
         out_png_dir   = kwargs.get("out_png_dir", "./")
         
+        capture_output = bool(kwargs.get("silent", False))
+        
         fitspng_param = "0.25,1" #1,150"
         
         # run_fitspng from HelperFunctions, string path to fitspng program
@@ -190,7 +193,7 @@ class FitsFile:
         
         # sp is from HelperFunctions, subprocess.run call
         for cmd in cmds[:self.num_imgs]:
-            _ = sp(cmd, capture_output = False)
+            _ = sp(cmd, capture_output = capture_output)
         
         im1 = f"{tmp_png_path}.png"
         im2 = f"{tmp_png_path}_out.png"
@@ -209,7 +212,7 @@ class FitsFile:
         montage_cmd += f" -tile {self.num_imgs}x1 -geometry \"175x175+2+0<\" \
                         {pj(out_png_dir, gname)}{combined}.png"
             
-        _ = sp(montage_cmd, capture_output = False)
+        _ = sp(montage_cmd, capture_output = capture_output)
         
         if cleanup:
             _ = sp(f"rm {im1} {im2} {im3}")
@@ -233,9 +236,9 @@ class FitsFile:
 
 # ==========================================================================================================
 
-    # Use str to display feedme(?)
-    def __str__(self):
-        pass
+    # # Use str to display feedme(?)
+    # def __str__(self):
+    #     pass
         
         #return output_str
         
@@ -258,7 +261,7 @@ class FitsFile:
             setattr(self, key, value)
 
 
-# In[6]:
+# In[37]:
 
 
 class OutputFits(FitsFile):
@@ -301,7 +304,7 @@ class OutputFits(FitsFile):
         # self.residual    = self.all_hdu.get("residual", None)
         
         
-    def masked_residual(self, mask):
+    def generate_masked_residual(self, mask):
 
         crop_box = self.feedme.header.region_to_fit
 
@@ -324,7 +327,7 @@ class OutputFits(FitsFile):
             self.nmr = slg.norm(self.masked_residual_normalized)
 
         except ValueError:
-            print(f"There is likely an observation error with galaxy {self.gname}, continuing...")
+            print(f"There is probably an observation error with galaxy {self.gname}, continuing...")
             # print(np.shape(mask_fits_file.data))
             # print(np.shape(fits_file.data))
             # print(crop_box)
@@ -333,23 +336,41 @@ class OutputFits(FitsFile):
         return self.masked_residual_normalized
 
 
-# In[7]:
+# In[38]:
+
+
+if __name__ == "__main__":
+    from RegTest.RegTest import *
+
+
+# In[39]:
 
 
 # Testing from_file
 if __name__ == "__main__":
     
-    obs = pj(_MODULE_DIR, "TestFiles", "1237671124296532233.fits")
-    model = pj(_MODULE_DIR, "TestFiles", "1237671124296532233", "1237671124296532233_galfit_out.fits")
+    gname = "1237671124296532233"
+    obs   = pj(TEST_DATA_DIR, f"{gname}.fits")
+    model = pj(TEST_DATA_DIR, gname, f"{gname}_galfit_out.fits")
+    mask  = pj(TEST_DATA_DIR, gname, f"{gname}_star-rm.fits")
     
     test_obs   = FitsFile(obs)
     test_model = OutputFits(model)
+    test_mask  = FitsFile(mask)
     
     print(test_obs.observation)
     print()
     print(test_model.feedme)
     print()
     print(test_model.model)
+    
+    # Purposefully do not fill in some of the header parameters
+    # since those do not exist in the output FITS header
+    # This is done to remind the user/programmer that the 
+    # OutputFits object only serves to represent the header
+    # nothing more, nothing less and so also reminds them to
+    # use a different method to fill in the header.
+    #print(test_model.feedme.header)
     
 #     _header = GalfitHeader()
 #     _header.from_file_helper(test_out.header)
@@ -359,11 +380,32 @@ if __name__ == "__main__":
 #     box_min, box_max = crop_box[0] - 1, crop_box[1]
         
 #     print(np.shape(test_in.data[box_min:box_max, box_min:box_max]))
-#     print(np.shape(test_out.observation.data))
-#     print(np.shape(test_out.data))
+    print("\nThese should all be the same .")
+    print(np.shape(test_model.observation.data))
+    print(np.shape(test_model.data))
+    print(np.shape(test_model.residual.data))
+    crop_box = test_model.feedme.header.region_to_fit
+    # + 1 to account for python indexing
+    crop_rad = crop_box[1] - crop_box[0] + 1
+    print(f"({crop_rad}, {crop_rad})")
+    print("Andddd pre crop")
+    print(np.shape(test_obs.observation.data))
 
 
-# In[8]:
+# In[40]:
+
+
+# Unit test to check value of masked residual
+if __name__ == "__main__":
+    
+    _ = test_model.generate_masked_residual(test_mask)
+    print(f"{test_model.norm_observation:.4f}")
+    print(f"{test_model.norm_model:.4f}")
+    print(f"{test_model.norm_residual:.4f}")
+    print(f"{test_model.nmr:.4f}")
+
+
+# In[ ]:
 
 
 if __name__ == "__main__":
