@@ -343,16 +343,16 @@ if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[39]:
+# In[42]:
 
 
 # Testing from_file
 if __name__ == "__main__":
     
     gname = "1237671124296532233"
-    obs   = pj(TEST_DATA_DIR, f"{gname}.fits")
-    model = pj(TEST_DATA_DIR, gname, f"{gname}_galfit_out.fits")
-    mask  = pj(TEST_DATA_DIR, gname, f"{gname}_star-rm.fits")
+    obs   = pj(TEST_DATA_DIR, "test-in", f"{gname}.fits")
+    model = pj(TEST_DATA_DIR, "test-out", gname, f"{gname}_galfit_out.fits")
+    mask  = pj(TEST_DATA_DIR, "test-out", gname, f"{gname}_star-rm.fits")
     
     test_obs   = FitsFile(obs)
     test_model = OutputFits(model)
@@ -405,7 +405,7 @@ if __name__ == "__main__":
     print(f"{test_model.nmr:.4f}")
 
 
-# In[ ]:
+# In[41]:
 
 
 if __name__ == "__main__":

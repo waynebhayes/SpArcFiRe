@@ -1,12 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
-
-
-
-
-
 # **Author: Matthew Portman**
 # 
 # **Date (Github date will likely be more accurate): 4/17/23**
@@ -139,7 +133,6 @@ if __name__ == "__main__":
                         const    = True,
                         default  = False,
                         help     = 'Choose NOT to remove all old slurm files (they may contain basic info about each fit but there will be a bunch!)')
-    
     
     parser.add_argument('-NS', '--num-steps',
                         dest     = 'steps', 
@@ -330,7 +323,7 @@ if __name__ == "__main__":
     star_masks = glob.glob(pj(tmp_masks_dir, "*_star-rm.fits"))
 
 
-# In[6]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -376,7 +369,7 @@ if __name__ == "__main__":
             os.chdir(cwd)
             
             if out_text.stderr:
-                print(f"Something went wrong running 'remove_stars_with_sextractor.py3'! Printing debug info...")
+                print(f"Something went wrong running 'remove_stars_with_sextractor.py'! Printing debug info...")
                 print(out_text)
                 #print(type(out_text.stderr))
             else:
@@ -398,6 +391,8 @@ def write_to_slurm(cwd, kwargs_main, galfit_script_name = pj(_MODULE_DIR, "go_go
     kwargs_in        = deepcopy(kwargs_main)
     
     print(f"Generating distrib-slurm input file in {cwd}: {slurm_file}")
+    # TODO: batch these, i.e. send 10 galaxies per cpu since GALFIT runs so fast
+    # we won't have to wait on nodes to open up again
     with open(pj(cwd, slurm_file), "w") as scf:
         for gname in kwargs_main["galaxy_names"]:
             kwargs_in["galaxy_names"] = gname
@@ -427,13 +422,13 @@ def check_galfit_out_hangups(tmp_fits_dir, out_dir, kwargs_main):
     return kwargs_main
 
 
-# In[1]:
+# In[14]:
 
 
-def write_failed(cwd, failures = []):
+def write_failed(failed_dir = cwd, failures = []):
     if failures:
         fail_filename = "galfit_failed.txt"
-        fail_filepath = pj(cwd, fail_filename)
+        fail_filepath = pj(failed_dir, fail_filename)
         print(f"{len(failures)} galax(y)ies completely failed. Writing the list of these to {fail_filepath}")
         with open(fail_filepath, "w") as ff:
             ff.writelines("\n".join(failures))
@@ -525,7 +520,7 @@ if __name__ == "__main__":
                                      run_fitspng = run_fitspng, 
                                      run_python = run_python)
         
-        write_failed(cwd, failures)
+        write_failed(tmp_dir, failures)
 
     # Unused but here for a good time
     boom = """Numerical Recipes run-time error...
@@ -577,7 +572,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[5]:
+# In[13]:
 
 
 if __name__ == "__main__":

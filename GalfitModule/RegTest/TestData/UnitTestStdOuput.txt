@@ -1,0 +1,62 @@
+The temp directory has a different number of star masks than the number of output directories.
+Generating starmasks...
+Star masks have been generated successfully.
+
+Finding all galaxies...
+Running feedme generator...
+Can't open to read star_dl.csv with star information (for PSF)
+Check Sparcfire output or directories. Proceeding with default values.
+1237655463239155886
+Couldn't use chirality. Proceeding with coin flip.
+1237667735062577326
+1237667735565238388
+1237667911674233053
+1237667911674691747
+1237668310013640891
+1237668311090200859
+1237671124293910779
+1237671124296532233
+
+Galfitting with 2 component steps... (stdout is captured):
+1237655463239155886
+Bulge
+Galfit failed this run!
+Bulge + Disk + Arms
+Galfit failed this run!
+1237655463239155886 completely failed!!!
+
+1237667735062577326
+Bulge
+Bulge + Disk + Arms
+
+1237667735565238388
+Bulge
+Bulge + Disk + Arms
+
+1237667911674233053
+Bulge
+Bulge + Disk + Arms
+
+1237667911674691747
+Bulge
+Bulge + Disk + Arms
+
+1237668310013640891
+Bulge
+Bulge + Disk + Arms
+
+1237668311090200859
+Bulge
+Bulge + Disk + Arms
+Galfit failed this run!
+
+1237671124293910779
+Bulge
+Bulge + Disk + Arms
+
+1237671124296532233
+Bulge
+Bulge + Disk + Arms
+
+1 galax(y)ies completely failed. Writing the list of these to /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_failed.txt
+Done! Cleaning up...

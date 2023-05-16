@@ -385,7 +385,7 @@ if __name__ == "__main__":
     container.to_file()
 
 
-# In[ ]:
+# In[10]:
 
 
 # Testing FeedmeContainer from_file
@@ -399,8 +399,8 @@ if __name__ == "__main__":
     # fourier = Fourier()
     # sky   = Sky(3)
 
-    example_fits = pj(TEST_DATA_DIR, "1237667911674691747", "1237667911674691747_galfit_out.fits")
-    example_feedme = pj(TEST_DATA_DIR, "1237667911674691747", "1237667911674691747.in")
+    example_fits = pj(TEST_DATA_DIR, "test-out", "1237667911674691747", "1237667911674691747_galfit_out.fits")
+    example_feedme = pj(TEST_DATA_DIR, "test-out", "1237667911674691747", "1237667911674691747.in")
     
     print("These are feedme -> output\n")
     
@@ -414,7 +414,7 @@ if __name__ == "__main__":
     print(str(container))    
 
 
-# In[ ]:
+# In[11]:
 
 
 # if __name__ == "__main__":
@@ -450,7 +450,7 @@ if __name__ == "__main__":
     
 
 
-# In[ ]:
+# In[12]:
 
 
 # Testing extraction into FeedmeContainer attributes
@@ -470,7 +470,7 @@ if __name__ == "__main__":
     print(str(example_feedme))
 
 
-# In[ ]:
+# In[13]:
 
 
 # Testing OutputContainer
@@ -582,7 +582,7 @@ if __name__ == "__main__":
     #good_output.header.to_file(output_filename, good_output.bulge, good_output.disk, good_output.arms, good_output.fourier, good_output.sky)
 
 
-# In[ ]:
+# In[14]:
 
 
 if __name__ == "__main__":
