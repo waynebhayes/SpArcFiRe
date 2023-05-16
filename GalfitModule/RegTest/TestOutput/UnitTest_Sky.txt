@@ -1,9 +1,0 @@
-
-# Component number: 3
- 0) sky                 # Component type
- 1) 1112.1005   1       # Sky background at center of fitting region [ADUs]
- 2) 0.0126      1       # dsky/dx (sky gradient in x)     [ADUs/pix]
- 3) 0.0181      1       # dsky/dy (sky gradient in y)     [ADUs/pix]
- Z) 0                   # Skip this model in output image?  (yes=1, no=0)
-
-================================================================================
