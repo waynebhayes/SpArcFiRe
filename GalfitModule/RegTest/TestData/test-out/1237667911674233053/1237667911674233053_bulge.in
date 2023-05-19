@@ -5,12 +5,12 @@
 
 ================================================================================
 # IMAGE and GALFIT CONTROL PARAMETERS
-A) /home/portmanm/testing_python_control/sparcfire-in/1237667911674233053.fits # Input data image (FITS file)
-B) /home/portmanm/testing_python_control/sparcfire-tmp/galfits/1237667911674233053_galfit_out.fits # Output data image block
+A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237667911674233053.fits # Input data image (FITS file)
+B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237667911674233053_galfit_out.fits # Output data image block
 C) none                 # Sigma image name (made from data if blank or 'none')
 D) none                 # Input PSF image and (optional) diffusion kernel
 E) 1                    # PSF fine sampling factor relative to data
-F) /home/portmanm/testing_python_control/sparcfire-tmp/galfit_masks/1237667911674233053_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
+F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237667911674233053_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 35      77   35   77 # Image region to fit (xmin xmax ymin ymax)
 I) 50      50           # Size of the convolution box (x y)

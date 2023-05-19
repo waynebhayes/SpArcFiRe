@@ -96,12 +96,14 @@ if __name__ == "__main__":
                               executable="/bin/bash")
 
     def run_unit_tests(things_to_test, PyDir = ""):
-        fail_count = 0
-        error_list = []
+        fail_count  = 0
+        error_list  = []
+        stdout_list = []
 
         for thing_name in things_to_test:
             path_to_thing = pj(_MODULE_DIR, PyDir, thing_name)
             result = sp(f"python3 {path_to_thing}.py")
+            stdout_list.append(result.stdout)
             
             if verbose:
                 print(result.stdout)
@@ -113,27 +115,40 @@ if __name__ == "__main__":
                 fail_count += 1
 
         print(f"{fail_count} unit tests for {PyDir} failed to run.")
-        return error_list, fail_count
+        return stdout_list, error_list, fail_count
 
     # Run all unit tests
     list_of_classes = ["Components", "Containers", "FitsHandlers"]
     list_of_helpers = ["HelperFunctions"]
     
+    all_stdout     = {}
     all_unit_error = {}
-    all_unit_error["Helpers"], fail_helpers = run_unit_tests(list_of_helpers, PyDir = "Functions")
-    all_unit_error["Classes"], fail_classes = run_unit_tests(list_of_classes, PyDir = "Classes")
+    
+    all_stdout["Helpers"], all_unit_error["Helpers"], fail_helpers = run_unit_tests(list_of_helpers, PyDir = "Functions")
+    all_stdout["Classes"], all_unit_error["Classes"], fail_classes = run_unit_tests(list_of_classes, PyDir = "Classes")
     
     total_fail_count += fail_helpers + fail_classes
 
     error_file = "OutputError.txt"
     error_path = pj(TEST_OUTPUT_DIR, error_file)
-    if exists(error_path):
-        os.remove(error_path)
+    # if exists(error_path):
+    #     os.remove(error_path)
         
-    with open(error_path, "w") as ef:
+    with open(error_path, "a") as ef:
         for name, err_list in all_unit_error.items():
             err_str = "\n".join(err_list)
             ef.write(f"{name}\n{err_str}")
+
+    stdout_path = pj(TEST_OUTPUT_DIR, "UnitTestStdOuput.txt")
+    if not exists(stdout_path):
+        print("Function helper must have failed! Adding to failure count and creating file.")
+        total_fail_count += 1
+    
+    # As output by HelperFunctions script per its own unit test
+    with open(stdout_path, "a") as f:
+        for name, out_list in all_stdout.items():
+            out_str = "\n".join(out_list)
+            f.write(f"{name}\n{out_str}")
             
 # Reg tests come next
 if __name__ == "__main__":
@@ -166,7 +181,7 @@ if __name__ == "__main__":
         print(result.stderr)
         
     # As output by HelperFunctions script per its own unit test
-    with open(pj(TEST_OUTPUT_DIR, "UnitTestStdOuput.txt"), "w") as f:
+    with open(stdout_path, "a") as f:
         f.write(result.stdout)
     
     # DIFF CHECKS
@@ -229,7 +244,7 @@ if __name__ == "__main__":
                 fail_count += 1
                 all_diff_error[f"{gname}_{suffix}"] = result.stdout
                 
-    with open(error_path, "w") as ef:
+    with open(error_path, "a") as ef:
         for name, err_str in all_diff_error.items():
             #err_str = "\n".join(err_list)
             ef.write(f"{name}\n{err_str}")

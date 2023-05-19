@@ -13,6 +13,9 @@ from copy import deepcopy
 from IPython import get_ipython
 from astropy.io import fits
 
+import numpy as np
+import pandas as pd
+
 
 # In[2]:
 
@@ -88,6 +91,14 @@ class ComponentContainer:
                 self.sky
                ]
     
+    def to_pandas(self):
+        return pd.concat([comp.to_pandas().reset_index() 
+                          for comp in ComponentContainer.to_list(self)], 
+                         axis = 1).drop(columns = ["index"])
+        
+    def from_pandas(self, input_df):
+        pass
+    
     def update_components(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -97,7 +108,7 @@ class ComponentContainer:
         return ComponentContainer(**vars(self))
     
     def __str__(self):
-        out_str = "\n".join(str(comp) for comp in ComponentContainer.to_list(self))
+        out_str = "\n".join([str(comp) for comp in ComponentContainer.to_list(self)])
         return out_str
 
 
@@ -233,8 +244,9 @@ class FeedmeContainer(ComponentContainer):
             input_file = open_file(self, open)
             from_text(self, input_file)
             input_file.close()
-            
-        _ = [c.update_param_values() for c in self.to_list()]
+        
+        # This is not needed now that we update
+        # param_values in the file helpers
         #_ = [c.update_param_values() for c in self.to_list()]
 
 
@@ -315,7 +327,8 @@ class OutputContainer(FeedmeContainer):
                     continue
 
                 comp.update_from_log(line)
-                comp.update_param_values()
+                # This is now done in Components
+                #comp.update_param_values()
 
         if self.success:
             update_components(self, galfit_out_text)
@@ -349,6 +362,9 @@ if __name__ == "__main__":
     
     container = ComponentContainer()
     print(container)
+    container_df = container.to_pandas()
+    print()
+    print(container_df)
 
 
 # In[8]:
@@ -378,6 +394,9 @@ if __name__ == "__main__":
                                       "fourier" : fourier,
                                       "sky"     : sky}
                                 )
+
+    print()
+    print(container.to_pandas())
     
     #print(container)
     container.path_to_feedme = pj(TEST_OUTPUT_DIR, f"{base_out}_FeedmeContainer.in")
@@ -450,7 +469,7 @@ if __name__ == "__main__":
     
 
 
-# In[12]:
+# In[15]:
 
 
 # Testing extraction into FeedmeContainer attributes
@@ -463,8 +482,8 @@ if __name__ == "__main__":
                                      fourier        = fourier, 
                                      sky            = sky)
     feedme_components = example_feedme.extract_components()
-    print(feedme_components.to_list())
-    print()
+    #print(feedme_components.to_list())
+    #print()
     _ = [print("Key:", k) for k in example_feedme.to_dict().keys()]
     print()
     print(str(example_feedme))

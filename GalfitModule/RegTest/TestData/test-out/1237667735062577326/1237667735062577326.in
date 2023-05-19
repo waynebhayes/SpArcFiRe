@@ -5,12 +5,12 @@
 
 ================================================================================
 # IMAGE and GALFIT CONTROL PARAMETERS
-A) /home/portmanm/testing_python_control/sparcfire-in/1237667735062577326.fits # Input data image (FITS file)
-B) /home/portmanm/testing_python_control/sparcfire-tmp/galfits/1237667735062577326_galfit_out.fits # Output data image block
+A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237667735062577326.fits # Input data image (FITS file)
+B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237667735062577326_galfit_out.fits # Output data image block
 C) none                 # Sigma image name (made from data if blank or 'none')
 D) none                 # Input PSF image and (optional) diffusion kernel
 E) 1                    # PSF fine sampling factor relative to data
-F) /home/portmanm/testing_python_control/sparcfire-tmp/galfit_masks/1237667735062577326_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
+F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237667735062577326_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 62      114   61   113 # Image region to fit (xmin xmax ymin ymax)
 I) 50      50           # Size of the convolution box (x y)
@@ -56,8 +56,8 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 
 R0) power               # PA rotation func. (power, log, none)
 R1) 0.0000      0       # Spiral inner radius [pixels]
-R2) 9.2903      0       # Spiral outer radius [pixels]
-R3) -114.9568   1       # Cumul. rotation out to outer radius [degrees]
+R2) 11.2564     0       # Spiral outer radius [pixels]
+R3) -124.1577   1       # Cumul. rotation out to outer radius [degrees]
 R4) 1.3476      1       # Asymptotic spiral powerlaw
 R9) -22.1018    1       # Inclination to L.o.S. [degrees]
 R10) 90.0000     1      # Sky position angle

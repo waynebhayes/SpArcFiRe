@@ -13,6 +13,9 @@ from copy import deepcopy
 from IPython import get_ipython
 from astropy.io import fits
 
+import pandas as pd
+import numpy as np
+
 
 # In[2]:
 
@@ -149,7 +152,7 @@ class GalfitComponent:
         
         for num, val, fix, desc in zip(self.param_numbers.keys(), self.param_values.values(), self.param_fix.values(), self.param_desc.values()):
             # Skip component type
-            if isinstance(val, (int, float)):
+            if isinstance(val, (int, float, np.float32)):
                 if isinstance(num, str):
                     line = f"{self.param_prefix}{num}) {val:{l_align}} {fix}"
                 else:
@@ -189,15 +192,67 @@ class GalfitComponent:
         
 # ==========================================================================================================
 
-    # TODO: Import parameters from pandas
-    def from_pandas(self):
-        pass
+    def from_pandas(self, input_df):
+        param_names  = [n.split(f"_{self.component_type}")[0] for n in input_df.columns]
+        param_values = input_df.iloc[0].values.astype(float)
+        new_param_dict = dict(zip(param_names, param_values))
+        
+        pos = "position"
+        if pos in self.param_values:
+            new_param_dict[pos] = (new_param_dict[f"{pos}_x"], new_param_dict[f"{pos}_y"])
+            new_param_dict.pop(f"{pos}_x")
+            new_param_dict.pop(f"{pos}_y")
+        
+        # No graceful way to do this...
+        # TODO: Can this be used for bending modes as well?
+        if self.component_type in ("fourier"):
+            f_modes = set([pn.split("_")[0] for pn in param_names])
+            a   = "amplitude"
+            pha = "phase_angle"
+            
+            for mode in f_modes:
+                new_param_dict[mode] = (new_param_dict[f"{mode}_{a}"], new_param_dict[f"{mode}_{pha}"])
+                new_param_dict.pop(f"{mode}_{a}")
+                new_param_dict.pop(f"{mode}_{pha}")
+        
+        self.param_values.update(new_param_dict)
+        self.update_values()
 
 # ==========================================================================================================
 
-    # TODO: Export parameters from pandas
     def to_pandas(self):
-        pass
+        name = f"{self.component_type}_{self.component_number}"
+        param_values = deepcopy(self.param_values)
+        
+        
+        if "Component type" in param_values:
+            param_values.pop("Component type")
+            
+        multi_valued = [(k,v) for k,v in param_values.items() if isinstance(v, tuple)]
+        
+        if multi_valued:
+            # For components which contain multi values, i.e. position
+            tuple_names = {"sersic"  : ("x","y"),
+                           "fourier" : ("amplitude", "phase_angle")}
+            
+            # Usually only two but to keep things generic we can loop
+            for tup in multi_valued:
+                tup_value = param_values.pop(tup[0])
+                
+                for i, val in enumerate(tup_value):
+                    param_values[f"{tup[0]}_{tuple_names[self.component_type][i]}"] = val
+        
+        param_names  = [f"{i}_{name}" for i in param_values.keys()]
+        param_values = np.array(list(param_values.values()))
+        param_values = param_values.reshape(1, len(param_values))
+        
+        # Redundancy in index name and column names is intentional!
+        all_data = pd.DataFrame(param_values, 
+                                index = [name], 
+                                columns = param_names,
+                                dtype = np.float32)
+        
+        return all_data
 # ==========================================================================================================
 
     def from_file_helper(self):
@@ -457,8 +512,10 @@ class Sersic(GalfitComponent):
         self.param_fix.update({self.param_numbers[k] : int(file_dict[k][1]) for k in p_numbers if k not in [1, "Z"]})
         self.param_fix["position"] = position_fix
         
-        # This will happen in the main call
-        #self.update_param_values()
+        # It makes more sense to do this immediately
+        # TODO: Check to remove redundancies for this
+        self.update_param_values()
+        
         return
         
     def update_from_log(self, in_line):
@@ -470,14 +527,18 @@ class Sersic(GalfitComponent):
         params = " ".join(params.split())
         params = params.split()
         params = [i.strip("*") for i in params]
+        
         self.magnitude        = float(params[0])
         self.effective_radius = float(params[1])
         self.sersic_index     = float(params[2])
         self.axis_ratio       = float(params[3])
         self.position_angle   = float(params[4])
+        self.update_param_values()
+        
+        return
 
 
-# In[6]:
+# In[18]:
 
 
 class Power(GalfitComponent):
@@ -579,8 +640,7 @@ class Power(GalfitComponent):
 
         self.param_fix.update({self.param_numbers[k] : int(file_dict[k][1]) for k in p_numbers if k not in [1, "Z"]})
         
-        # This will happen in the main call
-        #self.update_param_values()
+        self.update_param_values()
         return
         
     def update_from_log(self, in_line):
@@ -593,14 +653,17 @@ class Power(GalfitComponent):
         params = " ".join(params.split())
         params = params.split()
         params = [i.strip("*") for i in params]
+        
         self.cumul_rot          = float(params[0])
         self.powerlaw           = float(params[1])
         # Some dashed line here...
         self.inclination        = float(params[3])
         self.sky_position_angle = float(params[4])
+        self.update_param_values()
+        return
 
 
-# In[7]:
+# In[19]:
 
 
 class Fourier(GalfitComponent):
@@ -632,7 +695,7 @@ class Fourier(GalfitComponent):
         for num, values in n.items():
             key = f"{self.param_prefix}{num}"
             self.param_numbers[num] = key
-            self.param_values[key] = values
+            self.param_values[key] = tuple(values)
             self.param_desc[key] = f"Azim. Fourier mode {num}, amplitude, & phase angle"
             self.param_fix[key] = self.param_fix.get(key, "1 1")
 
@@ -693,8 +756,7 @@ class Fourier(GalfitComponent):
         # self.param_fix.update({self.param_numbers[k] : int(file_dict[k][1]) for k in p_numbers if k not in [1, "Z"]})
         # self.param_fix["position"] = position_fix
         
-        # This will happen in the main call
-        #self.update_param_values()
+        self.update_param_values()
         return
         
     def update_from_log(self, in_line):
@@ -706,6 +768,8 @@ class Fourier(GalfitComponent):
         
         self.param_values = {n: eval(f"({params[i].split(':')[1].replace('*', '')})")
                              for i, n in enumerate(self.param_values.keys())}
+        self.update_param_values()
+        return
 
 
 # In[8]:
@@ -791,8 +855,7 @@ class Sky(GalfitComponent):
         
         self.param_fix.update({self.param_numbers[k] : int(file_dict[k][1]) for k in p_numbers if k not in [1, "Z"]})
         
-        # This will happen in the main call
-        #self.update_param_values()
+        self.update_param_values()
         return
         
     
@@ -804,9 +867,12 @@ class Sky(GalfitComponent):
         params = " ".join(params.split())
         params = params.split()
         params = [i.strip("*") for i in params]
+        
         self.sky_background = float(params[0])
         self.dsky_dx = float(params[1])
         self.dsky_dy = float(params[1])
+        self.update_param_values()
+        return
 
 
 # In[9]:
@@ -958,8 +1024,7 @@ class GalfitHeader(GalfitComponent):
         self.display_type    = file_dict["O"][0]
         self.optimize        = int(file_dict["P"][0])
         
-        # This will happen in the main call
-        #self.update_param_values()
+        self.update_param_values()
         return
 
 
@@ -1011,12 +1076,12 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps""".
 
     header = GalfitHeader()
     header.from_file_helper(bogus_list)
-    header.update_param_values()
+    #header.update_param_values()
     print(header)
     header.to_file(f"{base_out}_header.txt")
 
     header.from_file_helper(bogus_dict)
-    header.update_param_values()
+    #header.update_param_values()
     print(header)
 
 
@@ -1046,12 +1111,21 @@ if __name__ == "__main__":
 
     bulge = Sersic(1)
     bulge.from_file_helper(bogus_list)
-    bulge.update_param_values()
+    #bulge.update_param_values()
     print(bulge)
     bulge.to_file(f"{base_out}_Sersic.txt")
 
     bulge.from_file_helper(bogus_dict)
-    bulge.update_param_values()
+    #bulge.update_param_values()
+    print(bulge)
+    
+    bulge_df = bulge.to_pandas()
+    print(bulge_df)
+    print()
+    bulge_df.iloc[0,0] = 111
+    bulge_df.iloc[0,1] = 112
+    bulge_df.iloc[0,2] = 113
+    bulge.from_pandas(bulge_df)
     print(bulge)
 
 
@@ -1077,12 +1151,21 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
 
     arms = Power(2)
     arms.from_file_helper(bogus_list)
-    arms.update_param_values()
+    #arms.update_param_values()
     arms.to_file(f"{base_out}_Power.txt")
     print(arms)
 
     arms.from_file_helper(bogus_dict)
-    arms.update_param_values()
+    #arms.update_param_values()
+    print(arms)
+    
+    arms_df = arms.to_pandas()
+    print(arms_df)
+    print()
+    arms_df.iloc[0,0] = 111
+    arms_df.iloc[0,1] = 112
+    arms_df.iloc[0,2] = 113
+    arms.from_pandas(arms_df)
     print(arms)
 
 
@@ -1100,12 +1183,22 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
 
     fourier = Fourier(2)
     fourier.from_file_helper(bogus_list)
-    fourier.update_param_values()
+    #fourier.update_param_values()
     fourier.to_file(f"{base_out}_Fourier.txt")
     print(fourier)
 
     fourier.from_file_helper(bogus_dict)
-    fourier.update_param_values()
+    #fourier.update_param_values()
+    print(fourier)
+    
+    print(fourier.param_values)
+    fourier_df = fourier.to_pandas()
+    print(fourier_df)
+    print()
+    fourier_df.iloc[0,0] = 111
+    fourier_df.iloc[0,1] = 112
+    fourier_df.iloc[0,2] = 113
+    fourier.from_pandas(fourier_df)
     print(fourier)
 
 
@@ -1128,12 +1221,21 @@ if __name__ == "__main__":
 
     sky = Sky(3)
     sky.from_file_helper(bogus_list)
-    sky.update_param_values()
+    #sky.update_param_values()
     sky.to_file(f"{base_out}_Sky.txt")
     print(sky)
 
     sky.from_file_helper(bogus_dict)
-    sky.update_param_values()
+    #sky.update_param_values()
+    print(sky)
+    
+    sky_df = sky.to_pandas()
+    print(sky_df)
+    print()
+    sky_df.iloc[0,0] = 111
+    sky_df.iloc[0,1] = 112
+    sky_df.iloc[0,2] = 113
+    sky.from_pandas(sky_df)
     print(sky)
 
 
