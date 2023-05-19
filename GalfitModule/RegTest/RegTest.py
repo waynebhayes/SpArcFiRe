@@ -171,6 +171,7 @@ if __name__ == "__main__":
     ctrl_script = pj(_MODULE_DIR, "control_script.py")
     print("Running GALFIT (capturing output)...")
     result = sp(f"python3 {ctrl_script} {in_dir} {tmp_dir} {out_dir}")
+    
     # try:
     #     shutil.move(pj(os.getcwd(), "galfit_failed.txt"), TEST_OUTPUT_DIR)
     # except FileNotFoundError:
@@ -192,6 +193,9 @@ if __name__ == "__main__":
     unit_test_data = sorted(glob(pj(TEST_DATA_DIR, "*.txt")) + glob(pj(TEST_DATA_DIR, "*.in")))
     unit_test_out  = sorted(glob(pj(TEST_OUTPUT_DIR, "*.txt")) + glob(pj(TEST_OUTPUT_DIR, "*.in")))
     
+    unit_test_data = [i for i in unit_test_data if os.path.basename(i) != "OutputError.txt"]
+    unit_test_out  = [i for i in unit_test_out  if os.path.basename(i) != "OutputError.txt"]
+    
     data_filenames   = [os.path.basename(i) for i in unit_test_data]
     output_filenames = [os.path.basename(i) for i in unit_test_out]
     
@@ -199,7 +203,7 @@ if __name__ == "__main__":
     
     if compared:
         print("Missing some output files from unit tests.")
-        print("Diff check will fail so skipping that...")
+        print("Diff check will fail so skipping the following...")
         print("\n".join(compared))
         
     fail_count = 0
@@ -207,6 +211,7 @@ if __name__ == "__main__":
     
     if not compared:
         for data, output, filename in zip(unit_test_data, unit_test_out, output_filenames):
+                
             all_diff_error[filename] = ""
 
             result = sp(f"diff {data} {output}")
@@ -216,9 +221,10 @@ if __name__ == "__main__":
                 print(result.stderr)
 
             if result.stdout:
+                #print(result.stdout)
                 print(f"Diff check for {filename} failed!")
                 fail_count += 1
-                all_diff_error[filename] = result.stdout
+                all_diff_error[filename] = f"{filename}\n{result.stdout}"
             
     # Diff checking GALFIT input/output
     # Diff does not work on FITS files
@@ -233,7 +239,9 @@ if __name__ == "__main__":
         for suffix in things_to_check:
             # This may produce a stderr if the file doesn't exist
             # say when galfit failes. Just a heads-up, shouldn't be a problem.
-            result = sp(f"diff {data}_{suffix} {output}_{suffix}")
+            # tail is to start at line 15 of each file to ignore the file path differences
+            # for input/output/star mask/etc.
+            result = sp(f"diff <(tail -n +15 {data}_{suffix}) <(tail -n +15 {output}_{suffix})")
             
             if verbose:
                 print(result.stdout)
@@ -242,7 +250,7 @@ if __name__ == "__main__":
             if result.stdout:
                 print(f"Diff check for {gname}_{suffix} failed!")
                 fail_count += 1
-                all_diff_error[f"{gname}_{suffix}"] = result.stdout
+                all_diff_error[f"{gname}_{suffix}"] = f"{data}_{suffix}\n{result.stdout}"
                 
     with open(error_path, "a") as ef:
         for name, err_str in all_diff_error.items():

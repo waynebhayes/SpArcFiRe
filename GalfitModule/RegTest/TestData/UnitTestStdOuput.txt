@@ -243,12 +243,12 @@ These are feedme -> output
 
 ================================================================================
 # IMAGE and GALFIT CONTROL PARAMETERS
-A) /home/portmanm/testing_python_control/sparcfire-in/1237667911674691747.fits # Input data image (FITS file)
-B) /home/portmanm/testing_python_control/sparcfire-tmp/galfits/1237667911674691747_galfit_out.fits # Output data image block
+A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237667911674691747.fits # Input data image (FITS file)
+B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237667911674691747_galfit_out.fits # Output data image block
 C) none                 # Sigma image name (made from data if blank or 'none')
 D) none                 # Input PSF image and (optional) diffusion kernel
 E) 1                    # PSF fine sampling factor relative to data
-F) /home/portmanm/testing_python_control/sparcfire-tmp/galfit_masks/1237667911674691747_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
+F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237667911674691747_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 20      46 20 46     # Image region to fit (xmin xmax ymin ymax)
 I) 50      50           # Size of the convolution box (x y)
@@ -294,8 +294,8 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 
 R0) power               # PA rotation func. (power, log, none)
 R1) 0.0000      0       # Spiral inner radius [pixels]
-R2) 7.2551      0       # Spiral outer radius [pixels]
-R3) -60.0000    1       # Cumul. rotation out to outer radius [degrees]
+R2) 3.6276      0       # Spiral outer radius [pixels]
+R3) -45.0000    1       # Cumul. rotation out to outer radius [degrees]
 R4) 0.7587      1       # Asymptotic spiral powerlaw
 R9) 28.5901     1       # Inclination to L.o.S. [degrees]
 R10) 90.0000     1      # Sky position angle
@@ -317,12 +317,12 @@ F3) 0.0500  25.0000 1 1 # Azim. Fourier mode 3, amplitude, & phase angle
 
 ================================================================================
 # IMAGE and GALFIT CONTROL PARAMETERS
-A) /home/portmanm/testing_python_control/sparcfire-in/1237667911674691747.fits # Input data image (FITS file)
-B) /home/portmanm/testing_python_control/sparcfire-tmp/galfits/1237667911674691747_galfit_out.fits # Output data image block
+A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237667911674691747.fits # Input data image (FITS file)
+B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237667911674691747_galfit_out.fits # Output data image block
 C) none                 # Sigma image name (made from data if blank or 'none')
 D) none                 # Input PSF image and (optional) diffusion kernel
 E) 1                    # PSF fine sampling factor relative to data
-F) /home/portmanm/testing_python_control/sparcfire-tmp/galfit_masks/1237667911674691747_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
+F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237667911674691747_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 20      46 20 46     # Image region to fit (xmin xmax ymin ymax)
 I) 50      50           # Size of the convolution box (x y)
@@ -351,37 +351,37 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 # Component number: 1
  0) sersic              # Component type
  1) 33.1654 32.8765 0 0 # Position x, y
- 3) 13.6793     1       # Integrated magnitude
- 4) 7.9037      1       # R_e (effective radius)   [pix]
- 5) 0.0477      1       # Sersic index n (de Vaucouleurs n=4)
- 9) 0.7091      1       # Axis ratio (b/a)
-10) -46.1150    1       # Position angle (PA) [deg: Up=0, Left=90]
+ 3) 14.8068     1       # Integrated magnitude
+ 4) 12.0222     1       # R_e (effective radius)   [pix]
+ 5) 0.9126      1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.4374      1       # Axis ratio (b/a)
+10) -47.1107    1       # Position angle (PA) [deg: Up=0, Left=90]
 
 # Component number: 2
  0) sersic              # Component type
  1) 33.1654 32.8765 0 0 # Position x, y
- 3) 13.8983     1       # Integrated magnitude
- 4) 1.1718      1       # R_e (effective radius)   [pix]
- 5) 8.1483      1       # Sersic index n (de Vaucouleurs n=4)
- 9) 0.4815      1       # Axis ratio (b/a)
-10) 44.2976     1       # Position angle (PA) [deg: Up=0, Left=90]
+ 3) 13.2576     1       # Integrated magnitude
+ 4) 6.2167      1       # R_e (effective radius)   [pix]
+ 5) 1.1164      1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.9363      1       # Axis ratio (b/a)
+10) -29.5809    1       # Position angle (PA) [deg: Up=0, Left=90]
 
 R0) power               # PA rotation func. (power, log, none)
 R1) 0.0000      0       # Spiral inner radius [pixels]
-R2) 7.2551      0       # Spiral outer radius [pixels]
-R3) -62.6515    1       # Cumul. rotation out to outer radius [degrees]
-R4) -0.7337     1       # Asymptotic spiral powerlaw
-R9) -88.7910    1       # Inclination to L.o.S. [degrees]
-R10) 89.7395     1      # Sky position angle
+R2) 3.6276      0       # Spiral outer radius [pixels]
+R3) 3.0671      1       # Cumul. rotation out to outer radius [degrees]
+R4) -2.1409     1       # Asymptotic spiral powerlaw
+R9) 0.0018      1       # Inclination to L.o.S. [degrees]
+R10) 127.7754    1      # Sky position angle
 
-F1) 0.3491  117.6729 1 1 # Azim. Fourier mode 1, amplitude, & phase angle
-F3) 0.4024  16.0707 1 1 # Azim. Fourier mode 3, amplitude, & phase angle
+F1) 0.0978  -66.2488 1 1 # Azim. Fourier mode 1, amplitude, & phase angle
+F3) 0.0615  -50.4153 1 1 # Azim. Fourier mode 3, amplitude, & phase angle
 
 # Component number: 3
  0) sky                 # Component type
- 1) 1112.2347   1       # Sky background at center of fitting region [ADUs]
- 2) -0.3815     1       # dsky/dx (sky gradient in x)     [ADUs/pix]
- 3) 0.2881      1       # dsky/dy (sky gradient in y)     [ADUs/pix]
+ 1) 1093.7289   1       # Sky background at center of fitting region [ADUs]
+ 2) -0.1052     1       # dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) -0.1515     1       # dsky/dy (sky gradient in y)     [ADUs/pix]
 
 Key: bulge
 Key: disk
@@ -397,12 +397,12 @@ Key: path_to_feedme
 
 ================================================================================
 # IMAGE and GALFIT CONTROL PARAMETERS
-A) /home/portmanm/testing_python_control/sparcfire-in/1237667911674691747.fits # Input data image (FITS file)
-B) /home/portmanm/testing_python_control/sparcfire-tmp/galfits/1237667911674691747_galfit_out.fits # Output data image block
+A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237667911674691747.fits # Input data image (FITS file)
+B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237667911674691747_galfit_out.fits # Output data image block
 C) none                 # Sigma image name (made from data if blank or 'none')
 D) none                 # Input PSF image and (optional) diffusion kernel
 E) 1                    # PSF fine sampling factor relative to data
-F) /home/portmanm/testing_python_control/sparcfire-tmp/galfit_masks/1237667911674691747_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
+F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237667911674691747_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 20      46 20 46     # Image region to fit (xmin xmax ymin ymax)
 I) 50      50           # Size of the convolution box (x y)
@@ -431,37 +431,37 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 # Component number: 1
  0) sersic              # Component type
  1) 33.1654 32.8765 0 0 # Position x, y
- 3) 13.6793     1       # Integrated magnitude
- 4) 7.9037      1       # R_e (effective radius)   [pix]
- 5) 0.0477      1       # Sersic index n (de Vaucouleurs n=4)
- 9) 0.7091      1       # Axis ratio (b/a)
-10) -46.1150    1       # Position angle (PA) [deg: Up=0, Left=90]
+ 3) 14.8068     1       # Integrated magnitude
+ 4) 12.0222     1       # R_e (effective radius)   [pix]
+ 5) 0.9126      1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.4374      1       # Axis ratio (b/a)
+10) -47.1107    1       # Position angle (PA) [deg: Up=0, Left=90]
 
 # Component number: 2
  0) sersic              # Component type
  1) 33.1654 32.8765 0 0 # Position x, y
- 3) 13.8983     1       # Integrated magnitude
- 4) 1.1718      1       # R_e (effective radius)   [pix]
- 5) 8.1483      1       # Sersic index n (de Vaucouleurs n=4)
- 9) 0.4815      1       # Axis ratio (b/a)
-10) 44.2976     1       # Position angle (PA) [deg: Up=0, Left=90]
+ 3) 13.2576     1       # Integrated magnitude
+ 4) 6.2167      1       # R_e (effective radius)   [pix]
+ 5) 1.1164      1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.9363      1       # Axis ratio (b/a)
+10) -29.5809    1       # Position angle (PA) [deg: Up=0, Left=90]
 
 R0) power               # PA rotation func. (power, log, none)
 R1) 0.0000      0       # Spiral inner radius [pixels]
-R2) 7.2551      0       # Spiral outer radius [pixels]
-R3) -62.6515    1       # Cumul. rotation out to outer radius [degrees]
-R4) -0.7337     1       # Asymptotic spiral powerlaw
-R9) -88.7910    1       # Inclination to L.o.S. [degrees]
-R10) 89.7395     1      # Sky position angle
+R2) 3.6276      0       # Spiral outer radius [pixels]
+R3) 3.0671      1       # Cumul. rotation out to outer radius [degrees]
+R4) -2.1409     1       # Asymptotic spiral powerlaw
+R9) 0.0018      1       # Inclination to L.o.S. [degrees]
+R10) 127.7754    1      # Sky position angle
 
-F1) 0.3491  117.6729 1 1 # Azim. Fourier mode 1, amplitude, & phase angle
-F3) 0.4024  16.0707 1 1 # Azim. Fourier mode 3, amplitude, & phase angle
+F1) 0.0978  -66.2488 1 1 # Azim. Fourier mode 1, amplitude, & phase angle
+F3) 0.0615  -50.4153 1 1 # Azim. Fourier mode 3, amplitude, & phase angle
 
 # Component number: 3
  0) sky                 # Component type
- 1) 1112.2347   1       # Sky background at center of fitting region [ADUs]
- 2) -0.3815     1       # dsky/dx (sky gradient in x)     [ADUs/pix]
- 3) 0.2881      1       # dsky/dy (sky gradient in y)     [ADUs/pix]
+ 1) 1093.7289   1       # Sky background at center of fitting region [ADUs]
+ 2) -0.1052     1       # dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) -0.1515     1       # dsky/dy (sky gradient in y)     [ADUs/pix]
 
 Checking the bad example
 Galfit failed this run!
@@ -779,37 +779,37 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 # Component number: 1
  0) sersic              # Component type
  1) 73.8201 74.2847 0 0 # Position x, y
- 3) 13.3542     1       # Integrated magnitude
- 4) 13.9421     1       # R_e (effective radius)   [pix]
- 5) 0.6672      1       # Sersic index n (de Vaucouleurs n=4)
- 9) 0.7773      1       # Axis ratio (b/a)
-10) -63.4710    1       # Position angle (PA) [deg: Up=0, Left=90]
+ 3) 14.1285     1       # Integrated magnitude
+ 4) 13.4960     1       # R_e (effective radius)   [pix]
+ 5) 0.3541      1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.7874      1       # Axis ratio (b/a)
+10) 60.5576     1       # Position angle (PA) [deg: Up=0, Left=90]
 
 # Component number: 2
  0) sersic              # Component type
  1) 73.8201 74.2847 0 0 # Position x, y
- 3) 14.4056     1       # Integrated magnitude
- 4) 38.8079     1       # R_e (effective radius)   [pix]
- 5) 2.7568      1       # Sersic index n (de Vaucouleurs n=4)
- 9) 0.6945      1       # Axis ratio (b/a)
-10) 164.3307    1       # Position angle (PA) [deg: Up=0, Left=90]
+ 3) 13.8853     1       # Integrated magnitude
+ 4) 15.5193     1       # R_e (effective radius)   [pix]
+ 5) 1.1219      1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.5288      1       # Axis ratio (b/a)
+10) 135.0784    1       # Position angle (PA) [deg: Up=0, Left=90]
 
 R0) power               # PA rotation func. (power, log, none)
 R1) 0.0000      0       # Spiral inner radius [pixels]
-R2) 29.4653     0       # Spiral outer radius [pixels]
-R3) -269.5119   1       # Cumul. rotation out to outer radius [degrees]
-R4) -10.4545    1       # Asymptotic spiral powerlaw
-R9) -45.8712    1       # Inclination to L.o.S. [degrees]
-R10) 121.4570    1      # Sky position angle
+R2) 9.8218      0       # Spiral outer radius [pixels]
+R3) -88.9569    1       # Cumul. rotation out to outer radius [degrees]
+R4) 0.4963      1       # Asymptotic spiral powerlaw
+R9) 23.8344     1       # Inclination to L.o.S. [degrees]
+R10) -96.6129    1      # Sky position angle
 
-F1) -0.1631 82.9377 1 1 # Azim. Fourier mode 1, amplitude, & phase angle
-F3) -0.0827 54.6140 1 1 # Azim. Fourier mode 3, amplitude, & phase angle
+F1) -0.1116 107.6485 1 1 # Azim. Fourier mode 1, amplitude, & phase angle
+F3) 0.1745  5.7695 1 1  # Azim. Fourier mode 3, amplitude, & phase angle
 
 # Component number: 3
  0) sky                 # Component type
- 1) 1083.2992   1       # Sky background at center of fitting region [ADUs]
- 2) 0.0467      1       # dsky/dx (sky gradient in x)     [ADUs/pix]
- 3) -0.0206     1       # dsky/dy (sky gradient in y)     [ADUs/pix]
+ 1) 1084.7181   1       # Sky background at center of fitting region [ADUs]
+ 2) 0.0344      1       # dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) 0.0141      1       # dsky/dy (sky gradient in y)     [ADUs/pix]
 
 
 model
@@ -827,55 +827,55 @@ COMMENT = ========== GALFIT Input Parameters ==========
 ------------------------------------------------------------------------
 =============================================
 
-INITFILE = /home/portmanm/testing_python_control/sparcfire-out/1237671124296532
-DATAIN = /home/portmanm/testing_python_control/sparcfire-in/12376711242965322
+INITFILE = /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-o
+DATAIN = /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/
 SIGMA = none
 PSF = none
 CONSTRNT = none
-MASK = /home/portmanm/testing_python_control/sparcfire-tmp/galfit_masks/123
+MASK = /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-t
 FITSECT = [47:101,47:101]
 CONVBOX = 50, 50
 MAGZPT = 24.8
 COMP_1 = sersic
 1_XC = [73.8201]
 1_YC = [74.2847]
-1_MAG = 13.3542 +/- 0.0638
-1_RE = 13.9421 +/- 0.2775
-1_N = 0.6672 +/- 0.0265
-1_AR = 0.7773 +/- 0.0158
-1_PA = -63.4710 +/- 1.3769
+1_MAG = 14.1285 +/- 0.0566
+1_RE = 13.4960 +/- 0.2408
+1_N = 0.3541 +/- 0.0160
+1_AR = 0.7874 +/- 0.0123
+1_PA = 60.5576 +/- 3.9617
 COMP_2 = sersic
 2_XC = [73.8201]
 2_YC = [74.2847]
-2_MAG = 14.4056 +/- 0.8585
-2_RE = 38.8079 +/- 31.8820
-2_N = 2.7568 +/- 0.7258
-2_AR = 0.6945 +/- 0.0634
-2_PA = 164.3307 +/- 7.5339
+2_MAG = 13.8853 +/- 0.0792
+2_RE = 15.5193 +/- 0.7402
+2_N = 1.1219 +/- 0.0424
+2_AR = 0.5288 +/- 0.0127
+2_PA = 135.0784 +/- 14.1329
 2_ROTF = power
 2_RIN = [0.0000]
-2_ROUT = [29.4653]
-2_RANG = -269.5119 +/- 1.4846
-2_ALPHA = *-10.4545* +/- *0.0111*
-2_INCL = -45.8712 +/- 0.0481
-2_SPA = 121.4570 +/- 0.0860
-2_F1 = -0.1631 +/- 0.0375
-2_F1PA = 82.9377 +/- 16.4029
-2_F3 = -0.0827 +/- 0.0429
-2_F3PA = 54.6140 +/- 8.7825
+2_ROUT = [9.8218]
+2_RANG = -88.9569 +/- 4.2928
+2_ALPHA = 0.4963 +/- 0.0408
+2_INCL = 23.8344 +/- 2.6051
+2_SPA = -96.6129 +/- 11.1162
+2_F1 = -0.1116 +/- 0.0068
+2_F1PA = 107.6485 +/- 5.0090
+2_F3 = 0.1745 +/- 0.0068
+2_F3PA = 5.7695 +/- 1.2489
 COMP_3 = sky
 3_XC = [74.0000]
 3_YC = [74.0000]
-3_SKY = 1083.2992 +/- 0.5112
-3_DSDX = 0.0467 +/- 0.0062
-3_DSDY = -0.0206 +/- 0.0062
-FLAGS = A-6 H-3 H-4 H-1 A-2 A-5 2
-CHISQ = 1023.57372968911
+3_SKY = 1084.7181 +/- 0.1551
+3_DSDX = 0.0344 +/- 0.0044
+3_DSDY = 0.0141 +/- 0.0038
+FLAGS = A-6 H-3 H-4 H-1 A-2 A-5
+CHISQ = 744.60384086402
 NDOF = 3004
 NFREE = 21
 NFIX = 6
-CHI2NU = 0.3407369
-LOGFILE = galfit.14
+CHI2NU = 0.2478708
+LOGFILE = galfit.02
 Img size: (55, 55)
 
 These should all be the same .
@@ -886,9 +886,9 @@ These should all be the same .
 Andddd pre crop
 (148, 148)
 60382.3062
-60380.7195
-324.5163
-0.0054
+60381.4591
+275.8166
+0.0046
 The temp directory has a different number of star masks than the number of output directories.
 Generating starmasks...
 Star masks have been generated successfully.
