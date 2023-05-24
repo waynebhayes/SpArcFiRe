@@ -421,16 +421,17 @@ if __name__ == "__main__":
     example_fits = pj(TEST_DATA_DIR, "test-out", "1237667911674691747", "1237667911674691747_galfit_out.fits")
     example_feedme = pj(TEST_DATA_DIR, "test-out", "1237667911674691747", "1237667911674691747.in")
     
-    print("These are feedme -> output\n")
+    print("These are feedme -> output")
+    print("ignoring filepaths for reg tests...\n")
     
     container.from_file(example_feedme)
-    print(str(container))
+    print(iff(str(container)))
     
     print("*"*80)
     print("*"*80)
     
     container.from_file(example_fits)
-    print(str(container))    
+    print(iff(str(container)))
 
 
 # In[11]:
@@ -469,7 +470,7 @@ if __name__ == "__main__":
     
 
 
-# In[15]:
+# In[11]:
 
 
 # Testing extraction into FeedmeContainer attributes
@@ -486,7 +487,7 @@ if __name__ == "__main__":
     #print()
     _ = [print("Key:", k) for k in example_feedme.to_dict().keys()]
     print()
-    print(str(example_feedme))
+    print(iff(str(example_feedme)))
 
 
 # In[13]:
@@ -601,7 +602,7 @@ if __name__ == "__main__":
     #good_output.header.to_file(output_filename, good_output.bulge, good_output.disk, good_output.arms, good_output.fourier, good_output.sky)
 
 
-# In[14]:
+# In[16]:
 
 
 if __name__ == "__main__":

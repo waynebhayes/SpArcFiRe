@@ -45,6 +45,12 @@ out_str = """\t Python3.6 or greater required! Exitting without generating feedm
             if feedmes have already been generated, galfit will run with those.\n"""
 assert sys.version_info >= (3, 6), out_str
 
+# ignore_feedme_filepaths
+def iff(feedme_str):
+    out_str = feedme_str.split("\n")
+    G_idx = [idx for idx,i in enumerate(out_str) if i.startswith("G)")][0]
+    return "\n".join(out_str[G_idx:])
+
 if __name__ == "__main__":
     
     USAGE = f"""USAGE:
@@ -139,7 +145,7 @@ if __name__ == "__main__":
             err_str = "\n".join(err_list)
             ef.write(f"{name}\n{err_str}")
 
-    stdout_path = pj(TEST_OUTPUT_DIR, "UnitTestStdOuput.txt")
+    stdout_path = pj(TEST_OUTPUT_DIR, "UnitTestStdOutput.txt")
     if not exists(stdout_path):
         print("Function helper must have failed! Adding to failure count and creating file.")
         total_fail_count += 1

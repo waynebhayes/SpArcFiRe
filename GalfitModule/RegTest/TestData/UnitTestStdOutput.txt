@@ -236,19 +236,8 @@ F3) 0.0500  25.0000 1 1 # Azim. Fourier mode 3, amplitude, & phase angle
 
 [1 rows x 27 columns]
 These are feedme -> output
+ignoring filepaths for reg tests...
 
-#  Input menu file: .in
-
-#  
-
-================================================================================
-# IMAGE and GALFIT CONTROL PARAMETERS
-A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237667911674691747.fits # Input data image (FITS file)
-B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237667911674691747_galfit_out.fits # Output data image block
-C) none                 # Sigma image name (made from data if blank or 'none')
-D) none                 # Input PSF image and (optional) diffusion kernel
-E) 1                    # PSF fine sampling factor relative to data
-F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237667911674691747_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 20      46 20 46     # Image region to fit (xmin xmax ymin ymax)
 I) 50      50           # Size of the convolution box (x y)
@@ -311,18 +300,6 @@ F3) 0.0500  25.0000 1 1 # Azim. Fourier mode 3, amplitude, & phase angle
 
 ********************************************************************************
 ********************************************************************************
-#  Input menu file: .in
-
-#  
-
-================================================================================
-# IMAGE and GALFIT CONTROL PARAMETERS
-A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237667911674691747.fits # Input data image (FITS file)
-B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237667911674691747_galfit_out.fits # Output data image block
-C) none                 # Sigma image name (made from data if blank or 'none')
-D) none                 # Input PSF image and (optional) diffusion kernel
-E) 1                    # PSF fine sampling factor relative to data
-F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237667911674691747_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 20      46 20 46     # Image region to fit (xmin xmax ymin ymax)
 I) 50      50           # Size of the convolution box (x y)
@@ -391,18 +368,6 @@ Key: sky
 Key: header
 Key: path_to_feedme
 
-#  Input menu file: .in
-
-#  
-
-================================================================================
-# IMAGE and GALFIT CONTROL PARAMETERS
-A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237667911674691747.fits # Input data image (FITS file)
-B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237667911674691747_galfit_out.fits # Output data image block
-C) none                 # Sigma image name (made from data if blank or 'none')
-D) none                 # Input PSF image and (optional) diffusion kernel
-E) 1                    # PSF fine sampling factor relative to data
-F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237667911674691747_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 20      46 20 46     # Image region to fit (xmin xmax ymin ymax)
 I) 50      50           # Size of the convolution box (x y)
