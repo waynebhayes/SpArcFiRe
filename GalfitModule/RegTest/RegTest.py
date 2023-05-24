@@ -188,8 +188,10 @@ if __name__ == "__main__":
         print(result.stderr)
         
     # As output by HelperFunctions script per its own unit test
-    with open(stdout_path, "a") as f:
-        f.write(result.stdout)
+    # Will have a filepath issue at the end of this as well as potentially an ordering
+    # issue so we don't use this output after all.
+    # with open(stdout_path, "a") as f:
+    #     f.write(result.stdout)
     
     # DIFF CHECKS
     print("Performing diff check for unit tests.")
