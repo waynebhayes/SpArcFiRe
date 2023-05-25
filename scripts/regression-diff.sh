@@ -44,7 +44,7 @@ awk "`cat $DIR/misc.awk`"'
 	    PROCINFO["sorted_in"]="@ind_num_asc"; #traverse for loop based on integer VALUE (not INDEX) of elements
 	    for(v in varCols) if(length(varCols[v])!=numTSVs){
 		Warn(sprintf("header column name \"%s\" does not appear in all input files",v));
-		delete yes; delete no;
+		yes=no="";
 		for(i=1;i<=ARGC;i++)if(i in varCols[v])yes=yes" "F[i];else no=no" "F[i];
 		Warn(sprintf("It exists in (%s) but is missing in (%s)",yes,no));
 		++headerMismatch[v]; # record column number (but not variable name)
