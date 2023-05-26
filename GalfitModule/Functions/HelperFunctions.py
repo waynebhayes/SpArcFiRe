@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
+# In[1]:
 
 
 import os
@@ -17,7 +17,7 @@ from copy import deepcopy
 from astropy.io import fits
 
 
-# In[3]:
+# In[2]:
 
 
 # For debugging purposes
@@ -31,7 +31,7 @@ def in_notebook():
         return False
 
 
-# In[4]:
+# In[3]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -50,7 +50,7 @@ else:
 sys.path.append(_MODULE_DIR)
 
 
-# In[5]:
+# In[4]:
 
 
 def export_to_py(notebook_name, output_filename = ""):
@@ -77,7 +77,7 @@ def export_to_py(notebook_name, output_filename = ""):
                 print("Output from nbconvert: ", *result)
 
 
-# In[6]:
+# In[5]:
 
 
 def check_programs():
@@ -101,7 +101,7 @@ global run_python
 run_galfit, run_fitspng, run_python = check_programs()
 
 
-# In[7]:
+# In[6]:
 
 
 def sp(cmd_str, capture_output = True, timeout = None):
@@ -114,21 +114,21 @@ def sp(cmd_str, capture_output = True, timeout = None):
                           executable="/bin/bash")
 
 
-# In[22]:
+# In[7]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[23]:
+# In[8]:
 
 
 # Unit test for sp
 # The components and things will overwrite files rather than append
 # so the second touch is unnecessary
 if __name__ == "__main__":
-    stdout_file   = "UnitTestStdOuput.txt"
+    stdout_file   = "UnitTestStdOutput.txt"
     # writeout_file = "UnitTestWriteOuput.txt"
     
     stdout_dest   = pj(TEST_OUTPUT_DIR, stdout_file)
@@ -145,7 +145,7 @@ if __name__ == "__main__":
         raise(Exception())
 
 
-# In[24]:
+# In[ ]:
 
 
 if __name__ == "__main__":

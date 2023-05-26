@@ -83,7 +83,7 @@ class HDU:
         return output_str
 
 
-# In[36]:
+# In[5]:
 
 
 class FitsFile:
@@ -261,7 +261,7 @@ class FitsFile:
             setattr(self, key, value)
 
 
-# In[37]:
+# In[6]:
 
 
 class OutputFits(FitsFile):
@@ -317,7 +317,6 @@ class OutputFits(FitsFile):
         try:
             self.masked_residual = (self.observation.data - self.model.data)*crop_mask
 
-            # TODO: norm of observation, norm of model, take the min of the two and divide by that
             self.norm_observation = slg.norm(crop_mask*self.observation.data)
             self.norm_model = slg.norm(crop_mask*self.model.data)
             self.norm_residual = slg.norm(crop_mask*self.residual.data)
@@ -336,23 +335,23 @@ class OutputFits(FitsFile):
         return self.masked_residual_normalized
 
 
-# In[38]:
+# In[7]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[39]:
+# In[8]:
 
 
 # Testing from_file
 if __name__ == "__main__":
     
     gname = "1237671124296532233"
-    obs   = pj(TEST_DATA_DIR, f"{gname}.fits")
-    model = pj(TEST_DATA_DIR, gname, f"{gname}_galfit_out.fits")
-    mask  = pj(TEST_DATA_DIR, gname, f"{gname}_star-rm.fits")
+    obs   = pj(TEST_DATA_DIR, "test-in", f"{gname}.fits")
+    model = pj(TEST_DATA_DIR, "test-out", gname, f"{gname}_galfit_out.fits")
+    mask  = pj(TEST_DATA_DIR, "test-out", gname, f"{gname}_star-rm.fits")
     
     test_obs   = FitsFile(obs)
     test_model = OutputFits(model)
@@ -392,7 +391,7 @@ if __name__ == "__main__":
     print(np.shape(test_obs.observation.data))
 
 
-# In[40]:
+# In[9]:
 
 
 # Unit test to check value of masked residual
@@ -405,7 +404,7 @@ if __name__ == "__main__":
     print(f"{test_model.nmr:.4f}")
 
 
-# In[ ]:
+# In[10]:
 
 
 if __name__ == "__main__":
