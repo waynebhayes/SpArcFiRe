@@ -58,7 +58,7 @@ done
 
 echo --- running GALFIT unit and reg tests ---
 echo
-GALFIT_REG_OUTPUT="$(python3 ${SPARCFIRE_HOME}/GalfitModule/RegTest/RegTest.py)"
+GALFIT_REG_OUTPUT="$(PYTHON3 ${SPARCFIRE_HOME}/GalfitModule/RegTest/RegTest.py)"
 echo "$GALFIT_REG_OUTPUT"
 
 len=$((${#GALFIT_REG_OUTPUT}))
