@@ -36,7 +36,7 @@ if [ "$SPARCFIRE_HOME" = . ]; then SPARCFIRE_HOME=`/bin/pwd`; fi
 PIP_NEED='numpy|Pillow|scipy|astropy'
 
 echo "Checking you have Python 2.7 or 3 installed."
-if python --version 2>&1 | fgrep -q "2.7"; then
+if python --version 2>&1 | grep -q '2\.7\.5'; then
     PYTHON=python
     PYTHON_SUFFIX=".py2"
     PIP_HAVE=`(pip2 list; $PYTHON -m pip list) 2>/dev/null | awk '{print $1}' | sort -u | egrep "$PIP_NEED"`
@@ -46,7 +46,7 @@ elif python --version 2>&1 | fgrep -q "3"; then
     PYTHON_SUFFIX=".py3"
     PIP_HAVE=`(pip3 list; $PYTHON -m pip list) 2>/dev/null | awk '{print $1}' | sort -u | egrep "$PIP_NEED"`
 
-elif python2.7 --version 2>&1; then
+elif python2.7 --version 2>&1 | grep -q '2\.7\.5'; then
     PYTHON=python2.7
     PYTHON_SUFFIX=".py2"
     PIP_HAVE=`(pip2 list; $PYTHON -m pip list) 2>/dev/null | awk '{print $1}' | sort -u | egrep "$PIP_NEED"`
