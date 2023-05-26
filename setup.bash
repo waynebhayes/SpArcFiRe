@@ -33,19 +33,39 @@ case $# in
 esac
 if [ "$SPARCFIRE_HOME" = . ]; then SPARCFIRE_HOME=`/bin/pwd`; fi
 
-echo -n "Checking you have Python 2.7 installed"
+PIP_NEED='numpy|Pillow|scipy|astropy|pandas'
+
+echo -n "Checking you have Python 2.7 or 3 installed"
 if python --version | fgrep 2.7 2>/dev/null; then
     PYTHON=python
+    PYTHON_SUFFIX=".py2"
+    PIP_HAVE=`(pip2 list; $PYTHON -m pip list) 2>/dev/null | awk '{print $1}' | sort -u | egrep "$PIP_NEED"`
+
+elif python --version | fgrep 3 2>/dev/null; then
+    PYTHON=python
+    PYTHON_SUFFIX=".py3"
+    PIP_HAVE=`(pip3 list; $PYTHON -m pip list) 2>/dev/null | awk '{print $1}' | sort -u | egrep "$PIP_NEED"`
+
 elif python2.7 --version 2>/dev/null; then
     PYTHON=python2.7
-else
-    fail "$SETUP_USAGE${NL} SETUP ERROR: You need to install Python 2.7, and have the executable called python2.7"
-fi
-echo "Your python2.7 is called $PYTHON:"
-$PYTHON --version
+    PYTHON_SUFFIX=".py2"
+    PIP_HAVE=`(pip2 list; $PYTHON -m pip list) 2>/dev/null | awk '{print $1}' | sort -u | egrep "$PIP_NEED"`
 
-PIP_NEED='numpy|Pillow|scipy|astropy'
-PIP_HAVE=`(pip2 list; $PYTHON -m pip list) 2>/dev/null | awk '{print $1}' | sort -u | egrep "$PIP_NEED"`
+elif python3 --version 2>/dev/null; then
+    PYTHON=python3
+    PYTHON_SUFFIX=".py3"
+    PIP_HAVE=`(pip3 list; $PYTHON -m pip list) 2>/dev/null | awk '{print $1}' | sort -u | egrep "$PIP_NEED"`
+
+else
+    fail "$SETUP_USAGE${NL} SETUP ERROR: You need to install Python 2.7 or 3, and have the executable called python2.7 or python3"
+fi
+echo "Your python is called $PYTHON:"
+$PYTHON --version
+export SPARCFIRE_PYTHON="$PYTHON"
+export PYTHON_SUFFIX="$PYTHON_SUFFIX"
+
+#PIP_NEED='numpy|Pillow|scipy|astropy|pandas'
+#PIP_HAVE=`(pip2 list; $PYTHON -m pip list) 2>/dev/null | awk '{print $1}' | sort -u | egrep "$PIP_NEED"`
 if [ `echo "$PIP_HAVE" | wc -l` -eq 4 ]; then
     echo "SUCCESS! SPARCFIRE_HOME set to $SPARCFIRE_HOME. Now adding $SPARCFIRE_HOME/scripts to PATH."
     export PATH="$SPARCFIRE_HOME/scripts:$PATH"
