@@ -58,8 +58,8 @@ done
 
 echo --- running GALFIT unit and reg tests ---
 echo
-if [ -n "${PYTHON3}" ];
-    GALFIT_REG_OUTPUT="$(PYTHON3 ${SPARCFIRE_HOME}/GalfitModule/RegTest/RegTest.py)"
+if [ -n "${PYTHON3}" ]; then
+    GALFIT_REG_OUTPUT="$($PYTHON3 ${SPARCFIRE_HOME}/GalfitModule/RegTest/RegTest.py)"
     echo "$GALFIT_REG_OUTPUT"
     len=$((${#GALFIT_REG_OUTPUT}))
     GALFIT_FAILS="${GALFIT_REG_OUTPUT:(-2):$len}"
