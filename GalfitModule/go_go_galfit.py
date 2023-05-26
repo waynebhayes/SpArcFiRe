@@ -259,6 +259,11 @@ def main(**kwargs):
 
         shutil.copy2(tmp_fits_path_gname, pj(out_dir, gname, f"{gname}_galfit_out.fits"))
         
+        # TODO(?): Output final GALFIT parameters/components to file via FITS header and
+        # FitsHandler routines. This may somewhat useful for future comparison but
+        # theoretically any comparison will likely take place in python and can
+        # therefore use the FitsHandler routines at run time.
+        
         print()
     
     return failed

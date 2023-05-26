@@ -36,7 +36,17 @@ mkdir -p /tmp/sparcfire-${USER:=`basename $SPARCFIRE_HOME`}
 MCR_CACHE_ROOT=/tmp/sparcfire-$USER
 export MCR_CACHE_ROOT
 
-SPARCFIRE_PYTHON="python2.7" #/usr/bin/
+#if [[ "$PYTHON" == "*2.7"; then
+#    SPARCFIRE_PYTHON="python2.7"
+#    FILE_SUFFIX=".py2"
+#elif [[ "$PYTHON" == "*3"; then
+#    SPARCFIRE_PYTHON="python3"
+#    FILE_SUFFIX=".py3"
+#else
+#    SPARCFIRE_PYTHON="python"
+#fi
+
+#SPARCFIRE_PYTHON="python2.7"
 FITS_PARAMS="0.25 0.75 2"
 STARMASK="_starmask.png"
 ELPS_DIR="NONE"
@@ -152,14 +162,14 @@ $FITS && $COMPUTE_STARMASK && (
     fi
     cd $SPARCFIRE_HOME/scripts/ArcPNGcreator/star_removal
     case `hostname` in
-    theory-monster*) $SPARCFIRE_PYTHON remove_stars_with_sextractor.py2 "$sfDir" "$pngDir" ;;
+    theory-monster*) $SPARCFIRE_PYTHON "remove_stars_with_sextractor${PYTHON_SUFFIX}" "$sfDir" "$pngDir" ;;
     bayonet-06*) 
         #source $SPARCFIRE_HOME/scripts/SpArcFiRe-pyvenv-bayonet-06/bin/activate;
-        $SPARCFIRE_PYTHON remove_stars_with_sextractor-bayonet-06.py2 "$sfDir" "$pngDir";;
+        $SPARCFIRE_PYTHON "remove_stars_with_sextractor-bayonet-06${PYTHON_SUFFIX}" "$sfDir" "$pngDir";;
         #source deactivate;;
     *) 
         #source $SPARCFIRE_HOME/scripts/SpArcFiRe-pyvenv/bin/activate;
-        $SPARCFIRE_PYTHON remove_stars_with_sextractor.py2 "$sfDir" "$pngDir";; 
+        $SPARCFIRE_PYTHON "remove_stars_with_sextractor${PYTHON_SUFFIX}"  "$sfDir" "$pngDir";; 
         #source deactivate;;
     esac
 )
