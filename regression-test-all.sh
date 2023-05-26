@@ -58,12 +58,18 @@ done
 
 echo --- running GALFIT unit and reg tests ---
 echo
-GALFIT_REG_OUTPUT="$(PYTHON3 ${SPARCFIRE_HOME}/GalfitModule/RegTest/RegTest.py)"
-echo "$GALFIT_REG_OUTPUT"
+if [ -n "${PYTHON3}" ];
+    GALFIT_REG_OUTPUT="$(PYTHON3 ${SPARCFIRE_HOME}/GalfitModule/RegTest/RegTest.py)"
+    echo "$GALFIT_REG_OUTPUT"
+    len=$((${#GALFIT_REG_OUTPUT}))
+    GALFIT_FAILS="${GALFIT_REG_OUTPUT:(-2):$len}"
+else
+    echo "Python3 installation either not found or too old... tallying a failure."
+    GALFIT_FAILS=1
+fi
 
-len=$((${#GALFIT_REG_OUTPUT}))
-NEW_FAILS="${GALFIT_REG_OUTPUT:(-2):$len}"
-(( NUM_FAILS+=NEW_FAILS ))
+
+(( NUM_FAILS+=GALFIT_FAILS ))
 echo
 echo --- GALFIT unit and reg tests incurred $NEW_FAILS failures, cumulative failures is $NUM_FAILS ---
 

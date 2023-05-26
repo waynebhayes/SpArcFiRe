@@ -83,9 +83,10 @@ echo ""
 #PIP_HAVE=`(pip2 list; $PYTHON -m pip list) 2>/dev/null | awk '{print $1}' | sort -u | egrep "$PIP_NEED"`
 if [ `echo "$PIP_HAVE" | wc -l` -eq 4 ]; then
     echo "SUCCESS! SPARCFIRE_HOME set to $SPARCFIRE_HOME. Now adding $SPARCFIRE_HOME/scripts to PATH."
+    echo ""
     export PATH="$SPARCFIRE_HOME/scripts:$PATH"
 else
-    (echo "We need all of the following Python packages: `echo "$PIP_NEED" | sed 's/|/ /g'`"
+    (echo "We need all of the following Python packages for $PYTHON: `echo "$PIP_NEED" | sed 's/|/ /g'`"
     echo But you only have the following:
     if echo $PIP_HAVE | grep . >/dev/null; then echo "$PIP_HAVE"; else echo "    (none)"; fi
     echo "To get the missing packages, please execute following commands, and note you may need to specify '--user':"
@@ -101,16 +102,15 @@ fi
 
 if [ `echo "$PIP_HAVE3" | wc -l` -eq 5 ]; then
     true
+elif [ -z "${PYTHON3}" ]; then
+    true
 else
-    (echo "We need all of the following Python packages: `echo "$PIP_NEED3" | sed 's/|/ /g'`"
+    (echo "We need all of the following Python packages for $PYTHON3: `echo "$PIP_NEED3" | sed 's/|/ /g'`"
     echo But you only have the following:
-    if echo $PIP_HAVE | grep . >/dev/null; then echo "$PIP_HAVE"; else echo "    (none)"; fi
+    if echo $PIP_HAVE3 | grep . >/dev/null; then echo "$PIP_HAVE3"; else echo "    (none)"; fi
     echo "To get the missing packages, please execute following commands, and note you may need to specify '--user':"
     echo ""
-    echo "$PIP_NEED" | tr '|' "$NL" | fgrep -v -f <(echo "$PIP_HAVE" | tr ' ' "$NL") |
+    echo "$PIP_NEED3" | tr '|' "$NL" | fgrep -v -f <(echo "$PIP_HAVE3" | tr ' ' "$NL") |
 	awk '{printf "\t'$PYTHON' -m pip install [--user] %s\n",$0}'
-    echo ""
-    echo SpArcFiRe repo is in "$SPARCFIRE_HOME"
-    echo "If you ran this script without the word 'source' before it, you messed up. Try again.") >&2
-    fail "SETUP ERROR: missing pip packages"
+    ) >&2
 fi
