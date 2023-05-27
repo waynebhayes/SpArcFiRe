@@ -88,8 +88,10 @@ if __name__ == "__main__":
     total_fail_count = 0
     
     # Cleaning up old reg test (if it was previously run)
-    print("Cleaning up old unit/regression test files from TestOutput directory.")
-    shutil.rmtree(TEST_OUTPUT_DIR)
+    if exists(TEST_OUTPUT_DIR):
+        print("Cleaning up old unit/regression test files from TestOutput directory.")
+        shutil.rmtree(TEST_OUTPUT_DIR)
+        
     os.mkdir(TEST_OUTPUT_DIR)
 
     def sp(cmd_str, capture_output = True, timeout = None):
