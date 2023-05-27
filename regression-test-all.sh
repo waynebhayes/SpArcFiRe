@@ -71,7 +71,7 @@ fi
 
 (( NUM_FAILS+=GALFIT_FAILS ))
 echo
-echo --- GALFIT unit and reg tests incurred $NEW_FAILS failures, cumulative failures is $NUM_FAILS ---
+echo --- GALFIT unit and reg tests incurred $GALFIT_FAILS failures, cumulative failures is $NUM_FAILS ---
 
 echo Total number of failures: $NUM_FAILS
 (echo $NUM_FAILS; git log -1 --format=%at) > git-at

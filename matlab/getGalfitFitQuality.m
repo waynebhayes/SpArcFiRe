@@ -21,16 +21,16 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
     gal_name = split(string(outputPath), '/');
     gal_name = gal_name(end);
 
-    [status, outputPath] = system('mktemp -d /tmp/galfit_junk.XXXXXX');
-    outputPath = outputPath + '/' + gal_name;
+    [status, outputPath] = system('mktemp -d /tmp/galfit_junk_XXXXXX');
+    outputPathGname = strtrim(string(outputPath)) + '/' + string(gal_name);
 
-    %disp('Checking outputPath - ' + outputPath)
-    outputPath = char(outputPath);
-    fitswrite(img, [outputPath '_galfit_input.fits']);
+    disp('Checking outputPathGname - ' + outputPathGname)
+    % outputPath = char(outputPath);
+    fitswrite(img, [char(outputPathGname) '_galfit_input.fits']);
     %galfitTemplateFilename = ['/home/' getenv('USER') '/bin/GalfitTemplates/template.feedme']; %added this to call galfit using correct path
-    galfitTemplateFilename = [getenv('SPARCFIRE_HOME') '/scripts/GalfitTemplates/template.feedme'];
-    disp(['Reading GALFIT template file: ' galfitTemplateFilename])
-    galfitTemplate = fopen(galfitTemplateFilename,'r');
+    galfitTemplateFilename = string([getenv('SPARCFIRE_HOME') '/GalfitTemplates/template.feedme']);
+    disp('Reading GALFIT template file: ' + galfitTemplateFilename)
+    galfitTemplate = fopen(galfitTemplateFilename, 'r');
     text = fread(galfitTemplate, '*char')';
     fclose(galfitTemplate);
 
@@ -38,7 +38,7 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
     muFit = gxyParams.iptCtrXY;
     nRows = gxyParams.iptSz(1);
     nCols = gxyParams.iptSz(2);
-    text = strrep(text, '$input_name', [outputPath '_galfit_input.fits']);
+    text = strrep(text, '$input_name', outputPathGname + '_galfit_input.fits');
     text = strrep(text, '$output_name', [OGoutputPath '_galfit_output.fits']);
     text = strrep(text, '$x_center', num2str(muFit(1)));
     text = strrep(text, '$y_center', num2str(size(img, 1) - muFit(2) + 1));
@@ -50,18 +50,19 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
     text = strrep(text, '$x_max', num2str(nRows));
     text = strrep(text, '$y_max', num2str(nCols));
 
-    galfitInput = fopen([outputPath '.feedme'],'wt');
+    disp('Writing GALFIT template file: ' + outputPathGname + '.feedme')
+    galfitInput = fopen(outputPathGname + '.feedme','wt');
     fwrite(galfitInput, text);
     fclose(galfitInput);
 
     % Run galfit
-    %galfitCommand = ['/home/' getenv('USER') '/bin/galfit ' outputPath '.feedme'];
+    %galfitCommand = ['/home/' getenv('USER') '/bin/galfit ' outputPathGname '.feedme'];
     % ^Will 9/30/19: This line of code was added a few months ago because of how matlab evaluates path's at compile time
     % see documentation/stuck_try_this.txt for more explanation
-    galfitCommand = [getenv('SPARCFIRE_HOME') '/scripts/galfit ' outputPath '.feedme'];
+    galfitCommand = char(getenv('SPARCFIRE_HOME') + "/scripts/galfit " + outputPathGname + ".feedme");
 
     % Grabbing current directory before cd-ing to tmp
-    former_dir = cd(outputPath);
+    former_dir = cd(char(strtrim(outputPath)));
 
     system(galfitCommand);
 
@@ -115,19 +116,19 @@ function [result] = getGalfitFitQuality(img,clusReproj,outputPath,gxyParams)
 
     % Writing images
     grouped =  cat(2,model,residual,relevantElements,selectedElements,truePositiveElements);
-    %imwrite(model, [outputPath '-L1_model.png']);
-    %imwrite(residual, [outputPath '-L2_residual.png']);
-    %imwrite(relevantElements, [outputPath '-L3_maskedResidual.png']);
-    %imwrite(selectedElements, [outputPath '-L4_clusMask.png']);
-    %imwrite(truePositiveElements, [outputPath '-L5_maskedClustersResidual.png']);
-    %imwrite(grouped, [outputPath '-L_fitQuality.png']);
+    %imwrite(model, [outputPathGname '-L1_model.png']);
+    %imwrite(residual, [outputPathGname '-L2_residual.png']);
+    %imwrite(relevantElements, [outputPathGname '-L3_maskedResidual.png']);
+    %imwrite(selectedElements, [outputPathGname '-L4_clusMask.png']);
+    %imwrite(truePositiveElements, [outputPathGname '-L5_maskedClustersResidual.png']);
+    %imwrite(grouped, [outputPathGname '-L_fitQuality.png']);
 
     % Cleanup files - let's save it for the end shall we? Matthew 1/12/21
     %disp('Removing galfit.* files...')
-    %delete([outputPath 'galfit.*']);
+    %delete([outputPathGname 'galfit.*']);
     %delete(['galfit.*']); 
-    %delete([outputPath '.feedme']);
-    %delete([outputPath '_galfit_input.fits']);
-    %delete([outputPath '_galfit_output.fits']);
+    %delete([outputPathGname '.feedme']);
+    %delete([outputPathGname '_galfit_input.fits']);
+    %delete([outputPathGname '_galfit_output.fits']);
 end
 

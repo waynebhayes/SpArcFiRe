@@ -73,6 +73,8 @@ PIP_NEED3='numpy|Pillow|scipy|astropy|pandas'
 if python3 -c 'import sys; assert sys.version_info >= (3,7), "Python3.7 or newer needed."'; then
     export PYTHON3=python3
     PIP_HAVE3=`(pip3 list; $PYTHON -m pip list) 2>/dev/null | awk '{print $1}' | sort -u | egrep "$PIP_NEED3"`
+    echo "Your python is called by $PYTHON3 and is version:"
+    $PYTHON3 --version
 else
     echo "python3 currently calls $(python3 --version)"
     echo "Python3.7 or newer must be called by 'python3' to use GalfitModule."
