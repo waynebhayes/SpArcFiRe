@@ -36,17 +36,7 @@ mkdir -p /tmp/sparcfire-${USER:=`basename $SPARCFIRE_HOME`}
 MCR_CACHE_ROOT=/tmp/sparcfire-$USER
 export MCR_CACHE_ROOT
 
-#if [[ "$PYTHON" == "*2.7"; then
-#    SPARCFIRE_PYTHON="python2.7"
-#    FILE_SUFFIX=".py2"
-#elif [[ "$PYTHON" == "*3"; then
-#    SPARCFIRE_PYTHON="python3"
-#    FILE_SUFFIX=".py3"
-#else
-#    SPARCFIRE_PYTHON="python"
-#fi
-
-#SPARCFIRE_PYTHON="python2.7"
+# SPARCFIRE_PYTHON="python2.7"
 FITS_PARAMS="0.25 0.75 2"
 STARMASK="_starmask.png"
 ELPS_DIR="NONE"
