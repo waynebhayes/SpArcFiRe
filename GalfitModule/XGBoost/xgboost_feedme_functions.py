@@ -524,6 +524,8 @@ def make_hist_plots(test_data, predicted_data, grid = False, bins = 30):
     fig.show()
 
 def export_filter():
+    # Bar radius is a holdover from an old version of galfit
+    # I'll keep this here for posterity and correct for it in the feedme gen script
     ignore_galfit_in  = ["Bar radius (pixels) disk", "Fourier Amplitude 2"]
     ignore_galfit_out = ["Crop Rad",
                  "R_e (effective radius)   (pix) bulge", # Bulge radius goes crazzyyyyyy
