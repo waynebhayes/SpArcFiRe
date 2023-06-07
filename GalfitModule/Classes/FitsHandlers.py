@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[2]:
 
 
 import os
@@ -19,7 +19,7 @@ import scipy.linalg as slg
 from scipy.stats import norm
 
 
-# In[2]:
+# In[3]:
 
 
 # For debugging purposes
@@ -33,7 +33,7 @@ def in_notebook():
         return False
 
 
-# In[3]:
+# In[4]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -51,12 +51,12 @@ else:
 
 sys.path.append(_MODULE_DIR)
 
-from Functions.HelperFunctions import *
+from Functions.helper_functions import *
 from Classes.Components import *
 from Classes.Containers import *
 
 
-# In[4]:
+# In[5]:
 
 
 class HDU:
@@ -83,7 +83,7 @@ class HDU:
         return output_str
 
 
-# In[5]:
+# In[6]:
 
 
 class FitsFile:
@@ -261,7 +261,7 @@ class FitsFile:
             setattr(self, key, value)
 
 
-# In[6]:
+# In[7]:
 
 
 class OutputFits(FitsFile):
@@ -335,14 +335,14 @@ class OutputFits(FitsFile):
         return self.masked_residual_normalized
 
 
-# In[7]:
+# In[8]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[8]:
+# In[9]:
 
 
 # Testing from_file
@@ -391,7 +391,7 @@ if __name__ == "__main__":
     print(np.shape(test_obs.observation.data))
 
 
-# In[9]:
+# In[10]:
 
 
 # Unit test to check value of masked residual
@@ -404,7 +404,7 @@ if __name__ == "__main__":
     print(f"{test_model.nmr:.4f}")
 
 
-# In[10]:
+# In[11]:
 
 
 if __name__ == "__main__":

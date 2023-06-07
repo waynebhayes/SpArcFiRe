@@ -145,9 +145,9 @@ if __name__ == "__main__":
         raise(Exception())
 
 
-# In[ ]:
+# In[9]:
 
 
 if __name__ == "__main__":
-    export_to_py("HelperFunctions", pj(_MODULE_DIR, "Functions", "HelperFunctions"))
+    export_to_py("helper_functions", pj(_MODULE_DIR, "Functions", "helper_functions"))
 

@@ -15,7 +15,7 @@
 # 
 # To run the control script: `bash control_script.sh`
 
-# In[1]:
+# In[2]:
 
 
 import numpy as np
@@ -27,15 +27,10 @@ import random
 import pandas as pd
 from copy import deepcopy
 
-import os
-from os.path import join as pj
-from os.path import exists
-
-import sys
 from astropy.io import fits
 
 
-# In[2]:
+# In[3]:
 
 
 # For debugging purposes
@@ -49,8 +44,13 @@ def in_notebook():
         return False
 
 
-# In[3]:
+# In[1]:
 
+
+import sys
+import os
+from os.path import join as pj
+from os.path import exists
 
 _HOME_DIR = os.path.expanduser("~")
 if in_notebook():
@@ -68,7 +68,7 @@ else:
 sys.path.append(_MODULE_DIR)
 from Classes.Components import *
 from Classes.Containers import FeedmeContainer
-from Functions.HelperFunctions import *
+from Functions.helper_functions import *
 
 
 # # To convert autocrop image to fits
@@ -745,7 +745,7 @@ if __name__ == "__main__":
     write_to_feedmes(top_dir = cwd)
 
 
-# In[ ]:
+# In[4]:
 
 
 if __name__ == "__main__":

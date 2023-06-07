@@ -40,10 +40,10 @@ TEST_DATA_DIR   = pj(REG_TEST_DIR, "TestData")
 
 base_out = pj(TEST_OUTPUT_DIR, "UnitTest")
 
-# Force >python 3.6 for f string compatibility
-out_str = """\t Python3.6 or greater required! Exitting without generating feedmes... 
+# Force >python 3.7 for f string compatibility
+out_str = """\t Python3.7 or greater required! Exitting without generating feedmes... 
             if feedmes have already been generated, galfit will run with those.\n"""
-assert sys.version_info >= (3, 6), out_str
+assert sys.version_info >= (3, 7), out_str
 
 # ignore_feedme_filepaths
 def iff(feedme_str):
@@ -127,7 +127,7 @@ if __name__ == "__main__":
 
     # Run all unit tests
     list_of_classes = ["Components", "Containers", "FitsHandlers"]
-    list_of_helpers = ["HelperFunctions"]
+    list_of_helpers = ["helper_functions"]
     
     all_stdout     = {}
     all_unit_error = {}
@@ -152,7 +152,7 @@ if __name__ == "__main__":
         print("Function helper must have failed! Adding to failure count and creating file.")
         total_fail_count += 1
     
-    # As output by HelperFunctions script per its own unit test
+    # As output by helper_functions script per its own unit test
     with open(stdout_path, "a") as f:
         for name, out_list in all_stdout.items():
             out_str = "\n".join(out_list)
@@ -189,7 +189,7 @@ if __name__ == "__main__":
         print(result.stdout)
         print(result.stderr)
         
-    # As output by HelperFunctions script per its own unit test
+    # As output by helper_functions script per its own unit test
     # Will have a filepath issue at the end of this as well as potentially an ordering
     # issue so we don't use this output after all.
     # with open(stdout_path, "a") as f:

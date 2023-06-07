@@ -51,7 +51,7 @@ sys.path.append(_MODULE_DIR)
 
 from Classes.Components import *
 # Relies on relative file hierarchy
-from Functions.HelperFunctions import *
+from Functions.helper_functions import *
 
 
 # In[4]:
@@ -470,7 +470,7 @@ if __name__ == "__main__":
     
 
 
-# In[11]:
+# In[12]:
 
 
 # Testing extraction into FeedmeContainer attributes
@@ -602,7 +602,7 @@ if __name__ == "__main__":
     #good_output.header.to_file(output_filename, good_output.bulge, good_output.disk, good_output.arms, good_output.fourier, good_output.sky)
 
 
-# In[16]:
+# In[14]:
 
 
 if __name__ == "__main__":

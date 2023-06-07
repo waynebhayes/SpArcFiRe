@@ -24,7 +24,7 @@
 #!pip install kaleido
 
 
-# In[3]:
+# In[2]:
 
 
 from xgboost import XGBClassifier
@@ -36,7 +36,7 @@ from sklearn.metrics import mean_squared_error as MSE
 from hyperopt import fmin, Trials, hp, tpe, STATUS_OK
 
 
-# In[4]:
+# In[7]:
 
 
 import numpy as np
@@ -66,11 +66,12 @@ import json
 from copy import deepcopy
 
 import pickle
+import argparse
 
 from joblib import Parallel, delayed
 
 
-# In[5]:
+# In[4]:
 
 
 # For debugging purposes
@@ -84,7 +85,7 @@ def in_notebook():
         return False
 
 
-# In[6]:
+# In[5]:
 
 
 import sys
@@ -109,17 +110,87 @@ sys.path.append(_MODULE_DIR)
 from Classes.Components import *
 from Classes.Containers import *
 from Classes.FitsHandlers import *
-from Functions.HelperFunctions import *
+from Functions.helper_functions import *
 
 
-# !jupyter nbconvert --to script testing_xgboost.ipynb
+# #!jupyter nbconvert --to script testing_xgboost.ipynb
 
-# In[7]:
+# In[9]:
 
 
 if __name__ == "__main__":
-    cwd = os.getcwd()
+    
+    # Force >python 3.10 for various compatabilities
+    out_str = "\t Python3.10 or greater required! Exitting without generating feedmes..."
+    assert sys.version_info >= (3, 10), out_str
+    
+    cwd = absp(os.getcwd()) # Doesn't work *in* notebook
+    old_cwd = absp(cwd) # Strings are immutable
+    
+    username = os.environ["USER"]
+    
+    USAGE = f"""USAGE:
 
+    python3 ./{sys.argv[0]} [OPTION] [[RUN-DIRECTORY] IN-DIRECTORY TMP-DIRECTORY OUT-DIRECTORY]
+    
+    OPTIONS => [-v | --verbose]
+
+    This script is used to train XGBoost to feed better input to GALFIT via SpArcFiRe. 
+    By default, it runs from the RUN (or current) directory and uses the
+    '-in' '-tmp' and '-out' directories as specified or otherwise defaults to 
+    'sparcfire-in', 'sparcfire-tmp', 'sparcfire-out'. 
+
+    Please do not specify symlinks for the above, they discomfort the programmer.
+    """
+    
+    parser = argparse.ArgumentParser(description = USAGE)
+    
+    parser.add_argument('-v', '--verbose',
+                        dest     = 'verbose', 
+                        action   = 'store_const',
+                        const    = True,
+                        default  = False,
+                        help     = 'Verbose output for all bash commands in control script.'
+                       )
+    
+    parser.add_argument(dest     = 'out_path',
+                        action   = 'store',
+                        type     = str,
+                        help     = "[OUT-DIRECTORY] from SpArcFiRe. \
+                                    SpArcFiRe directories should follow -in, -tmp, out or this probably won't work."
+                       )
+    
+    if not in_notebook():
+        args              = parser.parse_args() # Using vars(args) will call produce the args as a dict
+        
+        verbose           = args.verbose
+        capture_output    = not args.verbose
+        
+        sparc_out_dir = args.out_path
+            
+    else:
+        verbose = False
+        capture_output = True
+        
+        cwd = cwd.replace("ics-home", username)
+        sparc_out_dir = pj(_HOME_DIR, "run2_1000_galfit", "sparcfire-out") #pj(cwd, "sparcfire-out")
+        
+        sys.path.append(pj(_HOME_DIR, ".local", "bin"))
+        
+    # Making these absolute paths
+    cwd     = absp(cwd)
+    #in_dir  = absp(in_dir)
+    #tmp_dir = absp(tmp_dir)
+    sparc_out_dir = absp(sparc_out_dir)
+    
+    # Changing to specified working dir
+    os.chdir(cwd)
+
+
+# In[10]:
+
+
+if __name__ == "__main__":
     png_tiled_dir  = pj(cwd, "labeled_png_out")
     good_labeled_dir  = pj(png_tiled_dir, "good")
 
@@ -130,9 +201,6 @@ if __name__ == "__main__":
     outputs_dir = pj(cwd, "galfit_outputs")
     good_outputs_dir = pj(outputs_dir, "good")
     not_good_outputs_dir = pj(outputs_dir, "not_good")
-
-    # 29k_galaxies
-    sparc_out_dir = pj(_HOME_DIR, "run2_1000_galfit", "sparcfire-out")
 
 
 # In[8]:
@@ -155,7 +223,12 @@ def generate_labels_from_imgs(all_galaxies_path, good_folder_path):
 # In[9]:
 
 
-def organize_files(label_dict, sparcfire_out_dir, labels_top_dir = os.getcwd(), good_name = "good", not_good_name = "not_good"):
+def organize_files(label_dict, sparcfire_out_dir, **kwargs):
+    
+    labels_top_dir  = kwargs.get("labels_top_dir", os.getcwd())
+    good_name       = kwargs.get("good_name", "good")
+    not_good_name   = kwargs.get("not_good_name", "not_good")
+    label_dump_path = kwargs.get("label_dump_path", pj(labels_top_dir, "labeled_galaxies.json"))
     
     temp_dict = deepcopy(label_dict)
     for gname, label in temp_dict.items():
@@ -176,7 +249,7 @@ def organize_files(label_dict, sparcfire_out_dir, labels_top_dir = os.getcwd(), 
             print(f"No output found for {gname}, continuing to copy...")
             label_dict.pop(gname)
             
-    with open("labeled_galaxies.json", "w") as lg:
+    with open(label_dump_path, "w") as lg:
         json.dump(label_dict, lg)
     
     return label_dict
@@ -186,13 +259,14 @@ def organize_files(label_dict, sparcfire_out_dir, labels_top_dir = os.getcwd(), 
 
 
 if __name__ == "__main__":
-    # TODO: Check if already organized
+    
     label_json = pj(cwd, 'labeled_galaxies.json')
+    
     if exists(label_json):
         label_dict = json.load(open(label_json, 'r'))
     else:
         label_dict = generate_labels_from_imgs(sparc_out_dir, good_labeled_dir)
-        label_dict = organize_files(label_dict, pj(_HOME_DIR, "run2_1000_galfit", "sparcfire-out"))
+        label_dict = organize_files(label_dict, pj(_HOME_DIR, "run2_1000_galfit", "sparcfire-out"), label_dump_path = label_json)
 
 
 # In[11]:
@@ -765,7 +839,7 @@ def objective(space): #, data, label, test_size = 0.3):
     #return {'loss': -accuracy, 'status': STATUS_OK }
 
 
-# In[ ]:
+# In[32]:
 
 
 # Optimizing hyperparameters using hyperopt???
@@ -820,7 +894,7 @@ if __name__ == "__main__":
 #scipy.stats.kstest(rvs, cdf, args=(), N=20, alternative='two-sided', method='auto')
 
 
-# In[ ]:
+# In[33]:
 
 
 # Regresssion
@@ -891,7 +965,7 @@ if __name__ == "__main__":
     # With some weighting I think
 
 
-# In[ ]:
+# In[34]:
 
 
 def anderson_darling(in_df):
@@ -932,7 +1006,7 @@ def anderson_darling(in_df):
     return anderson_results
 
 
-# In[ ]:
+# In[35]:
 
 
 # ************************************************************************
@@ -943,7 +1017,7 @@ if __name__ == "__main__":
     _ = anderson_darling(out_pred_df)
 
 
-# In[ ]:
+# In[36]:
 
 
 # ************************************************************************
@@ -954,7 +1028,7 @@ if __name__ == "__main__":
     _ = anderson_darling(out_test)
 
 
-# In[ ]:
+# In[37]:
 
 
 def make_hist_plots(test_data, predicted_data, grid = False, bins = 30, adjust = 2.17, save = False):
@@ -1016,31 +1090,31 @@ def make_hist_plots(test_data, predicted_data, grid = False, bins = 30, adjust =
                       legend_tracegroupgap = height / (adjust*len(in_test.columns)))
     
     if save:
-        filepath = pj(cwd, "hist_plots", "all_plots")
+        filepath = pj(os.getcwd, "hist_plots", "all_plots")
         fig.write_image(f"{filepath}.svg")
     else:
         fig.show()
 
 
-# In[ ]:
+# In[38]:
 
 
 if __name__ == "__main__":
     make_hist_plots(out_test, out_pred_df, adjust=1.83, save = True)
 
 
-# In[ ]:
+# In[39]:
 
 
 if __name__ == "__main__":
-    reg.save_model("xgboost_model.json")
+    reg.save_model(pj(cwd, "xgboost_model.json"))
     # reg.load_model("xgboost_model.json")
 
 
-# In[ ]:
+# In[1]:
 
 
 if __name__ == "__main__":
-    #export_to_py("xgboost_train", pj(_MODULE_DIR, "Functions", "XGBoost_Train"))
-    export_to_py("xgboost_train", "xgboost_train")
+    export_to_py("xgboost_train", pj(_MODULE_DIR, "XGBoost", "xgboost_train"))
+    #export_to_py("xgboost_train", "xgboost_train")
 

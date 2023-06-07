@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[5]:
 
 
 import os
@@ -17,7 +17,7 @@ import pandas as pd
 import numpy as np
 
 
-# In[2]:
+# In[6]:
 
 
 # For debugging purposes
@@ -31,7 +31,7 @@ def in_notebook():
         return False
 
 
-# In[3]:
+# In[7]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -49,10 +49,10 @@ else:
 
 sys.path.append(_MODULE_DIR)
 
-from Functions.HelperFunctions import *
+from Functions.helper_functions import *
 
 
-# In[4]:
+# In[8]:
 
 
 class GalfitComponent:
@@ -406,7 +406,7 @@ class GalfitComponent:
     #     return self.__dict__.iteritems()
 
 
-# In[5]:
+# In[9]:
 
 
 class Sersic(GalfitComponent):
@@ -538,7 +538,7 @@ class Sersic(GalfitComponent):
         return
 
 
-# In[18]:
+# In[10]:
 
 
 class Power(GalfitComponent):
@@ -663,7 +663,7 @@ class Power(GalfitComponent):
         return
 
 
-# In[19]:
+# In[11]:
 
 
 class Fourier(GalfitComponent):
@@ -772,7 +772,7 @@ class Fourier(GalfitComponent):
         return
 
 
-# In[8]:
+# In[12]:
 
 
 class Sky(GalfitComponent):
@@ -875,7 +875,7 @@ class Sky(GalfitComponent):
         return
 
 
-# In[9]:
+# In[13]:
 
 
 class GalfitHeader(GalfitComponent):
@@ -1028,14 +1028,14 @@ class GalfitHeader(GalfitComponent):
         return
 
 
-# In[10]:
+# In[14]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[11]:
+# In[15]:
 
 
 # Unit Test for GalfitComponent
@@ -1046,7 +1046,7 @@ if __name__ == "__main__":
         print(k,v)
 
 
-# In[12]:
+# In[16]:
 
 
 if __name__ == "__main__":
@@ -1085,7 +1085,7 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps""".
     print(header)
 
 
-# In[13]:
+# In[17]:
 
 
 if __name__ == "__main__":
@@ -1129,7 +1129,7 @@ if __name__ == "__main__":
     print(bulge)
 
 
-# In[14]:
+# In[18]:
 
 
 if __name__ == "__main__":
@@ -1169,7 +1169,7 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
     print(arms)
 
 
-# In[15]:
+# In[19]:
 
 
 if __name__ == "__main__":
@@ -1202,7 +1202,7 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
     print(fourier)
 
 
-# In[16]:
+# In[20]:
 
 
 if __name__ == "__main__":
@@ -1239,7 +1239,7 @@ if __name__ == "__main__":
     print(sky)
 
 
-# In[17]:
+# In[21]:
 
 
 if __name__ == "__main__":

@@ -28,7 +28,7 @@
 # For controlling galfitting via sparcfire
 
 # ***************************************************************
-# In[6]:
+# In[2]:
 
 
 import sys
@@ -74,7 +74,7 @@ sys.path.append(_MODULE_DIR)
 
 from Classes.Components import *
 from Classes.Containers import *
-from Functions.HelperFunctions import *
+from Functions.helper_functions import *
 
 # This should give me numpy and pandas and whatnot
 # also gives this, from os.path import join as pj
@@ -88,9 +88,9 @@ import go_go_galfit
 if __name__ == "__main__":
     # TODO: Add run_dir? and default to cwd if not specified
     
-    # Force >python 3.6 for various compatabilities
-    out_str = "\t Python3.6 or greater required! Exitting without generating feedmes..."
-    assert sys.version_info >= (3, 6), out_str
+    # Force >python 3.7 for various compatabilities
+    out_str = "\t Python3.7 or greater required! Exitting without generating feedmes..."
+    assert sys.version_info >= (3, 7), out_str
     
     cwd = absp(os.getcwd()) # Doesn't work *in* notebook
     old_cwd = absp(cwd) # Strings are immutable
@@ -125,14 +125,16 @@ if __name__ == "__main__":
                         const    = True,
                         # Soon to be the other way around
                         default  = False,
-                        help     = 'Run GALFITs using Slurm.')
+                        help     = 'Run GALFITs using Slurm.'
+                       )
 
     parser.add_argument('-drs', '--dont-remove-slurm',
                         dest     = 'dont_remove_slurm',
                         action   = 'store_const',
                         const    = True,
                         default  = False,
-                        help     = 'Choose NOT to remove all old slurm files (they may contain basic info about each fit but there will be a bunch!)')
+                        help     = 'Choose NOT to remove all old slurm files (they may contain basic info about each fit but there will be a bunch!)'
+                       )
     
     parser.add_argument('-NS', '--num-steps',
                         dest     = 'steps', 
@@ -151,7 +153,8 @@ if __name__ == "__main__":
                         action   = 'store_const',
                         const    = True,
                         default  = False,
-                        help     = 'Restart control script on the premise that some have already run (likely with SLURM).')
+                        help     = 'Restart control script on the premise that some have already run (likely with SLURM).'
+                       )
     
     parser.add_argument('-RrG', '--rerun-galfit',
                         dest     = 'rerun', 
@@ -159,20 +162,23 @@ if __name__ == "__main__":
                         const    = True,
                         # Python cannot convert 'False' to a boolean... it's true *cries*
                         default  = "",
-                        help     = 'Run GALFIT again after the final fit to hopefully refine said fit.')
+                        help     = 'Run GALFIT again after the final fit to hopefully refine said fit.'
+                       )
     
     parser.add_argument('-v', '--verbose',
                         dest     = 'verbose', 
                         action   = 'store_const',
                         const    = True,
                         default  = False,
-                        help     = 'Verbose output for all bash commands in control script.')
+                        help     = 'Verbose output for all bash commands in control script.'
+                       )
     
     parser.add_argument(dest     = 'paths',
                         nargs    = "*",
                         type     = str,
                         help     = "RUN-DIRECTORY [IN-DIRECTORY TMP-DIRECTORY OUT-DIRECTORY] from SpArcFiRe. \
-                                    SpArcFiRe directories should follow -in, -tmp, out or this probably won't work.")
+                                    SpArcFiRe directories should follow -in, -tmp, out or this probably won't work."
+                       )
     
     if not in_notebook():
         args              = parser.parse_args() # Using vars(args) will call produce the args as a dict
@@ -572,7 +578,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[13]:
+# In[5]:
 
 
 if __name__ == "__main__":
