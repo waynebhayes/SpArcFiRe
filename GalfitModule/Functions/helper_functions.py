@@ -139,7 +139,7 @@ if __name__ == "__main__":
     
     # if touch_stdout.stderr or touch_writeout.stderr:
     if touch_stdout.stderr:
-        print("Touch failed in HelperFunctions unit test.")
+        print("Touch failed in helper_functions unit test.")
         print(touch_stdout.stderr)
         # print(touch_writeout.stderr)
         raise(Exception())

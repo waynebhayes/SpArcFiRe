@@ -4,31 +4,8 @@
 # **Author: Matthew Portman**
 # 
 # **Date (Github date will likely be more accurate): 4/17/23**
-# 1/26/21
-# New usage ---
-# Will default to running on top of sparc directory 
-# unless otherwise specified
-# 
-# Command line args
-#
-# -r, --rerun-galfit
-#		Re-run GALFIT using the galfit.01 file
-#
-# -p, --path
-#		Specify path to Sparcfire's in/tmp/out directories in that order;
-#		e.g. '-p /home/sparcfire_in /home/sparcfire_tmp /home/sparcfire_out'
-#
 
-# Change log - 1/19/21 
-# Updated silent to catch everything
-# Updated call to feedme gen to include paths
-# Changed 'which' to 'type -P' which seems better
-# See note for files= and masks=
-
-# For controlling galfitting via sparcfire
-
-# ***************************************************************
-# In[2]:
+# In[4]:
 
 
 import sys
@@ -40,7 +17,7 @@ import shutil
 import subprocess
 
 
-# In[3]:
+# In[5]:
 
 
 # For debugging purposes
@@ -54,7 +31,7 @@ def in_notebook():
         return False
 
 
-# In[4]:
+# In[6]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -218,6 +195,11 @@ if __name__ == "__main__":
             print(f"Paths incorrectly specified, defaulting to {cwd} (-in, -tmp, -out)...")
             print(f"{in_dir}\n{tmp_dir}\n{out_dir}")
             print()
+            
+        check_dir_names = [1 for i in (in_dir, tmp_dir, out_dir) if "-" not in i ]
+        if check_dir_names:
+            print("Directory paths must end in '-in' '-tmp' and '-out' or this won't work :(\nQuitting.")
+            sys.exit()
             
     else:
         slurm = False
@@ -578,7 +560,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[5]:
+# In[8]:
 
 
 if __name__ == "__main__":

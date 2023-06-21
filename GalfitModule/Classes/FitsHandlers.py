@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
+# In[1]:
 
 
 import os
@@ -19,7 +19,7 @@ import scipy.linalg as slg
 from scipy.stats import norm
 
 
-# In[3]:
+# In[2]:
 
 
 # For debugging purposes
@@ -33,7 +33,7 @@ def in_notebook():
         return False
 
 
-# In[4]:
+# In[3]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -56,7 +56,7 @@ from Classes.Components import *
 from Classes.Containers import *
 
 
-# In[5]:
+# In[4]:
 
 
 class HDU:
@@ -83,7 +83,7 @@ class HDU:
         return output_str
 
 
-# In[6]:
+# In[5]:
 
 
 class FitsFile:
@@ -182,7 +182,7 @@ class FitsFile:
         
         fitspng_param = "0.25,1" #1,150"
         
-        # run_fitspng from HelperFunctions, string path to fitspng program
+        # run_fitspng from helper_functions, string path to fitspng program
         fitspng_cmd1 = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}.png {tmp_fits_path}[1]"
         
         fitspng_cmd2 = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}_out.png {tmp_fits_path}[2]"
@@ -191,7 +191,7 @@ class FitsFile:
         
         cmds = [fitspng_cmd1, fitspng_cmd2, fitspng_cmd3]
         
-        # sp is from HelperFunctions, subprocess.run call
+        # sp is from helper_functions, subprocess.run call
         for cmd in cmds[:self.num_imgs]:
             _ = sp(cmd, capture_output = capture_output)
         
@@ -261,7 +261,7 @@ class FitsFile:
             setattr(self, key, value)
 
 
-# In[7]:
+# In[6]:
 
 
 class OutputFits(FitsFile):
@@ -335,14 +335,14 @@ class OutputFits(FitsFile):
         return self.masked_residual_normalized
 
 
-# In[8]:
+# In[7]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[9]:
+# In[8]:
 
 
 # Testing from_file
@@ -391,7 +391,7 @@ if __name__ == "__main__":
     print(np.shape(test_obs.observation.data))
 
 
-# In[10]:
+# In[9]:
 
 
 # Unit test to check value of masked residual
@@ -404,7 +404,7 @@ if __name__ == "__main__":
     print(f"{test_model.nmr:.4f}")
 
 
-# In[11]:
+# In[10]:
 
 
 if __name__ == "__main__":
