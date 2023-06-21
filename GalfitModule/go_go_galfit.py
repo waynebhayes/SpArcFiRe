@@ -18,7 +18,7 @@ sys.path.append(_MODULE_DIR)
     
 from Classes.Components import *
 from Classes.Containers import *
-from Functions.HelperFunctions import *
+from Functions.helper_functions import *
 from sparc_to_galfit_feedme_gen import *
 
 def check_programs():
@@ -155,7 +155,7 @@ def main(**kwargs):
         # Any galfit runs that feed into an output container *must* have capture_output = True or 
         # they won't update the new parameters
         if num_steps == 1:
-            run_galfit_cmd = f"{base_galfit_cmd} {feedme_info[gname]['path']}"
+            run_galfit_cmd = f"{base_galfit_cmd} {feedme_path}"
             final_galfit_output = OutputContainer(sp(run_galfit_cmd), **feedme_info[gname].to_dict())
             
         elif num_steps >= 2:

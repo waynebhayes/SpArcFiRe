@@ -8,6 +8,8 @@ import argparse
 from os.path import join as pj
 from os.path import exists
 
+from astropy.io import fits
+
 # For debugging purposes
 from IPython import get_ipython
 def in_notebook():
@@ -177,7 +179,10 @@ if __name__ == "__main__":
     
     # Run control script!
     ctrl_script = pj(_MODULE_DIR, "control_script.py")
-    print("Running GALFIT (capturing output)...")
+    print("Running GALFIT with single-step fitting (capturing output)...")
+    result = sp(f"python3 {ctrl_script} -NS 1 {in_dir} {tmp_dir} {out_dir}")
+    
+    print("Running GALFIT with default two-step fitting (capturing output)...")
     result = sp(f"python3 {ctrl_script} {in_dir} {tmp_dir} {out_dir}")
     
     # try:
@@ -240,12 +245,14 @@ if __name__ == "__main__":
     # Diff does not work on FITS files
     # That and all the info we really need from those is in the galfit.# files anyway
     print("Performing diff check for Galfit input/output.")
-    gnames = [os.path.basename(i) for i in glob(pj(in_dir, "*.fits"))]
+    gnames = [os.path.basename(i).rstrip(".fits") for i in glob(pj(in_dir, "*.fits"))]
     things_to_check = ["galfit.01", "galfit.02", ".in", "bulge.in"]
     
     for gname in gnames:
-        data = pj(TEST_DATA_DIR, gname)
+        data    = pj(TEST_DATA_DIR, gname)
         output  = pj(TEST_OUTPUT_DIR, gname)
+        
+        # Check galfit text output files
         for suffix in things_to_check:
             # This may produce a stderr if the file doesn't exist
             # say when galfit failes. Just a heads-up, shouldn't be a problem.
@@ -262,6 +269,20 @@ if __name__ == "__main__":
                 fail_count += 1
                 all_diff_error[f"{gname}_{suffix}"] = f"{data}_{suffix}\n{result.stdout}"
                 
+        # Check _out_old FITS files using Astropy since this RegTest shouldn't call FitsHandler except to check it
+        suffix = "galfit_out_old.fits"
+        if exists(f"{data}_{suffix}"):
+            data_fits   = fits.open(f"{data}_{suffix}")[2].data
+            output_fits = fits.open(f"{output}_{suffix}")[2].data
+        
+            if not np.array_equal(data_fits, output_fits):
+                fail_count += 1
+                all_diff_error[f"{gname}_{suffix}"] = f"Single Component Fit differs for {gname}!"
+                
+        elif exists(f"{output}_{suffix}"):
+            fail_count += 1
+            all_diff_error[f"{gname}_{suffix}"] = f"{gname} should not have successfully fit, something went... wrong (right?)."
+
     with open(error_path, "a") as ef:
         for name, err_str in all_diff_error.items():
             #err_str = "\n".join(err_list)
