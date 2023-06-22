@@ -12,8 +12,6 @@
 # Running from the overarching directory is a temporary measure which will be remedied upon completion of the entire control script and full integration with SpArcFiRe. 
 # 
 # TO RUN: `python3 sparc_to_galfit_feedme_gen.py`
-# 
-# To run the control script: `bash control_script.sh`
 
 # In[2]:
 
@@ -44,7 +42,7 @@ def in_notebook():
         return False
 
 
-# In[1]:
+# In[4]:
 
 
 import sys
@@ -61,9 +59,14 @@ else:
         _SPARCFIRE_DIR = os.environ["SPARCFIRE_HOME"]
         _MODULE_DIR = pj(_SPARCFIRE_DIR, "GalfitModule")
     except KeyError:
-        # print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
-        # print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
-        _MODULE_DIR = pj(_HOME_DIR, "GalfitModule")
+        if __name__ == "__main__":
+            print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
+            print("Checking the current directory for GalfitModule, otherwise quitting.")
+            
+        _MODULE_DIR = pj(os.getcwd(), "GalfitModule")
+        
+        if not exists(_MODULE_DIR):
+            raise Exception("Could not find GalfitModule!")
     
 sys.path.append(_MODULE_DIR)
 from Classes.Components import *
@@ -745,7 +748,7 @@ if __name__ == "__main__":
     write_to_feedmes(top_dir = cwd)
 
 
-# In[4]:
+# In[5]:
 
 
 if __name__ == "__main__":

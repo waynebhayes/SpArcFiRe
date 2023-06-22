@@ -43,9 +43,14 @@ else:
         _SPARCFIRE_DIR = os.environ["SPARCFIRE_HOME"]
         _MODULE_DIR = pj(_SPARCFIRE_DIR, "GalfitModule")
     except KeyError:
-        # print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
-        # print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
-        _MODULE_DIR = pj(_HOME_DIR, "GalfitModule")
+        if __name__ == "__main__":
+            print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
+            print("Checking the current directory for GalfitModule, otherwise quitting.")
+            
+        _MODULE_DIR = pj(os.getcwd(), "GalfitModule")
+        
+        if not exists(_MODULE_DIR):
+            raise Exception("Could not find GalfitModule!")
 
 sys.path.append(_MODULE_DIR)
 
@@ -602,7 +607,7 @@ if __name__ == "__main__":
     #good_output.header.to_file(output_filename, good_output.bulge, good_output.disk, good_output.arms, good_output.fourier, good_output.sky)
 
 
-# In[14]:
+# In[15]:
 
 
 if __name__ == "__main__":

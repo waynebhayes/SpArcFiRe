@@ -36,7 +36,7 @@ from sklearn.metrics import mean_squared_error as MSE
 from hyperopt import fmin, Trials, hp, tpe, STATUS_OK
 
 
-# In[7]:
+# In[2]:
 
 
 import numpy as np
@@ -71,7 +71,7 @@ import argparse
 from joblib import Parallel, delayed
 
 
-# In[4]:
+# In[5]:
 
 
 # For debugging purposes
@@ -85,7 +85,7 @@ def in_notebook():
         return False
 
 
-# In[5]:
+# In[6]:
 
 
 import sys
@@ -101,9 +101,14 @@ else:
         _SPARCFIRE_DIR = os.environ["SPARCFIRE_HOME"]
         _MODULE_DIR = pj(_SPARCFIRE_DIR, "GalfitModule")
     except KeyError:
-        print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
-        print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
-        _MODULE_DIR = pj(_HOME_DIR, "GalfitModule")
+        if __name__ == "__main__":
+            print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
+            print("Checking the current directory for GalfitModule, otherwise quitting.")
+            
+        _MODULE_DIR = pj(os.getcwd(), "GalfitModule")
+        
+        if not exists(_MODULE_DIR):
+            raise Exception("Could not find GalfitModule!")
     
 sys.path.append(_MODULE_DIR)
 
@@ -1111,7 +1116,7 @@ if __name__ == "__main__":
     # reg.load_model("xgboost_model.json")
 
 
-# In[1]:
+# In[11]:
 
 
 if __name__ == "__main__":

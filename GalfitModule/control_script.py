@@ -31,11 +31,13 @@ def in_notebook():
         return False
 
 
-# In[6]:
+# In[12]:
 
 
 _HOME_DIR = os.path.expanduser("~")
 if in_notebook():
+    # We hardcode the directory name because the notebooks 
+    # are used for prototyping and debugging. 
     _SPARCFIRE_DIR = pj(_HOME_DIR, "sparcfire_matt") 
     _MODULE_DIR    = pj(_SPARCFIRE_DIR, "GalfitModule")
 else:
@@ -44,8 +46,11 @@ else:
         _MODULE_DIR = pj(_SPARCFIRE_DIR, "GalfitModule")
     except KeyError:
         print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
-        print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
+        #print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)")
+        print("Checking the current directory for GalfitModule, otherwise quitting.")
         _MODULE_DIR = pj(_HOME_DIR, "GalfitModule")
+        if not exists(_MODULE_DIR):
+            raise Exception("Could not find GalfitModule!")
     
 sys.path.append(_MODULE_DIR)
 
@@ -198,8 +203,7 @@ if __name__ == "__main__":
             
         check_dir_names = [1 for i in (in_dir, tmp_dir, out_dir) if "-" not in i ]
         if check_dir_names:
-            print("Directory paths must end in '-in' '-tmp' and '-out' or this won't work :(\nQuitting.")
-            sys.exit()
+            raise Exception("Directory paths must end in '-in' '-tmp' and '-out'")
             
     else:
         slurm = False
@@ -560,7 +564,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[8]:
+# In[11]:
 
 
 if __name__ == "__main__":
