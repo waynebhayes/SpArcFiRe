@@ -4,6 +4,7 @@ import subprocess
 import shutil
 from glob import glob
 import argparse
+import numpy as np
 
 from os.path import join as pj
 from os.path import exists
@@ -182,6 +183,10 @@ if __name__ == "__main__":
     print("Running GALFIT with single-step fitting (capturing output)...")
     result = sp(f"python3 {ctrl_script} -NS 1 {in_dir} {tmp_dir} {out_dir}")
     
+    if verbose:
+        print(result.stdout)
+        print(result.stderr)
+    
     print("Running GALFIT with default two-step fitting (capturing output)...")
     result = sp(f"python3 {ctrl_script} {in_dir} {tmp_dir} {out_dir}")
     
@@ -246,11 +251,11 @@ if __name__ == "__main__":
     # That and all the info we really need from those is in the galfit.# files anyway
     print("Performing diff check for Galfit input/output.")
     gnames = [os.path.basename(i).rstrip(".fits") for i in glob(pj(in_dir, "*.fits"))]
-    things_to_check = ["galfit.01", "galfit.02", ".in", "bulge.in"]
+    things_to_check = ["_galfit.01", "_galfit.02", ".in", "_bulge.in"]
     
     for gname in gnames:
-        data    = pj(TEST_DATA_DIR, gname)
-        output  = pj(TEST_OUTPUT_DIR, gname)
+        data    = pj(TEST_DATA_DIR, "test-out", gname, gname)
+        output  = pj(TEST_OUTPUT_DIR, "test-out", gname, gname)
         
         # Check galfit text output files
         for suffix in things_to_check:
@@ -258,23 +263,33 @@ if __name__ == "__main__":
             # say when galfit failes. Just a heads-up, shouldn't be a problem.
             # tail is to start at line 15 of each file to ignore the file path differences
             # for input/output/star mask/etc.
-            result = sp(f"diff <(tail -n +15 {data}_{suffix}) <(tail -n +15 {output}_{suffix})")
+            result = sp(f"diff <(tail -n +15 {data}{suffix}) <(tail -n +15 {output}{suffix})")
             
             if verbose:
                 print(result.stdout)
                 print(result.stderr)
         
             if result.stdout:
-                print(f"Diff check for {gname}_{suffix} failed!")
+                # Carve a special exception for 1237655463239155886 since we randomize the spin parity
+                if result.stdout.split("\n")[0] == "60c60" and gname == "1237655463239155886":
+                    continue
+                    
+                print(f"Diff check for {gname}{suffix} failed!")
                 fail_count += 1
-                all_diff_error[f"{gname}_{suffix}"] = f"{data}_{suffix}\n{result.stdout}"
+                all_diff_error[f"{gname}{suffix}"] = f"{data}{suffix}\n{result.stdout}"
                 
         # Check _out_old FITS files using Astropy since this RegTest shouldn't call FitsHandler except to check it
         suffixes = ["galfit_out.fits", "galfit_out_old.fits"]
         for suffix in suffixes:
             if exists(f"{data}_{suffix}"):
                 data_fits   = fits.open(f"{data}_{suffix}")[2].data
-                output_fits = fits.open(f"{output}_{suffix}")[2].data
+                
+                try:
+                    output_fits = fits.open(f"{output}_{suffix}")[2].data
+                except FileNotFoundError as fnfe:
+                    fail_count += 1 
+                    all_diff_error[f"{gname}_{suffix}"] = f"{gname} did not successfully fit, something went wrong."
+                    continue
 
                 # The tolerance can be quite high because when GALFIT is off, it will differ significantly
                 # I set a tolerance in the first place for machine error/differences under the hood across clusters
@@ -289,7 +304,7 @@ if __name__ == "__main__":
     with open(error_path, "a") as ef:
         for name, err_str in all_diff_error.items():
             #err_str = "\n".join(err_list)
-            ef.write(f"{name}\n{err_str}")
+            ef.write(f"{name}\n{err_str}\n")
             
     print(f"{fail_count} regression tests failed.")
     if fail_count:

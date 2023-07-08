@@ -3,7 +3,7 @@
 
 # **Author: Matthew Portman**
 # 
-# **Date (Github date will likely be more accurate): 4/17/23**
+# **Date (Commit date will likely be more accurate): 4/17/23**
 
 # # MINI README
 # 
@@ -13,7 +13,7 @@
 # 
 # TO RUN: `python3 sparc_to_galfit_feedme_gen.py`
 
-# In[2]:
+# In[3]:
 
 
 import numpy as np
@@ -28,7 +28,7 @@ from copy import deepcopy
 from astropy.io import fits
 
 
-# In[3]:
+# In[4]:
 
 
 # For debugging purposes
@@ -42,7 +42,7 @@ def in_notebook():
         return False
 
 
-# In[4]:
+# In[5]:
 
 
 import sys
@@ -186,7 +186,7 @@ def scale_var(x, scale = 1):
     return float(x)*scale
 
 
-# In[20]:
+# In[1]:
 
 
 def galaxy_information(galaxy_name, galaxy_path):
@@ -253,6 +253,7 @@ def galaxy_information(galaxy_name, galaxy_path):
                 center_pos_y_out = float(row.get('inputCenterC', center_pos_y_out))
 
                 crop_rad_out = float(row.get('cropRad', crop_rad_out))
+                
             except ValueError as ve:
                 print(f"SpArcFiRe likely failed on this galaxy, {ve}. Proceeding with default values...")
                 break
@@ -560,7 +561,7 @@ def write_to_feedme(path, list_in, feedme_name = "autogen_feedme_galfit.in"):
         _ = [g.write(f"{value}\n") for value in list_in]
         
     return file_path
-# In[15]:
+# In[2]:
 
 
 def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwargs):
@@ -672,8 +673,8 @@ def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwarg
                        # Fixing this to 0.6 to give the arms the best chance to form
                        axis_ratio = 0.6,
                        position_angle = pos_angle_disk
-                      )       
-        
+                      )
+            
         arms  = Power(component_number = 2,
                       inner_rad = in_rad, # Chosen based on where *detection* of arms usually start
                       outer_rad = out_rad,
@@ -683,7 +684,13 @@ def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwarg
                       sky_position_angle = 90 # pos_angle_power
                      )
         
+        # Take 90 pixels (in the 256x256 image) to be the cutoff for an arm
+        # Test this
+        if scale_var(max_arc, 1/scale_fact) > 90:
+            arms.add_skip(skip_value = 1)
+
         fourier = Fourier(component_number = 2)
+            
         sky   = Sky(component_number = 3)
         
         # Previously used for Fourier modes
@@ -748,7 +755,7 @@ if __name__ == "__main__":
     write_to_feedmes(top_dir = cwd)
 
 
-# In[5]:
+# In[6]:
 
 
 if __name__ == "__main__":
