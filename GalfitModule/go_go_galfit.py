@@ -191,9 +191,14 @@ def main(**kwargs):
     
             # Overwrite original... for now 
             # Also good thing dicts retain order, this frequently comes up
-            galfit_output.to_file()
+            if galfit_output.arms.param_values.get("skip", 0):
+                # By default includes the header
+                galfit_output.to_file(galfit_output.bulge, galfit_output.disk, galfit_output.sky)
+            else:
+                galfit_output.to_file()
+                
             run_galfit_cmd = f"{base_galfit_cmd} {feedme_path}"
-            print("Bulge + Disk + Arms")
+            print("Bulge + Disk + Arms (if applicable)")
             final_galfit_output = OutputContainer(sp(run_galfit_cmd), **galfit_output.to_dict(), store_text = True)
             
         # Dropping this here for final rerun for all num_steps       

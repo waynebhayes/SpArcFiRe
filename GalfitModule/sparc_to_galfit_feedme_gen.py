@@ -561,7 +561,7 @@ def write_to_feedme(path, list_in, feedme_name = "autogen_feedme_galfit.in"):
         _ = [g.write(f"{value}\n") for value in list_in]
         
     return file_path
-# In[2]:
+# In[7]:
 
 
 def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwargs):
@@ -725,7 +725,11 @@ def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwarg
                                     fourier        = fourier,
                                     sky            = sky)
         
-        container.to_file()
+        if arms.param_values.get("skip", 0):
+            # By default includes the header
+            container.to_file(bulge, disk, sky)
+        else:
+            container.to_file()
         
         feedme_info_out[gname] = container
         
