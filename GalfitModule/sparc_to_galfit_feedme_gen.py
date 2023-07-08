@@ -686,8 +686,8 @@ def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwarg
         
         # Take 90 pixels (in the 256x256 image) to be the cutoff for an arm
         # Test this
-        if scale_var(max_arc, 1/scale_fact) > 90:
-            arms.add_skip(skip_value = 1)
+        # if scale_var(max_arc, 1/scale_fact) > 90:
+        #     arms.add_skip(skip_value = 1)
 
         fourier = Fourier(component_number = 2)
             
@@ -759,7 +759,7 @@ if __name__ == "__main__":
     write_to_feedmes(top_dir = cwd)
 
 
-# In[6]:
+# In[8]:
 
 
 if __name__ == "__main__":
