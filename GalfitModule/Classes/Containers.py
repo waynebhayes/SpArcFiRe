@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[ ]:
 
 
 import os
@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 
 
-# In[2]:
+# In[ ]:
 
 
 # For debugging purposes
@@ -31,7 +31,7 @@ def in_notebook():
         return False
 
 
-# In[3]:
+# In[ ]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -59,7 +59,7 @@ from Classes.Components import *
 from Functions.helper_functions import *
 
 
-# In[4]:
+# In[ ]:
 
 
 class ComponentContainer:
@@ -113,11 +113,17 @@ class ComponentContainer:
         return ComponentContainer(**vars(self))
     
     def __str__(self):
-        out_str = "\n".join([str(comp) for comp in ComponentContainer.to_list(self)])
+        # Skipping the output of power and fourier if 'skipped'
+        # i.e. don't exist in this current implementation
+        out_str = "\n".join(
+            str(comp) for comp in ComponentContainer.to_list(self)
+             if comp.param_values.get("skip", 0) != 1 and
+                comp.component_type not in ("power", "fourier")
+            )
         return out_str
 
 
-# In[5]:
+# In[ ]:
 
 
 class FeedmeContainer(ComponentContainer):
@@ -134,7 +140,12 @@ class FeedmeContainer(ComponentContainer):
         return [self.header] + ComponentContainer.to_list(self)
     
     def __str__(self):
-        out_str = f"{str(self.header)}\n" + "\n".join(str(comp) for comp in ComponentContainer.to_list(self))
+        out_str = f"{str(self.header)}\n" + \
+                    "\n".join(
+                        str(comp) for comp in ComponentContainer.to_list(self)
+                        if comp.param_values.get("skip", 0) != 1 and
+                           comp.component_type not in ("power", "fourier")
+                    )
         return out_str
         
     def to_file(self, *args, filename = ""):
@@ -177,24 +188,40 @@ class FeedmeContainer(ComponentContainer):
             
             for idx, (key, value) in enumerate(input_dict.items()):
                 component = component_list[component_num]
-                
+                # For skipping Power and Fourier if already specified (save some iterations)
+                #if component.param_values.get("skip", 0) == 1 and component.component_type in ("power", "fourier"):
+                    #continue
+                    
                 try:
                     component_idx_start = input_keys.index(component.start_dict)
                     component_idx_end   = input_keys.index(component.end_dict)
                 except ValueError as ve:
-                    # Trying to recover...
+                    # TODO: Don't default to spiral implementation! This is a hotfix for when no disk/spiral/etc.
+                    # i.e. in base container class, allow for an n component fit
+                    # For skipping Power and Fourier if already specified (save some iterations)
+                    if "is not in list" in str(ve) and component.component_type != "sky":
+                        component.add_skip(skip_val = 1)
+                        component_num += 1
+                        
+                        if component.component_type == "fourier":
+                            component_num -= 1
+                            
+                        send_to_helper = {}
+                        continue
+                        
+                    # Trying to recover... for sky?
                     # End will *always* (header excluded) be #_param                
-                    component_end = [k for k in input_keys if k.endswith(self.end_dict[2:])][0]
+                    component_end = [k for k in input_keys if k.endswith(component.end_dict[2:])][0]
 
                     if component_end[0].isnumeric():
-                        component_idx_start = input_keys.index(f"{component_end[0]}_{self.start_dict[2:]}")
+                        component_idx_start = input_keys.index(f"{component_end[0]}_{component.start_dict[2:]}")
                         component_idx_end   = input_keys.index(component_end)
 
                     else:
-                        print(f"Can't find start/end of {self.component_type} segment.")
+                        print(f"Can't find start/end of {component.component_type} segment.")
                         print(f"Check the filename or start/end_dict variables.")
                         print(f"Filename: {filename}")
-                        print(f"Start/End: {self.start_dict}/{self.end_dict}")
+                        print(f"Start/End: {component.start_dict}/{component.end_dict}")
                         raise ValueError(ve)
 
                 if component_idx_start <= idx <= component_idx_end:
@@ -255,7 +282,7 @@ class FeedmeContainer(ComponentContainer):
         #_ = [c.update_param_values() for c in self.to_list()]
 
 
-# In[6]:
+# In[ ]:
 
 
 class OutputContainer(FeedmeContainer):
@@ -359,7 +386,7 @@ class OutputContainer(FeedmeContainer):
             return ""
 
 
-# In[7]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -372,14 +399,14 @@ if __name__ == "__main__":
     print(container_df)
 
 
-# In[8]:
+# In[ ]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[9]:
+# In[ ]:
 
 
 # Testing FeedmeContainer kwargs and to_file
@@ -409,7 +436,7 @@ if __name__ == "__main__":
     container.to_file()
 
 
-# In[10]:
+# In[ ]:
 
 
 # Testing FeedmeContainer from_file
@@ -423,8 +450,8 @@ if __name__ == "__main__":
     # fourier = Fourier()
     # sky   = Sky(3)
 
-    example_fits = pj(TEST_DATA_DIR, "test-out", "1237667911674691747", "1237667911674691747_galfit_out.fits")
     example_feedme = pj(TEST_DATA_DIR, "test-out", "1237667911674691747", "1237667911674691747.in")
+    example_fits   = pj(TEST_DATA_DIR, "test-out", "1237667911674691747", "1237667911674691747_galfit_out.fits")
     
     print("These are feedme -> output")
     print("ignoring filepaths for reg tests...\n")
@@ -439,7 +466,69 @@ if __name__ == "__main__":
     print(iff(str(container)))
 
 
-# In[11]:
+# In[ ]:
+
+
+# Testing FeedmeContainer from_file with just bulge
+if __name__ == "__main__":
+    
+    header = GalfitHeader(galaxy_name = "fake_name")
+    container.update_components(header = header)
+    # bulge = Sersic(1)
+    # disk  = Sersic(2)
+    # arms  = Power()
+    # fourier = Fourier()
+    # sky   = Sky(3)
+
+    # This galaxy does not use the Power or Fourier functions
+    example_feedme = pj(TEST_DATA_DIR, "test-out", "1237668589728366770", "1237668589728366770.in")
+    example_fits   = pj(TEST_DATA_DIR, "test-out", "1237668589728366770", "1237668589728366770_galfit_out.fits")
+    
+    print("These are feedme -> output")
+    print("ignoring filepaths for reg tests...\n")
+    
+    container.from_file(example_feedme)
+    print(iff(str(container)))
+    
+    print("*"*80)
+    print("*"*80)
+    
+    container.from_file(example_fits)
+    print(iff(str(container)))
+
+
+# In[ ]:
+
+
+# Testing FeedmeContainer from_file with no arms
+if __name__ == "__main__":
+    
+    header = GalfitHeader(galaxy_name = "fake_name")
+    container.update_components(header = header)
+    # bulge = Sersic(1)
+    # disk  = Sersic(2)
+    # arms  = Power()
+    # fourier = Fourier()
+    # sky   = Sky(3)
+
+    # This galaxy does not use the Power or Fourier functions
+    example_feedme = pj(TEST_DATA_DIR, "test-out", "1237667912741355660", "1237667912741355660.in")
+    example_fits   = pj(TEST_DATA_DIR, "test-out", "1237667912741355660", "1237667912741355660_galfit_out.fits")
+    
+    print("These are feedme -> output")
+    print("ignoring filepaths for reg tests...\n")
+    
+    container.from_file(example_feedme)
+    print(iff(str(container)))
+    
+    print("*"*80)
+    print("*"*80)
+    
+    container.from_file(example_fits)
+    print(iff(str(container)))
+
+
+# In[ ]:
 
 
 # if __name__ == "__main__":
@@ -475,7 +564,7 @@ if __name__ == "__main__":
     
 
 
-# In[12]:
+# In[ ]:
 
 
 # Testing extraction into FeedmeContainer attributes
@@ -495,7 +584,7 @@ if __name__ == "__main__":
     print(iff(str(example_feedme)))
 
 
-# In[13]:
+# In[ ]:
 
 
 # Testing OutputContainer
@@ -607,7 +696,7 @@ if __name__ == "__main__":
     #good_output.header.to_file(output_filename, good_output.bulge, good_output.disk, good_output.arms, good_output.fourier, good_output.sky)
 
 
-# In[15]:
+# In[ ]:
 
 
 if __name__ == "__main__":

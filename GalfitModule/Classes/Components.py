@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[35]:
 
 
 import os
@@ -17,7 +17,7 @@ import pandas as pd
 import numpy as np
 
 
-# In[2]:
+# In[36]:
 
 
 # For debugging purposes
@@ -31,7 +31,7 @@ def in_notebook():
         return False
 
 
-# In[3]:
+# In[37]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -57,7 +57,7 @@ sys.path.append(_MODULE_DIR)
 from Functions.helper_functions import *
 
 
-# In[4]:
+# In[38]:
 
 
 class GalfitComponent:
@@ -92,6 +92,7 @@ class GalfitComponent:
 
     def add_skip(self, skip_val = 0):
         key = "skip"
+        #self.skip = skip_val
         self.param_numbers["Z"] = key
         self.param_values[key] = skip_val
         self.param_desc[key] = "Skip this model in output image?  (yes=1, no=0)"
@@ -370,6 +371,10 @@ class GalfitComponent:
 # ==========================================================================================================
 
     def to_file(self, filename, *args):
+        # For skipped power and fourier
+        if self.param_values.get("skip",0) == 1 and self.component_type in ("power", "fourier"):
+            return None
+        
         try:
             with open(filename, "w") as f:
                 f.write("\n")
@@ -386,6 +391,10 @@ class GalfitComponent:
                     fourier_index = comp_names.index("fourier")
 
                 for i, component in enumerate(args):
+                    # For skipped power and fourier
+                    if component.param_values.get("skip",0) == 1 and component.component_type in ("power", "fourier"):
+                        continue
+                        
                     f.write(str(component))
                     if i != fourier_index - 1:
                         f.write("\n")
@@ -411,7 +420,7 @@ class GalfitComponent:
     #     return self.__dict__.iteritems()
 
 
-# In[5]:
+# In[39]:
 
 
 class Sersic(GalfitComponent):
@@ -543,7 +552,7 @@ class Sersic(GalfitComponent):
         return
 
 
-# In[6]:
+# In[40]:
 
 
 class Power(GalfitComponent):
@@ -668,7 +677,7 @@ class Power(GalfitComponent):
         return
 
 
-# In[7]:
+# In[41]:
 
 
 class Fourier(GalfitComponent):
@@ -777,7 +786,7 @@ class Fourier(GalfitComponent):
         return
 
 
-# In[8]:
+# In[42]:
 
 
 class Sky(GalfitComponent):
@@ -880,7 +889,7 @@ class Sky(GalfitComponent):
         return
 
 
-# In[9]:
+# In[43]:
 
 
 class GalfitHeader(GalfitComponent):
@@ -1033,14 +1042,14 @@ class GalfitHeader(GalfitComponent):
         return
 
 
-# In[10]:
+# In[44]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[11]:
+# In[45]:
 
 
 # Unit Test for GalfitComponent
@@ -1051,7 +1060,7 @@ if __name__ == "__main__":
         print(k,v)
 
 
-# In[12]:
+# In[46]:
 
 
 if __name__ == "__main__":
@@ -1090,7 +1099,7 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps""".
     print(header)
 
 
-# In[13]:
+# In[47]:
 
 
 if __name__ == "__main__":
@@ -1134,7 +1143,7 @@ if __name__ == "__main__":
     print(bulge)
 
 
-# In[14]:
+# In[48]:
 
 
 if __name__ == "__main__":
@@ -1174,7 +1183,7 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
     print(arms)
 
 
-# In[15]:
+# In[49]:
 
 
 if __name__ == "__main__":
@@ -1205,6 +1214,22 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
     fourier_df.iloc[0,2] = 113
     fourier.from_pandas(fourier_df)
     print(fourier)
+
+
+# In[53]:
+
+
+if __name__ == "__main__":
+    arms.add_skip(skip_val = 1)
+    fourier.add_skip(skip_val = 1)
+    
+    # We should see an RZ, FZ which is nonsensical but when we write to file
+    # the power and fourier functions simply won't show
+
+    print(arms)
+    print(fourier)
+    
+    bulge.to_file(f"{base_out}_PowerFourierSkip.txt", arms, fourier)
 
 
 # In[16]:
