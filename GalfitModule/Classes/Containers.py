@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[1]:
 
 
 import os
@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 
 
-# In[ ]:
+# In[2]:
 
 
 # For debugging purposes
@@ -31,7 +31,7 @@ def in_notebook():
         return False
 
 
-# In[ ]:
+# In[3]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -59,7 +59,7 @@ from Classes.Components import *
 from Functions.helper_functions import *
 
 
-# In[ ]:
+# In[4]:
 
 
 class ComponentContainer:
@@ -117,13 +117,13 @@ class ComponentContainer:
         # i.e. don't exist in this current implementation
         out_str = "\n".join(
             str(comp) for comp in ComponentContainer.to_list(self)
-             if comp.param_values.get("skip", 0) != 1 and
+             if comp.param_values.get("skip", 0) != 1 or
                 comp.component_type not in ("power", "fourier")
             )
         return out_str
 
 
-# In[ ]:
+# In[5]:
 
 
 class FeedmeContainer(ComponentContainer):
@@ -143,7 +143,7 @@ class FeedmeContainer(ComponentContainer):
         out_str = f"{str(self.header)}\n" + \
                     "\n".join(
                         str(comp) for comp in ComponentContainer.to_list(self)
-                        if comp.param_values.get("skip", 0) != 1 and
+                        if comp.param_values.get("skip", 0) != 1 or
                            comp.component_type not in ("power", "fourier")
                     )
         return out_str
@@ -181,86 +181,245 @@ class FeedmeContainer(ComponentContainer):
         def from_fits(self, input_dict = obj_in):
             
             input_keys = list(input_dict.keys())
+            input_list = list(input_dict.items())
+            
+            # For now assume this will be the last one!
+            try:
+                final_idx  = input_keys.index("FLAGS")
+            except ValueError:
+                final_idx  = -1
             
             component_list = self.to_list()
-            component_num = 0
+            component_list_num = 1
+            
             send_to_helper = {}
             
-            for idx, (key, value) in enumerate(input_dict.items()):
-                component = component_list[component_num]
-                # For skipping Power and Fourier if already specified (save some iterations)
-                #if component.param_values.get("skip", 0) == 1 and component.component_type in ("power", "fourier"):
-                    #continue
-                    
-                try:
-                    component_idx_start = input_keys.index(component.start_dict)
-                    component_idx_end   = input_keys.index(component.end_dict)
-                except ValueError as ve:
-                    # TODO: Don't default to spiral implementation! This is a hotfix for when no disk/spiral/etc.
-                    # i.e. in base container class, allow for an n component fit
-                    # For skipping Power and Fourier if already specified (save some iterations)
-                    if "is not in list" in str(ve) and component.component_type != "sky":
-                        component.add_skip(skip_val = 1)
-                        component_num += 1
-                        
-                        if component.component_type == "fourier":
-                            component_num -= 1
-                            
-                        send_to_helper = {}
-                        continue
-                        
-                    # Trying to recover... for sky?
-                    # End will *always* (header excluded) be #_param                
-                    component_end = [k for k in input_keys if k.endswith(component.end_dict[2:])][0]
-
-                    if component_end[0].isnumeric():
-                        component_idx_start = input_keys.index(f"{component_end[0]}_{component.start_dict[2:]}")
-                        component_idx_end   = input_keys.index(component_end)
-
-                    else:
-                        print(f"Can't find start/end of {component.component_type} segment.")
-                        print(f"Check the filename or start/end_dict variables.")
-                        print(f"Filename: {filename}")
-                        print(f"Start/End: {component.start_dict}/{component.end_dict}")
-                        raise ValueError(ve)
-
-                if component_idx_start <= idx <= component_idx_end:
-                    send_to_helper[key] = value
+            component_nums = [(i, k) for i, k in enumerate(input_keys) if k.startswith("COMP")]
+            
+            for idx_component_nums, (i_begin, component_key) in enumerate(component_nums):
+                i_end = final_idx
                 
-                if idx == component_idx_end:
+                if idx_component_nums + 1 < len(component_nums):
+                    i_end = component_nums[idx_component_nums + 1][0]
+                        
+                chunk = input_list[i_begin:i_end]
+                
+                rotation_func  = [i for i, k in enumerate(chunk) if k[0].endswith("ROTF")]
+                # Assume at least F1
+                fourier_modes  = [i for i, k in enumerate(chunk) if k[0].endswith("F1")]
+
+                component_name = input_dict[component_key.strip()].strip()
+                component = component_list[component_list_num] #[c for c in component_list if c.component_type == component_name][0]
+                
+                # Aligning ourselves correctly
+                count = 0
+                while component.component_type != component_name or count == 100:
+                    #print(component.component_type)
+                    component.add_skip(skip_val = 1)
+                    component_list_num += 1
+                    component = component_list[component_list_num]
+                    count += 1
+                
+                component_list_num += 1
+                
+                # Also assume only a single rotation function per component... which I think is fair
+                if not rotation_func:
+                    send_to_helper = dict(input_list[i_begin : i_end])
                     component.from_file_helper(send_to_helper)
-                    send_to_helper = {}
-                    component_num += 1
                     
-                    if component_num == len(component_list): break
+                else:
+                    r_start = rotation_func[0]
+                    send_to_helper = dict(chunk[:r_start])
+                    component.from_file_helper(send_to_helper)
                     
-            return
+                    component = component_list[component_list_num] #[c for c in component_list if c.component_type == component_name][0]
+                    component_list_num += 1
+                    
+                    if not fourier_modes:
+                        send_to_helper = dict(chunk[r_start:])
+                        component.from_file_helper(send_to_helper)
+                        
+                    else:
+                        f_start = fourier_modes[0]
+                        send_to_helper = dict(chunk[r_start : f_start])
+                        component.from_file_helper(send_to_helper)
+
+                        component = component_list[component_list_num] #[c for c in component_list if c.component_type == "fourier"][0]
+                        component_list_num += 1
+                        
+                        send_to_helper = dict(chunk[f_start:])
+                        component.from_file_helper(send_to_helper)
+                    
+            
+# DEPRECATED
+# New implementation flips the logic, instead of starting from bulge + disk + spiral
+# we start from what's actually in the file and go from there (working around my defaults that is)
+
+            #components_to_pop = []
+#             for idx, (key, value) in enumerate(input_dict.items()):
+                
+#                 if component_list_num == len(component_list): break
+                
+#                 component = component_list[component_list_num]
+#                 name = component.component_type
+#                 #print(name, component_list_num, component_dict_num)
+#                 # For skipping Power and Fourier if already specified (save some iterations)
+#                 #if component.param_values.get("skip", 0) == 1 and component.component_type in ("power", "fourier"):
+#                     #continue
+                    
+#                 try:
+#                     component_idx_start = input_keys.index(component.start_dict)
+#                     component_idx_end   = input_keys.index(component.end_dict)
+                    
+#                 except ValueError as ve:
+#                     # TODO: Don't default to spiral implementation! This is a hotfix for when no disk/spiral/etc.
+#                     # i.e. in base container class, allow for an n component fit
+                    
+#                     # Sky defaults to component 3, this is why it fails for bulge only fits
+#                     # or outputs the wrong component number
+#                     if name == "sky":
+#                         self.sky = Sky(2)
+#                         component_list = self.to_list()
+#                         send_to_helper = {}
+#                         continue
+                        
+#                     elif "is not in list" in str(ve):
+#                         component.add_skip(skip_val = 1)
+#                         #components_to_pop.append(component.component_type)
+                        
+#                         #Any bending modes/rotations/etc. go here
+#                         component_list_num += 1
+                        
+#                         # Assume if it fails it fails for the whole component
+#                         send_to_helper = {}
+#                         continue
+
+#                     # End will *always* (header excluded) be #_param                
+#                     component_end = [k for k in input_keys if k.endswith(component.end_dict[2:])][0]
+#                     component_num = component_end[0]
+
+#                     if component_num.isnumeric():
+#                         # For COMP_#
+#                         if component.start_dict[:-2] == "COMP":
+#                             component_idx_start = input_keys.index(f"{component.start_dict[:-2]}_{component_end[0]}")
+#                         else:
+#                             component_idx_start = input_keys.index(f"{component_num}_{component.start_dict[2:]}")
+                            
+#                         component_idx_end   = input_keys.index(component_end)
+
+#                     else:
+#                         print(f"Can't find start/end of {component.component_type} segment.")
+#                         print(f"Check the filename or start/end_dict variables.")
+#                         print(f"Filename: {filename}")
+#                         print(f"Start/End: {component.start_dict}/{component.end_dict}")
+#                         raise ValueError(ve)
+
+#                 if component_idx_start <= idx <= component_idx_end:
+#                     send_to_helper[key] = value
+                
+#                 if idx == component_idx_end:
+#                     print(send_to_helper)
+#                     component.from_file_helper(send_to_helper)
+                    
+#                     send_to_helper = {}
+#                     component_list_num += 1
+#                     component_dict_num += 1
+                    
+            return #components_to_pop
         
-        def from_text(self, input_file):
+        def from_text(self, input_file_obj):
+            
+            input_file = [line.rstrip("\n") for line in input_file_obj.readlines()]
             
             component_list = self.to_list()
-            component_num = 0
-            send_to_helper = []
-            store = False
+            component_list_num = 0
+            #send_to_helper = []
+            #store = False
+            #component_exists = False
             
-            for line in input_file:
-                component = component_list[component_num]
+            component_idx_nums = [(i + 1, line[-1]) for i, line in enumerate(input_file) if line.startswith("# Component number")]
+            
+            for idx, (component_begin, component_num) in enumerate(component_idx_nums):
+                # White space *before* component number or end of file
+                component_end = [i for i,line in enumerate(input_file) if line.strip().startswith("="*10)][-1] - 1
                 
-                if line.strip().startswith(component.start_text):
-                    store = True
+                if idx + 1 < len(component_idx_nums):
+                    component_end = component_idx_nums[idx + 1][0] - 2
+                
+                chunk = input_file[component_begin : component_end]
+                
+                rotation_func  = [i for i, k in enumerate(chunk) if k.startswith("R0")]
+                # Assume at least F1
+                fourier_modes  = [i for i, k in enumerate(chunk) if k.startswith("F1")]
+                
+                component_name = input_file[component_begin].replace(" ", "").lstrip("0)").split("#")[0]
+                component = component_list[component_list_num]
+                
+                # Aligning ourselves correctly
+                count = 0
+                while component.component_type != component_name or count == 100:
+                    component.add_skip(skip_val = 1)
+                    component_list_num += 1
+                    component = component_list[component_list_num]
+                    count += 1
                     
-                if store:
-                    send_to_helper.append(line)
+                component_list_num += 1
+                
+                 # Also assume only a single rotation function per component... which I think is fair
+                if not rotation_func:
+                    component.from_file_helper(chunk)
                     
-                if line.strip().startswith(component.end_text):
-                    store = False
-                    component.from_file_helper(send_to_helper)
-                    send_to_helper = []
-                    component_num += 1
+                else:
+                    r_start = rotation_func[0]
+                    component.from_file_helper(chunk[:r_start - 1])
                     
-                    if component_num == len(component_list): break
+                    component = component_list[component_list_num] #[c for c in component_list if c.component_type == component_name][0]
+                    component_list_num += 1
+                    
+                    if not fourier_modes:
+                        component.from_file_helper(chunk[r_start:])
+                        
+                    else:
+                        f_start = fourier_modes[0]
+                        component.from_file_helper(chunk[r_start : f_start])
+
+                        component = component_list[component_list_num] #[c for c in component_list if c.component_type == "fourier"][0]
+                        component_list_num += 1
+                        
+                        component.from_file_helper(chunk[f_start:])
+
+# DEPRECATED
+#             for line in input_file:
+#                 component = component_list[component_num]
+                
+#                 if line.strip().startswith(component.start_text):
+#                     store = True
+#                     #component_exists = True
+                    
+#                 if store:
+#                     send_to_helper.append(line)
+#                     #component_exists = True
+                    
+#                 if line.strip().startswith(component.end_text):
+#                     #component_exists = True
+#                     store = False
+#                     component.from_file_helper(send_to_helper)
+#                     send_to_helper = []
+#                     component_num += 1
+                    
+#                     if component_num == len(component_list): break
+                    
+                    #component_exists = False
+                    #continue
+                    
+                # Basically if the if conditions are never met (which they should be)
+                # if not component_exists:
+                #     component.add_skip(skip_val = 1)
+                #     continue
+                    
+                #components_to_pop.append(component.component_type)
         
-            return
+            return #components_to_pop
         
         # 
         if isinstance(obj_in, dict):
@@ -282,7 +441,7 @@ class FeedmeContainer(ComponentContainer):
         #_ = [c.update_param_values() for c in self.to_list()]
 
 
-# In[ ]:
+# In[6]:
 
 
 class OutputContainer(FeedmeContainer):
@@ -386,7 +545,7 @@ class OutputContainer(FeedmeContainer):
             return ""
 
 
-# In[ ]:
+# In[7]:
 
 
 if __name__ == "__main__":
@@ -399,14 +558,14 @@ if __name__ == "__main__":
     print(container_df)
 
 
-# In[ ]:
+# In[8]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[ ]:
+# In[9]:
 
 
 # Testing FeedmeContainer kwargs and to_file
@@ -436,7 +595,7 @@ if __name__ == "__main__":
     container.to_file()
 
 
-# In[ ]:
+# In[10]:
 
 
 # Testing FeedmeContainer from_file
@@ -466,7 +625,7 @@ if __name__ == "__main__":
     print(iff(str(container)))
 
 
-# In[ ]:
+# In[12]:
 
 
 # Testing FeedmeContainer from_file with just bulge
@@ -481,7 +640,7 @@ if __name__ == "__main__":
     # sky   = Sky(3)
 
     # This galaxy does not use the Power or Fourier functions
-    example_feedme = pj(TEST_DATA_DIR, "test-out", "1237668589728366770", "1237668589728366770.in")
+    example_feedme = pj(TEST_DATA_DIR, "test-out", "1237668589728366770", "1237668589728366770_galfit.01")
     example_fits   = pj(TEST_DATA_DIR, "test-out", "1237668589728366770", "1237668589728366770_galfit_out.fits")
     
     print("These are feedme -> output")
@@ -497,7 +656,7 @@ if __name__ == "__main__":
     print(iff(str(container)))
 
 
-# In[ ]:
+# In[13]:
 
 
 # Testing FeedmeContainer from_file with no arms
@@ -528,7 +687,7 @@ if __name__ == "__main__":
     print(iff(str(container)))
 
 
-# In[ ]:
+# In[13]:
 
 
 # if __name__ == "__main__":
@@ -564,7 +723,7 @@ if __name__ == "__main__":
     
 
 
-# In[ ]:
+# In[14]:
 
 
 # Testing extraction into FeedmeContainer attributes
@@ -584,7 +743,7 @@ if __name__ == "__main__":
     print(iff(str(example_feedme)))
 
 
-# In[ ]:
+# In[15]:
 
 
 # Testing OutputContainer
@@ -696,7 +855,7 @@ if __name__ == "__main__":
     #good_output.header.to_file(output_filename, good_output.bulge, good_output.disk, good_output.arms, good_output.fourier, good_output.sky)
 
 
-# In[ ]:
+# In[16]:
 
 
 if __name__ == "__main__":
