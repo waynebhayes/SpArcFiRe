@@ -571,20 +571,24 @@ if __name__ == "__main__":
 # Testing FeedmeContainer kwargs and to_file
 if __name__ == "__main__":
     
-    header = GalfitHeader(galaxy_name = "tester")
-    bulge = Sersic(1, position = (25,25))
-    disk  = Sersic(2, position = (25,25))
-    arms  = Power(2)
-    fourier = Fourier(2)
-    sky   = Sky(3)
-    
-    container = FeedmeContainer(**{"header"  : header,
-                                      "bulge"   : bulge,
-                                      "disk"    : disk,
-                                      "arms"    : arms,
-                                      "fourier" : fourier,
-                                      "sky"     : sky}
-                                )
+    def new_container():
+        header = GalfitHeader(galaxy_name = "tester")
+        bulge = Sersic(1, position = (25,25))
+        disk  = Sersic(2, position = (25,25))
+        arms  = Power(2)
+        fourier = Fourier(2)
+        sky   = Sky(3)
+
+        container = FeedmeContainer(**{"header"  : header,
+                                          "bulge"   : bulge,
+                                          "disk"    : disk,
+                                          "arms"    : arms,
+                                          "fourier" : fourier,
+                                          "sky"     : sky}
+                                    )
+        return container
+
+    container = new_container()
 
     print()
     print(container.to_pandas())
@@ -601,13 +605,7 @@ if __name__ == "__main__":
 # Testing FeedmeContainer from_file
 if __name__ == "__main__":
     
-    header = GalfitHeader(galaxy_name = "fake_name")
-    container.update_components(header = header)
-    # bulge = Sersic(1)
-    # disk  = Sersic(2)
-    # arms  = Power()
-    # fourier = Fourier()
-    # sky   = Sky(3)
+    container = new_container()
 
     example_feedme = pj(TEST_DATA_DIR, "test-out", "1237667911674691747", "1237667911674691747.in")
     example_fits   = pj(TEST_DATA_DIR, "test-out", "1237667911674691747", "1237667911674691747_galfit_out.fits")
@@ -625,19 +623,13 @@ if __name__ == "__main__":
     print(iff(str(container)))
 
 
-# In[12]:
+# In[11]:
 
 
 # Testing FeedmeContainer from_file with just bulge
 if __name__ == "__main__":
     
-    header = GalfitHeader(galaxy_name = "fake_name")
-    container.update_components(header = header)
-    # bulge = Sersic(1)
-    # disk  = Sersic(2)
-    # arms  = Power()
-    # fourier = Fourier()
-    # sky   = Sky(3)
+    container = new_container()
 
     # This galaxy does not use the Power or Fourier functions
     example_feedme = pj(TEST_DATA_DIR, "test-out", "1237668589728366770", "1237668589728366770_galfit.01")
@@ -656,20 +648,14 @@ if __name__ == "__main__":
     print(iff(str(container)))
 
 
-# In[13]:
+# In[12]:
 
 
 # Testing FeedmeContainer from_file with no arms
 if __name__ == "__main__":
     
-    header = GalfitHeader(galaxy_name = "fake_name")
-    container.update_components(header = header)
-    # bulge = Sersic(1)
-    # disk  = Sersic(2)
-    # arms  = Power()
-    # fourier = Fourier()
-    # sky   = Sky(3)
-
+    container = new_container()
+    
     # This galaxy does not use the Power or Fourier functions
     example_feedme = pj(TEST_DATA_DIR, "test-out", "1237667912741355660", "1237667912741355660.in")
     example_fits   = pj(TEST_DATA_DIR, "test-out", "1237667912741355660", "1237667912741355660_galfit_out.fits")
@@ -687,54 +673,21 @@ if __name__ == "__main__":
     print(iff(str(container)))
 
 
-# In[13]:
-
-
-# if __name__ == "__main__":
-#     # Testing additional functionality
-    
-#     out_str = """Iteration : 12    Chi2nu: 3.571e-01     dChi2/Chi2: -3.21e-08   alamda: 1e+02
-#  sersic    : (  [62.90],  [62.90])  14.11     13.75    0.30    0.63    60.82
-#  sky       : [ 63.00,  63.00]  1130.51  -4.92e-02  1.00e-02
-#  sersic    : (  [62.90],  [62.90])  14.19     12.43    1.45    0.62   100.55
-#    power   :     [0.00]   [23.51]  219.64     -0.16     ---  -44.95   -15.65
-#    fourier : (1:  0.06,   -6.67)   (3:  0.05,    0.18)
-# COUNTDOWN = 0"""
-    
-#     bulge1, disk1, arms1, fourier1, sky1 = update_components(out_str, 
-#                                                              bulge, 
-#                                                              disk, 
-#                                                              arms, 
-#                                                              fourier, 
-#                                                              sky)
-#     # Checking difference
-#     # Use subtraction! When it's done
-#     print(bulge)
-#     print(disk)
-#     print(arms)
-#     print(fourier)
-#     print(sky)
-#     print("="*80)
-#     print(bulge1)
-#     print(disk1)
-#     print(arms1)
-#     print(fourier1)
-#     print(sky1)
-    
-
-
-# In[14]:
+# In[15]:
 
 
 # Testing extraction into FeedmeContainer attributes
 if __name__ == "__main__":
+    container = new_container()
     example_feedme = FeedmeContainer(path_to_feedme = "somewhere/out_there", 
-                                     header         = header, 
-                                     bulge          = bulge, 
-                                     disk           = disk, 
-                                     arms           = arms, 
-                                     fourier        = fourier, 
-                                     sky            = sky)
+                                     header         = container.header, 
+                                     bulge          = container.bulge, 
+                                     disk           = container.disk, 
+                                     arms           = container.arms, 
+                                     fourier        = container.fourier, 
+                                     sky            = container.sky
+                                    )
+    
     feedme_components = example_feedme.extract_components()
     #print(feedme_components.to_list())
     #print()
@@ -743,7 +696,7 @@ if __name__ == "__main__":
     print(iff(str(example_feedme)))
 
 
-# In[15]:
+# In[16]:
 
 
 # Testing OutputContainer
@@ -855,7 +808,7 @@ if __name__ == "__main__":
     #good_output.header.to_file(output_filename, good_output.bulge, good_output.disk, good_output.arms, good_output.fourier, good_output.sky)
 
 
-# In[16]:
+# In[ ]:
 
 
 if __name__ == "__main__":
