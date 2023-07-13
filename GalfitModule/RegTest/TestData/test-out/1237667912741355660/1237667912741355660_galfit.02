@@ -1,0 +1,73 @@
+
+#  Input menu file: /home/portmanm/run9_arm-cutoff/sparcfire-out/1237667912741355660/1237667912741355660.in
+
+#  Chi^2/nu = 0.761,  Chi^2 = 818.615,  Ndof = 1076
+
+================================================================================
+# IMAGE and GALFIT CONTROL PARAMETERS
+A) /home/portmanm/run9_arm-cutoff/sparcfire-in/1237667912741355660.fits      # Input data image (FITS file)
+B) /home/portmanm/run9_arm-cutoff/sparcfire-tmp/galfits/1237667912741355660_galfit_out.fits      # Output data image block
+C) none                # Sigma image name (made from data if blank or "none") 
+D) none                # Input PSF image and (optional) diffusion kernel
+E) 1                   # PSF fine sampling factor relative to data 
+F) /home/portmanm/run9_arm-cutoff/sparcfire-tmp/galfit_masks/1237667912741355660_star-rm.fits      # Bad pixel mask (FITS image or ASCII coord list)
+G) none                # File with parameter constraints (ASCII file) 
+H) 33   65   34   66   # Image region to fit (xmin xmax ymin ymax)
+I) 50     50           # Size of the convolution box (x y)
+J) 24.800              # Magnitude photometric zeropoint 
+K) 0.396  0.396        # Plate scale (dx dy)   [arcsec per pixel]
+O) regular             # Display type (regular, curses, both)
+P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
+
+# INITIAL FITTING PARAMETERS
+#
+#   For component type, the allowed functions are: 
+#       sersic, expdisk, edgedisk, devauc, king, nuker, psf, 
+#       gaussian, moffat, ferrer, and sky. 
+#  
+#   Hidden parameters will only appear when they're specified:
+#       Bn (n=integer, Bending Modes).
+#       C0 (diskyness/boxyness), 
+#       Fn (n=integer, Azimuthal Fourier Modes).
+#       R0-R10 (coordinate rotation, for creating spiral structures).
+#       To, Ti, T0-T10 (truncation function).
+# 
+# ------------------------------------------------------------------------------
+#   par)    par value(s)    fit toggle(s)    # parameter description 
+# ------------------------------------------------------------------------------
+
+# Component number: 1
+ 0) sersic                 #  Component type
+ 1) 48.9445  49.6255  0 0  #  Position x, y
+ 3) 16.1768     1          #  Integrated magnitude 
+ 4) 24.7819     1          #  R_e (effective radius)   [pix]
+ 5) 0.0231      1          #  Sersic index n (de Vaucouleurs n=4) 
+ 6) 0.0000      0          #     ----- 
+ 7) 0.0000      0          #     ----- 
+ 8) 0.0000      0          #     ----- 
+ 9) 0.5915      1          #  Axis ratio (b/a)  
+10) -13.0085    1          #  Position angle (PA) [deg: Up=0, Left=90]
+ Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
+
+# Component number: 2
+ 0) sersic                 #  Component type
+ 1) 48.9445  49.6255  0 0  #  Position x, y
+ 3) 13.9874     1          #  Integrated magnitude 
+ 4) 7.3493      1          #  R_e (effective radius)   [pix]
+ 5) 1.2620      1          #  Sersic index n (de Vaucouleurs n=4) 
+ 6) 0.0000      0          #     ----- 
+ 7) 0.0000      0          #     ----- 
+ 8) 0.0000      0          #     ----- 
+ 9) 0.8439      1          #  Axis ratio (b/a)  
+10) -49.1595    1          #  Position angle (PA) [deg: Up=0, Left=90]
+ Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
+
+# Component number: 3
+ 0) sky                    #  Component type
+ 1) 1108.7072    1          #  Sky background at center of fitting region [ADUs]
+ 2) 0.1234      1          #  dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) -6.036e-02     1       #  dsky/dy (sky gradient in y)     [ADUs/pix]
+ Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
+
+================================================================================
+
