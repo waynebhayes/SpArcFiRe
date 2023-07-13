@@ -57,7 +57,7 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 R0) power               # PA rotation func. (power, log, none)
 R1) 0.0000      0       # Spiral inner radius [pixels]
 R2) 0.0000      0       # Spiral outer radius [pixels]
-R3) -60.0000    1       # Cumul. rotation out to outer radius [degrees]
+R3) 60.0000     1       # Cumul. rotation out to outer radius [degrees]
 R4) 1.0000      1       # Asymptotic spiral powerlaw
 R9) 30.0000     1       # Inclination to L.o.S. [degrees]
 R10) 90.0000     1      # Sky position angle

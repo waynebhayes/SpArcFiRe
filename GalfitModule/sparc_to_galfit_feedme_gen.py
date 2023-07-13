@@ -222,7 +222,7 @@ def galaxy_information(galaxy_name, galaxy_path):
     inclination = 30
     
     bar_cand = 'FALSE'
-    spin_parity = random.choice(['','-'])
+    spin_parity = '' #random.choice(['','-'])
     
     failure_modes = ["input rejected", 
                      "Subscript indices must either be real positive integers or logicals.",
@@ -349,17 +349,17 @@ def galaxy_information(galaxy_name, galaxy_path):
         elif chirality == 'S-wise':
             spin_parity = ''
         else:
-            print(f"Couldn't use chirality. Proceeding with coin flip.")
+            print(f"Couldn't use chirality.") #Proceeding with coin flip.")
     elif chirality_2 == chirality_3:
         if chirality_2 == 'Z-wise':
             spin_parity = '-'
         elif chirality_2 == 'S-wise':
             spin_parity = ''
         else:
-            print(f"Couldn't use chirality. Proceeding with coin flip.")
+            print(f"Couldn't use chirality.") # Proceeding with coin flip.")
     else:
-        print("Something went wrong in choosing a chirality! Coin flip...")
-        spin_parity = random.choice(['','-'])
+        print("Something went wrong in choosing a chirality!") #Coin flip...")
+        spin_parity = '' #random.choice(['','-'])
         
     return (
         bulge_rad_out,
@@ -762,7 +762,7 @@ if __name__ == "__main__":
     #write_to_feedmes(top_dir = cwd)
 
 
-# In[47]:
+# In[48]:
 
 
 if __name__ == "__main__":

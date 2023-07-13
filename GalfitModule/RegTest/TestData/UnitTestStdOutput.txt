@@ -165,6 +165,19 @@ fourier_2                  0.1449  ...                  -35.1366
 F1) 111.0000 112.0000 1 1 # Azim. Fourier mode 1, amplitude, & phase angle
 F3) 113.0000 -35.1366 1 1 # Azim. Fourier mode 3, amplitude, & phase angle
 
+R0) power               # PA rotation func. (power, log, none)
+R1) 111.0000    0       # Spiral inner radius [pixels]
+R2) 112.0000    0       # Spiral outer radius [pixels]
+R3) 113.0000    1       # Cumul. rotation out to outer radius [degrees]
+R4) -2.3697     1       # Asymptotic spiral powerlaw
+R9) 40.8043     1       # Inclination to L.o.S. [degrees]
+R10) 24.3010     1      # Sky position angle
+RZ) 1                   # Skip this model in output image?  (yes=1, no=0)
+
+F1) 111.0000 112.0000 1 1 # Azim. Fourier mode 1, amplitude, & phase angle
+F3) 113.0000 -35.1366 1 1 # Azim. Fourier mode 3, amplitude, & phase angle
+FZ) 1                   # Skip this model in output image?  (yes=1, no=0)
+
 # Component number: 3
  0) sky                 # Component type
  1) 1112.1005   1       # Sky background at center of fitting region [ADUs]
@@ -239,12 +252,13 @@ These are feedme -> output
 ignoring filepaths for reg tests...
 
 G) none                 # File with parameter constraints (ASCII file)
-H) 20      46 20 46     # Image region to fit (xmin xmax ymin ymax)
+H) 0       255   0   255 # Image region to fit (xmin xmax ymin ymax)
 I) 50      50           # Size of the convolution box (x y)
 J) 24.8                 # Magnitude photometric zeropoint
 K) 0.396   0.396        # Plate scale (dx dy)   [arcsec per pixel]
 O) regular              # Display type (regular, curses, both)
 P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
+Z) 1                    # Skip this model in output image?  (yes=1, no=0)
 
 # INITIAL FITTING PARAMETERS
 #
@@ -301,12 +315,13 @@ F3) 0.0500  25.0000 1 1 # Azim. Fourier mode 3, amplitude, & phase angle
 ********************************************************************************
 ********************************************************************************
 G) none                 # File with parameter constraints (ASCII file)
-H) 20      46 20 46     # Image region to fit (xmin xmax ymin ymax)
+H) 0       255   0   255 # Image region to fit (xmin xmax ymin ymax)
 I) 50      50           # Size of the convolution box (x y)
 J) 24.8                 # Magnitude photometric zeropoint
 K) 0.396   0.396        # Plate scale (dx dy)   [arcsec per pixel]
 O) regular              # Display type (regular, curses, both)
 P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
+Z) 1                    # Skip this model in output image?  (yes=1, no=0)
 
 # INITIAL FITTING PARAMETERS
 #
@@ -359,6 +374,222 @@ F3) 0.0615  -50.4153 1 1 # Azim. Fourier mode 3, amplitude, & phase angle
  1) 1093.7289   1       # Sky background at center of fitting region [ADUs]
  2) -0.1052     1       # dsky/dx (sky gradient in x)     [ADUs/pix]
  3) -0.1515     1       # dsky/dy (sky gradient in y)     [ADUs/pix]
+
+These are feedme -> output
+ignoring filepaths for reg tests...
+
+G) none                 # File with parameter constraints (ASCII file)
+H) 0       255   0   255 # Image region to fit (xmin xmax ymin ymax)
+I) 50      50           # Size of the convolution box (x y)
+J) 24.8                 # Magnitude photometric zeropoint
+K) 0.396   0.396        # Plate scale (dx dy)   [arcsec per pixel]
+O) regular              # Display type (regular, curses, both)
+P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
+Z) 1                    # Skip this model in output image?  (yes=1, no=0)
+
+# INITIAL FITTING PARAMETERS
+#
+#   For component type, the allowed functions are: 
+#       sersic, expdisk, edgedisk, devauc, king, nuker, psf, 
+#       gaussian, moffat, ferrer, and sky. 
+#  
+#   Hidden parameters will only appear when they're specified:
+#       Bn (n=integer, Bending Modes).
+#       C0 (diskyness/boxyness), 
+#       Fn (n=integer, Azimuthal Fourier Modes).
+#       R0-R10 (coordinate rotation, for creating spiral structures).
+#       To, Ti, T0-T10 (truncation function).
+# 
+# ------------------------------------------------------------------------------
+#   par)    par value(s)    fit toggle(s)    # parameter description 
+# ------------------------------------------------------------------------------
+
+# Component number: 1
+ 0) sersic              # Component type
+ 1) 43.4409 43.8034 0 0 # Position x, y
+ 3) 12.2155     1       # Integrated magnitude
+ 4) 15.3409     1       # R_e (effective radius)   [pix]
+ 5) 1.6929      1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.7594      1       # Axis ratio (b/a)
+10) 83.0652     1       # Position angle (PA) [deg: Up=0, Left=90]
+ Z) 0                   # Skip this model in output image?  (yes=1, no=0)
+
+# Component number: 2
+ 0) sersic              # Component type
+ 1) 25.0000 25.0000 0 0 # Position x, y
+ 3) 13.0000     1       # Integrated magnitude
+ 4) 10.0000     1       # R_e (effective radius)   [pix]
+ 5) 4.0000      1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.6000      1       # Axis ratio (b/a)
+10) 0.0000      1       # Position angle (PA) [deg: Up=0, Left=90]
+ Z) 1                   # Skip this model in output image?  (yes=1, no=0)
+
+# Component number: 3
+ 0) sky                 # Component type
+ 1) 1129.4700   1       # Sky background at center of fitting region [ADUs]
+ 2) -0.0272     1       # dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) -0.0994     1       # dsky/dy (sky gradient in y)     [ADUs/pix]
+ Z) 0                   # Skip this model in output image?  (yes=1, no=0)
+
+********************************************************************************
+********************************************************************************
+G) none                 # File with parameter constraints (ASCII file)
+H) 0       255   0   255 # Image region to fit (xmin xmax ymin ymax)
+I) 50      50           # Size of the convolution box (x y)
+J) 24.8                 # Magnitude photometric zeropoint
+K) 0.396   0.396        # Plate scale (dx dy)   [arcsec per pixel]
+O) regular              # Display type (regular, curses, both)
+P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
+Z) 1                    # Skip this model in output image?  (yes=1, no=0)
+
+# INITIAL FITTING PARAMETERS
+#
+#   For component type, the allowed functions are: 
+#       sersic, expdisk, edgedisk, devauc, king, nuker, psf, 
+#       gaussian, moffat, ferrer, and sky. 
+#  
+#   Hidden parameters will only appear when they're specified:
+#       Bn (n=integer, Bending Modes).
+#       C0 (diskyness/boxyness), 
+#       Fn (n=integer, Azimuthal Fourier Modes).
+#       R0-R10 (coordinate rotation, for creating spiral structures).
+#       To, Ti, T0-T10 (truncation function).
+# 
+# ------------------------------------------------------------------------------
+#   par)    par value(s)    fit toggle(s)    # parameter description 
+# ------------------------------------------------------------------------------
+
+# Component number: 1
+ 0) sersic              # Component type
+ 1) 43.4409 43.8034 0 0 # Position x, y
+ 3) 12.2155     1       # Integrated magnitude
+ 4) 15.3409     1       # R_e (effective radius)   [pix]
+ 5) 1.6929      1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.7594      1       # Axis ratio (b/a)
+10) 83.0652     1       # Position angle (PA) [deg: Up=0, Left=90]
+ Z) 0                   # Skip this model in output image?  (yes=1, no=0)
+
+# Component number: 2
+ 0) sersic              # Component type
+ 1) 25.0000 25.0000 0 0 # Position x, y
+ 3) 13.0000     1       # Integrated magnitude
+ 4) 10.0000     1       # R_e (effective radius)   [pix]
+ 5) 4.0000      1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.6000      1       # Axis ratio (b/a)
+10) 0.0000      1       # Position angle (PA) [deg: Up=0, Left=90]
+ Z) 1                   # Skip this model in output image?  (yes=1, no=0)
+
+# Component number: 3
+ 0) sky                 # Component type
+ 1) 1129.4700   1       # Sky background at center of fitting region [ADUs]
+ 2) -0.0272     1       # dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) -0.0994     1       # dsky/dy (sky gradient in y)     [ADUs/pix]
+ Z) 0                   # Skip this model in output image?  (yes=1, no=0)
+
+These are feedme -> output
+ignoring filepaths for reg tests...
+
+G) none                 # File with parameter constraints (ASCII file)
+H) 0       255   0   255 # Image region to fit (xmin xmax ymin ymax)
+I) 50      50           # Size of the convolution box (x y)
+J) 24.8                 # Magnitude photometric zeropoint
+K) 0.396   0.396        # Plate scale (dx dy)   [arcsec per pixel]
+O) regular              # Display type (regular, curses, both)
+P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
+Z) 1                    # Skip this model in output image?  (yes=1, no=0)
+
+# INITIAL FITTING PARAMETERS
+#
+#   For component type, the allowed functions are: 
+#       sersic, expdisk, edgedisk, devauc, king, nuker, psf, 
+#       gaussian, moffat, ferrer, and sky. 
+#  
+#   Hidden parameters will only appear when they're specified:
+#       Bn (n=integer, Bending Modes).
+#       C0 (diskyness/boxyness), 
+#       Fn (n=integer, Azimuthal Fourier Modes).
+#       R0-R10 (coordinate rotation, for creating spiral structures).
+#       To, Ti, T0-T10 (truncation function).
+# 
+# ------------------------------------------------------------------------------
+#   par)    par value(s)    fit toggle(s)    # parameter description 
+# ------------------------------------------------------------------------------
+
+# Component number: 1
+ 0) sersic              # Component type
+ 1) 48.9445 49.6255 0 0 # Position x, y
+ 3) 13.9400     1       # Integrated magnitude
+ 4) 7.6300      1       # R_e (effective radius)   [pix]
+ 5) 1.2900      1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.8400      1       # Axis ratio (b/a)
+10) -48.9500    1       # Position angle (PA) [deg: Up=0, Left=90]
+
+# Component number: 2
+ 0) sersic              # Component type
+ 1) 48.9445 49.6255 0 0 # Position x, y
+ 3) 13.0000     1       # Integrated magnitude
+ 4) 3.8725      1       # R_e (effective radius)   [pix]
+ 5) 4.0000      1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.6000      1       # Axis ratio (b/a)
+10) 2.1832      1       # Position angle (PA) [deg: Up=0, Left=90]
+
+# Component number: 3
+ 0) sky                 # Component type
+ 1) 1110.0000   1       # Sky background at center of fitting region [ADUs]
+ 2) 0.1240      1       # dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) 0.1240      1       # dsky/dy (sky gradient in y)     [ADUs/pix]
+
+********************************************************************************
+********************************************************************************
+G) none                 # File with parameter constraints (ASCII file)
+H) 0       255   0   255 # Image region to fit (xmin xmax ymin ymax)
+I) 50      50           # Size of the convolution box (x y)
+J) 24.8                 # Magnitude photometric zeropoint
+K) 0.396   0.396        # Plate scale (dx dy)   [arcsec per pixel]
+O) regular              # Display type (regular, curses, both)
+P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
+Z) 1                    # Skip this model in output image?  (yes=1, no=0)
+
+# INITIAL FITTING PARAMETERS
+#
+#   For component type, the allowed functions are: 
+#       sersic, expdisk, edgedisk, devauc, king, nuker, psf, 
+#       gaussian, moffat, ferrer, and sky. 
+#  
+#   Hidden parameters will only appear when they're specified:
+#       Bn (n=integer, Bending Modes).
+#       C0 (diskyness/boxyness), 
+#       Fn (n=integer, Azimuthal Fourier Modes).
+#       R0-R10 (coordinate rotation, for creating spiral structures).
+#       To, Ti, T0-T10 (truncation function).
+# 
+# ------------------------------------------------------------------------------
+#   par)    par value(s)    fit toggle(s)    # parameter description 
+# ------------------------------------------------------------------------------
+
+# Component number: 1
+ 0) sersic              # Component type
+ 1) 48.9445 49.6255 0 0 # Position x, y
+ 3) 16.1768     1       # Integrated magnitude
+ 4) 24.7819     1       # R_e (effective radius)   [pix]
+ 5) 0.0231      1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.5915      1       # Axis ratio (b/a)
+10) -13.0085    1       # Position angle (PA) [deg: Up=0, Left=90]
+
+# Component number: 2
+ 0) sersic              # Component type
+ 1) 48.9445 49.6255 0 0 # Position x, y
+ 3) 13.9874     1       # Integrated magnitude
+ 4) 7.3493      1       # R_e (effective radius)   [pix]
+ 5) 1.2620      1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.8439      1       # Axis ratio (b/a)
+10) -49.1595    1       # Position angle (PA) [deg: Up=0, Left=90]
+
+# Component number: 3
+ 0) sky                 # Component type
+ 1) 1108.7072   1       # Sky background at center of fitting region [ADUs]
+ 2) 0.1234      1       # dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) -0.0604     1       # dsky/dy (sky gradient in y)     [ADUs/pix]
 
 Key: bulge
 Key: disk
@@ -369,7 +600,7 @@ Key: header
 Key: path_to_feedme
 
 G) none                 # File with parameter constraints (ASCII file)
-H) 20      46 20 46     # Image region to fit (xmin xmax ymin ymax)
+H) 0       255   0   255 # Image region to fit (xmin xmax ymin ymax)
 I) 50      50           # Size of the convolution box (x y)
 J) 24.8                 # Magnitude photometric zeropoint
 K) 0.396   0.396        # Plate scale (dx dy)   [arcsec per pixel]
@@ -395,38 +626,38 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 
 # Component number: 1
  0) sersic              # Component type
- 1) 33.1654 32.8765 0 0 # Position x, y
- 3) 14.8068     1       # Integrated magnitude
- 4) 12.0222     1       # R_e (effective radius)   [pix]
- 5) 0.9126      1       # Sersic index n (de Vaucouleurs n=4)
- 9) 0.4374      1       # Axis ratio (b/a)
-10) -47.1107    1       # Position angle (PA) [deg: Up=0, Left=90]
+ 1) 25.0000 25.0000 0 0 # Position x, y
+ 3) 13.0000     1       # Integrated magnitude
+ 4) 10.0000     1       # R_e (effective radius)   [pix]
+ 5) 4.0000      1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.6000      1       # Axis ratio (b/a)
+10) 0.0000      1       # Position angle (PA) [deg: Up=0, Left=90]
 
 # Component number: 2
  0) sersic              # Component type
- 1) 33.1654 32.8765 0 0 # Position x, y
- 3) 13.2576     1       # Integrated magnitude
- 4) 6.2167      1       # R_e (effective radius)   [pix]
- 5) 1.1164      1       # Sersic index n (de Vaucouleurs n=4)
- 9) 0.9363      1       # Axis ratio (b/a)
-10) -29.5809    1       # Position angle (PA) [deg: Up=0, Left=90]
+ 1) 25.0000 25.0000 0 0 # Position x, y
+ 3) 13.0000     1       # Integrated magnitude
+ 4) 10.0000     1       # R_e (effective radius)   [pix]
+ 5) 4.0000      1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.6000      1       # Axis ratio (b/a)
+10) 0.0000      1       # Position angle (PA) [deg: Up=0, Left=90]
 
 R0) power               # PA rotation func. (power, log, none)
 R1) 0.0000      0       # Spiral inner radius [pixels]
-R2) 3.6276      0       # Spiral outer radius [pixels]
-R3) 3.0671      1       # Cumul. rotation out to outer radius [degrees]
-R4) -2.1409     1       # Asymptotic spiral powerlaw
-R9) 0.0018      1       # Inclination to L.o.S. [degrees]
-R10) 127.7754    1      # Sky position angle
+R2) 20.0000     0       # Spiral outer radius [pixels]
+R3) 90.0000     1       # Cumul. rotation out to outer radius [degrees]
+R4) 1.0000      1       # Asymptotic spiral powerlaw
+R9) 15.0000     1       # Inclination to L.o.S. [degrees]
+R10) 45.0000     1      # Sky position angle
 
-F1) 0.0978  -66.2488 1 1 # Azim. Fourier mode 1, amplitude, & phase angle
-F3) 0.0615  -50.4153 1 1 # Azim. Fourier mode 3, amplitude, & phase angle
+F1) 0.0500  45.0000 1 1 # Azim. Fourier mode 1, amplitude, & phase angle
+F3) 0.0500  25.0000 1 1 # Azim. Fourier mode 3, amplitude, & phase angle
 
 # Component number: 3
  0) sky                 # Component type
- 1) 1093.7289   1       # Sky background at center of fitting region [ADUs]
- 2) -0.1052     1       # dsky/dx (sky gradient in x)     [ADUs/pix]
- 3) -0.1515     1       # dsky/dy (sky gradient in y)     [ADUs/pix]
+ 1) 1000.0000   1       # Sky background at center of fitting region [ADUs]
+ 2) 0.0000      1       # dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) 0.0000      1       # dsky/dy (sky gradient in y)     [ADUs/pix]
 
 Checking the bad example
 Galfit failed this run!
