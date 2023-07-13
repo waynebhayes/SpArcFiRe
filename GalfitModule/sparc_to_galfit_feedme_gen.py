@@ -13,7 +13,7 @@
 # 
 # TO RUN: `python3 sparc_to_galfit_feedme_gen.py`
 
-# In[3]:
+# In[4]:
 
 
 import numpy as np
@@ -28,7 +28,7 @@ from copy import deepcopy
 from astropy.io import fits
 
 
-# In[4]:
+# In[5]:
 
 
 # For debugging purposes
@@ -42,7 +42,7 @@ def in_notebook():
         return False
 
 
-# In[5]:
+# In[6]:
 
 
 import sys
@@ -96,7 +96,7 @@ from Functions.helper_functions import *
 #         print("Check Sparcfire output or directories. Cannot proceed.")
 #         raise SystemExit("Quitting.")
 
-# In[34]:
+# In[7]:
 
 
 # Grabbing filepath from command line
@@ -123,7 +123,7 @@ def command_line(top_dir = os.getcwd(), **kwargs): # = True):
     return absp(in_dir_out), absp(tmp_dir_out), absp(out_dir_out)
 
 
-# In[5]:
+# In[8]:
 
 
 def get_galaxy_names_list(in_dir, tmp_dir, out_dir, galaxy_names = []):
@@ -162,7 +162,7 @@ def get_galaxy_names_list(in_dir, tmp_dir, out_dir, galaxy_names = []):
     return filenames_read, gnames_out, folders_out
 
 
-# In[6]:
+# In[9]:
 
 
 def path_join(path='.', name='', file_ext=''):
@@ -178,7 +178,7 @@ def path_join(path='.', name='', file_ext=''):
     return file_path
 
 
-# In[6]:
+# In[10]:
 
 
 def scale_var(x, scale = 1):
@@ -186,7 +186,7 @@ def scale_var(x, scale = 1):
     return float(x)*scale
 
 
-# In[1]:
+# In[39]:
 
 
 def galaxy_information(galaxy_name, galaxy_path):
@@ -208,7 +208,7 @@ def galaxy_information(galaxy_name, galaxy_path):
     
     axis_ratio_out = 0.5
     avg_arc_length_out = 30
-    max_arc_length_out = 30
+    max_arc_length_out = 20
     
     chirality = 0
     chirality_2 = 0
@@ -381,7 +381,7 @@ def galaxy_information(galaxy_name, galaxy_path):
             )
 
 
-# In[18]:
+# In[12]:
 
 
 def arc_information(galaxy_name, galaxy_path, num_arms = 2):
@@ -466,7 +466,7 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2):
     return inner_rad, outer_rad, cumul_rot_out #, alpha_out
 
 
-# In[9]:
+# In[13]:
 
 
 def csv_sdss_info(galaxy_names): # to grab petromag and also psf parameter things
@@ -532,7 +532,7 @@ def csv_sdss_info(galaxy_names): # to grab petromag and also psf parameter thing
     return gname_info
 
 
-# In[10]:
+# In[14]:
 
 
 def write_starmask_ascii(starmask_filepath):
@@ -561,7 +561,7 @@ def write_to_feedme(path, list_in, feedme_name = "autogen_feedme_galfit.in"):
         _ = [g.write(f"{value}\n") for value in list_in]
         
     return file_path
-# In[7]:
+# In[46]:
 
 
 def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwargs):
@@ -685,9 +685,12 @@ def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwarg
                      )
         
         # Take 90 pixels (in the 256x256 image) to be the cutoff for an arm
-        # Test this
-        # if scale_var(max_arc, 1/scale_fact) > 90:
-        #     arms.add_skip(skip_value = 1)
+        # Use a simple cut off for now
+        # Looking at the first two arms may be too unreliable
+        #print("Max arc length in 256 img", scale_var(max_arc, 0.5*256/crop_rad))
+        if scale_var(max_arc, 0.5*256/crop_rad) < 75:
+            print("Skipping Arms")
+            arms.add_skip(skip_val = 1)
 
         fourier = Fourier(component_number = 2)
             
@@ -725,7 +728,7 @@ def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwarg
                                     fourier        = fourier,
                                     sky            = sky)
         
-        if arms.param_values.get("skip", 0):
+        if arms.param_values.get("skip", False):
             # By default includes the header
             container.to_file(bulge, disk, sky)
         else:
@@ -742,24 +745,24 @@ def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwarg
         #paths_to_feedme.append(write_to_feedme(gfolder, formatted_feedme, feedme_name = gname + ".in")) # do I need paths_to_feedme? I used to use it for something...
 
 
-# In[ ]:
+# In[42]:
 
 
 if __name__ == "__main__":
     
-    # FOR NOW (aka TODO) force >python 3.6 for f string compatibility
-    out_str = """\t Python3.6 or greater required! Exitting without generating feedmes... 
+    # FOR NOW (aka TODO) force >python 3.7 for f string and subprocess compatibility
+    out_str = """\t Python3.7 or greater required! Exitting without generating feedmes... 
                 if feedmes have already been generated, galfit will run with those.\n"""
-    assert sys.version_info >= (3, 6), out_str
+    assert sys.version_info >= (3, 7), out_str
     
-    cwd = os.getcwd()
-    if in_notebook():
-        cwd = cwd.replace("ics-home", username)
+    # cwd = os.getcwd()
+    # if in_notebook():
+    #     cwd = cwd.replace("ics-home", username)
         
-    write_to_feedmes(top_dir = cwd)
+    #write_to_feedmes(top_dir = cwd)
 
 
-# In[8]:
+# In[47]:
 
 
 if __name__ == "__main__":

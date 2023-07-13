@@ -193,6 +193,7 @@ def main(**kwargs):
             # Also good thing dicts retain order, this frequently comes up
             if galfit_output.arms.param_values.get("skip", 0):
                 # By default includes the header
+                print("Skipping Arms")
                 galfit_output.to_file(galfit_output.bulge, galfit_output.disk, galfit_output.sky)
             else:
                 galfit_output.to_file()

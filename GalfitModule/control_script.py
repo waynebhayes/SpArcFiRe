@@ -5,7 +5,7 @@
 # 
 # **Date (Github date will likely be more accurate): 4/17/23**
 
-# In[4]:
+# In[19]:
 
 
 import sys
@@ -16,8 +16,10 @@ import argparse
 import shutil
 import subprocess
 
+import time
 
-# In[5]:
+
+# In[3]:
 
 
 # For debugging purposes
@@ -31,7 +33,7 @@ def in_notebook():
         return False
 
 
-# In[12]:
+# In[4]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -45,10 +47,13 @@ else:
         _SPARCFIRE_DIR = os.environ["SPARCFIRE_HOME"]
         _MODULE_DIR = pj(_SPARCFIRE_DIR, "GalfitModule")
     except KeyError:
-        print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
-        #print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)")
-        print("Checking the current directory for GalfitModule, otherwise quitting.")
-        _MODULE_DIR = pj(_HOME_DIR, "GalfitModule")
+        
+        if __name__ == "__main__":
+            print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
+            print("Checking the current directory for GalfitModule, otherwise quitting.")
+            
+        _MODULE_DIR = pj(os.getcwd(), "GalfitModule")
+        
         if not exists(_MODULE_DIR):
             raise Exception("Could not find GalfitModule!")
     
@@ -64,7 +69,7 @@ from sparc_to_galfit_feedme_gen import *
 import go_go_galfit
 
 
-# In[7]:
+# In[5]:
 
 
 if __name__ == "__main__":
@@ -159,7 +164,7 @@ if __name__ == "__main__":
                         nargs    = "*",
                         type     = str,
                         help     = "RUN-DIRECTORY [IN-DIRECTORY TMP-DIRECTORY OUT-DIRECTORY] from SpArcFiRe. \
-                                    SpArcFiRe directories should follow -in, -tmp, out or this probably won't work."
+                                    SpArcFiRe directories should follow -in, -tmp, -out."
                        )
     
     if not in_notebook():
@@ -383,8 +388,6 @@ def write_to_slurm(cwd, kwargs_main, galfit_script_name = pj(_MODULE_DIR, "go_go
     kwargs_in        = deepcopy(kwargs_main)
     
     print(f"Generating distrib-slurm input file in {cwd}: {slurm_file}")
-    # TODO: batch these, i.e. send 10 galaxies per cpu since GALFIT runs so fast
-    # we won't have to wait on nodes to open up again
     with open(pj(cwd, slurm_file), "w") as scf:
         for gname in kwargs_main["galaxy_names"]:
             kwargs_in["galaxy_names"] = gname
@@ -392,6 +395,7 @@ def write_to_slurm(cwd, kwargs_main, galfit_script_name = pj(_MODULE_DIR, "go_go
             cmd_str = ""
             for k,v in kwargs_in.items():
                 cmd_str += f"{k}={v} "
+                
             # Good thing dictionaries retain order now, *whistles innocently*
             scf.write(f"{run_python} {galfit_script_name} {cmd_str}\n")
 
@@ -404,8 +408,8 @@ def write_to_slurm(cwd, kwargs_main, galfit_script_name = pj(_MODULE_DIR, "go_go
 def check_galfit_out_hangups(tmp_fits_dir, out_dir, kwargs_main):
     # For hang-ups, check if final copy has occurred
     # Check for file which indicates galfit outputs nothing at all
-    # This avoids conflating ones which han'vet run and ones which have nothing to show for it
-    kwargs_main["galaxy_names"] = [gname for gname in kwargs_main["galaxy_names"] 
+    # This avoids conflating ones which haven't run and ones which have nothing to show for it
+    kwargs_main["galaxy_names"] = [gname for gname in kwargs_main["galaxy_names"]
                                    if not exists(f"{pj(out_dir, gname, gname)}_galfit_out.fits")
                                    and not exists(f"{pj(tmp_fits_dir, 'failed_' + gname)}_galfit_out.fits")]
     
@@ -414,7 +418,7 @@ def check_galfit_out_hangups(tmp_fits_dir, out_dir, kwargs_main):
     return kwargs_main
 
 
-# In[14]:
+# In[ ]:
 
 
 def write_failed(failed_dir = cwd, failures = []):
@@ -424,6 +428,7 @@ def write_failed(failed_dir = cwd, failures = []):
         print(f"{len(failures)} galax(y)ies completely failed. Writing the list of these to {fail_filepath}")
         with open(fail_filepath, "w") as ff:
             ff.writelines("\n".join(failures))
+            ff.write("\n")
 
 
 # In[ ]:
@@ -466,19 +471,27 @@ if __name__ == "__main__":
             print("No galaxies to fit, exitting.")
             sys.exit()
             
-        print("Piping to slurm")
+        #print("Piping to slurm")
         print(f"{len(kwargs_main['galaxy_names'])} galaxies")
         slurm_run_name = "GALFITTING"
         timeout = 15 # Minutes
-        slurm_run_cmd = f"cat {slurm_file} | ~wayne/bin/distrib_slurm {slurm_run_name} -M all"
+        
+        extra_slurm = ""
+        if verbose:
+            extra_slurm = "-v"
+            
+        slurm_run_cmd = f"cat {slurm_file} | ~wayne/bin/distrib_slurm {slurm_run_name} -M all --ntasks-per-core=10 {extra_slurm}"
         
         if not restart:
             write_to_slurm(cwd, kwargs_main, slurm_file = slurm_file)
+            print("Galfitting via SLURM...")
             try:
                 sp(f"{slurm_run_cmd} -t {timeout}", capture_output = capture_output, timeout = 60*(timeout + 1))
             except subprocess.TimeoutExpired:
                 pass
 
+        # Python needs a moment to catch-up it seems
+        time.sleep(60)
         kwargs_main = check_galfit_out_hangups(tmp_fits_dir, out_dir, kwargs_main)
         
         count = 2
@@ -564,7 +577,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[11]:
+# In[26]:
 
 
 if __name__ == "__main__":
