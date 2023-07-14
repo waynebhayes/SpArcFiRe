@@ -481,7 +481,7 @@ class OutputContainer(FeedmeContainer):
 
             else:
                 print(f"Did not detect either '{success}' or '{failure}' in galfit output. Something must have gone terribly wrong! Printing output...")
-                print(f"{err_text}")
+                print(f"{galfit_err_text}")
                 self.success = False
         
         if galfit_out_text:
@@ -673,7 +673,7 @@ if __name__ == "__main__":
     print(iff(str(container)))
 
 
-# In[15]:
+# In[13]:
 
 
 # Testing extraction into FeedmeContainer attributes
@@ -696,7 +696,7 @@ if __name__ == "__main__":
     print(iff(str(example_feedme)))
 
 
-# In[16]:
+# In[14]:
 
 
 # Testing OutputContainer
@@ -808,7 +808,7 @@ if __name__ == "__main__":
     #good_output.header.to_file(output_filename, good_output.bulge, good_output.disk, good_output.arms, good_output.fourier, good_output.sky)
 
 
-# In[ ]:
+# In[15]:
 
 
 if __name__ == "__main__":
