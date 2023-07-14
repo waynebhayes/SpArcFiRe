@@ -127,18 +127,19 @@ def fill_objects(in_tuple, galfit_mask_path, out_png_dir):
     try:
         fits_file = OutputFits(fitspath)
         mask_fits_file = FitsFile(mask_fits_name)
-    except Exception:
+    except Exception as e:
         print(f"There was an issue opening galaxy {gname}. Continuing...")
+        print(e)
         return None, None
     
     masked_residual_normalized = fits_file.generate_masked_residual(mask_fits_file)
     if masked_residual_normalized is None:
-        print(f"Could not calculate nmr") # for galaxy {gname}. Continuing...")
+        #print(f"Could not calculate nmr") # for galaxy {gname}. Continuing...")
         return None, None
     
     fits_file.to_png(out_png_dir = out_png_dir) #"/home/portmanm/29k_galaxies/sparcfire-out/galfit_png")
     
-    return gname, fits_file.nmr
+    return gname, fits_file.nmr#, fits_file.nmrr
 
     # output_fits_dict[gname] = fits_file
     # mask_dict[gname] = mask_fits_file
