@@ -266,7 +266,7 @@ class FitsFile:
             setattr(self, key, value)
 
 
-# In[6]:
+# In[32]:
 
 
 class OutputFits(FitsFile):
@@ -311,6 +311,8 @@ class OutputFits(FitsFile):
         
     def generate_masked_residual(self, mask):
 
+        small_number = 1e-8
+        
         crop_box = self.feedme.header.region_to_fit
 
         # To adjust for python indexing
@@ -322,13 +324,27 @@ class OutputFits(FitsFile):
         try:
             self.masked_residual = (self.observation.data - self.model.data)*crop_mask
 
+            # TODO: COMPARE PIXEL BY PIXEL AS A RATIO, SAY 1-OBS/MODEL (whichever is higher goes in denom)
             self.norm_observation = slg.norm(crop_mask*self.observation.data)
             self.norm_model = slg.norm(crop_mask*self.model.data)
             self.norm_residual = slg.norm(crop_mask*self.residual.data)
             self.masked_residual_normalized = self.masked_residual/min(self.norm_observation, self.norm_model)
+            
+            obs_model = 1 - np.divide(
+                                crop_mask*self.observation.data/self.norm_observation, 
+                                crop_mask*self.model.data/self.norm_model + small_number
+                                     )
+
+            model_obs = 1 - np.divide( 
+                                crop_mask*self.model.data/self.norm_model,
+                                crop_mask*self.observation.data/self.norm_observation + small_number
+                                     )
+            # Replace negative values with 1 - reciprocal
+            self.masked_residual_ratio = np.where(obs_model >= 0, obs_model, model_obs)
             # Masked residual normalized
             # I seem to use this acronym a lot
-            self.nmr = slg.norm(self.masked_residual_normalized)
+            self.nmr  = slg.norm(self.masked_residual_normalized)
+            self.nmrr = slg.norm(self.masked_residual_ratio)
 
         except ValueError:
             print(f"There is probably an observation error with galaxy {self.gname}, continuing...")
@@ -340,14 +356,14 @@ class OutputFits(FitsFile):
         return self.masked_residual_normalized
 
 
-# In[7]:
+# In[18]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[8]:
+# In[33]:
 
 
 # Testing from_file
@@ -396,7 +412,7 @@ if __name__ == "__main__":
     print(np.shape(test_obs.observation.data))
 
 
-# In[9]:
+# In[35]:
 
 
 # Unit test to check value of masked residual
@@ -407,9 +423,11 @@ if __name__ == "__main__":
     print(f"{test_model.norm_model:.4f}")
     print(f"{test_model.norm_residual:.4f}")
     print(f"{test_model.nmr:.4f}")
+    print(f"{test_model.nmrr:.8f}")
+    #print(np.min(test_model.observation.data))
 
 
-# In[10]:
+# In[16]:
 
 
 if __name__ == "__main__":
