@@ -13,7 +13,7 @@
 # 
 # TO RUN: `python3 sparc_to_galfit_feedme_gen.py`
 
-# In[4]:
+# In[2]:
 
 
 import numpy as np
@@ -28,7 +28,7 @@ from copy import deepcopy
 from astropy.io import fits
 
 
-# In[5]:
+# In[3]:
 
 
 # For debugging purposes
@@ -42,7 +42,7 @@ def in_notebook():
         return False
 
 
-# In[6]:
+# In[4]:
 
 
 import sys
@@ -197,6 +197,9 @@ def galaxy_information(galaxy_name, galaxy_path):
     bulge_rot_angle_out = 1
 
     crop_rad_out = 30 # New!
+    # Making this global since I'm now grabbing the necessary info from the csv
+    global scale_fact
+    scale_fact = 2*crop_rad_out/256
 
     center_pos_x_out = 30
     center_pos_y_out = 30
@@ -262,7 +265,8 @@ def galaxy_information(galaxy_name, galaxy_path):
                 print(f"SpArcFiRe likely failed on this galaxy, {ve}. Proceeding with default values...")
                 break
                 
-            global scale_fact # Making this global since I'm now grabbing the necessary info from the csv
+            # Now declared first thing!
+            #global scale_fact
             scale_fact = 2*crop_rad_out/256
             
             # Anything with converting to float/int should go in here since there are a couple issues besides
@@ -649,6 +653,7 @@ def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwarg
                               galaxy_name = gname,
                               input_image = pj(in_dir, f"{gname}.fits"),
                               output_image = pj(tmp_dir, "galfits", f"{gname}_galfit_out.fits"),
+                              #psf = pj(tmp_dir, "psf_files", f"{gname}_psf.fits"),
                               pixel_mask = pj(tmp_dir, "galfit_masks", f"{gname}_star-rm.fits"),
                               region_to_fit = (x1crop, x2crop, y1crop, y2crop),
                               optimize = 0
@@ -762,7 +767,7 @@ if __name__ == "__main__":
     #write_to_feedmes(top_dir = cwd)
 
 
-# In[48]:
+# In[6]:
 
 
 if __name__ == "__main__":
