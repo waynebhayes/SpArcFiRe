@@ -5,7 +5,7 @@
 # 
 # **Date (Github date will likely be more accurate): 4/17/23**
 
-# In[19]:
+# In[1]:
 
 
 import sys
@@ -19,7 +19,7 @@ import subprocess
 import time
 
 
-# In[3]:
+# In[2]:
 
 
 # For debugging purposes
@@ -33,7 +33,7 @@ def in_notebook():
         return False
 
 
-# In[4]:
+# In[3]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -278,7 +278,7 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     # Setting up paths and variables
-    tmp_fits_dir = pj(tmp_dir, "galfits")
+    tmp_fits_dir    = pj(tmp_dir, "galfits")
     tmp_masks_dir   = pj(tmp_dir, "galfit_masks")
     tmp_psf_dir     = pj(tmp_dir, "psf_files")
     tmp_png_dir     = pj(tmp_dir, "galfit_png")
@@ -365,6 +365,25 @@ if __name__ == "__main__":
             out_text = sp(f"python3 {pj(star_removal_path, 'remove_stars_with_sextractor.py3')} {need_masks_dir} {tmp_masks_dir}", capture_output = capture_output)
             os.chdir(cwd)
             
+            star_masks = glob.glob(pj(tmp_masks_dir, "*_star-rm.fits"))
+            issue_masking_gnames = [os.path.basename(sm).rstrip("_star-rm.fits") 
+                             for sm in star_masks
+                             if sm not in galaxy_folder_names]
+            
+            # GALFIT can still run on these galaxies without a mask 
+            # so I don't have to worry about letting it know
+            if issue_masking_gnames:
+                issue_file = pj(tmp_dir, "issue_masking.txt")
+                
+                # This is so that I don't have to generate all star masks again...
+                with open(issue_file, "w") as f:
+                    for im in issue_masking_gnames:
+                        _ = sp(f"touch {pj(tmp_masks_dir, im)}-failed_star-rm.fits")
+                        f.write(im)
+                    
+                print("Could not produce a star mask for all galaxies")
+                print(f"See {issue_file} for more details, creating empties...")
+            
             if out_text.stderr:
                 print(f"Something went wrong running 'remove_stars_with_sextractor.py'! Printing debug info...")
                 print(out_text)
@@ -375,7 +394,7 @@ if __name__ == "__main__":
                 
         else:
             print("Star masks have already been generated, proceeding.")
-            print()    
+            print()
 
 
 # ## Galfitting/Slurming!
@@ -577,7 +596,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[26]:
+# In[8]:
 
 
 if __name__ == "__main__":
