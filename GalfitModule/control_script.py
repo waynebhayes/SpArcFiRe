@@ -69,7 +69,7 @@ from sparc_to_galfit_feedme_gen import *
 import go_go_galfit
 
 
-# In[5]:
+# In[4]:
 
 
 if __name__ == "__main__":
@@ -596,7 +596,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[8]:
+# In[5]:
 
 
 if __name__ == "__main__":
