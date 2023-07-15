@@ -230,7 +230,7 @@ if __name__ == "__main__":
         slurm_run_cmd = f"cat {slurm_file} | {run_slurm} {slurm_run_name} {slurm_options} {slurm_verbose}"
         completed = sp(slurm_run_cmd, capture_output = not verbose)
         
-        # TODO: Add check if not on Slurm capable 
+        # TODO: Add check if not on Slurm capable machine
         if completed.stderr:
             print(completed.stderr)
             # Rerun out_nmr
@@ -257,6 +257,7 @@ if __name__ == "__main__":
     pickle.dump(out_nmr, open(pickle_filename_temp, 'wb'))
     
     if not dont_remove_slurm and slurm:
+        _ = sp(f"rm -r \"$HOME/SLURM_turds/{slurm_run_name}\"", capture_output = capture_output)
         _ = sp(f"rm -f {pj(run_dir, name)}*_output_nmr.pkl")
         _ = sp(f"rm -f {slurm_file}")
         
