@@ -125,8 +125,8 @@ if __name__ == "__main__":
     
 # ==================================================================================================================
 
-def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_png_dir, slurm = True):
-    
+def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_png_dir = "", slurm = True):
+
     report_num = 1000
     if slurm:
         report_num = 100
@@ -158,7 +158,9 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_png_dir, s
         return None, None
     
     # Doesn't work on Openlab (sadly)
-    if not slurm:
+    # Keep this in for actual slurming since it's hard to read booleans
+    # from command line (use the default value to our advantage)
+    if not slurm and out_png_dir:
         fits_file.to_png(out_png_dir = out_png_dir)
     
     return gname, fits_file.nmr#, fits_file.nmrr
@@ -183,7 +185,6 @@ def parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_png_dir, all_gname_t
     return out_nmr
 
 # ==================================================================================================================
-# TODO chunk this up via slurm
 if __name__ == "__main__":
     
     final_pkl_file = f'{pj(run_dir, name)}_output_nmr.pkl'
@@ -209,7 +210,7 @@ if __name__ == "__main__":
     chunk_size = 1000
     if slurm and chunk_size > len(all_gname_tmp_out)*0.5:
         print("No need to slurm!")
-        out_nmr = parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_png_dir, all_gname_tmp_out, slurm = False)
+        out_nmr = parallel_wrapper(galfit_tmp_path, galfit_mask_path, None, all_gname_tmp_out, slurm = False)
         
     elif slurm:
         _, _, run_python = go_go_galfit.check_programs()
@@ -257,6 +258,7 @@ if __name__ == "__main__":
     
     if not dont_remove_slurm and slurm:
         _ = sp(f"rm -f {pj(run_dir, name)}*_output_nmr.pkl")
+        _ = sp(f"rm -f {slurm_file}")
         
     pickle_filename = f'{pj(run_dir, name)}_output_nmr.pkl'
     _ = sp(f"mv {pickle_filename_temp} {pickle_filename}")
