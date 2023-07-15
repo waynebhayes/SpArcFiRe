@@ -149,8 +149,8 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_png_dir = 
         mask_fits_file = FitsFile(mask_fits_name)
     except Exception as e:
         print(f"There was an issue opening star mask for galaxy {gname}. Proceeding without mask...")
-        # The mask gets cropped down to the crop box size anyway
-        mask_fits_file = np.zeros((500,500))
+        # Logic implemented to handle None
+        mask_fits_file = None #np.zeros((500,500))
     
     masked_residual_normalized = fits_file.generate_masked_residual(mask_fits_file)
     if masked_residual_normalized is None:
@@ -257,12 +257,12 @@ if __name__ == "__main__":
     pickle.dump(out_nmr, open(pickle_filename_temp, 'wb'))
     
     if not dont_remove_slurm and slurm:
-        _ = sp(f"rm -r \"$HOME/SLURM_turds/{slurm_run_name}\"", capture_output = capture_output)
-        _ = sp(f"rm -f {pj(run_dir, name)}*_output_nmr.pkl")
-        _ = sp(f"rm -f {slurm_file}")
+        _ = sp(f"rm -r \"$HOME/SLURM_turds/{slurm_run_name}\"", capture_output = not verbose)
+        _ = sp(f"rm -f {pj(run_dir, name)}*_output_nmr.pkl", capture_output = not verbose)
+        _ = sp(f"rm -f {slurm_file}", capture_output = not verbose)
         
     pickle_filename = f'{pj(run_dir, name)}_output_nmr.pkl'
-    _ = sp(f"mv {pickle_filename_temp} {pickle_filename}")
+    _ = sp(f"mv {pickle_filename_temp} {pickle_filename}", capture_output = not verbose)
 
         #output_fits_dict = dict(zip(out_nmr))
 
