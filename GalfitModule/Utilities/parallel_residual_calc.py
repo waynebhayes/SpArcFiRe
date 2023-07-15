@@ -61,6 +61,7 @@ if __name__ == "__main__":
     parser.add_argument('-n', '--name',
                         dest     = 'name',
                         action   = 'store',
+                        required = True, 
                         help     = 'Name of the run (for save file).')
     
     parser.add_argument('--no-slurm',
