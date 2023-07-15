@@ -5,7 +5,7 @@
 # 
 # **Date (Github date will likely be more accurate): 4/17/23**
 
-# In[1]:
+# In[10]:
 
 
 import sys
@@ -19,7 +19,7 @@ import subprocess
 import time
 
 
-# In[2]:
+# In[11]:
 
 
 # For debugging purposes
@@ -33,7 +33,7 @@ def in_notebook():
         return False
 
 
-# In[3]:
+# In[12]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -69,7 +69,7 @@ from sparc_to_galfit_feedme_gen import *
 import go_go_galfit
 
 
-# In[4]:
+# In[13]:
 
 
 if __name__ == "__main__":
@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
     python3 ./{sys.argv[0]} [OPTION] [[RUN-DIRECTORY] IN-DIRECTORY TMP-DIRECTORY OUT-DIRECTORY]
     
-    OPTIONS =>[-s | --slurm] 
+    OPTIONS =>[-s | --serial] 
               [-drs | --dont-remove-slurm] 
               [-NS | --num-steps] 
               [-r | --restart]
@@ -105,14 +105,12 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description = USAGE)
     
-    # TODO: invert this to running without slurm for when it comes time for the big runs
-    parser.add_argument('-s', '--slurm',
+    parser.add_argument('-s', '--serial',
                         dest     = 'slurm',
                         action   = 'store_const',
-                        const    = True,
-                        # Soon to be the other way around
-                        default  = False,
-                        help     = 'Run GALFITs using Slurm.'
+                        const    = False,
+                        default  = True,
+                        help     = 'Run GALFITs without using Slurm.'
                        )
 
     parser.add_argument('-drs', '--dont-remove-slurm',
@@ -282,12 +280,15 @@ if __name__ == "__main__":
     tmp_masks_dir   = pj(tmp_dir, "galfit_masks")
     tmp_psf_dir     = pj(tmp_dir, "psf_files")
     tmp_png_dir     = pj(tmp_dir, "galfit_png")
+    need_masks_dir  = pj(tmp_dir, "need_masks")
     
     #all_galfit_out = pj(out_dir, "all_galfit_out")
     out_png_dir     = pj(out_dir, "galfit_png")
     
     # Should be same as SpArcFiRe's but I'm packaging it with just in case
     star_removal_path = pj(_MODULE_DIR, "star_removal")
+    
+    pipe_to_slurm_cmd = "~wayne/bin/distrib_slurm"
     
     if not restart:
         # Remove old
@@ -297,7 +298,14 @@ if __name__ == "__main__":
             pass
 
     # Making sub-directories
-    _ = [os.mkdir(i) for i in (tmp_fits_dir, tmp_masks_dir, tmp_psf_dir, tmp_png_dir, out_png_dir) if not exists(i)]
+    _ = [os.mkdir(i) for i in (tmp_fits_dir, 
+                               tmp_masks_dir, 
+                               tmp_psf_dir, 
+                               tmp_png_dir, 
+                               out_png_dir, 
+                               need_masks_dir) 
+         if not exists(i)
+        ]
     
     # makedirs will make both at once, handy!
     #if not exists(out_png): os.makedirs(out_png)
@@ -310,9 +318,23 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":    
     # Grabbing list of file names and masks with bash variable expansion
+    print("Setting up, finding files...")
     input_filenames = glob.glob(pj(in_dir, "*.fits"))
     output_folders  = glob.glob(pj(out_dir, "123*/"))
     star_masks      = glob.glob(pj(tmp_dir, "*_star-rm.fits"))
+    
+    # The ONLY reason we need this is because of how remove_stars_with... works
+    # If we change that, the whole mess of code and operations that use can go away
+    # the need_masks_dir can go away
+    in_need_masks   = glob.glob(pj(need_masks_dir, "*.fits"))
+    
+    check_need_masks = set(output_folders).intersection(
+                       set([os.path.basename(i) for i in in_need_masks])
+                                                        )
+    if not check_need_masks:
+        _ = sp(f"rm -rf {need_masks_dir}", capture_output = capture_output)
+        os.mkdir(need_masks_dir)
+        in_need_masks = []
     
     if star_masks and not restart:
         sp(f"mv {pj(tmp_dir,'*_star-rm.fits')} {tmp_masks_dir}", capture_output = capture_output)
@@ -342,24 +364,67 @@ if __name__ == "__main__":
         if len(output_folders) != len(star_masks):
             
             print("The temp directory has a different number of star masks than the number of output directories.") 
-            need_masks_dir = pj(tmp_dir, "need_masks")
-            if not exists(need_masks_dir):
-                os.mkdir(need_masks_dir)
                 
+            print("Getting things ready to generate star masks...")
             galaxy_folder_names = [os.path.basename(i.rstrip("/")) for i in output_folders]
             star_mask_names = [os.path.basename(i) for i in star_masks]
-                  
-            for gname in galaxy_folder_names:
-                star_mask_filename = f"{gname}_star-rm.fits"
-                if star_mask_filename not in star_mask_names:
-                    try:
-                        shutil.copy2(pj(in_dir, f"{gname}.fits"), need_masks_dir)
-                    except FileNotFoundError:
-                        print(f"Could not find {gname} in {in_dir}. Continuing...")
-                else:
-                    # To remove extras, print out the rest of this list
-                    star_mask_names.remove(star_mask_filename)
+            
+            if slurm:
+                slurm_copy_input = "slurm_copy_inputs"
+                if exists(slurm_copy_input):
+                    _ = sp(f"rm {slurm_copy_input}", capture_output = capture_output)
+
+                _ = sp(f"touch {slurm_copy_input}", capture_output = capture_output)
+
+                sci = open(slurm_copy_input, "a")
+                
+            # TODO: Could also tar then transfer(?)
+            if len(in_need_masks) + len(star_mask_names) != len(output_folders):
+                print("Copying input galaxies without masks to 'need_masks' in tmp folder")
+                for gname in galaxy_folder_names:
+                    star_mask_filename = f"{gname}_star-rm.fits"
+                    in_file = f"{gname}.fits"
+                    cp_cmd = f"cp -uv {pj(in_dir, in_file)} {need_masks_dir}"
+
+                    if in_file in in_need_masks:
+                        continue
                     
+                    # This is probably unecessary but keeping just in case
+                    elif in_file.split(".fits")[0] not in galaxy_folder_names:
+                        _ = sp(f"rm -f {pj(need_masks_dir, in_file)}", capture_output = capture_output)
+
+                    elif star_mask_filename not in star_mask_names:
+
+                        if slurm:
+                            cp_cmd += "\n"
+                            sci.write(cp_cmd)
+
+                        else:
+                            try:
+                                shutil.copy2(pj(in_dir, in_file), need_masks_dir)
+                            except FileNotFoundError:
+                                print(f"Could not find {gname} in {in_dir}. Continuing...")
+                            #result = sp(f"cp -u {pj(need_masks_dir, in_file)}", capture_output = True)
+                            # if result.stderr:
+                            #     print(f"Could not find {gname} in {in_dir}, {result.stderr}. Continuing...")
+                    else:
+                        # To remove extras, print out the rest of this list
+                        star_mask_names.remove(star_mask_filename)
+                        _ = sp(f"rm -f {pj(need_masks_dir, in_file)}", capture_output = capture_output)
+
+                if slurm:
+                    sci.close()
+
+                    extra_slurm = ""
+                    if verbose:
+                        extra_slurm = "-v"
+
+                    slurm_run_name = "COPYING_INPUT_FILES"
+                    slurm_run_cmd = f"cat {slurm_copy_input} | {pipe_to_slurm_cmd} {slurm_run_name} -M all {extra_slurm}"
+                    # Running without timeout for now
+                    print("Performing the copy with slurm...")
+                    _ = sp(f"{slurm_run_cmd}", capture_output = capture_output)
+                
             print("Generating starmasks...")
             os.chdir(star_removal_path)
             out_text = sp(f"python3 {pj(star_removal_path, 'remove_stars_with_sextractor.py3')} {need_masks_dir} {tmp_masks_dir}", capture_output = capture_output)
@@ -402,14 +467,21 @@ if __name__ == "__main__":
 # In[ ]:
 
 
-def write_to_slurm(cwd, kwargs_main, galfit_script_name = pj(_MODULE_DIR, "go_go_galfit.py"), slurm_file = pj(cwd, "slurm_cmd_file")):
+def write_to_slurm(cwd, 
+                   kwargs_main, 
+                   galfit_script_name = pj(_MODULE_DIR, "go_go_galfit.py"), 
+                   slurm_file = pj(cwd, "slurm_cmd_file"),
+                   chunk_size = 10
+                  ):
     _, _, run_python = go_go_galfit.check_programs()
     kwargs_in        = deepcopy(kwargs_main)
     
     print(f"Generating distrib-slurm input file in {cwd}: {slurm_file}")
     with open(pj(cwd, slurm_file), "w") as scf:
-        for gname in kwargs_main["galaxy_names"]:
-            kwargs_in["galaxy_names"] = gname
+        #for gname in kwargs_main["galaxy_names"]:
+        for i, chunk in enumerate(range(chunk_size, len(kwargs_main["galaxy_names"]) +  chunk_size, chunk_size)):
+            chunk_o_galaxies = kwargs_main["galaxy_names"][chunk - chunk_size:][:chunk_size]
+            kwargs_in["galaxy_names"] = ",".join(chunk_o_galaxies)
 
             cmd_str = ""
             for k,v in kwargs_in.items():
@@ -474,8 +546,10 @@ if __name__ == "__main__":
                    "out_dir"        : out_dir,
                    "num_steps"      : num_steps,
                    "rerun"          : rerun,
+                   "slurm"          : slurm,
                    "verbose"        : verbose,
                    "capture_output" : capture_output,
+                   # THIS MUST BE LAST FOR SENDING SEVERAL TO SLURM
                    "galaxy_names"   : galaxy_names
                   }
     
@@ -493,13 +567,13 @@ if __name__ == "__main__":
         #print("Piping to slurm")
         print(f"{len(kwargs_main['galaxy_names'])} galaxies")
         slurm_run_name = "GALFITTING"
-        timeout = 15 # Minutes
+        timeout = 29 # Minutes
         
         extra_slurm = ""
         if verbose:
             extra_slurm = "-v"
             
-        slurm_run_cmd = f"cat {slurm_file} | ~wayne/bin/distrib_slurm {slurm_run_name} -M all --ntasks-per-core=10 {extra_slurm}"
+        slurm_run_cmd = f"cat {slurm_file} | {pipe_to_slurm_cmd} {slurm_run_name} -M all {extra_slurm}"
         
         if not restart:
             write_to_slurm(cwd, kwargs_main, slurm_file = slurm_file)
@@ -584,19 +658,20 @@ gaussj: Singular Matrix-1
 
 if __name__ == "__main__":
     print("Done! Cleaning up...")
-    _ = sp("rm galfit.* fit.log", capture_output = capture_output) # , capture_output = False)
-    _ = sp("rm *.png", capture_output = capture_output) # , capture_output = False)
+    _ = sp("rm galfit.* fit.log", capture_output = capture_output)
+    _ = sp("rm *.png", capture_output = capture_output)
     
     # We use the negative of remove slurm because we want cleanup to be the default
     if slurm and not dont_remove_slurm:
         _ = sp(f"rm -r \"$HOME/SLURM_turds/{slurm_run_name}\"", capture_output = capture_output)
-        _ = sp(f"rm {slurm_file}", capture_output = capture_output) # , capture_output = False)
+        _ = sp(f"rm {slurm_file}", capture_output = capture_output)
+        _ = sp(f"rm {slurm_copy_input}", capture_output = capture_output)
         
     # Moving back to original directory
     os.chdir(old_cwd)
 
 
-# In[5]:
+# In[35]:
 
 
 if __name__ == "__main__":
