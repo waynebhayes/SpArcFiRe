@@ -83,16 +83,18 @@ def main(**kwargs):
     # Of course the important things
     num_steps = int(kwargs.get("num_steps", 2))
     rerun     = kwargs.get("rerun", "")
+    slurm     = kwargs.get("slurm", False)
     
     # For verbosity, default to capturing output
     # Keep both for clarity
     verbose        = kwargs.get("verbose", False)
     capture_output = kwargs.get("capture_output", True)
     
-    # If slurm, this will be a single filename
-    galaxy_names = kwargs.get("galaxy_names", [])
-    if isinstance(galaxy_names, str):
-        galaxy_names = [galaxy_names]
+    # Feeding in as comma separated galaxies
+    # If single galaxy, this returns a list containing just the one galaxy
+    galaxy_names = kwargs.get("galaxy_names", []).split(",")
+    # if isinstance(galaxy_names, str):
+    #     galaxy_names = [galaxy_names]
     #assert isinstance(galaxy_names, list), "input_filenames must be a list, even if it's a single galaxy."
     
     # This PITA brought to you by running things in the notebook environment
@@ -103,12 +105,12 @@ def main(**kwargs):
     
     # We could chunk this up for slurm but since Wayne's script 
     # automatically distributes processes, we don't have to worry about it
-    # Also this way we can take in one less variable (slurm)
-    gname = ""
-    slurm = False
-    if len(galaxy_names) == 1:
-        gname = galaxy_names[0]
-        slurm = True
+    # Deprecated
+    # gname = ""
+    # slurm = False
+    # if len(galaxy_names) == 1:
+    #     #gname = galaxy_names[0]
+    #     slurm = True
         
     print("Running feedme generator...")
     feedme_info = write_to_feedmes(top_dir = cwd,
@@ -223,7 +225,7 @@ def main(**kwargs):
             # for debugging
             #print(final_out_text)
             print()
-            failed.append(gname)
+            #failed.append(gname)
             continue
         
         fitspng_param = "0.25,1" #1,150"
