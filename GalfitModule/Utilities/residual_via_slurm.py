@@ -1,16 +1,10 @@
 import numpy as np
 import astropy as ap
-# import pandas as pd
 from astropy.io import fits
 
-# from math import ceil
-
-#import glob
 import os
-import argparse
 
 from os.path import join as pj
-from os.path import abspath as absp
 
 import pickle
 from joblib import Parallel, delayed
