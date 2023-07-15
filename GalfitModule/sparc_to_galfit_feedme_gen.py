@@ -13,7 +13,7 @@
 # 
 # TO RUN: `python3 sparc_to_galfit_feedme_gen.py`
 
-# In[2]:
+# In[7]:
 
 
 import numpy as np
@@ -28,7 +28,7 @@ from copy import deepcopy
 from astropy.io import fits
 
 
-# In[3]:
+# In[8]:
 
 
 # For debugging purposes
@@ -42,7 +42,7 @@ def in_notebook():
         return False
 
 
-# In[4]:
+# In[9]:
 
 
 import sys
@@ -233,7 +233,13 @@ def galaxy_information(galaxy_name, galaxy_path):
                     ]
     
     try:
-        csv_filename = path_join(galaxy_path, galaxy_name, '.csv') # Changing to csv to be consistent
+        # Using this for the *big* runs because *somebody* (Wayne)
+        # didn't validate and overwrite the original csv's to include CR (crop radius)
+        csv_CR = path_join(galaxy_path, galaxy_name, '.csv+CR')
+        csv_filename = path_join(galaxy_path, galaxy_name, '.csv')
+        if exists(csv_CR):
+            csv_filename = csv_CR
+            
         csv_file = open(csv_filename, 'r')
         
     except:
@@ -767,7 +773,7 @@ if __name__ == "__main__":
     #write_to_feedmes(top_dir = cwd)
 
 
-# In[6]:
+# In[10]:
 
 
 if __name__ == "__main__":
