@@ -21,6 +21,8 @@ from Classes.Containers import *
 from Functions.helper_functions import *
 from sparc_to_galfit_feedme_gen import *
 
+import star_removal.remove_stars_with_sextractor as remove_stars_with_sextractor
+
 def check_programs():
 
     # This seems to work in Python directly so I'm leaving it as-is
@@ -90,10 +92,14 @@ def main(**kwargs):
     verbose        = kwargs.get("verbose", False)
     capture_output = kwargs.get("capture_output", True)
     
+    # For generating starmasks per galaxy
+    generate_starmasks = kwargs.get("generate_starmasks", True)
+    
     # Feeding in as comma separated galaxies
     # If single galaxy, this returns a list containing just the one galaxy
-    galaxy_names = kwargs.get("galaxy_names", []).split(",")
-    # if isinstance(galaxy_names, str):
+    galaxy_names = kwargs.get("galaxy_names", [])
+    if isinstance(galaxy_names, str):
+        galaxy_names = galaxy_names.split(",")
     #     galaxy_names = [galaxy_names]
     #assert isinstance(galaxy_names, list), "input_filenames must be a list, even if it's a single galaxy."
     
@@ -111,6 +117,15 @@ def main(**kwargs):
     # if len(galaxy_names) == 1:
     #     #gname = galaxy_names[0]
     #     slurm = True
+    
+    if generate_starmasks:
+        print("Generating Starmasks")
+        
+        # I think we have to change path for source extractor
+        star_removal_path = pj(_MODULE_DIR, "star_removal")
+        os.chdir(star_removal_path)
+        remove_stars_with_sextractor.main(in_dir, pj(tmp_dir, "galfit_masks"), galaxy_names)
+        os.chdir(cwd)
         
     print("Running feedme generator...")
     feedme_info = write_to_feedmes(top_dir = cwd,

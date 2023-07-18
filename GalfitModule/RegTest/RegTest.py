@@ -181,14 +181,14 @@ if __name__ == "__main__":
     # Run control script!
     ctrl_script = pj(_MODULE_DIR, "control_script.py")
     print("Running GALFIT with single-step fitting (capturing output)...")
-    result = sp(f"python3 {ctrl_script} -NS 1 {in_dir} {tmp_dir} {out_dir}")
+    result = sp(f"python3 {ctrl_script} -s -NS 1 {in_dir} {tmp_dir} {out_dir}")
     
     if verbose:
         print(result.stdout)
         print(result.stderr)
     
     print("Running GALFIT with default two-step fitting (capturing output)...")
-    result = sp(f"python3 {ctrl_script} {in_dir} {tmp_dir} {out_dir}")
+    result = sp(f"python3 {ctrl_script} -s {in_dir} {tmp_dir} {out_dir}")
     
     # try:
     #     shutil.move(pj(os.getcwd(), "galfit_failed.txt"), TEST_OUTPUT_DIR)
@@ -270,9 +270,10 @@ if __name__ == "__main__":
                 print(result.stderr)
         
             if result.stdout:
+                # Deprecated choice
                 # Carve a special exception for 1237655463239155886 since we randomize the spin parity
-                if result.stdout.split("\n")[0] == "60c60" and gname == "1237655463239155886":
-                    continue
+                #if result.stdout.split("\n")[0] == "60c60" and gname == "1237655463239155886":
+                #    continue
                     
                 print(f"Diff check for {gname}{suffix} failed!")
                 fail_count += 1

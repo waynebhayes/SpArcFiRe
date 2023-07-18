@@ -70,28 +70,36 @@ def restore_padding(img, pad_amts):
     return img
 
 def gen_sextractor_segmentation(in_filepath, tmp_catalog_filepath, tmp_seg_filepath):
+    # Hardcoding this
+    sextractor_configfile = "star_rm.sex"
+    
     logger.info("running SExtractor")
     sextractor_args = ['sex', in_filepath, #['source-extractor', in_filepath, #'sex', in_filepath,
-	    '-c', sextractor_configfile, 
-	    '-CHECKIMAGE_TYPE', 'SEGMENTATION',
-	    '-CHECKIMAGE_NAME', tmp_seg_filepath,
-	    '-CATALOG_NAME', tmp_catalog_filepath]
+                       '-c', sextractor_configfile, 
+                       '-CHECKIMAGE_TYPE', 'SEGMENTATION',
+                       '-CHECKIMAGE_NAME', tmp_seg_filepath,
+                       '-CATALOG_NAME', tmp_catalog_filepath
+                      ]
     try:
         proc = subprocess.Popen(sextractor_args, stderr=subprocess.STDOUT)
         proc.communicate()
         logger.info("SExtractor finished")
+        
     except OSError as ose:
-      logger.error("Sextractor call failed: {0}".format(ose))
-      logger.info("Sextractor was called with: {0}".format(
-              " ".join(sextractor_args)))
-      logger.info("Check that Sextractor is available on this system.")
-      return None
+        logger.error("Sextractor call failed: {0}".format(ose))
+        logger.info("Sextractor was called with: {0}".format(
+                    " ".join(sextractor_args))
+                   )
+        logger.info("Check that Sextractor is available on this system.")
+        return None
+    
     except subprocess.CalledProcessError as cpe:
         logger.error("Sextractor call failed")
         logger.info("SExtractor output follows: \n{0}".format(
             cpe.output))
         logger.warning("output not produced for {0}".format(in_filename))
         return None
+    
     logger.info("reading input and SExtractor-segmentation images")
     seg_img = fits.getdata(tmp_seg_filepath)
     return seg_img.astype(int)
@@ -383,13 +391,8 @@ def create_star_mask_ctrcontig(seg_img, ctr_r, ctr_c):
 
 # "/home/darren/Dropbox/GalaxyParser/test-data/star-removal/" test_out
 # /mnt/share/in /mnt/share/out
-if __name__ == '__main__':
-    if len(sys.argv) != 3:
-        print("usage: remove_stars_with_sextractor in_dir out_dir")
-        sys.exit()
-    
-    in_dirpath = sys.argv[1]
-    out_dirpath = sys.argv[2]
+
+def main(in_dirpath, out_dirpath, galaxy_names = []):
     
     keep_seg_img = False
     
@@ -418,6 +421,7 @@ if __name__ == '__main__':
             sys.stderr.write(errmsg + '\n')
             logger.fatal(errmsg)
             sys.exit(1)
+            
         else:
             logger.warning("output directory already exists {0}".format(
                 out_dirpath))
@@ -437,27 +441,37 @@ if __name__ == '__main__':
     
     random.seed()
     tmpdir = os.path.join(out_dirpath, "star-rm_tmp_{0:09d}".format(
-        random.randrange(1, 999999999)))
+                          random.randrange(1, 999999999))
+                         )
     if os.path.exists(tmpdir):
         errmsg = "temporary directory {0} already exists".format(tmpdir)
         sys.stderr.write(errmsg + '\n')
         logger.error(errmsg)
         sys.exit(1)
+        
     else:
         os.mkdir(tmpdir)
         logger.info("created temporary directory: {0}".format(tmpdir))
+        
 #    tmp_seg_filepath = os.path.join(tmpdir, "segmentation.fits")
     tmp_catalog_filepath = os.path.join(tmpdir, 'tmp_sextractor_out.cat')
     
-    flist = [fname for fname in os.listdir(in_dirpath) 
-        if fname.endswith(".fits")]
+    fits_suffix = '.fits'
+    
+    if galaxy_names:
+        flist = [f"{i}{fits_suffix}" for i in galaxy_names]
+    else:
+        flist = [fname for fname in os.listdir(in_dirpath) 
+                 if fname.endswith(fits_suffix)]
+    
     logger.info("found {0} FITS files in {1}".format(len(flist), in_dirpath))
     
-    fits_suffix = '.fits'
+    
     for in_filename in flist:
         try:
             in_imgname = in_filename[:-len(fits_suffix)]
             logger.info("processing: {0}".format(in_filename))
+            
             in_filepath = os.path.join(in_dirpath, in_filename)
             sex_in_filepath = in_filepath
             
@@ -466,38 +480,54 @@ if __name__ == '__main__':
             
             in_img = fits.getdata(in_filepath)
             logger.info('input image dimensions: {0}'.format(in_img.shape))
+            
             tmp_depad_imgpath = None
             (depad_img, removed_padding) = remove_padding(in_img)
+            
             ctr_r = int(np.round(in_img.shape[0]/2))
             ctr_c = int(np.round(in_img.shape[1]/2))
+            
             if removed_padding:
                 logger.warning("padding found in the input image")
                 tmp_depad_imgpath = os.path.join(tmpdir, 
                     in_filename[:-len(fits_suffix)] + "_depadded.fits")
+                
                 fits.writeto(tmp_depad_imgpath, depad_img)
+                
                 logger.info("created a de-padded image for SExtractor to use")
+                
                 sex_in_filepath = tmp_depad_imgpath
                 ctr_r = ctr_r - removed_padding[0][0]
                 ctr_c = ctr_c - removed_padding[1][0]
                 ctr_r = int(round(ctr_r))
                 ctr_c = int(round(ctr_c))
+                
             logger.info('segmentation image dimensions (depadded): {0}'.format(
                 depad_img.shape))
+            
             seg_img = gen_sextractor_segmentation(sex_in_filepath, 
-                tmp_catalog_filepath, tmp_seg_filepath)
+                                                  tmp_catalog_filepath, 
+                                                  tmp_seg_filepath
+                                                 )
+            
             if removed_padding:
                 os.remove(tmp_depad_imgpath)
                 logger.info("removed temporary de-padded image")
+                
             if not keep_seg_img:
                 try:
                     os.remove(tmp_seg_filepath)
                 except:
                     logger.info("not able to remove segmentation image")
                 logger.info("removed segmentation image")
+                
             if seg_img is None:
                 continue
-            (star_mask, star_mask_aggressive, isobj) = create_star_mask(
-                seg_img, ctr_r, ctr_c)
+                
+            (star_mask, star_mask_aggressive, isobj) = create_star_mask(seg_img, 
+                                                                        ctr_r, 
+                                                                        ctr_c
+                                                                       )
             mask_levels = np.zeros(star_mask.shape)
             galfit_mask_levels = np.zeros(star_mask.shape)
             
@@ -529,12 +559,32 @@ if __name__ == '__main__':
                 #fits.writeto(out_filepath + '_star-mask-aggressive.fits', depad_img * star_mask_aggressive)
                 
                 logger.info("wrote {0}".format(out_filepath))
-                
-            imageio.imwrite(os.path.join(out_dirpath, in_imgname + '_starmask.png'), mask_levels)
+             
+            # For GalfitModule, this is uneccessary. 
+            #imageio.imwrite(os.path.join(out_dirpath, in_imgname + '_starmask.png'), mask_levels)
+            
         except Exception as e:
             logger.warning("could not create starmask for " + in_imgname)
             logger.warning(e)
             continue
-if not keep_seg_img:
-    shutil.rmtree(tmpdir)
-    logger.info("removed temporary directory: {0}".format(tmpdir))
+            
+    if not keep_seg_img:
+        shutil.rmtree(tmpdir)
+        logger.info("removed temporary directory: {0}".format(tmpdir))
+        
+    if __name__ == '__main__':
+        
+        if len(sys.argv) < 3:
+            print("usage: remove_stars_with_sextractor in_dir out_dir [galaxy_names,]")
+            sys.exit()
+            
+        in_dir  = sys.argv[1]
+        out_dir = sys.argv[2]
+        
+        galaxy_names = []
+        try:
+            galaxy_names = sys.argv[3:].split(",")
+        except IndexError:
+            pass
+        
+        _ = main(in_dir, out_dir, galaxy_names)
