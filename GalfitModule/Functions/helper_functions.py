@@ -119,7 +119,7 @@ def sp(cmd_str, capture_output = True, timeout = None):
                           executable="/bin/bash")
 
 
-# In[7]:
+# In[38]:
 
 
 def find_files(search_dir = ".", search_pattern = "*", filetype = "f"):
@@ -130,19 +130,19 @@ def find_files(search_dir = ".", search_pattern = "*", filetype = "f"):
     elif filetype in ("f", "file"):
         type_cmd = "f"
         
-    result = sp(f"find {pj(search_dir, search_pattern)} -maxdepth 0 -type {filetype}")
+    result = sp(f"find {pj(search_dir)} -maxdepth 1 -type {filetype} -name \"{search_pattern}\"")
     
     return [os.path.basename(i) for i in result.stdout.split("\n") if i]
 
 
-# In[8]:
+# In[39]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[9]:
+# In[40]:
 
 
 # Unit test for sp
@@ -166,7 +166,7 @@ if __name__ == "__main__":
         raise(Exception())
 
 
-# In[10]:
+# In[43]:
 
 
 # Unit test for list_files
@@ -177,7 +177,7 @@ if __name__ == "__main__":
     print(find_files(pj(TEST_DATA_DIR, "test-out"), "123*", "d"))
 
 
-# In[11]:
+# In[17]:
 
 
 if __name__ == "__main__":
