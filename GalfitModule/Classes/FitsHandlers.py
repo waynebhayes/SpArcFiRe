@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[1]:
 
 
 import os
@@ -19,7 +19,7 @@ import scipy.linalg as slg
 from scipy.stats import norm
 
 
-# In[ ]:
+# In[2]:
 
 
 # For debugging purposes
@@ -33,7 +33,7 @@ def in_notebook():
         return False
 
 
-# In[ ]:
+# In[3]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -61,7 +61,7 @@ from Classes.Components import *
 from Classes.Containers import *
 
 
-# In[ ]:
+# In[4]:
 
 
 class HDU:
@@ -88,7 +88,7 @@ class HDU:
         return output_str
 
 
-# In[ ]:
+# In[5]:
 
 
 class FitsFile:
@@ -266,7 +266,7 @@ class FitsFile:
             setattr(self, key, value)
 
 
-# In[ ]:
+# In[6]:
 
 
 class OutputFits(FitsFile):
@@ -334,12 +334,12 @@ class OutputFits(FitsFile):
             
             obs_model = 1 - np.divide(
                                 crop_mask*self.observation.data/self.norm_observation, 
-                                crop_mask*self.model.data/(self.norm_model + small_number)
+                                crop_mask*self.model.data/self.norm_model + small_number
                                      )
 
             model_obs = 1 - np.divide( 
                                 crop_mask*self.model.data/self.norm_model,
-                                crop_mask*self.observation.data/(self.norm_observation + small_number)
+                                crop_mask*self.observation.data/self.norm_observation + small_number
                                      )
             # Replace negative values with 1 - reciprocal
             self.masked_residual_ratio = np.where(obs_model >= 0, obs_model, model_obs)
@@ -358,14 +358,14 @@ class OutputFits(FitsFile):
         return self.masked_residual_normalized
 
 
-# In[ ]:
+# In[7]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[ ]:
+# In[8]:
 
 
 # Testing from_file
@@ -414,7 +414,7 @@ if __name__ == "__main__":
     print(np.shape(test_obs.observation.data))
 
 
-# In[ ]:
+# In[9]:
 
 
 # Unit test to check value of masked residual
@@ -429,7 +429,7 @@ if __name__ == "__main__":
     #print(np.min(test_model.observation.data))
 
 
-# In[ ]:
+# In[10]:
 
 
 if __name__ == "__main__":
