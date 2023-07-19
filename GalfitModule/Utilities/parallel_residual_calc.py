@@ -42,86 +42,6 @@ from Classes.FitsHandlers import *
 from Functions.helper_functions import *
 
 import go_go_galfit
-
-if __name__ == "__main__":
-    run_dir = os.getcwd()
-
-    #in_dir = pj(_HOME_DIR, "29k_galaxies_obs")
-    #run_dir = pj(_HOME_DIR, "29k_galaxies")
-    # in_dir  = "sparcfire-in"
-    # tmp_dir = "sparcfire-tmp"
-    # out_dir = "sparcfire-out"
-    #galfits_tmp = "galfits"
-    #galfit_masks = "galfit_masks"
-    #galfit_out = "all_galfit_out"
-    #nmr = "norm_masked_residual"
-    
-    parser = argparse.ArgumentParser()#description = USAGE)
-    
-    parser.add_argument('-n', '--name',
-                        dest     = 'name',
-                        action   = 'store',
-                        required = True, 
-                        help     = 'Name of the run (for save file).')
-    
-    parser.add_argument('--no-slurm',
-                        dest     = 'slurm',
-                        action   = 'store_const',
-                        const    = False,
-                        # Soon to be the other way around
-                        default  = True,
-                        help     = 'Run GALFITs using Slurm.')
-
-    parser.add_argument('-drS', '--dont-remove-slurm',
-                        dest     = 'dont_remove_slurm',
-                        action   = 'store_const',
-                        const    = True,
-                        default  = False,
-                        help     = 'Choose NOT to remove all old slurm files (they may contain basic info about each fit but there will be a bunch!)')
-    
-    parser.add_argument('-r', '--restart',
-                        dest     = 'restart', 
-                        action   = 'store_const',
-                        const    = True,
-                        default  = False,
-                        help     = 'Restart script on the premise that some have already run (likely with SLURM).')
-    
-    parser.add_argument('-v', '--verbose',
-                        dest     = 'verbose', 
-                        action   = 'store_const',
-                        const    = True,
-                        default  = False,
-                        help     = 'Verbosity.')
-
-    parser.add_argument(dest     = 'paths',
-                        nargs    = "*",
-                        type     = str,
-                        help     = "IN-DIRECTORY TMP-DIRECTORY OUT-DIRECTORY from SpArcFiRe. \
-                                    Must follow -in, -tmp, out or this won't work.")
-    
-    args = parser.parse_args() # Using vars(args) will call produce the args as a dict
-    name = args.name
-    slurm = args.slurm
-    dont_remove_slurm = args.dont_remove_slurm
-    restart = args.restart
-    verbose = args.verbose
-    
-    if len(args.paths) == 3:
-            in_dir, tmp_dir, out_dir = args.paths[0], args.paths[1], args.paths[2]
-            #print(f"Paths are, {in_dir}, {tmp_dir}, {out_dir}")
-    else:
-        in_dir = pj(run_dir, "sparcfire-in")
-        tmp_dir = pj(run_dir, "sparcfire-tmp")
-        out_dir = pj(run_dir, "sparcfire-out")
-
-        print(f"Paths incorrectly specified, defaulting to (in, tmp, out)...")
-        print(f"{in_dir}\n{tmp_dir}\n{out_dir}")
-        print()
-        
-    #in_dir = pj(_HOME_DIR, "29k_galaxies_obs")
-    in_dir  = absp(in_dir)
-    tmp_dir = absp(tmp_dir)
-    out_dir = absp(out_dir)
     
 # ==================================================================================================================
 
@@ -181,14 +101,31 @@ def parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_png_dir, all_gname_t
                                          slurm = slurm
                                         )
                    for count, gname in enumerate(all_gname_tmp_out) if not gname.startswith("failed")
-                                              )
+                                    )
     return out_nmr
 
 # ==================================================================================================================
-if __name__ == "__main__":
+def main(**kwargs):
     
-    final_pkl_file = f'{pj(run_dir, name)}_output_nmr.pkl'
-    if exists(final_pkl_file):
+    # Dirs and name of the run for which the calculation was done
+    run_dir       = kwargs.get("run_dir", os.getcwd())
+    #in_dir        = kwargs.get("in_dir", pj(run_dir, "sparcfire-in"))
+    tmp_dir       = kwargs.get("tmp_dir", pj(run_dir, "sparcfire-tmp"))
+    out_dir       = kwargs.get("out_dir", pj(run_dir, "sparcfire-out"))
+    basename      = kwargs.get("basename", "GALFIT")
+    
+    # Of course the important things
+    slurm             = kwargs.get("slurm", False)
+    dont_remove_slurm = kwargs.get("dont_remove_slurm", False)
+    restart           = kwargs.get("restart", False)
+    
+    # For verbosity, default to capturing output
+    # Keep both for clarity
+    verbose        = kwargs.get("verbose", False)
+    capture_output = kwargs.get("capture_output", True)
+    
+    final_pkl_file = f'{pj(run_dir, basename)}_output_nmr.pkl'
+    if not slurm and exists(final_pkl_file):
         ans = input(f"Do you wish to delete the current final output nmr pickle file? Y/N\n{final_pkl_file}\n")
         if ans.upper() == "Y":
             _ = sp(f"rm -f {final_pkl_file}")
@@ -211,6 +148,7 @@ if __name__ == "__main__":
     if slurm and chunk_size > len(all_gname_tmp_out)*0.5:
         print("No need to slurm!")
         out_nmr = parallel_wrapper(galfit_tmp_path, galfit_mask_path, None, all_gname_tmp_out, slurm = False)
+        slurm = False
         
     elif slurm:
         _, _, run_python = go_go_galfit.check_programs()
@@ -221,14 +159,26 @@ if __name__ == "__main__":
         slurm_options  = "-M all"
         slurm_verbose  = "-v" if verbose else ""
         
+        finished_pkl_num = 0
+        if restart:
+            finished_pkl_num = max(
+                                   [int(os.path.basename(i).replace(basename, "")) 
+                                    for i in glob.glob(pj(run_dir, f'{basename}*_output_nmr.pkl'))
+                                   ]
+                                  )
+        
         with open(slurm_file, "w") as sf:
             for i, chunk in enumerate(range(chunk_size, len(all_gname_tmp_out) +  chunk_size, chunk_size)):
+                if i < finished_pkl_num:
+                    continue
+                    
                 gal_to_slurm = all_gname_tmp_out[chunk - chunk_size:][:chunk_size]
-                sf.write(f"{run_python} {python_slurm} {pj(run_dir, name + str(i))} {galfit_tmp_path} {galfit_mask_path} {out_png_dir} {','.join(gal_to_slurm)}\n")
+                #num_str = f"{i:0>3}"
+                sf.write(f"{run_python} {python_slurm} {pj(run_dir, basename + str(i))} {galfit_tmp_path} {galfit_mask_path} {out_png_dir} {','.join(gal_to_slurm)}\n")
                 
         print("Slurming")
         slurm_run_cmd = f"cat {slurm_file} | {run_slurm} {slurm_run_name} {slurm_options} {slurm_verbose}"
-        completed = sp(slurm_run_cmd, capture_output = not verbose)
+        completed = sp(slurm_run_cmd, capture_output = capture_output)
         
         # TODO: Add check if not on Slurm capable machine
         if completed.stderr:
@@ -236,7 +186,7 @@ if __name__ == "__main__":
             # Rerun out_nmr
         
         else:
-            all_output_pkl = glob.glob(pj(run_dir, f'{name}*_output_nmr.pkl'))
+            all_output_pkl = glob.glob(pj(run_dir, f'{basename}*_output_nmr.pkl'))
             for file in all_output_pkl:
                 out_nmr.extend(pickle.load(open(file, 'rb')))
 
@@ -253,17 +203,113 @@ if __name__ == "__main__":
     #                                               )
     
     # In the future, drop this in out_dir
-    pickle_filename_temp = f'{pj(run_dir, name)}_output_nmr_final.pkl'
+    pickle_filename_temp = f'{pj(run_dir, basename)}_output_nmr_final.pkl'
     pickle.dump(out_nmr, open(pickle_filename_temp, 'wb'))
     
     if not dont_remove_slurm and slurm:
-        _ = sp(f"rm -r \"$HOME/SLURM_turds/{slurm_run_name}\"", capture_output = not verbose)
-        _ = sp(f"rm -f {pj(run_dir, name)}*_output_nmr.pkl", capture_output = not verbose)
-        _ = sp(f"rm -f {slurm_file}", capture_output = not verbose)
+        _ = sp(f"rm -r \"$HOME/SLURM_turds/{slurm_run_name}\"", capture_output = capture_output)
+        _ = sp(f"rm -f {pj(run_dir, basename)}*_output_nmr.pkl", capture_output = capture_output)
+        _ = sp(f"rm -f {slurm_file}", capture_output = capture_output)
         
-    pickle_filename = f'{pj(run_dir, name)}_output_nmr.pkl'
-    _ = sp(f"mv {pickle_filename_temp} {pickle_filename}", capture_output = not verbose)
+    pickle_filename = f'{pj(run_dir, basename)}_output_nmr.pkl'
+    _ = sp(f"mv {pickle_filename_temp} {pickle_filename}", capture_output = capture_output)
 
         #output_fits_dict = dict(zip(out_nmr))
 
+if __name__ == "__main__":
+    
+    run_dir = os.getcwd()
+
+    #in_dir = pj(_HOME_DIR, "29k_galaxies_obs")
+    #run_dir = pj(_HOME_DIR, "29k_galaxies")
+    # in_dir  = "sparcfire-in"
+    # tmp_dir = "sparcfire-tmp"
+    # out_dir = "sparcfire-out"
+    #galfits_tmp = "galfits"
+    #galfit_masks = "galfit_masks"
+    #galfit_out = "all_galfit_out"
+    #nmr = "norm_masked_residual"
+    
+    parser = argparse.ArgumentParser()#description = USAGE)
+    
+    parser.add_argument('-n', '--name',
+                        dest     = 'basename',
+                        action   = 'store',
+                        default  = 'GALFIT',
+                        #required = True, 
+                        help     = 'Name of the run (for save file).')
+    
+    parser.add_argument('--no-slurm',
+                        dest     = 'slurm',
+                        action   = 'store_const',
+                        const    = False,
+                        # Soon to be the other way around
+                        default  = True,
+                        help     = 'Run GALFITs using Slurm.')
+
+    parser.add_argument('-drS', '--dont-remove-slurm',
+                        dest     = 'dont_remove_slurm',
+                        action   = 'store_const',
+                        const    = True,
+                        default  = False,
+                        help     = 'Choose NOT to remove all old slurm files (they may contain basic info about each fit but there will be a bunch!)')
+    
+    parser.add_argument('-r', '--restart',
+                        dest     = 'restart', 
+                        action   = 'store_const',
+                        const    = True,
+                        default  = False,
+                        help     = 'Restart script on the premise that some have already run (likely with SLURM).')
+    
+    parser.add_argument('-v', '--verbose',
+                        dest     = 'verbose', 
+                        action   = 'store_const',
+                        const    = True,
+                        default  = False,
+                        help     = 'Verbosity.')
+
+    parser.add_argument(dest     = 'paths',
+                        nargs    = "*",
+                        type     = str,
+                        help     = "IN-DIRECTORY TMP-DIRECTORY OUT-DIRECTORY from SpArcFiRe. \
+                                    Must follow -in, -tmp, out or this won't work.")
+    
+    args = parser.parse_args() # Using vars(args) will call produce the args as a dict
+    basename = args.basename
+    slurm = args.slurm
+    dont_remove_slurm = args.dont_remove_slurm
+    restart = args.restart
+    verbose = args.verbose
+    
+    if len(args.paths) == 3:
+            in_dir, tmp_dir, out_dir = args.paths[0], args.paths[1], args.paths[2]
+            #print(f"Paths are, {in_dir}, {tmp_dir}, {out_dir}")
+    else:
+        in_dir = pj(run_dir, "sparcfire-in")
+        tmp_dir = pj(run_dir, "sparcfire-tmp")
+        out_dir = pj(run_dir, "sparcfire-out")
+
+        print(f"Paths incorrectly specified, defaulting to (in, tmp, out)...")
+        print(f"{in_dir}\n{tmp_dir}\n{out_dir}")
+        print()
+        
+    #in_dir = pj(_HOME_DIR, "29k_galaxies_obs")
+    # Don't actually need in_dir but to follow the structure of all the others...
+    #in_dir  = absp(in_dir)
+    tmp_dir = absp(tmp_dir)
+    out_dir = absp(out_dir)
+    
+    kwargs = {
+              #"in_dir"            : in_dir,
+              "tmp_dir"           : tmp_dir,
+              "out_dir"           : out_dir,
+              "basename"          : basename,
+              "slurm"             : slurm,
+              "dont_remove_slurm" : dont_remove_slurm,
+              "restart"           : restart,
+              "verbose"           : verbose,
+              "capture_output"    : not verbose
+             }
+    
+    main(**kwargs)
        

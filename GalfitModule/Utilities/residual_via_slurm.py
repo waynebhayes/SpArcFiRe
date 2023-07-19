@@ -29,7 +29,7 @@ import sys
 from parallel_residual_calc import parallel_wrapper
 
 if __name__ == "__main__":
-    name              = sys.argv[1]
+    basename          = sys.argv[1]
     galfit_tmp_path   = sys.argv[2]
     galfit_mask_path  = sys.argv[3]
     out_png_dir       = sys.argv[4]
@@ -38,5 +38,5 @@ if __name__ == "__main__":
     out_nmr = parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_png_dir, all_gname_tmp_out)
     
     # In the future, drop this in out_dir
-    pickle_filename = f'{name}_output_nmr.pkl'
+    pickle_filename = f'{basename}_output_nmr.pkl'
     pickle.dump(out_nmr, open(pickle_filename, 'wb'))
