@@ -62,6 +62,7 @@ sys.path.append(_MODULE_DIR)
 from Classes.Components import *
 from Classes.Containers import *
 from Functions.helper_functions import *
+import Utilities.parallel_residual_calc as parallel_residual_calc
 
 # This should give me numpy and pandas and whatnot
 # also gives this, from os.path import join as pj
@@ -121,6 +122,14 @@ if __name__ == "__main__":
                         help     = 'Choose NOT to remove all old slurm files (they may contain basic info about each fit but there will be a bunch!)'
                        )
     
+    parser.add_argument('-ac', '--aggressive-clean',
+                        dest     = 'aggressive_clean',
+                        action   = 'store_const',
+                        const    = True,
+                        default  = False,
+                        help     = 'Aggressively clean-up directories, removing .in files after galfit runs'
+                       )
+    
     parser.add_argument('-NS', '--num-steps',
                         dest     = 'steps', 
                         action   = 'store',
@@ -170,6 +179,8 @@ if __name__ == "__main__":
         num_steps         = args.steps
         slurm             = args.slurm
         dont_remove_slurm = args.dont_remove_slurm
+        aggressive_clean  = args.aggressive_clean
+        
         rerun             = args.rerun
         restart           = args.restart
         
@@ -292,10 +303,11 @@ if __name__ == "__main__":
     
     if not restart:
         # Remove old
-        try:
-            shutil.rmtree(tmp_fits_dir)
-        except OSError as e:
-            pass
+        _ = sp(f"rm -rf {tmp_fits_dir}", capture_output = capture_output)
+        # try:
+        #     shutil.rmtree(tmp_fits_dir)
+        # except OSError as e:
+        #     pass
 
     # Making sub-directories
     _ = [os.mkdir(i) for i in (tmp_fits_dir, 
@@ -324,7 +336,11 @@ if __name__ == "__main__":
     # output_folders  = glob.glob(pj(out_dir, "123*/"))
     # star_masks      = glob.glob(pj(tmp_dir, "*_star-rm.fits"))
     input_filenames = find_files(in_dir, "*.fits", "f")
-    output_folders  = find_files(out_dir, "123*", "d")
+    output_folders  = [i for i in find_files(out_dir, "*", "d") 
+                       if os.path.basename(i) != os.path.basename(out_dir) and
+                          os.path.basename(i) != "galfit_png"
+                      ]
+    
     star_masks      = find_files(tmp_dir, "*_star-rm.fits", "f")
     
     # The ONLY reason we need this is because of how remove_stars_with... works
@@ -568,6 +584,7 @@ if __name__ == "__main__":
                    "verbose"            : verbose,
                    "capture_output"     : capture_output,
                    "generate_starmasks" : generate_starmasks,
+                   "aggressive_clean"   : aggressive_clean,
                    # THIS MUST BE LAST FOR SENDING SEVERAL TO SLURM
                    "galaxy_names"       : galaxy_names
                   }
@@ -670,6 +687,31 @@ gaussj: Singular Matrix-1
    too small/big, Nuker powerlaw too small/big.  If frustrated or
    problem should persist, email for help or report problem to:
                      Chien.Y.Peng@gmail.com"""
+# ## Calculating Residuals
+
+# In[ ]:
+
+
+if __name__ == "__main__":
+    print("Calculating residuals")
+    parallel_residual_calc.main(run_dir           = cwd,
+                                # Don't actually need in_dir
+                                #in_dir            = in_dir,
+                                tmp_dir           = tmp_dir,
+                                out_dir           = out_dir,
+                                basename          = "GALFIT",
+                                slurm             = slurm,
+                                dont_remove_slurm = dont_remove_slurm,
+                                restart           = restart,
+                                verbose           = verbose,
+                                capture_output    = not verbose
+                               )
+    if aggressive_clean:
+        # May need to use find and delete
+        print("Aggressively cleaning, removing star masks.")
+        _ = sp(f"rm -rf {pj(tmp_masks_dir)} {pj(tmp_png_dir)}", capture_output = capture_output)
+
+
 # ## Tidying Up in case anything is leftover
 
 # In[ ]:
@@ -690,7 +732,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[14]:
+# In[ ]:
 
 
 if __name__ == "__main__":

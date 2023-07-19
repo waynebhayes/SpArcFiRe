@@ -95,6 +95,9 @@ def main(**kwargs):
     # For generating starmasks per galaxy
     generate_starmasks = kwargs.get("generate_starmasks", True)
     
+    # To aggressively free up space
+    aggressive_clean   = kwargs.get("aggressive_clean", False)
+    
     # Feeding in as comma separated galaxies
     # If single galaxy, this returns a list containing just the one galaxy
     galaxy_names = kwargs.get("galaxy_names", [])
@@ -288,6 +291,25 @@ def main(**kwargs):
         # therefore use the FitsHandler routines at run time.
         
         print()
+        
+    if aggressive_clean:
+        print("Aggressively cleaning... in, temp galfit output, and psf directories.")
+        to_del_in = (pj(in_dir, f"{gname}.fits") for gname in galaxy_names
+                     if exists(pj(in_dir, f"{gname}.fits"))
+                    )
+        # Need masks for residual calculation
+        to_del_tmp_fits  = (pj(tmp_dir, "galfits", f"{gname}_galfit_out.fits") for gname in galaxy_names
+                           if exists(pj(tmp_dir, "galfits", f"{gname}_galfit_out.fits"))
+                           )  
+        
+        to_del_psf_files = (pj(tmp_dir, "psf_files", f"{gname}_psf.fits") for gname in galaxy_names
+                            if exists(pj(tmp_dir, "psf_files", f"{gname}_psf.fits"))
+                           )
+        
+        #print(f"rm -rf {' '.join(to_del_in)} {' '.join(to_del_tmp_fits)} {' '.join(to_del_psf_files)}")
+        _ = sp(f"rm -rf {' '.join(to_del_in)} {' '.join(to_del_tmp_fits)} {' '.join(to_del_psf_files)}",
+               capture_output = capture_output
+              )
     
     return failed
         
