@@ -129,37 +129,44 @@ def command_line(top_dir = os.getcwd(), **kwargs): # = True):
 def get_galaxy_names_list(in_dir, tmp_dir, out_dir, galaxy_names = []):
 
     gnames_out = galaxy_names
-    try:
-        filenames_read = glob.glob(in_dir + "/*.fits") # Previously hardcoded
+#     try:
+#         #filenames_read = find_files(in_dir, "*.fits", "f")
     
-    #except:
-        # Feel free to hardcode this 
-        #print("Please input the full path to the input directory for the SpArcFiRe run and include the trailing /")
-        #print("e.g. /home/usr/sparcfire-in/")
-        #in_dir = input()
+#     #except:
+#         # Feel free to hardcode this 
+#         #print("Please input the full path to the input directory for the SpArcFiRe run and include the trailing /")
+#         #print("e.g. /home/usr/sparcfire-in/")
+#         #in_dir = input()
     
-        #try:
-            #filenames_in = glob.glob(in_dir + "*.fits")
+#         #try:
+#             #filenames_in = glob.glob(in_dir + "*.fits")
 
-        #except:
-            #print("See instructions above or check your directory path. Could not glob.")
-            #raise SystemExit("Exitting.")
+#         #except:
+#             #print("See instructions above or check your directory path. Could not glob.")
+#             #raise SystemExit("Exitting.")
     
-    except:
-        print("Please copy me into the directory which contains the folders for your")
-        print("input, temporary, and output files for SpArcFiRe denoted:")
-        print("sparcfire-in, sparcfire-tmp, and sparcfire-out.")
-        raise SystemExit("Exitting.")
+#     except:
+#         print("Please copy me into the directory which contains the folders for your")
+#         print("input, temporary, and output files for SpArcFiRe denoted:")
+#         print("sparcfire-in, sparcfire-tmp, and sparcfire-out.")
+#         raise SystemExit("Exitting.")
         
-    else:
-        if not gnames_out:
-            gnames_out  = [os.path.basename(s).split(".")[0] 
-                          for s in filenames_read 
-                          if exists(pj(out_dir, os.path.basename(s).split(".")[0]))]
-            
-        folders_out = [pj(out_dir, gname) for gname in gnames_out ]
+#     else:
+    if not gnames_out:
+        print("No galaxy names fed in. Finding them to generate feedmes.")
+    #     print("Something went wrong! No galaxies fed into feedme generator.")
+    #     print("Please copy me into the directory which contains the folders for your")
+    #     print("input, temporary, and output files for SpArcFiRe denoted:")
+    #     print("sparcfire-in, sparcfire-tmp, and sparcfire-out.")
+    #     raise SystemExit("Exitting.")
+        gnames_out  = [os.path.basename(s).replace(".fits", "")
+                       for s in find_files(in_dir, "*.fits", "f")
+                       if exists(pj(out_dir, os.path.basename(s).replace(".fits", "")))
+                      ]
+
+    folders_out = [pj(out_dir, gname) for gname in gnames_out]
         
-    return filenames_read, gnames_out, folders_out
+    return gnames_out, folders_out
 
 
 # In[9]:
@@ -585,8 +592,7 @@ def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwarg
     tmp_dir = kwargs.get("tmp_dir", tmp_dir)
     out_dir = kwargs.get("out_dir", out_dir)
     
-    galaxy_names = kwargs.get("galaxy_names", [])
-    _, galaxy_names, gfolders = get_galaxy_names_list(in_dir, tmp_dir, out_dir, galaxy_names = galaxy_names)
+    galaxy_names, gfolders = get_galaxy_names_list(in_dir, tmp_dir, out_dir, galaxy_names = kwargs.get("galaxy_names", []))
     
     psf_info = csv_sdss_info(galaxy_names)
     
@@ -773,7 +779,7 @@ if __name__ == "__main__":
     #write_to_feedmes(top_dir = cwd)
 
 
-# In[10]:
+# In[11]:
 
 
 if __name__ == "__main__":
