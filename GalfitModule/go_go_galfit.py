@@ -3,6 +3,7 @@ import sys
 import os
 from os.path import join as pj
 # from os.path import exists
+from astropy.io import fits
 
 _HOME_DIR = os.path.expanduser("~")    
 
@@ -20,23 +21,25 @@ from Classes.Components import *
 from Classes.Containers import *
 from Functions.helper_functions import *
 from sparc_to_galfit_feedme_gen import *
+from Utilities.parallel_residual_calc import fill_objects #, parallel_wrapper
 
 import star_removal.remove_stars_with_sextractor as remove_stars_with_sextractor
 
-def check_programs():
+# This is in helper_functions
+# def check_programs():
 
-    # This seems to work in Python directly so I'm leaving it as-is
-    # Checking galfit
-    run_galfit = shutil.which("galfit")
-    #run_galfit = response.stdout.strip()
+#     # This seems to work in Python directly so I'm leaving it as-is
+#     # Checking galfit
+#     run_galfit = shutil.which("galfit")
+#     #run_galfit = response.stdout.strip()
 
-    # Checking fitspng
-    run_fitspng   = shutil.which("fitspng")
+#     # Checking fitspng
+#     run_fitspng   = shutil.which("fitspng")
 
-    # Checking exact python3 call
-    run_python = shutil.which("python3")
+#     # Checking exact python3 call
+#     run_python = shutil.which("python3")
 
-    return run_galfit, run_fitspng, run_python
+#     return run_galfit, run_fitspng, run_python
 
 def rerun_galfit(galfit_output, base_galfit_cmd, *args):
     
@@ -72,19 +75,22 @@ def touch_failed_fits(gname, tmp_fits_dir):
 def main(**kwargs):
     
     # Main Directories
-    cwd       = kwargs.get("cwd", os.getcwd())
-    in_dir    = kwargs.get("in_dir", pj(cwd, "sparcfire-in"))
+    cwd       = kwargs.get("cwd"    , os.getcwd())
+    in_dir    = kwargs.get("in_dir" , pj(cwd, "sparcfire-in"))
     tmp_dir   = kwargs.get("tmp_dir", pj(cwd, "sparcfire-tmp"))
     out_dir   = kwargs.get("out_dir", pj(cwd, "sparcfire-out"))
     
     # Should some directory structure change in the future
-    tmp_fits_dir = kwargs.get("tmp_fits_dir", pj(tmp_dir, "galfits"))
-    tmp_png_dir  = kwargs.get("tmp_png_dir", pj(tmp_dir, "galfit_png"))
-    out_png_dir  = kwargs.get("out_png_dir", pj(out_dir, "galfit_png"))
+    tmp_fits_dir  = kwargs.get("tmp_fits_dir" , pj(tmp_dir, "galfits"))
+    tmp_png_dir   = kwargs.get("tmp_png_dir"  , pj(tmp_dir, "galfit_png"))
+    tmp_masks_dir = kwargs.get("tmp_masks_dir", pj(tmp_dir, "galfit_masks"))
+    tmp_psf_dir   = kwargs.get("tmp_psf_dir"  , pj(tmp_dir, "psf_files"))
+    
+    out_png_dir   = kwargs.get("out_png_dir"  , pj(out_dir, "galfit_png"))
     
     # Of course the important things
     num_steps = int(kwargs.get("num_steps", 2))
-    rerun     = kwargs.get("rerun", "")
+    rerun     = kwargs.get("rerun", False)
     slurm     = kwargs.get("slurm", False)
     
     # For verbosity, default to capturing output
@@ -94,6 +100,9 @@ def main(**kwargs):
     
     # For generating starmasks per galaxy
     generate_starmasks = kwargs.get("generate_starmasks", True)
+    
+    # To indicate running from a local tmp dir
+    run_from_tmp       = kwargs.get("run_from_tmp", False)
     
     # To aggressively free up space
     aggressive_clean   = kwargs.get("aggressive_clean", False)
@@ -108,9 +117,9 @@ def main(**kwargs):
     
     # This PITA brought to you by running things in the notebook environment
     run_galfit, run_fitspng, run_python = check_programs()
-    run_galfit  = kwargs.get("run_galfit", run_galfit)
+    run_galfit  = kwargs.get("run_galfit" , run_galfit)
     run_fitspng = kwargs.get("run_fitspng", run_fitspng)
-    run_python  = kwargs.get("run_python", run_python)
+    run_python  = kwargs.get("run_python" , run_python)
     
     # We could chunk this up for slurm but since Wayne's script 
     # automatically distributes processes, we don't have to worry about it
@@ -120,6 +129,12 @@ def main(**kwargs):
     # if len(galaxy_names) == 1:
     #     #gname = galaxy_names[0]
     #     slurm = True
+    if run_from_tmp:
+        for k,v in kwargs.items():
+            if "_dir" in k and k != "out_dir":
+                #_ = sp(f"rm -rf {v}")
+            #os.makedirs(v, exist_ok = True)
+                _ = sp(f"mkdir -p {v}")
     
     if generate_starmasks:
         print("Generating Starmasks")
@@ -127,7 +142,7 @@ def main(**kwargs):
         # I think we have to change path for source extractor
         star_removal_path = pj(_MODULE_DIR, "star_removal")
         os.chdir(star_removal_path)
-        remove_stars_with_sextractor.main(in_dir, pj(tmp_dir, "galfit_masks"), galaxy_names)
+        remove_stars_with_sextractor.main(in_dir, tmp_masks_dir, galaxy_names)
         os.chdir(cwd)
         
     print("Running feedme generator...")
@@ -154,6 +169,7 @@ def main(**kwargs):
         #     continue
         
         if gname not in feedme_info:
+            print(f"Feedme not generated for {gname}")
             touch_failed_fits(gname, tmp_fits_dir)
             failed.append(gname)
             continue
@@ -238,7 +254,7 @@ def main(**kwargs):
         # Alternatively, if not final_galfit_output.success and not galfit_output.success:
         if not exists(f"{tmp_fits_path_gname}"):
             print(f"{gname} completely failed!!!")
-            # This file avoids conflating ones which han'vet run and ones which have nothing to show for it
+            # This file avoids conflating ones which haven't run and ones which have nothing to show for it
             touch_failed_fits(gname, tmp_fits_dir)
             # for debugging
             #print(final_out_text)
@@ -282,6 +298,13 @@ def main(**kwargs):
             for galfit_out in glob.glob(pj(cwd, "galfit.*")):
                 ext_num = galfit_out.split(".")[-1]
                 shutil.move(galfit_out, pj(out_dir, gname, f"{gname}_galfit.{ext_num}"))
+                
+        # Residual calculation, now done all at the same time! And added to the FITS header
+        _, gname_nmr = fill_objects(gname, 1, tmp_fits_dir, tmp_masks_dir)
+        with fits.open(tmp_fits_path_gname, mode='update', output_verify='ignore') as hdul:
+            hdul[2].header["NMR"] = (gname_nmr, "Norm of the masked residual")
+            # Flush done automatically in update mode
+            #hdul.flush()
 
         shutil.copy2(tmp_fits_path_gname, pj(out_dir, gname, f"{gname}_galfit_out.fits"))
         
@@ -294,20 +317,24 @@ def main(**kwargs):
         
     if aggressive_clean:
         print("Aggressively cleaning... in, temp galfit output, and psf directories.")
-        to_del_in = (pj(in_dir, f"{gname}.fits") for gname in galaxy_names
-                     if exists(pj(in_dir, f"{gname}.fits"))
-                    )
-        # Need masks for residual calculation
-        to_del_tmp_fits  = (pj(tmp_dir, "galfits", f"{gname}_galfit_out.fits") for gname in galaxy_names
-                           if exists(pj(tmp_dir, "galfits", f"{gname}_galfit_out.fits"))
-                           )  
+        to_del_gal_in    = (pj(in_dir, f"{gname}.fits") for gname in galaxy_names
+                            if exists(pj(in_dir, f"{gname}.fits"))
+                           )
+
+        to_del_tmp_fits  = (pj(tmp_fits_dir, f"{gname}_galfit_out.fits") for gname in galaxy_names
+                            if exists(pj(tmp_fits_dir, f"{gname}_galfit_out.fits"))
+                           )
         
-        to_del_psf_files = (pj(tmp_dir, "psf_files", f"{gname}_psf.fits") for gname in galaxy_names
-                            if exists(pj(tmp_dir, "psf_files", f"{gname}_psf.fits"))
+        to_del_masks     = (pj(tmp_masks_dir, f"{gname}_star-rm.fits") for gname in galaxy_names
+                            if exists(pj(tmp_masks_dir, f"{gname}_star-rm.fits"))
+                           )
+        
+        to_del_psf_files = (pj(tmp_psf_dir, f"{gname}_psf.fits") for gname in galaxy_names
+                            if exists(pj(tmp_psf_dir, f"{gname}_psf.fits"))
                            )
         
         #print(f"rm -rf {' '.join(to_del_in)} {' '.join(to_del_tmp_fits)} {' '.join(to_del_psf_files)}")
-        _ = sp(f"rm -rf {' '.join(to_del_in)} {' '.join(to_del_tmp_fits)} {' '.join(to_del_psf_files)}",
+        _ = sp(f"rm -f {' '.join(to_del_gal_in)} {' '.join(to_del_tmp_fits)} {' '.join(to_del_masks)} {' '.join(to_del_psf_files)}",
                capture_output = capture_output
               )
     
@@ -322,7 +349,13 @@ if __name__ == "__main__":
     
     for kw in cmd_line_input:
         k, v = kw.split("=")
-        kwargs_input[k] = v.strip()
+        v = v.strip()
+        if v.lower() == "false":
+            v = False
+        elif v.lower() == "true":
+            v = True
+            
+        kwargs_input[k] = v
 
     _ = main(**kwargs_input)
     #write_failures(os.getcwd(), failures)
