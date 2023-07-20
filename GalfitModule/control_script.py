@@ -274,7 +274,8 @@ if __name__ == "__main__":
 #     #subprocess.run(['ls', '-l'], stderr=subprocess.DEVNULL)
 
     if not in_notebook():
-        run_galfit, run_fitspng, run_python = go_go_galfit.check_programs()
+        # This is in helper_functions
+        run_galfit, run_fitspng, run_python = check_programs()
 #         # This seems to work in Python directly so I'm leaving it as-is
 #         # Checking galfit
 #         run_galfit = shutil.which("galfit")
@@ -525,7 +526,7 @@ def write_to_slurm(cwd,
                    # determined by SLURM proc limit 
                    chunk_size = 5 
                   ):
-    _, _, run_python = go_go_galfit.check_programs()
+    _, _, run_python = check_programs()
     kwargs_in        = deepcopy(kwargs_main)
     
     print(f"Generating distrib-slurm input file in {cwd}: {slurm_file}")
@@ -821,7 +822,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[ ]:
+# In[54]:
 
 
 if __name__ == "__main__":
