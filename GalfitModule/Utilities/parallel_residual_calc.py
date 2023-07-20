@@ -41,7 +41,7 @@ from Classes.Containers import *
 from Classes.FitsHandlers import *
 from Functions.helper_functions import *
 
-import go_go_galfit
+#from go_go_galfit import check_programs
     
 # ==================================================================================================================
 
@@ -74,7 +74,7 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_png_dir = 
     
     masked_residual_normalized = fits_file.generate_masked_residual(mask_fits_file)
     if masked_residual_normalized is None:
-        #print(f"Could not calculate nmr") # for galaxy {gname}. Continuing...")
+        print(f"Could not calculate nmr for galaxy {gname}. Continuing...")
         return None, None
     
     # Doesn't work on Openlab (sadly)
@@ -105,6 +105,7 @@ def parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_png_dir, all_gname_t
     return out_nmr
 
 # ==================================================================================================================
+
 def main(**kwargs):
     
     # Dirs and name of the run for which the calculation was done
@@ -151,7 +152,7 @@ def main(**kwargs):
         slurm = False
         
     elif slurm:
-        _, _, run_python = go_go_galfit.check_programs()
+        _, _, run_python = check_programs()
         python_slurm   = pj(_MODULE_DIR, "Utilities", "residual_via_slurm.py")
         slurm_file     = "parallel_residual_slurm"
         run_slurm      = "~wayne/bin/distrib_slurm"
