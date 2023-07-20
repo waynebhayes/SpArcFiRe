@@ -119,7 +119,7 @@ def sp(cmd_str, capture_output = True, timeout = None):
                           executable="/bin/bash")
 
 
-# In[38]:
+# In[7]:
 
 
 def find_files(search_dir = ".", search_pattern = "*", filetype = "f"):
@@ -135,14 +135,23 @@ def find_files(search_dir = ".", search_pattern = "*", filetype = "f"):
     return [os.path.basename(i) for i in result.stdout.split("\n") if i]
 
 
-# In[39]:
+# In[21]:
+
+
+# Writing this to replace os.path.exists since that's too slow
+def exists(filename):
+    result = sp(f"[ -e {filename} ] && echo 1 || echo 0")
+    return bool(int(result.stdout))
+
+
+# In[8]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[40]:
+# In[9]:
 
 
 # Unit test for sp
@@ -166,18 +175,28 @@ if __name__ == "__main__":
         raise(Exception())
 
 
-# In[43]:
+# In[13]:
 
 
 # Unit test for list_files
 if __name__ == "__main__":
     
-    print(find_files(pj(TEST_DATA_DIR, "test-in"), "*", "f"))
+    print(find_files(pj(TEST_DATA_DIR, "test-in"), "*.fits", "f"))
     print()
     print(find_files(pj(TEST_DATA_DIR, "test-out"), "123*", "d"))
 
 
-# In[17]:
+# In[24]:
+
+
+# Unit test for exists
+if __name__ == "__main__":
+    
+    print("Does test-in exist?", exists(pj(TEST_DATA_DIR, "test-in")))
+    print("Does test-spout exist?", exists(pj(TEST_DATA_DIR, "test-spout")))
+
+
+# In[11]:
 
 
 if __name__ == "__main__":
