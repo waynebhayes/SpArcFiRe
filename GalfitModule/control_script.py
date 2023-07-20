@@ -5,7 +5,7 @@
 # 
 # **Date (Github date will likely be more accurate): 4/17/23**
 
-# In[3]:
+# In[41]:
 
 
 import sys
@@ -17,6 +17,7 @@ import shutil
 import subprocess
 
 import time
+import pickle
 
 
 # In[4]:
@@ -89,8 +90,10 @@ if __name__ == "__main__":
 
     python3 ./{sys.argv[0]} [OPTION] [[RUN-DIRECTORY] IN-DIRECTORY TMP-DIRECTORY OUT-DIRECTORY]
     
-    OPTIONS =>[-s | --serial] 
-              [-drs | --dont-remove-slurm] 
+    OPTIONS =>[-s | --serial]
+              [-drs | --dont-remove-slurm]
+              [-t  | --tmp]
+              [-ac | --aggressive-clean]
               [-NS | --num-steps] 
               [-r | --restart]
               [-RrG | --rerun-galfit]
@@ -122,12 +125,22 @@ if __name__ == "__main__":
                         help     = 'Choose NOT to remove all old slurm files (they may contain basic info about each fit but there will be a bunch!)'
                        )
     
+    parser.add_argument('-t', '--tmp',
+                        dest     = 'run_from_tmp',
+                        action   = 'store_const',
+                        const    = True,
+                        default  = False,
+                        help     = 'Indicates to the program a run from a directory in /tmp/ local to each cluster machine.\n\
+                                    WARNING: either output to a different location or copy from tmp to said location \
+                                    under the assumption that tmp will be wiped at some point in the near future.'
+                       )
+    
     parser.add_argument('-ac', '--aggressive-clean',
                         dest     = 'aggressive_clean',
                         action   = 'store_const',
                         const    = True,
                         default  = False,
-                        help     = 'Aggressively clean-up directories, removing .in files after galfit runs'
+                        help     = 'Aggressively clean-up directories, removing -in, temp output, psf, and mask files after galfit runs'
                        )
     
     parser.add_argument('-NS', '--num-steps',
@@ -136,9 +149,9 @@ if __name__ == "__main__":
                         type     = int,
                         choices  = range(1,4),
                         default  = 2,
-                        help     = 'Run GALFIT using step-by-step component selection (up to 3), i.e. \n \
-                                    1: Bulge + Disk + Arms,\n \
-                                    2: Bulge -> Bulge + Disk + Arms,\n \
+                        help     = 'Run GALFIT using step-by-step component selection (up to 3), i.e.\n\t\
+                                    1: Bulge + Disk + Arms,\n\t\
+                                    2: Bulge -> Bulge + Disk + Arms,\n\t\
                                     3: Bulge -> Bulge + Disk -> Bulge + Disk + Arms'
                        )
     
@@ -154,8 +167,7 @@ if __name__ == "__main__":
                         dest     = 'rerun', 
                         action   = 'store_const',
                         const    = True,
-                        # Python cannot convert 'False' to a boolean... it's true *cries*
-                        default  = "",
+                        default  = False,
                         help     = 'Run GALFIT again after the final fit to hopefully refine said fit.'
                        )
     
@@ -179,6 +191,7 @@ if __name__ == "__main__":
         num_steps         = args.steps
         slurm             = args.slurm
         dont_remove_slurm = args.dont_remove_slurm
+        run_from_tmp      = args.run_from_tmp
         aggressive_clean  = args.aggressive_clean
         
         rerun             = args.rerun
@@ -336,6 +349,10 @@ if __name__ == "__main__":
     # output_folders  = glob.glob(pj(out_dir, "123*/"))
     # star_masks      = glob.glob(pj(tmp_dir, "*_star-rm.fits"))
     input_filenames = find_files(in_dir, "*.fits", "f")
+    if not input_filenames:
+        print(f"No input files found in {in_dir}. Is something wrong?")
+        sys.exit()
+        
     output_folders  = [i for i in find_files(out_dir, "*", "d") 
                        if os.path.basename(i) != os.path.basename(out_dir) and
                           os.path.basename(i) != "galfit_png"
@@ -372,6 +389,10 @@ if __name__ == "__main__":
     
     if not restart:
         generate_starmasks = True
+        if not exists(pj(tmp_masks_dir, 'remove_stars_with_sextractor.log')):
+            # remove_stars_with_sextractor needs this available before it can log
+            _ = sp(f"touch {pj(tmp_masks_dir, 'remove_stars_with_sextractor.log')}", capture_output = capture_output)
+        
 #         try:
 #             star_removal_path = pj(os.environ["SPARCFIRE_HOME"], "star_removal")
             
@@ -501,7 +522,8 @@ def write_to_slurm(cwd,
                    kwargs_main, 
                    galfit_script_name = pj(_MODULE_DIR, "go_go_galfit.py"), 
                    slurm_file = pj(cwd, "slurm_cmd_file"),
-                   chunk_size = 10
+                   # determined by SLURM proc limit 
+                   chunk_size = 5 
                   ):
     _, _, run_python = go_go_galfit.check_programs()
     kwargs_in        = deepcopy(kwargs_main)
@@ -571,7 +593,7 @@ if __name__ == "__main__":
         for gname in galaxy_names:
             new_out = pj(out_dir, gname, f"{gname}_galfit_out.fits")
             old_out = pj(out_dir, gname, f"{gname}_galfit_out_old.fits")
-            if exists(pj(out_dir, gname, new_out)):
+            if exists(new_out):
                 shutil.move(new_out, old_out)
 
     kwargs_main = {"cwd"                : cwd,
@@ -584,6 +606,7 @@ if __name__ == "__main__":
                    "verbose"            : verbose,
                    "capture_output"     : capture_output,
                    "generate_starmasks" : generate_starmasks,
+                   "run_from_tmp"       : run_from_tmp,
                    "aggressive_clean"   : aggressive_clean,
                    # THIS MUST BE LAST FOR SENDING SEVERAL TO SLURM
                    "galaxy_names"       : galaxy_names
@@ -603,13 +626,12 @@ if __name__ == "__main__":
         #print("Piping to slurm")
         print(f"{len(kwargs_main['galaxy_names'])} galaxies")
         slurm_run_name = "GALFITTING"
-        timeout = 29 # Minutes
+        slurm_options  = "-M all"
+        slurm_verbose  = "-v" if verbose else ""
         
-        extra_slurm = ""
-        if verbose:
-            extra_slurm = "-v"
+        timeout = 29 # Minutes
             
-        slurm_run_cmd = f"cat {slurm_file} | {pipe_to_slurm_cmd} {slurm_run_name} -M all {extra_slurm}"
+        slurm_run_cmd = f"cat {slurm_file} | {pipe_to_slurm_cmd} {slurm_run_name} {slurm_options} {slurm_verbose}"
         
         if not restart:
             write_to_slurm(cwd, kwargs_main, slurm_file = slurm_file)
@@ -654,7 +676,7 @@ if __name__ == "__main__":
                                      run_fitspng = run_fitspng, 
                                      run_python = run_python)
         
-        write_failed(tmp_dir, failures)
+        write_failed(out_dir, failures)
 
     # Unused but here for a good time
     boom = """Numerical Recipes run-time error...
@@ -687,38 +709,13 @@ gaussj: Singular Matrix-1
    too small/big, Nuker powerlaw too small/big.  If frustrated or
    problem should persist, email for help or report problem to:
                      Chien.Y.Peng@gmail.com"""
-# ## Calculating Residuals
-
-# In[ ]:
-
-
-if __name__ == "__main__":
-    print("Calculating residuals")
-    parallel_residual_calc.main(run_dir           = cwd,
-                                # Don't actually need in_dir
-                                #in_dir            = in_dir,
-                                tmp_dir           = tmp_dir,
-                                out_dir           = out_dir,
-                                basename          = "GALFIT",
-                                slurm             = slurm,
-                                dont_remove_slurm = dont_remove_slurm,
-                                restart           = restart,
-                                verbose           = verbose,
-                                capture_output    = not verbose
-                               )
-    if aggressive_clean:
-        # May need to use find and delete
-        print("Aggressively cleaning, removing star masks.")
-        _ = sp(f"rm -rf {pj(tmp_masks_dir)} {pj(tmp_png_dir)}", capture_output = capture_output)
-
-
 # ## Tidying Up in case anything is leftover
 
 # In[ ]:
 
 
 if __name__ == "__main__":
-    print("Done! Cleaning up...")
+    print("Cleaning up...")
     _ = sp("rm galfit.* fit.log", capture_output = capture_output)
     _ = sp("rm *.png", capture_output = capture_output)
     
@@ -727,7 +724,99 @@ if __name__ == "__main__":
         _ = sp(f"rm -r \"$HOME/SLURM_turds/{slurm_run_name}\"", capture_output = capture_output)
         _ = sp(f"rm {slurm_file}", capture_output = capture_output)
         #_ = sp(f"rm {slurm_copy_input}", capture_output = capture_output)
+
+
+# ## Combining Residuals
+
+# In[ ]:
+
+
+if __name__ == "__main__":
+    basename = "GALFIT"
+    pkl_file = pj(out_dir, f"{basename}_output_nmr.pkl")
+    print(f"Combining all the residual calculations into {pkl_file}")
+
+    all_nmr = {}
+    if slurm:
+        python_slurm   = pj(_MODULE_DIR, "Utilities", "combine_via_slurm.py")
+        slurm_file     = "parallel_combine_slurm"
+        slurm_run_name = "COMBINE_NMR"
+
+        finished_pkl_num = 0
+        if restart:
+            finished_pkl_num = max(
+                                   [int(os.path.basename(i).replace(basename, "")) 
+                                    for i in find_files(out_dir, f'{basename}*_output_nmr.pkl', "f")
+                                   ]
+                                  )
+
+        chunk_size = 20
+        with open(slurm_file, "w") as sf:
+            for i, chunk in enumerate(range(chunk_size, len(galaxy_names) + chunk_size, chunk_size)):
+                if i < finished_pkl_num:
+                    continue
+
+                gal_to_slurm = galaxy_names[chunk - chunk_size:][:chunk_size]
+                #num_str = f"{i:0>3}"
+                sf.write(f"{run_python} {python_slurm} {pj(out_dir, basename + str(i))} {','.join(gal_to_slurm)}\n")
+
+        print("Slurming to combine residuals")
+        slurm_run_cmd = f"cat {slurm_file} | {pipe_to_slurm_cmd} {slurm_run_name} {slurm_options} {slurm_verbose}"
+        _ = sp(slurm_run_cmd, capture_output = capture_output)
+
+        all_output_pkl = [pj(out_dir, fname) for fname in find_files(out_dir, f'{basename}*_output_nmr.pkl', "f")]
+        _ = [all_nmr.update(pickle.load(open(file, 'rb'))) for file in all_output_pkl]
         
+    else:
+        for gname in galaxy_names:
+            output_file = pj(out_dir, gname, f"{gname}_galfit_out.fits")
+            if exists(output_file):
+                with fits.open(output_file) as hdul: 
+                    all_nmr[gname] = hdul[2].header["NMR"]
+
+    # Could split this into the above if/else but this keeps everything output
+    # related in one place
+    pickle_filename_temp = f'{pj(out_dir, basename)}_output_nmr_final.pkl'
+    pickle.dump(all_nmr, open(pickle_filename_temp, 'wb'))
+    
+    if not dont_remove_slurm and slurm:
+        _ = sp(f"rm -r \"$HOME/SLURM_turds/{slurm_run_name}\"", capture_output = capture_output)
+        _ = sp(f"rm -f {pj(out_dir, basename)}*_output_nmr.pkl", capture_output = capture_output)
+        _ = sp(f"rm -f {slurm_file}", capture_output = capture_output)
+        
+    pickle_filename = f'{pj(out_dir, basename)}_output_nmr.pkl'    
+    _ = sp(f"mv {pickle_filename_temp} {pickle_filename}", capture_output = capture_output)
+
+
+# In[ ]:
+
+
+# Deprecated
+# Combine the residuals now that they're in the headers
+    # print("Calculating residuals")
+    # parallel_residual_calc.main(run_dir           = cwd,
+    #                             # Don't actually need in_dir
+    #                             #in_dir            = in_dir,
+    #                             tmp_dir           = tmp_dir,
+    #                             out_dir           = out_dir,
+    #                             basename          = "GALFIT",
+    #                             slurm             = slurm,
+    #                             dont_remove_slurm = dont_remove_slurm,
+    #                             restart           = restart,
+    #                             verbose           = verbose,
+    #                             capture_output    = not verbose
+    #                            )
+    # if aggressive_clean:
+    #     # May need to use find and delete
+    #     print("Aggressively cleaning, removing star masks.")
+    #     _ = sp(f"rm -rf {pj(tmp_masks_dir)} {pj(tmp_png_dir)}", capture_output = capture_output)
+
+
+# In[ ]:
+
+
+if __name__ == "__main__":
+    print("All done!")
     # Moving back to original directory
     os.chdir(old_cwd)
 
