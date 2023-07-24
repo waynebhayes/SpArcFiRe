@@ -5,7 +5,7 @@
 # 
 # **Date (Github date will likely be more accurate): 4/17/23**
 
-# In[41]:
+# In[57]:
 
 
 import sys
@@ -18,6 +18,7 @@ import subprocess
 
 import time
 import pickle
+import joblib
 
 
 # In[4]:
@@ -90,7 +91,7 @@ if __name__ == "__main__":
 
     python3 ./{sys.argv[0]} [OPTION] [[RUN-DIRECTORY] IN-DIRECTORY TMP-DIRECTORY OUT-DIRECTORY]
     
-    OPTIONS =>[-s | --serial]
+    OPTIONS =>[-p | --parallel]
               [-drs | --dont-remove-slurm]
               [-t  | --tmp]
               [-ac | --aggressive-clean]
@@ -109,12 +110,16 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description = USAGE)
     
-    parser.add_argument('-s', '--serial',
-                        dest     = 'slurm',
-                        action   = 'store_const',
-                        const    = False,
-                        default  = True,
-                        help     = 'Run GALFITs without using Slurm.'
+    parser.add_argument('-p', '--parallel',
+                        dest     = 'parallel',
+                        action   = 'store',
+                        type     = int,
+                        choices  = range(0,3),
+                        default  = 1,
+                        help     = 'Run algorithm with/without intensive parallelization. Defaults to on machine parallel.\nOptions are:\n\t\
+                                    0: in serial,\n\t\
+                                    1: on machine parallel,\n\t\
+                                    2: cluster computing via SLURM'
                        )
 
     parser.add_argument('-drs', '--dont-remove-slurm',
@@ -160,7 +165,7 @@ if __name__ == "__main__":
                         action   = 'store_const',
                         const    = True,
                         default  = False,
-                        help     = 'Restart control script on the premise that some have already run (likely with SLURM).'
+                        help     = 'Restart control script on the premise that some have already run (likely in parallel).'
                        )
     
     parser.add_argument('-RrG', '--rerun-galfit',
@@ -189,7 +194,7 @@ if __name__ == "__main__":
     if not in_notebook():
         args              = parser.parse_args() # Using vars(args) will call produce the args as a dict
         num_steps         = args.steps
-        slurm             = args.slurm
+        parallel          = args.parallel
         dont_remove_slurm = args.dont_remove_slurm
         run_from_tmp      = args.run_from_tmp
         aggressive_clean  = args.aggressive_clean
@@ -233,7 +238,7 @@ if __name__ == "__main__":
             raise Exception("Directory paths must end in '-in' '-tmp' and '-out'")
             
     else:
-        slurm = False
+        parallel = 0
         rerun = ""
         num_steps = 2
         # Avoid some... nasty surprises for when debugging
@@ -313,7 +318,13 @@ if __name__ == "__main__":
     # Should be same as SpArcFiRe's but I'm packaging it with just in case
     star_removal_path = pj(_MODULE_DIR, "star_removal")
     
-    pipe_to_slurm_cmd = "~wayne/bin/distrib_slurm"
+    if parallel == 1:
+        # CPU Parallel
+        pipe_to_parallel_cmd = "/home/sana/bin/parallel"
+        
+    elif parallel == 2:
+        # SLURM/Cluster Computing
+        pipe_to_parallel_cmd = "~wayne/bin/distrib_slurm"
     
     if not restart:
         # Remove old
@@ -418,14 +429,14 @@ if __name__ == "__main__":
 #             #galaxy_folder_names = [os.path.basename(i.rstrip("/")) for i in output_folders]
 #             #star_mask_names = [os.path.basename(i) for i in star_masks]
             
-#             slurm_copy_input = "slurm_copy_inputs"
-#             if slurm:
-#                 if exists(slurm_copy_input):
-#                     _ = sp(f"rm {slurm_copy_input}", capture_output = capture_output)
+#             parallel_copy_input = "parallel_copy_inputs"
+#             if parallel:
+#                 if exists(parallel_copy_input):
+#                     _ = sp(f"rm {parallel_copy_input}", capture_output = capture_output)
 
-#                 _ = sp(f"touch {slurm_copy_input}", capture_output = capture_output)
+#                 _ = sp(f"touch {parallel_copy_input}", capture_output = capture_output)
 
-#                 sci = open(slurm_copy_input, "a")
+#                 sci = open(parallel_copy_input, "a")
                 
 #             # TODO: Could also tar then transfer(?)
 #             if len(in_need_masks) + len(star_mask_names) != len(output_folders):
@@ -444,7 +455,7 @@ if __name__ == "__main__":
 
 #                     elif star_mask_filename not in star_mask_names:
 
-#                         if slurm:
+#                         if parallel:
 #                             cp_cmd += "\n"
 #                             sci.write(cp_cmd)
 
@@ -461,18 +472,18 @@ if __name__ == "__main__":
 #                         star_mask_names.remove(star_mask_filename)
 #                         _ = sp(f"rm -f {pj(need_masks_dir, in_file)}", capture_output = capture_output)
 
-#                 if slurm:
+#                 if parallel:
 #                     sci.close()
 
-#                     extra_slurm = ""
+#                     extra_parallel = ""
 #                     if verbose:
-#                         extra_slurm = "-v"
+#                         extra_parallel = "-v"
 
-#                     slurm_run_name = "COPYING_INPUT_FILES"
-#                     slurm_run_cmd = f"cat {slurm_copy_input} | {pipe_to_slurm_cmd} {slurm_run_name} -M all {extra_slurm}"
+#                     parallel_run_name = "COPYING_INPUT_FILES"
+#                     parallel_run_cmd = f"cat {parallel_copy_input} | {pipe_to_parallel_cmd} {parallel_run_name} -M all {extra_parallel}"
 #                     # Running without timeout for now
-#                     print("Performing the copy with slurm...")
-#                     _ = sp(f"{slurm_run_cmd}", capture_output = capture_output)
+#                     print("Performing the copy with parallel...")
+#                     _ = sp(f"{parallel_run_cmd}", capture_output = capture_output)
                 
 #             print("Generating starmasks...")
 #             os.chdir(star_removal_path)
@@ -514,23 +525,23 @@ if __name__ == "__main__":
             print()
 
 
-# ## Galfitting/Slurming!
+# ## Galfitting!
 
 # In[ ]:
 
 
-def write_to_slurm(cwd, 
+def write_to_parallel(cwd, 
                    kwargs_main, 
                    galfit_script_name = pj(_MODULE_DIR, "go_go_galfit.py"), 
-                   slurm_file = pj(cwd, "slurm_cmd_file"),
-                   # determined by SLURM proc limit 
+                   parallel_file = pj(cwd, "parallel_cmd_file"),
+                   # determined by parallel proc limit 
                    chunk_size = 5 
                   ):
     _, _, run_python = check_programs()
     kwargs_in        = deepcopy(kwargs_main)
     
-    print(f"Generating distrib-slurm input file in {cwd}: {slurm_file}")
-    with open(pj(cwd, slurm_file), "w") as scf:
+    print(f"Generating input file for parallelziation in {cwd}: {parallel_file}")
+    with open(pj(cwd, parallel_file), "w") as scf:
         #for gname in kwargs_main["galaxy_names"]:
         for i, chunk in enumerate(range(chunk_size, len(kwargs_main["galaxy_names"]) +  chunk_size, chunk_size)):
             chunk_o_galaxies = kwargs_main["galaxy_names"][chunk - chunk_size:][:chunk_size]
@@ -543,7 +554,7 @@ def write_to_slurm(cwd,
             # Good thing dictionaries retain order now, *whistles innocently*
             scf.write(f"{run_python} {galfit_script_name} {cmd_str}\n")
 
-    sp(f"chmod a+x {slurm_file}", capture_output = capture_output)
+    sp(f"chmod a+x {parallel_file}", capture_output = capture_output)
 
 
 # In[ ]:
@@ -603,42 +614,51 @@ if __name__ == "__main__":
                    "out_dir"            : out_dir,
                    "num_steps"          : num_steps,
                    "rerun"              : rerun,
-                   "slurm"              : slurm,
+                   "parallel"              : parallel,
                    "verbose"            : verbose,
                    "capture_output"     : capture_output,
                    "generate_starmasks" : generate_starmasks,
                    "run_from_tmp"       : run_from_tmp,
                    "aggressive_clean"   : aggressive_clean,
-                   # THIS MUST BE LAST FOR SENDING SEVERAL TO SLURM
+                   # THIS MUST BE LAST FOR SENDING SEVERAL FOR PARALLELIZATION
                    "galaxy_names"       : galaxy_names
                   }
     
     # In case we're running back to back, this will reduce galaxy_names appropriately
     kwargs_main = check_galfit_out_hangups(tmp_fits_dir, out_dir, kwargs_main)
-    slurm_file = "slurm_cmd_file"
+    parallel_file = "parallel_cmd_file"
     
 #    raise(AssertionError())
     # One at a time
-    if slurm:
+    if parallel:
         if not kwargs_main["galaxy_names"]:
             print("No galaxies to fit, exitting.")
             sys.exit()
             
-        #print("Piping to slurm")
+        #print("Piping to parallel")
         print(f"{len(kwargs_main['galaxy_names'])} galaxies")
-        slurm_run_name = "GALFITTING"
-        slurm_options  = "-M all"
-        slurm_verbose  = "-v" if verbose else ""
+        
+        if parallel == 1:
+            # For CPU parallel
+            parallel_run_name = ""#"GALFITTING"
+            parallel_options  = joblib.cpu_count() #"-M all"
+            
+        elif parallel == 2:
+            # For SLURM/Cluster Computing
+            parallel_run_name = "GALFITTING"
+            parallel_options  = "-M all"
+        
+        parallel_verbose  = "-v" if verbose else ""
         
         timeout = 29 # Minutes
             
-        slurm_run_cmd = f"cat {slurm_file} | {pipe_to_slurm_cmd} {slurm_run_name} {slurm_options} {slurm_verbose}"
+        parallel_run_cmd = f"cat {parallel_file} | {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
         
         if not restart:
-            write_to_slurm(cwd, kwargs_main, slurm_file = slurm_file)
-            print("Galfitting via SLURM...")
+            write_to_parallel(cwd, kwargs_main, parallel_file = parallel_file)
+            print("Galfitting via parallelization...")
             try:
-                sp(f"{slurm_run_cmd} -t {timeout}", capture_output = capture_output, timeout = 60*(timeout + 1))
+                sp(f"{parallel_run_cmd} -t {timeout}", capture_output = capture_output, timeout = 60*(timeout + 1))
             except subprocess.TimeoutExpired:
                 pass
 
@@ -648,14 +668,14 @@ if __name__ == "__main__":
         
         count = 2
         while kwargs_main["galaxy_names"] and count < 10:
-            print("Did not finish all galaxies, slurming again, increasing timeout...\n")
+            print("Did not finish all galaxies, parallelizing again, increasing timeout...\n")
             print(f"{len(kwargs_main['galaxy_names'])} galaxies to go.")
-            write_to_slurm(cwd, kwargs_main, slurm_file = slurm_file)
+            write_to_parallel(cwd, kwargs_main, parallel_file = parallel_file)
             
             timeout *= count
             try:
-                print("Piping to slurm")
-                sp(f"{slurm_run_cmd} -t {timeout}", capture_output = capture_output, timeout = 60*(timeout + 1))
+                print("Piping to parallel")
+                sp(f"{parallel_run_cmd} -t {timeout}", capture_output = capture_output, timeout = 60*(timeout + 1))
             except subprocess.TimeoutExpired:
                 pass
             
@@ -721,10 +741,10 @@ if __name__ == "__main__":
     _ = sp("rm *.png", capture_output = capture_output)
     
     # We use the negative of remove slurm because we want cleanup to be the default
-    if slurm and not dont_remove_slurm:
-        _ = sp(f"rm -r \"$HOME/SLURM_turds/{slurm_run_name}\"", capture_output = capture_output)
-        _ = sp(f"rm {slurm_file}", capture_output = capture_output)
-        #_ = sp(f"rm {slurm_copy_input}", capture_output = capture_output)
+    if parallel and not dont_remove_slurm:
+        _ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
+        _ = sp(f"rm {parallel_file}", capture_output = capture_output)
+        #_ = sp(f"rm {parallel_copy_input}", capture_output = capture_output)
 
 
 # ## Combining Residuals
@@ -738,10 +758,19 @@ if __name__ == "__main__":
     print(f"Combining all the residual calculations into {pkl_file}")
 
     all_nmr = {}
-    if slurm:
-        python_slurm   = pj(_MODULE_DIR, "Utilities", "combine_via_slurm.py")
-        slurm_file     = "parallel_combine_slurm"
-        slurm_run_name = "COMBINE_NMR"
+    if parallel:
+        python_parallel   = pj(_MODULE_DIR, "Utilities", "combine_via_parallel.py")
+        parallel_file     = "parallel_combine_parallel"
+        
+        if parallel == 1:
+            # For CPU parallel
+            parallel_run_name = ""#"GALFITTING"
+            parallel_options  = joblib.cpu_count() #"-M all"
+            
+        elif parallel == 2:
+            # For SLURM/Cluster Computing
+            parallel_run_name = "COMBINE_NMR"
+            parallel_options  = "-M all"
 
         finished_pkl_num = 0
         if restart:
@@ -752,18 +781,18 @@ if __name__ == "__main__":
                                   )
 
         chunk_size = 20
-        with open(slurm_file, "w") as sf:
+        with open(parallel_file, "w") as sf:
             for i, chunk in enumerate(range(chunk_size, len(galaxy_names) + chunk_size, chunk_size)):
                 if i < finished_pkl_num:
                     continue
 
-                gal_to_slurm = galaxy_names[chunk - chunk_size:][:chunk_size]
+                gal_to_parallel = galaxy_names[chunk - chunk_size:][:chunk_size]
                 #num_str = f"{i:0>3}"
-                sf.write(f"{run_python} {python_slurm} {pj(out_dir, basename + str(i))} {','.join(gal_to_slurm)}\n")
+                sf.write(f"{run_python} {python_parallel} {pj(out_dir, basename + str(i))} {','.join(gal_to_parallel)}\n")
 
-        print("Slurming to combine residuals")
-        slurm_run_cmd = f"cat {slurm_file} | {pipe_to_slurm_cmd} {slurm_run_name} {slurm_options} {slurm_verbose}"
-        _ = sp(slurm_run_cmd, capture_output = capture_output)
+        print("parallelizing to combine residuals")
+        parallel_run_cmd = f"cat {parallel_file} | {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
+        _ = sp(parallel_run_cmd, capture_output = capture_output)
 
         all_output_pkl = [pj(out_dir, fname) for fname in find_files(out_dir, f'{basename}*_output_nmr.pkl', "f")]
         _ = [all_nmr.update(pickle.load(open(file, 'rb'))) for file in all_output_pkl]
@@ -780,10 +809,10 @@ if __name__ == "__main__":
     pickle_filename_temp = f'{pj(out_dir, basename)}_output_nmr_final.pkl'
     pickle.dump(all_nmr, open(pickle_filename_temp, 'wb'))
     
-    if not dont_remove_slurm and slurm:
-        _ = sp(f"rm -r \"$HOME/SLURM_turds/{slurm_run_name}\"", capture_output = capture_output)
+    if not dont_remove_slurm and parallel:
+        _ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
         _ = sp(f"rm -f {pj(out_dir, basename)}*_output_nmr.pkl", capture_output = capture_output)
-        _ = sp(f"rm -f {slurm_file}", capture_output = capture_output)
+        _ = sp(f"rm -f {parallel_file}", capture_output = capture_output)
         
     pickle_filename = f'{pj(out_dir, basename)}_output_nmr.pkl'    
     _ = sp(f"mv {pickle_filename_temp} {pickle_filename}", capture_output = capture_output)
@@ -801,8 +830,8 @@ if __name__ == "__main__":
     #                             tmp_dir           = tmp_dir,
     #                             out_dir           = out_dir,
     #                             basename          = "GALFIT",
-    #                             slurm             = slurm,
-    #                             dont_remove_slurm = dont_remove_slurm,
+    #                             parallel             = parallel,
+    #                             dont_remove_parallel = dont_remove_parallel,
     #                             restart           = restart,
     #                             verbose           = verbose,
     #                             capture_output    = not verbose
@@ -817,12 +846,17 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
+    if aggressive_clean:
+        print("Final tidying...")
+        _ = sp(f"rm -rf {out_dir}", capture_output = capture_output)
+        _ = sp(f"mkdir -p {out_dir}", capture_output = capture_output)
+        
     print("All done!")
     # Moving back to original directory
     os.chdir(old_cwd)
 
 
-# In[54]:
+# In[56]:
 
 
 if __name__ == "__main__":
