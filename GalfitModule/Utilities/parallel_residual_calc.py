@@ -45,10 +45,10 @@ from Functions.helper_functions import *
     
 # ==================================================================================================================
 
-def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_png_dir = "", slurm = True):
+def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_png_dir = "", parallel = True):
 
     report_num = 1000
-    if slurm:
+    if parallel:
         report_num = 100
         
     if not count % report_num:
@@ -78,9 +78,9 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_png_dir = 
         return None, None
     
     # Doesn't work on Openlab (sadly)
-    # Keep this in for actual slurming since it's hard to read booleans
+    # Keep this in for actual parallelizing since it's hard to read booleans
     # from command line (use the default value to our advantage)
-    if not slurm and out_png_dir:
+    if not parallel and out_png_dir:
         fits_file.to_png(out_png_dir = out_png_dir)
     
     return gname, fits_file.nmr#, fits_file.nmrr
@@ -90,7 +90,7 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_png_dir = 
     
 # ==================================================================================================================
 
-def parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_png_dir, all_gname_tmp_out, slurm = True):
+def parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_png_dir, all_gname_tmp_out, parallel = True):
     out_nmr = Parallel(n_jobs = -2)( #, timeout = 30)(
                    delayed(fill_objects)(
                                          gname,
@@ -98,7 +98,7 @@ def parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_png_dir, all_gname_t
                                          galfit_tmp_path,
                                          galfit_mask_path,
                                          out_png_dir,
-                                         slurm = slurm
+                                         parallel = parallel
                                         )
                    for count, gname in enumerate(all_gname_tmp_out) if not gname.startswith("failed")
                                     )
@@ -116,7 +116,7 @@ def main(**kwargs):
     basename      = kwargs.get("basename", "GALFIT")
     
     # Of course the important things
-    slurm             = kwargs.get("slurm", False)
+    parallel          = kwargs.get("parallel", 1)
     dont_remove_slurm = kwargs.get("dont_remove_slurm", False)
     restart           = kwargs.get("restart", False)
     
@@ -126,7 +126,7 @@ def main(**kwargs):
     capture_output = kwargs.get("capture_output", True)
     
     final_pkl_file = f'{pj(run_dir, basename)}_output_nmr.pkl'
-    if not slurm and exists(final_pkl_file):
+    if not parallel and exists(final_pkl_file):
         ans = input(f"Do you wish to delete the current final output nmr pickle file? Y/N\n{final_pkl_file}\n")
         if ans.upper() == "Y":
             _ = sp(f"rm -f {final_pkl_file}")
@@ -146,19 +146,28 @@ def main(**kwargs):
     out_nmr = []
     
     chunk_size = 1000
-    if slurm and chunk_size > len(all_gname_tmp_out)*0.5:
-        print("No need to slurm!")
-        out_nmr = parallel_wrapper(galfit_tmp_path, galfit_mask_path, None, all_gname_tmp_out, slurm = False)
-        slurm = False
+    if parallel and chunk_size > len(all_gname_tmp_out)*0.5:
+        print("No need to parallelize!")
+        out_nmr = parallel_wrapper(galfit_tmp_path, galfit_mask_path, None, all_gname_tmp_out, parallel = False)
+        parallel = False
         
-    elif slurm:
+    elif parallel:
         _, _, run_python = check_programs()
-        python_slurm   = pj(_MODULE_DIR, "Utilities", "residual_via_slurm.py")
-        slurm_file     = "parallel_residual_slurm"
-        run_slurm      = "~wayne/bin/distrib_slurm"
-        slurm_run_name = "CALCULATE_NMR"
-        slurm_options  = "-M all"
-        slurm_verbose  = "-v" if verbose else ""
+        python_parallel   = pj(_MODULE_DIR, "Utilities", "residual_via_parallel.py")
+        parallel_file     = "parallel_residual_parallel"
+        
+        if parallel == 1:
+            run_parallel      = "/home/sana/bin/parallel"
+            parallel_run_name = ""
+            parallel_options  = joblib.cpu_count()
+            
+        elif parallel == 2:
+            # TODO: Add check if not on Slurm capable machine
+            run_parallel      = "~wayne/bin/distrib_slurm"
+            parallel_run_name = "CALCULATE_NMR"
+            parallel_options  = "-M all"
+            
+        parallel_verbose  = "-v" if verbose else ""
         
         finished_pkl_num = 0
         if restart:
@@ -168,20 +177,19 @@ def main(**kwargs):
                                    ]
                                   )
         
-        with open(slurm_file, "w") as sf:
+        with open(parallel_file, "w") as sf:
             for i, chunk in enumerate(range(chunk_size, len(all_gname_tmp_out) +  chunk_size, chunk_size)):
                 if i < finished_pkl_num:
                     continue
                     
-                gal_to_slurm = all_gname_tmp_out[chunk - chunk_size:][:chunk_size]
+                gal_to_parallel = all_gname_tmp_out[chunk - chunk_size:][:chunk_size]
                 #num_str = f"{i:0>3}"
-                sf.write(f"{run_python} {python_slurm} {pj(run_dir, basename + str(i))} {galfit_tmp_path} {galfit_mask_path} {out_png_dir} {','.join(gal_to_slurm)}\n")
+                sf.write(f"{run_python} {python_parallel} {pj(run_dir, basename + str(i))} {galfit_tmp_path} {galfit_mask_path} {out_png_dir} {','.join(gal_to_parallel)}\n")
                 
-        print("Slurming")
-        slurm_run_cmd = f"cat {slurm_file} | {run_slurm} {slurm_run_name} {slurm_options} {slurm_verbose}"
-        completed = sp(slurm_run_cmd, capture_output = capture_output)
+        print("parallelizing")
+        parallel_run_cmd = f"cat {parallel_file} | {run_parallel} {parallel_run_name} {parallel_options} {parallel_verbose}"
+        completed = sp(parallel_run_cmd, capture_output = capture_output)
         
-        # TODO: Add check if not on Slurm capable machine
         if completed.stderr:
             print(completed.stderr)
             # Rerun out_nmr
@@ -192,7 +200,7 @@ def main(**kwargs):
                 out_nmr.extend(pickle.load(open(file, 'rb')))
 
     else:
-        out_nmr = parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_png_dir, all_gname_tmp_out, slurm = False)
+        out_nmr = parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_png_dir, all_gname_tmp_out, parallel = False)
             
     # out_nmr = Parallel(n_jobs = -2, timeout = 30)(
     #                    delayed(fill_objects)(
@@ -207,10 +215,10 @@ def main(**kwargs):
     pickle_filename_temp = f'{pj(run_dir, basename)}_output_nmr_final.pkl'
     pickle.dump(out_nmr, open(pickle_filename_temp, 'wb'))
     
-    if not dont_remove_slurm and slurm:
-        _ = sp(f"rm -r \"$HOME/SLURM_turds/{slurm_run_name}\"", capture_output = capture_output)
+    if not dont_remove_slurm and parallel:
+        _ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
         _ = sp(f"rm -f {pj(run_dir, basename)}*_output_nmr.pkl", capture_output = capture_output)
-        _ = sp(f"rm -f {slurm_file}", capture_output = capture_output)
+        _ = sp(f"rm -f {parallel_file}", capture_output = capture_output)
         
     pickle_filename = f'{pj(run_dir, basename)}_output_nmr.pkl'
     _ = sp(f"mv {pickle_filename_temp} {pickle_filename}", capture_output = capture_output)
@@ -240,13 +248,17 @@ if __name__ == "__main__":
                         #required = True, 
                         help     = 'Name of the run (for save file).')
     
-    parser.add_argument('--no-slurm',
-                        dest     = 'slurm',
-                        action   = 'store_const',
-                        const    = False,
-                        # Soon to be the other way around
-                        default  = True,
-                        help     = 'Run GALFITs using Slurm.')
+    parser.add_argument('-p', '--parallel',
+                        dest     = 'parallel',
+                        action   = 'store',
+                        type     = int,
+                        choices  = range(0,3),
+                        default  = 1,
+                        help     = 'Run algorithm with/without intensive parallelization. Defaults to on machine parallel.\nOptions are:\n\t\
+                                    0: in serial,\n\t\
+                                    1: on machine parallel,\n\t\
+                                    2: cluster computing via SLURM'
+                       )
 
     parser.add_argument('-drS', '--dont-remove-slurm',
                         dest     = 'dont_remove_slurm',
@@ -260,7 +272,7 @@ if __name__ == "__main__":
                         action   = 'store_const',
                         const    = True,
                         default  = False,
-                        help     = 'Restart script on the premise that some have already run (likely with SLURM).')
+                        help     = 'Restart script on the premise that some have already run (likely in parallel).')
     
     parser.add_argument('-v', '--verbose',
                         dest     = 'verbose', 
@@ -277,7 +289,7 @@ if __name__ == "__main__":
     
     args = parser.parse_args() # Using vars(args) will call produce the args as a dict
     basename = args.basename
-    slurm = args.slurm
+    parallel = args.parallel
     dont_remove_slurm = args.dont_remove_slurm
     restart = args.restart
     verbose = args.verbose
@@ -305,7 +317,7 @@ if __name__ == "__main__":
               "tmp_dir"           : tmp_dir,
               "out_dir"           : out_dir,
               "basename"          : basename,
-              "slurm"             : slurm,
+              "parallel"             : parallel,
               "dont_remove_slurm" : dont_remove_slurm,
               "restart"           : restart,
               "verbose"           : verbose,
