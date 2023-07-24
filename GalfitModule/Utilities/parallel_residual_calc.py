@@ -317,7 +317,7 @@ if __name__ == "__main__":
               "tmp_dir"           : tmp_dir,
               "out_dir"           : out_dir,
               "basename"          : basename,
-              "parallel"             : parallel,
+              "parallel"          : parallel,
               "dont_remove_slurm" : dont_remove_slurm,
               "restart"           : restart,
               "verbose"           : verbose,
