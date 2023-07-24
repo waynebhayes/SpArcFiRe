@@ -590,7 +590,7 @@ def write_failed(failed_dir = cwd, failures = []):
 
 
 if __name__ == "__main__":
-    print("Finding all galaxies...")
+    #print("Finding all galaxies...")
     # galaxy_names = [os.path.basename(i).rstrip(".fits") 
     #                 for i in input_filenames]
     
@@ -602,6 +602,7 @@ if __name__ == "__main__":
         # Backing up old fits
         # So we can check for new ones
         # and also backup previous runs if there's an accidental overwrite
+        print("Backing up previous output (if found)")
         for gname in galaxy_names:
             new_out = pj(out_dir, gname, f"{gname}_galfit_out.fits")
             old_out = pj(out_dir, gname, f"{gname}_galfit_out_old.fits")
@@ -672,7 +673,7 @@ if __name__ == "__main__":
             print(f"{len(kwargs_main['galaxy_names'])} galaxies to go.")
             write_to_parallel(cwd, kwargs_main, parallel_file = parallel_file)
             
-            timeout *= count
+            timeout += count
             try:
                 print("Piping to parallel")
                 sp(f"{parallel_run_cmd} -t {timeout}", capture_output = capture_output, timeout = 60*(timeout + 1))
@@ -856,7 +857,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[56]:
+# In[58]:
 
 
 if __name__ == "__main__":

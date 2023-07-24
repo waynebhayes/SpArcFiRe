@@ -91,7 +91,7 @@ def main(**kwargs):
     # Of course the important things
     num_steps = int(kwargs.get("num_steps", 2))
     rerun     = kwargs.get("rerun", False)
-    slurm     = kwargs.get("slurm", False)
+    parallel  = kwargs.get("parallel", 1)
     
     # For verbosity, default to capturing output
     # Keep both for clarity
@@ -121,14 +121,14 @@ def main(**kwargs):
     run_fitspng = kwargs.get("run_fitspng", run_fitspng)
     run_python  = kwargs.get("run_python" , run_python)
     
-    # We could chunk this up for slurm but since Wayne's script 
+    # We could chunk this up for parallel but since Wayne's script 
     # automatically distributes processes, we don't have to worry about it
     # Deprecated
     # gname = ""
-    # slurm = False
+    # parallel = False
     # if len(galaxy_names) == 1:
     #     #gname = galaxy_names[0]
-    #     slurm = True
+    #     parallel = True
     if run_from_tmp:
         for k,v in kwargs.items():
             if "_dir" in k and k != "out_dir":
@@ -160,7 +160,7 @@ def main(**kwargs):
     
     failed = []
     
-    # Working on non-slurm for now
+    # Working on non-parallel for now
     print()
     print(f"Galfitting with {num_steps} component steps... (stdout is captured):")
     for gname in galaxy_names:
@@ -293,8 +293,8 @@ def main(**kwargs):
         else:
             print("Skipping fitspng conversion... there is likely a library (libcfitsio) issue.")
 
-        # No point in doing this with slurm because race conditions
-        if not slurm:
+        # No point in doing this in parallel because race conditions
+        if not parallel:
             for galfit_out in glob.glob(pj(cwd, "galfit.*")):
                 ext_num = galfit_out.split(".")[-1]
                 shutil.move(galfit_out, pj(out_dir, gname, f"{gname}_galfit.{ext_num}"))
