@@ -82,15 +82,18 @@ def export_to_py(notebook_name, output_filename = ""):
                 print("Output from nbconvert: ", *result)
 
 
-# In[5]:
+# In[20]:
 
 
 def check_programs():
 
     # This seems to work in Python directly so I'm leaving it as-is
     # Checking galfit
-    run_galfit = shutil.which("galfit")
-    #run_galfit = response.stdout.strip()
+    hostname = sp(f"hostname").stdout.split(".")[0]
+    
+    run_galfit = shutil.which(f"galfit_{hostname}")
+    if not run_galfit:
+        run_galfit = shutil.which(f"galfit")
 
     # Checking fitspng
     run_fitspng   = shutil.which("fitspng")
@@ -135,7 +138,7 @@ def find_files(search_dir = ".", search_pattern = "*", filetype = "f"):
     return [os.path.basename(i) for i in result.stdout.split("\n") if i]
 
 
-# In[21]:
+# In[8]:
 
 
 # Writing this to replace os.path.exists since that's too slow
@@ -144,14 +147,14 @@ def exists(filename):
     return bool(int(result.stdout))
 
 
-# In[8]:
+# In[9]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[9]:
+# In[10]:
 
 
 # Unit test for sp
@@ -175,7 +178,7 @@ if __name__ == "__main__":
         raise(Exception())
 
 
-# In[13]:
+# In[11]:
 
 
 # Unit test for list_files
@@ -186,7 +189,7 @@ if __name__ == "__main__":
     print(find_files(pj(TEST_DATA_DIR, "test-out"), "123*", "d"))
 
 
-# In[24]:
+# In[12]:
 
 
 # Unit test for exists
@@ -196,7 +199,7 @@ if __name__ == "__main__":
     print("Does test-spout exist?", exists(pj(TEST_DATA_DIR, "test-spout")))
 
 
-# In[11]:
+# In[13]:
 
 
 if __name__ == "__main__":
