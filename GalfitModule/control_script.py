@@ -519,10 +519,10 @@ if __name__ == "__main__":
 #                 print("Star masks have been generated successfully.")
 #                 print()
                 
-        else:
-            generate_starmasks = False
-            print("Star masks have already been generated, proceeding.")
-            print()
+    else:
+        generate_starmasks = False
+        print("Star masks have already been generated, proceeding.")
+        print()
 
 
 # ## Galfitting!
@@ -632,26 +632,26 @@ if __name__ == "__main__":
 #    raise(AssertionError())
     # One at a time
     if parallel:
-        if not kwargs_main["galaxy_names"]:
+        if not kwargs_main["galaxy_names"] and not restart:
             print("No galaxies to fit, exitting.")
             sys.exit()
             
         #print("Piping to parallel")
         print(f"{len(kwargs_main['galaxy_names'])} galaxies")
         
+        timeout = 29 # Minutes
+        
         if parallel == 1:
             # For CPU parallel
             parallel_run_name = ""#"GALFITTING"
-            parallel_options  = joblib.cpu_count() #"-M all"
+            parallel_options  = joblib.cpu_count()
+            parallel_verbose  = ""
             
         elif parallel == 2:
             # For SLURM/Cluster Computing
             parallel_run_name = "GALFITTING"
-            parallel_options  = "-M all"
-        
-        parallel_verbose  = "-v" if verbose else ""
-        
-        timeout = 29 # Minutes
+            parallel_options  = f"-M all -t {timeout}"
+            parallel_verbose  = "-v" if verbose else ""
             
         parallel_run_cmd = f"cat {parallel_file} | {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
         
@@ -659,27 +659,28 @@ if __name__ == "__main__":
             write_to_parallel(cwd, kwargs_main, parallel_file = parallel_file)
             print("Galfitting via parallelization...")
             try:
-                sp(f"{parallel_run_cmd} -t {timeout}", capture_output = capture_output, timeout = 60*(timeout + 1))
+                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout = 60*(timeout + 1))
             except subprocess.TimeoutExpired:
+                print("Timed out.")
                 pass
 
-        # Python needs a moment to catch-up it seems
-        time.sleep(60)
-        kwargs_main = check_galfit_out_hangups(tmp_fits_dir, out_dir, kwargs_main)
+            # Python needs a moment to catch-up it seems
+            time.sleep(60)
+            kwargs_main = check_galfit_out_hangups(tmp_fits_dir, out_dir, kwargs_main)
         
         count = 2
         while kwargs_main["galaxy_names"] and count < 10:
-            print("Did not finish all galaxies, parallelizing again, increasing timeout...\n")
+            print("Did not finish all galaxies, parallelizing again...\n")
             print(f"{len(kwargs_main['galaxy_names'])} galaxies to go.")
             write_to_parallel(cwd, kwargs_main, parallel_file = parallel_file)
             
-            timeout += count
             try:
                 print("Piping to parallel")
-                sp(f"{parallel_run_cmd} -t {timeout}", capture_output = capture_output, timeout = 60*(timeout + 1))
+                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout = 60*(timeout + 1))
             except subprocess.TimeoutExpired:
                 pass
             
+            time.sleep(60)
             kwargs_main = check_galfit_out_hangups(tmp_fits_dir, out_dir, kwargs_main)
             count += 1
             
@@ -776,8 +777,9 @@ if __name__ == "__main__":
         finished_pkl_num = 0
         if restart:
             finished_pkl_num = max(
-                                   [int(os.path.basename(i).replace(basename, "")) 
+                                   [int(os.path.basename(i).split("_")[0].replace(basename, "")) 
                                     for i in find_files(out_dir, f'{basename}*_output_nmr.pkl', "f")
+                                    if os.path.basename(i).split("_")[0].replace(basename, "")
                                    ]
                                   )
 
@@ -857,7 +859,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[58]:
+# In[66]:
 
 
 if __name__ == "__main__":
