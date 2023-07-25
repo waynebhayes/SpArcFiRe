@@ -82,7 +82,20 @@ def export_to_py(notebook_name, output_filename = ""):
                 print("Output from nbconvert: ", *result)
 
 
-# In[20]:
+# In[5]:
+
+
+def sp(cmd_str, capture_output = True, timeout = None):
+    # Because it is a pain in the butt to call subprocess with all those commands every time
+    return subprocess.run(cmd_str, 
+                          capture_output = capture_output, 
+                          text = True, 
+                          shell = True,
+                          timeout = timeout,
+                          executable="/bin/bash")
+
+
+# In[6]:
 
 
 def check_programs():
@@ -107,19 +120,6 @@ global run_galfit
 global run_fitspng
 global run_python
 run_galfit, run_fitspng, run_python = check_programs()
-
-
-# In[6]:
-
-
-def sp(cmd_str, capture_output = True, timeout = None):
-    # Because it is a pain in the butt to call subprocess with all those commands every time
-    return subprocess.run(cmd_str, 
-                          capture_output = capture_output, 
-                          text = True, 
-                          shell = True,
-                          timeout = timeout,
-                          executable="/bin/bash")
 
 
 # In[7]:
