@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[35]:
+# In[1]:
 
 
 import os
@@ -17,7 +17,7 @@ import pandas as pd
 import numpy as np
 
 
-# In[36]:
+# In[2]:
 
 
 # For debugging purposes
@@ -31,7 +31,7 @@ def in_notebook():
         return False
 
 
-# In[37]:
+# In[3]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -57,7 +57,7 @@ sys.path.append(_MODULE_DIR)
 from Functions.helper_functions import *
 
 
-# In[38]:
+# In[4]:
 
 
 class GalfitComponent:
@@ -420,7 +420,9 @@ class GalfitComponent:
     #     return self.__dict__.iteritems()
 
 
-# In[39]:
+# 
+
+# In[5]:
 
 
 class Sersic(GalfitComponent):
@@ -552,7 +554,7 @@ class Sersic(GalfitComponent):
         return
 
 
-# In[40]:
+# In[6]:
 
 
 class Power(GalfitComponent):
@@ -677,7 +679,7 @@ class Power(GalfitComponent):
         return
 
 
-# In[41]:
+# In[7]:
 
 
 class Fourier(GalfitComponent):
@@ -786,7 +788,7 @@ class Fourier(GalfitComponent):
         return
 
 
-# In[42]:
+# In[8]:
 
 
 class Sky(GalfitComponent):
@@ -889,7 +891,7 @@ class Sky(GalfitComponent):
         return
 
 
-# In[43]:
+# In[9]:
 
 
 class GalfitHeader(GalfitComponent):
@@ -901,7 +903,7 @@ class GalfitHeader(GalfitComponent):
         self.input_image     = kwargs.get("input_image", f"{galaxy_name}.fits")
         self.output_image    = kwargs.get("output_image", f"{galaxy_name}_galfit_out.fits")
         self.sigma_image     = kwargs.get("sigma_image", "none")
-        self.psf             = kwargs.get("psf", "none") # May add gname to this
+        self.psf             = kwargs.get("psf", f"{galaxy_name}_psf.fits") # May add gname to this
         self.fine_sampling   = kwargs.get("fine_sampling", 1)
         self.pixel_mask      = kwargs.get("pixel_mask", f"{galaxy_name}_star-rm.fits")
         self.constraints     = kwargs.get("constraints", "none")
@@ -1042,14 +1044,14 @@ class GalfitHeader(GalfitComponent):
         return
 
 
-# In[44]:
+# In[ ]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[45]:
+# In[ ]:
 
 
 # Unit Test for GalfitComponent
@@ -1060,7 +1062,7 @@ if __name__ == "__main__":
         print(k,v)
 
 
-# In[46]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1099,21 +1101,21 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps""".
     print(header)
 
 
-# In[47]:
+# In[ ]:
 
 
 if __name__ == "__main__":
     bogus_list = """ 0) sersic                 #  Component type
-     1) 76.7000  76.5000  0 0  #  Position x, y
-     3) 12.9567     1          #  Integrated magnitude
-     4) 18.5147     1          #  R_e (effective radius)   [pix]
-     5) 0.6121      1          #  Sersic index n (de Vaucouleurs n=4)
-     6) 0.0000      0          #     -----
-     7) 0.0000      0          #     -----
-     8) 0.0000      0          #     -----
-     9) 0.3943      1          #  Axis ratio (b/a)
-    10) -48.3372    1          #  Position angle (PA) [deg: Up=0, Left=90]
-     Z) 0                      #  Skip this model in output image?  (yes=1, no=0)""".split("\n")
+ 1) 76.7000  76.5000  0 0  #  Position x, y
+ 3) 12.9567     1          #  Integrated magnitude
+ 4) 18.5147     1          #  R_e (effective radius)   [pix]
+ 5) 0.6121      1          #  Sersic index n (de Vaucouleurs n=4)
+ 6) 0.0000      0          #     -----
+ 7) 0.0000      0          #     -----
+ 8) 0.0000      0          #     -----
+ 9) 0.3943      1          #  Axis ratio (b/a)
+ 10) -48.3372    1          #  Position angle (PA) [deg: Up=0, Left=90]
+ Z) 0                      #  Skip this model in output image?  (yes=1, no=0)""".split("\n")
 
     bogus_dict = eval("""{'1_XC': '[67.3796]',
      '1_YC': '[67.7662]',
@@ -1143,7 +1145,7 @@ if __name__ == "__main__":
     print(bulge)
 
 
-# In[48]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1183,7 +1185,7 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
     print(arms)
 
 
-# In[49]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1216,7 +1218,7 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
     print(fourier)
 
 
-# In[53]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1232,7 +1234,7 @@ if __name__ == "__main__":
     bulge.to_file(f"{base_out}_PowerFourierSkip.txt", arms, fourier)
 
 
-# In[16]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1269,7 +1271,7 @@ if __name__ == "__main__":
     print(sky)
 
 
-# In[17]:
+# In[ ]:
 
 
 if __name__ == "__main__":
