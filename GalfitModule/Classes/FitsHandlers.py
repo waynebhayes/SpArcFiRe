@@ -17,6 +17,8 @@ import gc
 import numpy as np
 import scipy.linalg as slg
 from scipy.stats import norm
+from skimage.draw import disk, ellipse
+import matplotlib.pyplot as plt
 
 
 # In[2]:
@@ -176,6 +178,7 @@ class FitsFile:
         
         gname         = kwargs.get("gname", self.gname)
         
+        # TODO: BAD ASSUMPTION MOVING FORWARD
         tmp_fits_path = kwargs.get("tmp_fits_path", self.filepath)
         # .../galfits -> galfit_png
         tmp_png_dir   = os.path.split(tmp_fits_path)[0].rstrip("s") + "_png"
@@ -308,20 +311,77 @@ class OutputFits(FitsFile):
         # self.model       = self.all_hdu.get("model", None)
         # self.residual    = self.all_hdu.get("residual", None)
         
+    def generate_bulge_mask(self, sparcfire_csv):
         
-    def generate_masked_residual(self, mask):
+        # Thanks Azra!
+        bulge_mask = np.ones(np.shape(self.model.data))
+        try:
+            info = pd.read_csv(sparcfire_csv)
+        except FileNotFoundError as fe:
+            print(fe)
+            return bulge_mask
+            
+        input_size = float(info[' iptSz'][0].split()[0][1:])
+        bulge_rad  = float(info[' bulgeMajAxsLen'][0])
+        # In radians
+        bulge_angle = float(info[' bulgeMajAxsAngle'][0])
+        axis_ratio  = float(info[' bulgeAxisRatio'][0]) # Maj/minor
+        
+        # + 1 added for effect
+        major_rad = int(bulge_rad * len(self.model.data[0]) // input_size) + 1
+        minor_rad = int(major_rad/axis_ratio)
+
+        crop_box = self.feedme.header.region_to_fit
+        # To adjust for python indexing
+        xbox_min, ybox_min = crop_box[0] - 1, crop_box[2] - 1
+        
+        # Shifting everything to origin
+        center_x, center_y = np.array(self.feedme.bulge.position, dtype = int) - 1 -\
+                             np.array((xbox_min, ybox_min), dtype = int)
+        
+        # center_x2, bulge_y2 = np.array(self.feedme.bulge.position, dtype = int) - \
+        #                      np.array((xbox_min, ybox_min), dtype = int) + \
+        #                      rad
+
+        #xx, yy = disk((center_x, center_y), major_rad)
+        xx, yy = ellipse(center_x, center_y, major_rad, minor_rad, rotation = bulge_angle)
+        
+        bulge_mask[xx, yy] = 0
+        self.bulge_mask = bulge_mask
+        
+#         temp = self.model.data
+#         plt.imshow(temp, origin = "lower")
+#         plt.show()
+        
+#         temp[xx, yy] = np.min(self.model.data[np.nonzero(self.model.data)])
+#         plt.imshow(temp, origin = "lower")
+#         plt.show()
+            
+        return bulge_mask
+        
+        
+    def generate_masked_residual(self, mask, use_bulge_mask = True):
 
         small_number = 1e-8
         
         crop_box = self.feedme.header.region_to_fit
-
         # To adjust for python indexing
-        box_min, box_max = crop_box[0] - 1, crop_box[1]
+        # Also, reminder, non-inclusive of end
+        xbox_min, xbox_max, ybox_min, ybox_max = crop_box[0] - 1, crop_box[1], crop_box[2] - 1, crop_box[3]
 
         # To invert the matrix since galfit keeps 0 valued areas
         crop_mask = 1
         if mask:
-            crop_mask = 1 - mask.data[box_min:box_max, box_min:box_max]
+            crop_mask = 1 - mask.data[xbox_min:xbox_max, ybox_min:ybox_max]
+            
+        if use_bulge_mask:
+            feedme_dir, feedme_file = os.path.split(self.feedme.path_to_feedme)
+            
+            if exists(pj(feedme_dir, f"{self.gname}.csv")):
+                crop_mask *= self.generate_bulge_mask(pj(feedme_dir, f"{self.gname}.csv"))
+            else:
+                # REQUIRES GENERATE_BULGE_MASK TO BE RUN SEPARATE WITH CSV FILE SPECIFIED 
+                crop_mask *= self.bulge_mask
         
         try:
             self.masked_residual = (self.observation.data - self.model.data)*crop_mask
@@ -420,16 +480,25 @@ if __name__ == "__main__":
 # Unit test to check value of masked residual
 if __name__ == "__main__":
     
+    print("No bulge mask")
+    _ = test_model.generate_masked_residual(test_mask, use_bulge_mask = False)
+    print(f"Norm of the observation: {test_model.norm_observation:.4f}")
+    print(f"Norm of the model: {test_model.norm_model:.4f}")
+    print(f"Norm of the residual: {test_model.norm_residual:.4f}")
+    print(f"Norm of the masked residual: {test_model.nmr:.4f}")
+    print(f"Norm of the masked residual ratio: {test_model.nmrr:.8f}")
+    
+    print("\nNow with bulge mask")
     _ = test_model.generate_masked_residual(test_mask)
-    print(f"{test_model.norm_observation:.4f}")
-    print(f"{test_model.norm_model:.4f}")
-    print(f"{test_model.norm_residual:.4f}")
-    print(f"{test_model.nmr:.4f}")
-    print(f"{test_model.nmrr:.8f}")
+    print(f"Norm of the observation: {test_model.norm_observation:.4f}")
+    print(f"Norm of the model: {test_model.norm_model:.4f}")
+    print(f"Norm of the residual: {test_model.norm_residual:.4f}")
+    print(f"Norm of the masked residual: {test_model.nmr:.4f}")
+    print(f"Norm of the masked residual ratio: {test_model.nmrr:.8f}")
     #print(np.min(test_model.observation.data))
 
 
-# In[10]:
+# In[ ]:
 
 
 if __name__ == "__main__":
