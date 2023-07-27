@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[ ]:
 
 
 import os
@@ -21,7 +21,7 @@ from skimage.draw import disk, ellipse
 import matplotlib.pyplot as plt
 
 
-# In[2]:
+# In[ ]:
 
 
 # For debugging purposes
@@ -35,7 +35,7 @@ def in_notebook():
         return False
 
 
-# In[3]:
+# In[ ]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -63,7 +63,7 @@ from Classes.Components import *
 from Classes.Containers import *
 
 
-# In[4]:
+# In[ ]:
 
 
 class HDU:
@@ -90,7 +90,7 @@ class HDU:
         return output_str
 
 
-# In[5]:
+# In[ ]:
 
 
 class FitsFile:
@@ -269,7 +269,7 @@ class FitsFile:
             setattr(self, key, value)
 
 
-# In[6]:
+# In[ ]:
 
 
 class OutputFits(FitsFile):
@@ -305,6 +305,8 @@ class OutputFits(FitsFile):
         
         self.data = self.model.data
         
+        self.bulge_mask = np.ones(np.shape(self.model.data))
+        
         self.close()
         
         # self.observation = self.all_hdu.get("observation", None)
@@ -316,16 +318,26 @@ class OutputFits(FitsFile):
         # Thanks Azra!
         bulge_mask = np.ones(np.shape(self.model.data))
         try:
-            info = pd.read_csv(sparcfire_csv)
+            info = pd.read_csv(sparcfire_csv, dtype = str).dropna()
         except FileNotFoundError as fe:
             print(fe)
             return bulge_mask
+        
+        if "rejected" in info[' fit_state']:
+            return bulge_mask
             
-        input_size = float(info[' iptSz'][0].split()[0][1:])
+        try:
+            input_size = float(str(info[' iptSz'][0]).split()[0][1:])
+        except Exception as e:
+            print(f"There is an issue determining the bulge mask for {self.gname}.")
+            return bulge_mask
+        
         bulge_rad  = float(info[' bulgeMajAxsLen'][0])
         # In radians
         bulge_angle = float(info[' bulgeMajAxsAngle'][0])
         axis_ratio  = float(info[' bulgeAxisRatio'][0]) # Maj/minor
+        if axis_ratio < 0.5:
+            axis_ratio = 0.5
         
         # + 1 added for effect
         major_rad = int(bulge_rad * len(self.model.data[0]) // input_size) + 1
@@ -344,7 +356,13 @@ class OutputFits(FitsFile):
         #                      rad
 
         #xx, yy = disk((center_x, center_y), major_rad)
-        xx, yy = ellipse(center_x, center_y, major_rad, minor_rad, rotation = bulge_angle)
+        try:
+            xx, yy = ellipse(center_x, center_y, major_rad, minor_rad, rotation = bulge_angle, shape = np.shape(self.model.data))
+        except Exception as e:
+            print(e)
+            print(self.gname)
+            #print(center_x, center_y, major_rad, minor_rad, rotation)
+            return bulge_mask
         
         bulge_mask[xx, yy] = 0
         self.bulge_mask = bulge_mask
@@ -381,7 +399,12 @@ class OutputFits(FitsFile):
                 crop_mask *= self.generate_bulge_mask(pj(feedme_dir, f"{self.gname}.csv"))
             else:
                 # REQUIRES GENERATE_BULGE_MASK TO BE RUN SEPARATE WITH CSV FILE SPECIFIED 
-                crop_mask *= self.bulge_mask
+                try:
+                    crop_mask *= self.bulge_mask
+                except AttributeError:
+                    print(f"Could not generate bulge mask for {self.gname}. Check location of csv or run generate_bulge_mask with a specified csv file.")
+                except ValueError:
+                    print(f"Could not generate bulge mask for {self.gname}. There may be an issue with sparcfire output due to a broadcast issue.")
         
         try:
             self.masked_residual = (self.observation.data - self.model.data)*crop_mask
@@ -418,14 +441,14 @@ class OutputFits(FitsFile):
         return self.masked_residual_normalized
 
 
-# In[7]:
+# In[ ]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[8]:
+# In[ ]:
 
 
 # Testing from_file
@@ -474,7 +497,7 @@ if __name__ == "__main__":
     print(np.shape(test_obs.observation.data))
 
 
-# In[9]:
+# In[ ]:
 
 
 # Unit test to check value of masked residual
