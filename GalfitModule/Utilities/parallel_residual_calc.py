@@ -45,7 +45,7 @@ from Functions.helper_functions import *
     
 # ==================================================================================================================
 
-def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_png_dir = "", parallel = True):
+def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", to_png = False, parallel = True):
 
     report_num = 1000
     if parallel:
@@ -72,16 +72,22 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_png_dir = 
         # Logic implemented to handle None
         mask_fits_file = None #np.zeros((500,500))
     
+    if out_dir:
+        _ = fits_file.generate_bulge_mask(pj(out_dir, gname, f"{gname}.csv"))
+        
     masked_residual_normalized = fits_file.generate_masked_residual(mask_fits_file)
     if masked_residual_normalized is None:
         print(f"Could not calculate nmr for galaxy {gname}. Continuing...")
         return None, None
     
     # Doesn't work on Openlab (sadly)
-    # Keep this in for actual parallelizing since it's hard to read booleans
+    # Keep this in for actual parallelizing since it's a PITA to read booleans
     # from command line (use the default value to our advantage)
-    if not parallel and out_png_dir:
-        fits_file.to_png(out_png_dir = out_png_dir)
+    if not parallel and to_png:
+        if isinstance(to_png, str):
+            fits_file.to_png(out_png_dir = to_png)
+        elif out_dir:
+            fits_file.to_png(out_png_dir = pj(out_dir, "galfit_png"))
     
     return gname, fits_file.nmr#, fits_file.nmrr
 
@@ -90,14 +96,15 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_png_dir = 
     
 # ==================================================================================================================
 
-def parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_png_dir, all_gname_tmp_out, parallel = True):
+def parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_dir, to_png, all_gname_tmp_out, parallel = True):
     out_nmr = Parallel(n_jobs = -2)( #, timeout = 30)(
                    delayed(fill_objects)(
                                          gname,
                                          count,
                                          galfit_tmp_path,
                                          galfit_mask_path,
-                                         out_png_dir,
+                                         out_dir,
+                                         to_png,
                                          parallel = parallel
                                         )
                    for count, gname in enumerate(all_gname_tmp_out) if not gname.startswith("failed")
@@ -147,8 +154,14 @@ def main(**kwargs):
     
     chunk_size = 1000
     if parallel and chunk_size > len(all_gname_tmp_out)*0.5:
-        print("No need to parallelize!")
-        out_nmr = parallel_wrapper(galfit_tmp_path, galfit_mask_path, None, all_gname_tmp_out, parallel = False)
+        print("No need to (massively) parallelize!")
+        out_nmr = parallel_wrapper(galfit_tmp_path, 
+                                   galfit_mask_path, 
+                                   out_dir, 
+                                   None, 
+                                   all_gname_tmp_out, 
+                                   parallel = False
+                                  )
         parallel = False
         
     elif parallel:
@@ -184,7 +197,7 @@ def main(**kwargs):
                     
                 gal_to_parallel = all_gname_tmp_out[chunk - chunk_size:][:chunk_size]
                 #num_str = f"{i:0>3}"
-                sf.write(f"{run_python} {python_parallel} {pj(run_dir, basename + str(i))} {galfit_tmp_path} {galfit_mask_path} {out_png_dir} {','.join(gal_to_parallel)}\n")
+                sf.write(f"{run_python} {python_parallel} {pj(run_dir, basename + str(i))} {galfit_tmp_path} {galfit_mask_path} {out_dir} {out_png_dir} {','.join(gal_to_parallel)}\n")
                 
         print("parallelizing")
         parallel_run_cmd = f"cat {parallel_file} | {run_parallel} {parallel_run_name} {parallel_options} {parallel_verbose}"
@@ -200,7 +213,13 @@ def main(**kwargs):
                 out_nmr.extend(pickle.load(open(file, 'rb')))
 
     else:
-        out_nmr = parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_png_dir, all_gname_tmp_out, parallel = False)
+        out_nmr = parallel_wrapper(galfit_tmp_path, 
+                                   galfit_mask_path,
+                                   out_dir,
+                                   out_png_dir, 
+                                   all_gname_tmp_out, 
+                                   parallel = False
+                                  )
             
     # out_nmr = Parallel(n_jobs = -2, timeout = 30)(
     #                    delayed(fill_objects)(
