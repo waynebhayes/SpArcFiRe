@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[ ]:
 
 
 import os
@@ -17,7 +17,7 @@ import pandas as pd
 import numpy as np
 
 
-# In[2]:
+# In[ ]:
 
 
 # For debugging purposes
@@ -31,7 +31,7 @@ def in_notebook():
         return False
 
 
-# In[3]:
+# In[ ]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -57,7 +57,7 @@ sys.path.append(_MODULE_DIR)
 from Functions.helper_functions import *
 
 
-# In[4]:
+# In[ ]:
 
 
 class GalfitComponent:
@@ -420,9 +420,7 @@ class GalfitComponent:
     #     return self.__dict__.iteritems()
 
 
-# 
-
-# In[5]:
+# In[ ]:
 
 
 class Sersic(GalfitComponent):
@@ -539,22 +537,27 @@ class Sersic(GalfitComponent):
         # example
         # sersic    : (  [62.90],  [62.90])  14.11     13.75    0.30    0.63    60.82
         # does not include position
-        params = in_line.split("])")[1]
-        params = " ".join(params.split())
-        params = params.split()
-        params = [i.strip("*") for i in params]
+        #params = in_line.split("])")[1]
+        #params = " ".join(params.split())
+        #params = params.split()
+        #params = [i.strip("*") for i in params]
+        #params = [i.strip("[]") for i in params.split()]
+        params = [i.strip("[*,]()") for i in in_line.split() 
+                  if any(map(str.isdigit, i))
+                 ]
         
-        self.magnitude        = float(params[0])
-        self.effective_radius = float(params[1])
-        self.sersic_index     = float(params[2])
-        self.axis_ratio       = float(params[3])
-        self.position_angle   = float(params[4])
+        self.position         = (float(params[0]), float(params[1]))
+        self.magnitude        = float(params[2])
+        self.effective_radius = float(params[3])
+        self.sersic_index     = float(params[4])
+        self.axis_ratio       = float(params[5])
+        self.position_angle   = float(params[6])
         self.update_param_values()
         
         return
 
 
-# In[6]:
+# In[ ]:
 
 
 class Power(GalfitComponent):
@@ -662,24 +665,24 @@ class Power(GalfitComponent):
     def update_from_log(self, in_line):
         # example
         # power   :     [0.00]   [23.51]  219.64     -0.16     ---  -44.95   -15.65
-        # does not include inner/outer rad
-        # Assumes those are the only ones fixed
         
-        params = in_line.split("]")[2] 
-        params = " ".join(params.split())
-        params = params.split()
-        params = [i.strip("*") for i in params]
+        #params = in_line.split("]")[2] 
+        #params = " ".join(params.split())
+        params = [i.strip("[*]") for i in in_line.split() 
+                  if any(map(str.isdigit, i))
+                 ]
         
-        self.cumul_rot          = float(params[0])
-        self.powerlaw           = float(params[1])
-        # Some dashed line here...
-        self.inclination        = float(params[3])
-        self.sky_position_angle = float(params[4])
+        self.inner_rad          = float(params[0])
+        self.outer_rad          = float(params[1])
+        self.cumul_rot          = float(params[2])
+        self.powerlaw           = float(params[3])
+        self.inclination        = float(params[4])
+        self.sky_position_angle = float(params[5])
         self.update_param_values()
         return
 
 
-# In[7]:
+# In[ ]:
 
 
 class Fourier(GalfitComponent):
@@ -788,7 +791,7 @@ class Fourier(GalfitComponent):
         return
 
 
-# In[8]:
+# In[ ]:
 
 
 class Sky(GalfitComponent):
@@ -879,19 +882,23 @@ class Sky(GalfitComponent):
         # example
         #sky       : [ 63.00,  63.00]  1130.51  -4.92e-02  1.00e-02
         
-        params = in_line.split("]")[1]
-        params = " ".join(params.split())
-        params = params.split()
-        params = [i.strip("*") for i in params]
+        # params = in_line.split("]")[1]
+        # params = " ".join(params.split())
+        # params = params.split()
+        # params = [i.strip("*") for i in params]
+        params = [i.strip("[*,]") for i in in_line.split() 
+                  if any(map(str.isdigit, i))
+                 ]
         
-        self.sky_background = float(params[0])
-        self.dsky_dx = float(params[1])
-        self.dsky_dy = float(params[1])
+        # params[0] and [1] are position
+        self.sky_background = float(params[2])
+        self.dsky_dx = float(params[3])
+        self.dsky_dy = float(params[4])
         self.update_param_values()
         return
 
 
-# In[9]:
+# In[ ]:
 
 
 class GalfitHeader(GalfitComponent):
@@ -1143,6 +1150,11 @@ if __name__ == "__main__":
     bulge_df.iloc[0,2] = 113
     bulge.from_pandas(bulge_df)
     print(bulge)
+    
+    log_line = "sersic    : (  [62.90],  [62.90])  14.11*     13.75    0.30    0.63    60.82"
+    
+    bulge.update_from_log(log_line)
+    print(bulge)
 
 
 # In[ ]:
@@ -1183,6 +1195,11 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
     arms_df.iloc[0,2] = 113
     arms.from_pandas(arms_df)
     print(arms)
+    
+    log_line = "power   :     [0.00]   23.51  219.64     -0.16*     ---  -44.95   -15.65"
+    
+    arms.update_from_log(log_line)
+    print(arms)
 
 
 # In[ ]:
@@ -1216,6 +1233,11 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
     fourier_df.iloc[0,2] = 113
     fourier.from_pandas(fourier_df)
     print(fourier)
+    
+    log_line = "fourier : (1:  0.06,   -6.67)   (3:  0.05,    0.18)"
+    
+    fourier.update_from_log(log_line)
+    print(fourier)
 
 
 # In[ ]:
@@ -1244,18 +1266,18 @@ if __name__ == "__main__":
  3) 1.813e-02      1       #  dsky/dy (sky gradient in y)     [ADUs/pix]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)""".split("\n")
 
+    sky = Sky(3)
+    sky.from_file_helper(bogus_list)
+    #sky.update_param_values()
+    sky.to_file(f"{base_out}_Sky.txt")
+    print(sky)
+    
     bogus_dict = eval("""{'COMP_3': 'sky',
  '3_XC': '[67.0000]',
  '3_YC': '[68.0000]',
  '3_SKY': '1133.4166 +/- 0.1595',
  '3_DSDX': '0.0119 +/- 0.0048',
  '3_DSDY': '-0.0131 +/- 0.0047'}""")
-
-    sky = Sky(3)
-    sky.from_file_helper(bogus_list)
-    #sky.update_param_values()
-    sky.to_file(f"{base_out}_Sky.txt")
-    print(sky)
 
     sky.from_file_helper(bogus_dict)
     #sky.update_param_values()
@@ -1268,6 +1290,11 @@ if __name__ == "__main__":
     sky_df.iloc[0,1] = 112
     sky_df.iloc[0,2] = 113
     sky.from_pandas(sky_df)
+    print(sky)
+    
+    log_line = "sky       : [ 63.00,  63.00]  1130.51  -4.92e-02  1.00e-02"
+    
+    sky.update_from_log(log_line)
     print(sky)
 
 
