@@ -13,7 +13,7 @@
 # 
 # TO RUN: `python3 sparc_to_galfit_feedme_gen.py`
 
-# In[7]:
+# In[1]:
 
 
 import numpy as np
@@ -28,7 +28,7 @@ from copy import deepcopy
 from astropy.io import fits
 
 
-# In[8]:
+# In[2]:
 
 
 # For debugging purposes
@@ -42,7 +42,7 @@ def in_notebook():
         return False
 
 
-# In[9]:
+# In[3]:
 
 
 import sys
@@ -278,13 +278,19 @@ def galaxy_information(galaxy_name, galaxy_path):
                 print(f"SpArcFiRe likely failed on this galaxy, {ve}. Proceeding with default values...")
                 break
                 
-            # Now declared first thing!
-            #global scale_fact
-            scale_fact = 2*crop_rad_out/256
+            # # Now declared first thing!
+            # #global scale_fact
+            # scale_fact = 2*crop_rad_out/256
             
             # Anything with converting to float/int should go in here since there are a couple issues besides
             # fit state which still result in an empty csv
             try:
+                input_size    = int(row.get('iptSz', "[256 256]").strip().split()[0][1:])
+                if input_size:
+                    scale_fact = 2*crop_rad_out/input_size
+                else:
+                    scale_fact = 2*crop_rad_out/256
+                    
                 bulge_rad_out = scale_var(row.get('bulgeMajAxsLen', bulge_rad_out/scale_fact), scale_fact)
                 bulge_axis_ratio_out = row.get('bulgeAxisRatio', bulge_axis_ratio_out)
                 
@@ -486,67 +492,67 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2):
 # In[13]:
 
 
-def csv_sdss_info(galaxy_names): # to grab petromag and also psf parameter things
+# def csv_sdss_info(galaxy_names): # to grab petromag and also psf parameter things
     
-    gname_info = {}
+#     gname_info = {}
     
-    # Defaults go here
-    run = 0
-    rerun = 0
-    cam = 0
-    field = 0
-    row = 0
-    col = 0
-    pmag = 16
+#     # Defaults go here
+#     run = 0
+#     rerun = 0
+#     cam = 0
+#     field = 0
+#     row = 0
+#     col = 0
+#     pmag = 16
     
-    try:
-        #star_dl_filename = glob_name('star_dl','star_dl','.csv')
-        star_dl_filename = path_join('star_dl','star_dl','.csv')
-        star_dl_file = open(star_dl_filename, 'r')
+#     try:
+#         #star_dl_filename = glob_name('star_dl','star_dl','.csv')
+#         star_dl_filename = path_join('star_dl','star_dl','.csv')
+#         star_dl_file = open(star_dl_filename, 'r')
         
-    except:
-        print("Can't open to read star_dl.csv with star information (for PSF)")
-        print("Check Sparcfire output or directories. Proceeding with default values.")
+#     except:
+#         print("Can't open to read star_dl.csv with star information (for PSF)")
+#         print("Check Sparcfire output or directories. Proceeding with default values.")
     
-        for gname in galaxy_names:
-            gname_info[gname] = [run, rerun, cam, field, row, col, pmag]
+#         for gname in galaxy_names:
+#             gname_info[gname] = [run, rerun, cam, field, row, col, pmag]
             
-        return gname_info
+#         return gname_info
 
-    else:
-        star_df = pd.read_csv(star_dl_file, index_col=0)
-        #csv_gal_name = star_df.columns[0]
+#     else:
+#         star_df = pd.read_csv(star_dl_file, index_col=0)
+#         #csv_gal_name = star_df.columns[0]
         
-        for gname in galaxy_names:
-            try:
-                temp = star_df.at[gname, 'run']
+#         for gname in galaxy_names:
+#             try:
+#                 temp = star_df.at[gname, 'run']
 
-            except:
-                #print(star_df.loc[:, 'name'])
-                print("Can't find the galaxy:", gname, "in our repository.")
-                print("Proceeding with default values and no PSF.")
-                run = 0
-                rerun = 0
-                camcol = 0
-                field = 0
-                rowc = 0
-                colc = 0
-                petromag = 16
+#             except:
+#                 #print(star_df.loc[:, 'name'])
+#                 print("Can't find the galaxy:", gname, "in our repository.")
+#                 print("Proceeding with default values and no PSF.")
+#                 run = 0
+#                 rerun = 0
+#                 camcol = 0
+#                 field = 0
+#                 rowc = 0
+#                 colc = 0
+#                 petromag = 16
 
-            else:
-                galaxy_band = gname[-1]
+#             else:
+#                 galaxy_band = gname[-1]
 
-                run = ' run: '     + str(star_df.at[gname, 'run'])
-                rerun = ' rerun: ' + str(star_df.at[gname, 'rerun'])
-                cam = ' camcol: '  + str(star_df.at[gname, 'camcol'])
-                field = ' field: ' + str(star_df.at[gname, 'field'])
-                row = ' row: '     + str(star_df.at[gname, 'rowC'])
-                col = ' col: '     + str(star_df.at[gname, 'colC'])
-                pmag = str(star_df.at[gname, 'petroMag_' + galaxy_band])
+#                 run = ' run: '     + str(star_df.at[gname, 'run'])
+#                 rerun = ' rerun: ' + str(star_df.at[gname, 'rerun'])
+#                 cam = ' camcol: '  + str(star_df.at[gname, 'camcol'])
+#                 field = ' field: ' + str(star_df.at[gname, 'field'])
+#                 row = ' row: '     + str(star_df.at[gname, 'rowC'])
+#                 col = ' col: '     + str(star_df.at[gname, 'colC'])
+#                 pmag = str(star_df.at[gname, 'petroMag_' + galaxy_band])
                 
-            gname_info[gname] = [run, rerun, cam, field, row, col, pmag]
+#             gname_info[gname] = [run, rerun, cam, field, row, col, pmag]
         
-    return gname_info
+#     return gname_info
 
 
 # In[14]:
@@ -594,7 +600,7 @@ def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwarg
     
     galaxy_names, gfolders = get_galaxy_names_list(in_dir, tmp_dir, out_dir, galaxy_names = kwargs.get("galaxy_names", []))
     
-    psf_info = csv_sdss_info(galaxy_names)
+    #psf_info = csv_sdss_info(galaxy_names)
     
     feedme_info_out = {}
     
@@ -658,14 +664,16 @@ def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwarg
         
         #To reconstruct the z PSF (i.e., the 5th HDU) at the position (row, col) = (500, 600) from run 1336, column 2, field 51 you’d say:
         #read_PSF psField-001336-2-0051.fit 5 500.0 600.0 foo.fit
-        run, rerun, camcol, field, psf_row, psf_col, petromag = psf_info[gname]
+        #run, rerun, camcol, field, psf_row, psf_col, petromag = psf_info[gname]
+        # Using the default I've been using (for now)
+        petromag = 16
         
         header = GalfitHeader(input_menu_file = gname,
-                              extra_header_info = f"{run}{camcol}{field}; HDU: z{psf_row}{psf_col}",
+                              #extra_header_info = f"{run}{camcol}{field}; HDU: z{psf_row}{psf_col}",
                               galaxy_name = gname,
                               input_image = pj(in_dir, f"{gname}.fits"),
                               output_image = pj(tmp_dir, "galfits", f"{gname}_galfit_out.fits"),
-                              #psf = pj(tmp_dir, "psf_files", f"{gname}_psf.fits"),
+                              psf = "None", #pj(tmp_dir, "psf_files", f"{gname}_psf.fits"),
                               pixel_mask = pj(tmp_dir, "galfit_masks", f"{gname}_star-rm.fits"),
                               region_to_fit = (x1crop, x2crop, y1crop, y2crop),
                               optimize = 0
@@ -705,8 +713,8 @@ def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwarg
         # Use a simple cut off for now
         # Looking at the first two arms may be too unreliable
         #print("Max arc length in 256 img", scale_var(max_arc, 0.5*256/crop_rad))
-        if scale_var(max_arc, 0.5*256/crop_rad) < 75:
-            print("Skipping Arms")
+        if scale_var(max_arc, 1/scale_fact) < 75:
+            print("Skipping Arms, max arc len is", max_arc*1/scale_fact)
             arms.add_skip(skip_val = 1)
 
         fourier = Fourier(component_number = 2)
@@ -762,24 +770,24 @@ def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwarg
         #paths_to_feedme.append(write_to_feedme(gfolder, formatted_feedme, feedme_name = gname + ".in")) # do I need paths_to_feedme? I used to use it for something...
 
 
-# In[42]:
+# In[ ]:
 
 
 if __name__ == "__main__":
     
     # FOR NOW (aka TODO) force >python 3.7 for f string and subprocess compatibility
-    out_str = """\t Python3.7 or greater required! Exitting without generating feedmes... 
-                if feedmes have already been generated, galfit will run with those.\n"""
-    assert sys.version_info >= (3, 7), out_str
+    # out_str = """\t Python3.7 or greater required! Exitting without generating feedmes... 
+    #             if feedmes have already been generated, galfit will run with those.\n"""
+    # assert sys.version_info >= (3, 7), out_str
     
-    # cwd = os.getcwd()
+    
     # if in_notebook():
     #     cwd = cwd.replace("ics-home", username)
-        
-    #write_to_feedmes(top_dir = cwd)
+    cwd = os.getcwd()    
+    write_to_feedmes(top_dir = cwd)
 
 
-# In[11]:
+# In[13]:
 
 
 if __name__ == "__main__":
