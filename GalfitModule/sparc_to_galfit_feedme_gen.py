@@ -668,12 +668,15 @@ def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwarg
         # Using the default I've been using (for now)
         petromag = 16
         
+        tmp_dir_basename = os.path.basename(tmp_dir)
         header = GalfitHeader(input_menu_file = gname,
                               #extra_header_info = f"{run}{camcol}{field}; HDU: z{psf_row}{psf_col}",
                               galaxy_name = gname,
                               input_image = pj(in_dir, f"{gname}.fits"),
                               output_image = pj(tmp_dir, "galfits", f"{gname}_galfit_out.fits"),
-                              psf = "None", #pj(tmp_dir, "psf_files", f"{gname}_psf.fits"),
+                              # Unfortunately have to use a relative path here since GALFIT
+                              # breaks when the filename is too long
+                              psf = pj("..", "..", tmp_dir_basename, "psf_files", f"{gname}_psf.fits"),
                               pixel_mask = pj(tmp_dir, "galfit_masks", f"{gname}_star-rm.fits"),
                               region_to_fit = (x1crop, x2crop, y1crop, y2crop),
                               optimize = 0
@@ -787,7 +790,7 @@ if __name__ == "__main__":
     write_to_feedmes(top_dir = cwd)
 
 
-# In[13]:
+# In[14]:
 
 
 if __name__ == "__main__":
