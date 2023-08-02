@@ -5,12 +5,14 @@
 # 
 # **Date (Github date will likely be more accurate): 4/17/23**
 
-# In[2]:
+# In[19]:
 
 
 import sys
 import os
 from os.path import join as pj
+
+from astropy.io import fits
 
 import argparse
 import shutil
@@ -308,7 +310,8 @@ if __name__ == "__main__":
     # Setting up paths and variables
     tmp_fits_dir    = pj(tmp_dir, "galfits")
     tmp_masks_dir   = pj(tmp_dir, "galfit_masks")
-    tmp_psf_dir     = pj(tmp_dir, "psf_files")
+    # Now dropping these in the individual galaxy folders
+    #tmp_psf_dir     = pj(tmp_dir, "psf_files")
     tmp_png_dir     = pj(tmp_dir, "galfit_png")
     #need_masks_dir  = pj(tmp_dir, "need_masks")
     
@@ -340,7 +343,7 @@ if __name__ == "__main__":
     # Making sub-directories
     _ = [os.mkdir(i) for i in (tmp_fits_dir, 
                                tmp_masks_dir, 
-                               tmp_psf_dir, 
+                               #tmp_psf_dir, 
                                tmp_png_dir, 
                                out_png_dir
                               )#, 
@@ -549,6 +552,10 @@ def write_to_parallel(cwd,
         for i, chunk in enumerate(range(chunk_size, len(kwargs_main["galaxy_names"]) +  chunk_size, chunk_size)):
             chunk_o_galaxies = kwargs_main["galaxy_names"][chunk - chunk_size:][:chunk_size]
             kwargs_in["galaxy_names"] = ",".join(chunk_o_galaxies)
+            
+            kwargs_in["petromags"] = ",".join(kwargs_main["petromags"][chunk - chunk_size:][:chunk_size])
+            kwargs_in["bulge_axis_ratios"] = ",".join(kwargs_main["bulge_axis_ratios"][chunk - chunk_size:][:chunk_size])
+            
 
             cmd_str = ""
             for k,v in kwargs_in.items():
@@ -593,7 +600,7 @@ def write_failed(failed_dir = cwd, failures = []):
 # In[ ]:
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":    
     #print("Finding all galaxies...")
     # galaxy_names = [os.path.basename(i).rstrip(".fits") 
     #                 for i in input_filenames]
@@ -612,6 +619,27 @@ if __name__ == "__main__":
             old_out = pj(out_dir, gname, f"{gname}_galfit_out_old.fits")
             if exists(new_out):
                 shutil.move(new_out, old_out)
+                
+    print("Reading in SDSS information")
+    # TODO: don't hardcode this
+    # ASSUME ALL ARE IN SAME COLOR BAND (FOR NOW)
+    with fits.open(pj(in_dir, galaxy_names[0] + ".fits")) as f:
+        #SURVEY = SDSS-r  DR7
+        color = f[0].header["SURVEY"].split()[0][-1]
+        
+    gzoo_file = pj(_HOME_DIR, "kelly_stuff", "Kelly-29k.tsv")
+    try:
+        gzoo_data = pd.read_csv(gzoo_file, 
+                                sep = "\t", 
+                                usecols = ["GZ_dr8objid", "petroMag_r", "deVAB_r"],
+                                index_col = "GZ_dr8objid", 
+                                dtype = {"GZ_dr8objid" : str}
+                               )
+        petromags = [gzoo_data.loc[gname, f"petroMag_{color}"] for gname in galaxy_names]
+        bulge_axis_ratios = [gzoo_data.loc[gname, f"deVAB_{color}"] for gname in galaxy_names]
+    except FileNotFoundError:
+        print(f"Could not find {gzoo_file}. Proceeding.")
+        gzoo_data = None
 
     kwargs_main = {"cwd"                : cwd,
                    "in_dir"             : in_dir,
@@ -619,13 +647,15 @@ if __name__ == "__main__":
                    "out_dir"            : out_dir,
                    "num_steps"          : num_steps,
                    "rerun"              : rerun,
-                   "parallel"              : parallel,
+                   "parallel"           : parallel,
                    "verbose"            : verbose,
                    "capture_output"     : capture_output,
                    "generate_starmasks" : generate_starmasks,
                    "run_from_tmp"       : run_from_tmp,
                    "aggressive_clean"   : aggressive_clean,
-                   # THIS MUST BE LAST FOR SENDING SEVERAL FOR PARALLELIZATION
+                   "petromags"          : petromags,
+                   "bulge_axis_ratios"  : bulge_axis_ratios,
+                   # Keep this last just in case
                    "galaxy_names"       : galaxy_names
                   }
     
@@ -871,7 +901,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[10]:
+# In[ ]:
 
 
 if __name__ == "__main__":

@@ -110,8 +110,12 @@ def main(**kwargs):
     # Feeding in as comma separated galaxies
     # If single galaxy, this returns a list containing just the one galaxy
     galaxy_names = kwargs.get("galaxy_names", [])
+    petromags         = kwargs.get("petromags", [])
+    bulge_axis_ratios = kwargs.get("bulge_axis_ratios", [])
     if isinstance(galaxy_names, str):
         galaxy_names = galaxy_names.split(",")
+        petromags    = petromags.split(",")
+        bulge_axis_ratios    = bulge_axis_ratios.split(",")
     #     galaxy_names = [galaxy_names]
     #assert isinstance(galaxy_names, list), "input_filenames must be a list, even if it's a single galaxy."
     
@@ -150,7 +154,9 @@ def main(**kwargs):
                                    galaxy_names = galaxy_names,
                                    in_dir  = in_dir,
                                    tmp_dir = tmp_dir,
-                                   out_dir = out_dir
+                                   out_dir = out_dir,
+                                   petromags = petromags,
+                                   bulge_axis_ratios = bulge_axis_ratios
                                   )
                                    
     max_it = 150
@@ -195,34 +201,38 @@ def main(**kwargs):
             final_galfit_output = OutputContainer(sp(run_galfit_cmd), **feedme_info[gname].to_dict())
             
         elif num_steps >= 2:
-            bulge_in = pj(out_dir, gname, f"{gname}_bulge.in")
-            header.to_file(bulge_in, initial_components.bulge, initial_components.sky)
+            # This ends up being more like a disk fit
+            disk_in = pj(out_dir, gname, f"{gname}_disk.in")
+            header.to_file(disk_in, initial_components.disk, initial_components.sky)
             
-            run_galfit_cmd = f"{base_galfit_cmd} {bulge_in}"
-            print("Bulge")
-            galfit_output = OutputContainer(sp(run_galfit_cmd), **feedme_info[gname].to_dict())
+            run_galfit_cmd = f"{base_galfit_cmd} {disk_in}"
+            print("Disk")
+            galfit_output = OutputContainer(sp(run_galfit_cmd), sersic_order = ["disk"], **feedme_info[gname].to_dict())
             
             if rerun:
                 galfit_output = rerun_galfit(galfit_output,
                                              base_galfit_cmd,
-                                             initial_components.bulge, initial_components.sky
+                                             # Pass in initial components here to generically
+                                             # determine which were optimized on
+                                             initial_components.disk, initial_components.sky
                                             )
 
             if num_steps == 3:
-                disk_in = pj(out_dir, gname, f"{gname}_disk.in")
+                # Fit disk first, now to refine the bulge
+                bulge_disk_in = pj(out_dir, gname, f"{gname}_bulge+disk.in")
                 
                 # Note initial components disk and galfit output the rest
                 # Those are updated!
-                header.to_file(disk_in, galfit_output.bulge, initial_components.disk, galfit_output.sky)
+                header.to_file(bulge_disk_in, initial_components.bulge, galfit_output.disk, galfit_output.sky)
                 
-                run_galfit_cmd = f"{base_galfit_cmd} {disk_in}"
+                run_galfit_cmd = f"{base_galfit_cmd} {bulge_disk_in}"
                 print("Bulge + Disk")
                 galfit_output = OutputContainer(sp(run_galfit_cmd), **galfit_output.to_dict())
                 
                 if rerun:
                     galfit_output = rerun_galfit(galfit_output,
                                                  base_galfit_cmd,
-                                                 galfit_output.bulge, initial_components.disk, galfit_output.sky
+                                                 initial_components.bulge, galfit_output.disk, galfit_output.sky
                                                 )
     
             # Overwrite original... for now 
@@ -300,9 +310,11 @@ def main(**kwargs):
                 shutil.move(galfit_out, pj(out_dir, gname, f"{gname}_galfit.{ext_num}"))
                 
         # Residual calculation, now done all at the same time! And added to the FITS header
-        _, gname_nmr = fill_objects(gname, 1, tmp_fits_dir, tmp_masks_dir)
+        _, gname_nmr, gname_kstest = fill_objects(gname, 1, tmp_fits_dir, tmp_masks_dir)
         with fits.open(tmp_fits_path_gname, mode='update', output_verify='ignore') as hdul:
             hdul[2].header["NMR"] = (gname_nmr, "Norm of the masked residual")
+            hdul[2].header["ks_p"] = (round(gname_kstest.pvalue, 4), "p value of kstest vs noise")
+            hdul[2].header["ks_stat"] = (round(gname_kstest.statistic, 4), "statistic value of kstest vs noise")
             # Flush done automatically in update mode
             #hdul.flush()
 
