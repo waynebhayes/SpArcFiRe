@@ -553,8 +553,8 @@ def write_to_parallel(cwd,
             chunk_o_galaxies = kwargs_main["galaxy_names"][chunk - chunk_size:][:chunk_size]
             kwargs_in["galaxy_names"] = ",".join(chunk_o_galaxies)
             
-            kwargs_in["petromags"] = ",".join(kwargs_main["petromags"][chunk - chunk_size:][:chunk_size])
-            kwargs_in["bulge_axis_ratios"] = ",".join(kwargs_main["bulge_axis_ratios"][chunk - chunk_size:][:chunk_size])
+            # kwargs_in["petromags"] = ",".join(kwargs_main["petromags"][chunk - chunk_size:][:chunk_size])
+            # kwargs_in["bulge_axis_ratios"] = ",".join(kwargs_main["bulge_axis_ratios"][chunk - chunk_size:][:chunk_size])
             
 
             cmd_str = ""
@@ -620,26 +620,31 @@ if __name__ == "__main__":
             if exists(new_out):
                 shutil.move(new_out, old_out)
                 
-    print("Reading in SDSS information")
+    #print("Reading in SDSS information")
     # TODO: don't hardcode this
     # ASSUME ALL ARE IN SAME COLOR BAND (FOR NOW)
-    with fits.open(pj(in_dir, galaxy_names[0] + ".fits")) as f:
-        #SURVEY = SDSS-r  DR7
-        color = f[0].header["SURVEY"].split()[0][-1]
+    # with fits.open(pj(in_dir, galaxy_names[0] + ".fits")) as f:
+    #     #SURVEY = SDSS-r  DR7
+    #     color = f[0].header["SURVEY"].split()[0][-1]
         
-    gzoo_file = pj(_HOME_DIR, "kelly_stuff", "Kelly-29k.tsv")
-    try:
-        gzoo_data = pd.read_csv(gzoo_file, 
-                                sep = "\t", 
-                                usecols = ["GZ_dr8objid", "petroMag_r", "deVAB_r"],
-                                index_col = "GZ_dr8objid", 
-                                dtype = {"GZ_dr8objid" : str}
-                               )
-        petromags = [gzoo_data.loc[gname, f"petroMag_{color}"] for gname in galaxy_names]
-        bulge_axis_ratios = [gzoo_data.loc[gname, f"deVAB_{color}"] for gname in galaxy_names]
-    except FileNotFoundError:
-        print(f"Could not find {gzoo_file}. Proceeding.")
-        gzoo_data = None
+#     gzoo_file = pj(_HOME_DIR, "kelly_stuff", "Kelly-Final-GZ-all-psfield-incl.csv")
+#     try:
+#         gzoo_data = pd.read_csv(gzoo_file, 
+#                                 #sep = "\t", 
+#                                 usecols = ["GZ_dr8objid", "petroMag_r", "deVAB_r"],
+#                                 index_col = "GZ_dr8objid", 
+#                                 dtype = {"GZ_dr8objid" : str}
+#                                )
+        
+#         petromags = [str(gzoo_data.loc[gname, f"petroMag_{color}"]) if gname in gzoo_data.index else "16" 
+#                      for gname in galaxy_names]
+        
+#         bulge_axis_ratios = [str(gzoo_data.loc[gname, f"deVAB_{color}"]) if gname in gzoo_data.index else "1"
+#                              for gname in galaxy_names]
+        
+#     except FileNotFoundError:
+#         print(f"Could not find {gzoo_file}. Proceeding.")
+#         gzoo_data = None
 
     kwargs_main = {"cwd"                : cwd,
                    "in_dir"             : in_dir,
@@ -653,8 +658,8 @@ if __name__ == "__main__":
                    "generate_starmasks" : generate_starmasks,
                    "run_from_tmp"       : run_from_tmp,
                    "aggressive_clean"   : aggressive_clean,
-                   "petromags"          : petromags,
-                   "bulge_axis_ratios"  : bulge_axis_ratios,
+                   # "petromags"          : petromags,
+                   # "bulge_axis_ratios"  : bulge_axis_ratios,
                    # Keep this last just in case
                    "galaxy_names"       : galaxy_names
                   }

@@ -259,9 +259,11 @@ def galaxy_information(galaxy_name, galaxy_path):
     for row in reader:
         # if sparcfire fails
         if row.get('fit_state', "") in failure_modes:
-            break
+            return kwargs_out
+        
         elif row.get('fit_state', "") != "OK":
             print(f"fit state is: {row.get('fit_state', '')}")
+            return kwargs_out
 
         try:
             # Already accounted for, no need to scale
@@ -272,7 +274,7 @@ def galaxy_information(galaxy_name, galaxy_path):
 
         except (ValueError, TypeError) as ve:
             print(f"SpArcFiRe likely failed on this galaxy, {ve}. Proceeding with default values...")
-            break
+            return kwargs_out
 
         # Anything with converting to float/int should go in here since there are a couple issues besides
         # fit state which still result in an empty csv
@@ -316,7 +318,7 @@ def galaxy_information(galaxy_name, galaxy_path):
 
         # Happens when row is empty... This is easier than messing with other conditionals for each scale factor/float conversion
         except ValueError as ve:
-            pass
+            return kwargs_out
 
         if disk_rot_angle < 0: 
             inclination = np.degrees(np.arccos(disk_axis_ratio))
@@ -593,8 +595,9 @@ def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwarg
     
     feedme_info_out = {}
     
-    petromags = kwargs.get("petromags", 16*np.ones(len(gfolders)))
-    bulge_axis_ratios = kwargs.get("bulge_axis_ratios", [])
+    # Not worth it speed-wise
+    #petromags = kwargs.get("petromags", 16*np.ones(len(gfolders)))
+    #bulge_axis_ratios = kwargs.get("bulge_axis_ratios", [])
     
     for i, gfolder in enumerate(gfolders):
     
@@ -664,13 +667,16 @@ def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwarg
         
         # Take mag from SDSS
         # Using the default I've been using (for now)
-        petromag = float(petromags[i])
+        # Not worth it except for giant runs
+        petromag = 16 #float(petromags[i])
         
         # Take bulge axis ratio from SDSS
-        if bulge_axis_ratios:
-            bulge_axis_ratio = float(bulge_axis_ratios[i])
-        else:
-            bulge_axis_ratio = galaxy_dict["bulge_axis_ratio"]
+        # Not worth it except for giant runs
+        # if bulge_axis_ratios:
+        #     bulge_axis_ratio = float(bulge_axis_ratios[i])
+        # else:
+        #     bulge_axis_ratio = 
+        bulge_axis_ratio = float(galaxy_dict["bulge_axis_ratio"])
         
         bulge = Sersic(component_number = 1, 
                        position = (center_pos_x, center_pos_y),
@@ -706,7 +712,7 @@ def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwarg
         # Looking at the first two arms may be too unreliable
         #print("Max arc length in 256 img", scale_var(max_arc, 0.5*256/crop_rad))
         if scale_var(galaxy_dict["max_arc_length"], 1/scale_fact_std) < 75:
-            print("Skipping Arms, max arc len is", max_arc*1/scale_fact_std)
+            print("Skipping Arms, max arc len is", galaxy_dict["max_arc_length"]/scale_fact_std)
             arms.add_skip(skip_val = 1)
         else:
             # Fixing this to 0.6 to give the arms the best chance to form
@@ -777,7 +783,7 @@ if __name__ == "__main__":
     write_to_feedmes(top_dir = cwd)
 
 
-# In[20]:
+# In[26]:
 
 
 if __name__ == "__main__":

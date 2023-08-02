@@ -110,12 +110,12 @@ def main(**kwargs):
     # Feeding in as comma separated galaxies
     # If single galaxy, this returns a list containing just the one galaxy
     galaxy_names = kwargs.get("galaxy_names", [])
-    petromags         = kwargs.get("petromags", [])
-    bulge_axis_ratios = kwargs.get("bulge_axis_ratios", [])
+    # petromags         = kwargs.get("petromags", [])
+    # bulge_axis_ratios = kwargs.get("bulge_axis_ratios", [])
     if isinstance(galaxy_names, str):
         galaxy_names = galaxy_names.split(",")
-        petromags    = petromags.split(",")
-        bulge_axis_ratios    = bulge_axis_ratios.split(",")
+        # petromags    = petromags.split(",")
+        # bulge_axis_ratios    = bulge_axis_ratios.split(",")
     #     galaxy_names = [galaxy_names]
     #assert isinstance(galaxy_names, list), "input_filenames must be a list, even if it's a single galaxy."
     
@@ -154,9 +154,9 @@ def main(**kwargs):
                                    galaxy_names = galaxy_names,
                                    in_dir  = in_dir,
                                    tmp_dir = tmp_dir,
-                                   out_dir = out_dir,
-                                   petromags = petromags,
-                                   bulge_axis_ratios = bulge_axis_ratios
+                                   out_dir = out_dir
+                                   # petromags = petromags,
+                                   # bulge_axis_ratios = bulge_axis_ratios
                                   )
                                    
     max_it = 150
@@ -313,8 +313,12 @@ def main(**kwargs):
         _, gname_nmr, gname_kstest = fill_objects(gname, 1, tmp_fits_dir, tmp_masks_dir)
         with fits.open(tmp_fits_path_gname, mode='update', output_verify='ignore') as hdul:
             hdul[2].header["NMR"] = (gname_nmr, "Norm of the masked residual")
-            hdul[2].header["ks_p"] = (round(gname_kstest.pvalue, 4), "p value of kstest vs noise")
-            hdul[2].header["ks_stat"] = (round(gname_kstest.statistic, 4), "statistic value of kstest vs noise")
+            if gname_kstest:
+                hdul[2].header["ks_p"] = (round(gname_kstest.pvalue, 4), "p value of kstest vs noise")
+                hdul[2].header["ks_stat"] = (round(gname_kstest.statistic, 4), "statistic value of kstest vs noise")
+            else:
+                hdul[2].header["ks_p"] = (None, "p value of kstest vs noise")
+                hdul[2].header["ks_stat"] = (None, "statistic value of kstest vs noise")
             # Flush done automatically in update mode
             #hdul.flush()
 
