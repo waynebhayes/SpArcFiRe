@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[1]:
 
 
 import os
@@ -16,12 +16,12 @@ import gc
 
 import numpy as np
 import scipy.linalg as slg
-from scipy.stats import norm
+from scipy.stats import norm, kstest
 from skimage.draw import disk, ellipse
 import matplotlib.pyplot as plt
 
 
-# In[ ]:
+# In[2]:
 
 
 # For debugging purposes
@@ -35,7 +35,7 @@ def in_notebook():
         return False
 
 
-# In[ ]:
+# In[3]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -63,7 +63,7 @@ from Classes.Components import *
 from Classes.Containers import *
 
 
-# In[ ]:
+# In[4]:
 
 
 class HDU:
@@ -90,7 +90,7 @@ class HDU:
         return output_str
 
 
-# In[ ]:
+# In[5]:
 
 
 class FitsFile:
@@ -269,7 +269,7 @@ class FitsFile:
             setattr(self, key, value)
 
 
-# In[ ]:
+# In[13]:
 
 
 class OutputFits(FitsFile):
@@ -361,7 +361,7 @@ class OutputFits(FitsFile):
         except Exception as e:
             print(e)
             print(self.gname)
-            #print(center_x, center_y, major_rad, minor_rad, rotation)
+            print(center_x, center_y, major_rad, minor_rad, rotation)
             return bulge_mask
         
         bulge_mask[xx, yy] = 0
@@ -407,7 +407,14 @@ class OutputFits(FitsFile):
                     print(f"Could not generate bulge mask for {self.gname}. There may be an issue with sparcfire output due to a broadcast issue.")
         
         try:
+            # compare to gaussian with same mean, std via kstest
+            # if p value high, not that different
+            
             self.masked_residual = (self.observation.data - self.model.data)*crop_mask
+            mean = np.mean(self.masked_residual)
+            std  = np.std(self.masked_residual)
+            gaussian = np.random.normal(mean, std, len(self.masked_residual))
+            self.kstest = kstest(gaussian, self.masked_residual.flatten())
 
             # TODO: COMPARE PIXEL BY PIXEL AS A RATIO, SAY 1-OBS/MODEL (whichever is higher goes in denom)
             self.norm_observation = slg.norm(crop_mask*self.observation.data)
@@ -441,14 +448,14 @@ class OutputFits(FitsFile):
         return self.masked_residual_normalized
 
 
-# In[ ]:
+# In[14]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[ ]:
+# In[15]:
 
 
 # Testing from_file
@@ -497,7 +504,7 @@ if __name__ == "__main__":
     print(np.shape(test_obs.observation.data))
 
 
-# In[ ]:
+# In[16]:
 
 
 # Unit test to check value of masked residual
@@ -518,10 +525,12 @@ if __name__ == "__main__":
     print(f"Norm of the residual: {test_model.norm_residual:.4f}")
     print(f"Norm of the masked residual: {test_model.nmr:.4f}")
     print(f"Norm of the masked residual ratio: {test_model.nmrr:.8f}")
+    print(f"kstest p value: {test_model.kstest.pvalue:.4f}")
+    print(f"kstest statistic: {test_model.kstest.statistic:.4f}")
     #print(np.min(test_model.observation.data))
 
 
-# In[ ]:
+# In[18]:
 
 
 if __name__ == "__main__":
