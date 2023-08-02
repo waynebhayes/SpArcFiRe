@@ -458,7 +458,7 @@ class OutputContainer(FeedmeContainer):
         # This is more for cleaning up some functions elsewhere
         # self.galfit_num = kwargs.get("galfit_num", "01")
         
-        def check_success(self, galfit_out_text) -> None:
+        def check_success(self, galfit_out_text, **kwargs) -> None:
             # I don't like checking for the full line because there are embedded quotes
             # and one is a backtick I think...: Fit summary is now being saved into `fit.log'.
             # To be safe I just check the first part
@@ -485,10 +485,11 @@ class OutputContainer(FeedmeContainer):
                 self.success = False
         
         if galfit_out_text:
-            check_success(self, galfit_out_text)
+            kwargs.pop("galfit_out_text", None)
+            check_success(self, galfit_out_text, **kwargs)
 
         # For reading from galfit stdout to update classes
-        def update_components(self, galfit_out_text) -> None: #, bulge, disk, arms, fourier, sky):
+        def update_components(self, galfit_out_text, **kwargs) -> None: #, bulge, disk, arms, fourier, sky):
             
             last_it = galfit_out_text.split("Iteration")[-1]
 
@@ -496,10 +497,13 @@ class OutputContainer(FeedmeContainer):
             by_line = last_it.splitlines()
             for line in by_line:
                 if line.strip().startswith("sersic"):
-                    if s_count == 0:
+                    if kwargs.get("sersic_order"):
+                        comp = eval("self." + kwargs.get("sersic_order")[s_count])
+                        s_count += 1
+                    elif s_count == 0:
                         comp = self.bulge
                         s_count += 1 
-                    else:
+                    elif s_count == 1:
                         comp = self.disk               
 
                 elif line.strip().startswith("power"):
@@ -522,7 +526,7 @@ class OutputContainer(FeedmeContainer):
                 #comp.update_param_values()
 
         if self.success:
-            update_components(self, galfit_out_text)
+            update_components(self, galfit_out_text, **kwargs)
             
         if kwargs.get("store_text", False):
             self.galfit_out_text = galfit_out_text
