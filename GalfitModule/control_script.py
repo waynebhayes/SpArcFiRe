@@ -5,7 +5,7 @@
 # 
 # **Date (Github date will likely be more accurate): 4/17/23**
 
-# In[57]:
+# In[2]:
 
 
 import sys
@@ -21,7 +21,7 @@ import pickle
 import joblib
 
 
-# In[4]:
+# In[3]:
 
 
 # For debugging purposes
@@ -35,7 +35,7 @@ def in_notebook():
         return False
 
 
-# In[13]:
+# In[4]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -328,11 +328,14 @@ if __name__ == "__main__":
     
     if not restart:
         # Remove old
+        print("Removing old results in tmp folder (if they exist).")
         _ = sp(f"rm -rf {tmp_fits_dir}", capture_output = capture_output)
         # try:
         #     shutil.rmtree(tmp_fits_dir)
         # except OSError as e:
         #     pass
+    else:
+        print("Restarting the run (still have to find everything).")
 
     # Making sub-directories
     _ = [os.mkdir(i) for i in (tmp_fits_dir, 
@@ -398,9 +401,9 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    
+    generate_starmasks = True
     if not restart:
-        generate_starmasks = True
+        #generate_starmasks = True
         if not exists(pj(tmp_masks_dir, 'remove_stars_with_sextractor.log')):
             # remove_stars_with_sextractor needs this available before it can log
             _ = sp(f"touch {pj(tmp_masks_dir, 'remove_stars_with_sextractor.log')}", capture_output = capture_output)
@@ -420,8 +423,9 @@ if __name__ == "__main__":
         # GALFIT can only run on what's there... I mean there are defaults for SpArcFiRe
         # but this is the more appropriate choice. 
         if len(output_folders) != len(star_masks):
-            
             print("The temp directory has a different number of star masks than the number of output directories.") 
+        else:
+            generate_starmasks = False
             
 # DEPRECATED
                            
@@ -519,10 +523,9 @@ if __name__ == "__main__":
 #                 print("Star masks have been generated successfully.")
 #                 print()
                 
-    else:
-        generate_starmasks = False
-        print("Star masks have already been generated, proceeding.")
-        print()
+    # else:
+    #     generate_starmasks = False
+    #     print("Star masks have already been generated, proceeding.")
 
 
 # ## Galfitting!
@@ -535,7 +538,7 @@ def write_to_parallel(cwd,
                    galfit_script_name = pj(_MODULE_DIR, "go_go_galfit.py"), 
                    parallel_file = pj(cwd, "parallel_cmd_file"),
                    # determined by parallel proc limit 
-                   chunk_size = 5 
+                   chunk_size = 20
                   ):
     _, _, run_python = check_programs()
     kwargs_in        = deepcopy(kwargs_main)
@@ -567,6 +570,7 @@ def check_galfit_out_hangups(tmp_fits_dir, out_dir, kwargs_main):
     kwargs_main["galaxy_names"] = [gname for gname in kwargs_main["galaxy_names"]
                                    if not exists(f"{pj(out_dir, gname, gname)}_galfit_out.fits")
                                    and not exists(f"{pj(tmp_fits_dir, 'failed_' + gname)}_galfit_out.fits")]
+    # TODO: CHECK FOR FINAL .IN FILE TO ENSURE IT TRIED TO RUN THE FULL FIT
     
     # because of mutability I don't need to do this but
     # because it's good practice...
@@ -639,24 +643,30 @@ if __name__ == "__main__":
         #print("Piping to parallel")
         print(f"{len(kwargs_main['galaxy_names'])} galaxies")
         
-        timeout = 29 # Minutes
-        
+        chunk_size = 5
         if parallel == 1:
             # For CPU parallel
             parallel_run_name = ""#"GALFITTING"
             parallel_options  = joblib.cpu_count()
             parallel_verbose  = ""
+            chunk_size = kwargs_main["galaxy_names"]//joblib.cpu_count() + 1
+            # Two whole days for big runs
+            timeout = 2880 # Minutes
             
         elif parallel == 2:
             # For SLURM/Cluster Computing
             parallel_run_name = "GALFITTING"
+            # Slurm needs different timeout limits
+            timeout = 60 # Minutes
             parallel_options  = f"-M all -t {timeout}"
             parallel_verbose  = "-v" if verbose else ""
+            chunk_size = 20
+
             
         parallel_run_cmd = f"cat {parallel_file} | {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
         
         if not restart:
-            write_to_parallel(cwd, kwargs_main, parallel_file = parallel_file)
+            write_to_parallel(cwd, kwargs_main, parallel_file = parallel_file, chunk_size = chunk_size)
             print("Galfitting via parallelization...")
             try:
                 sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout = 60*(timeout + 1))
@@ -667,12 +677,14 @@ if __name__ == "__main__":
             # Python needs a moment to catch-up it seems
             time.sleep(60)
             kwargs_main = check_galfit_out_hangups(tmp_fits_dir, out_dir, kwargs_main)
+        else:
+            print("Restart fitting commencing")
         
         count = 2
         while kwargs_main["galaxy_names"] and count < 10:
             print("Did not finish all galaxies, parallelizing again...\n")
             print(f"{len(kwargs_main['galaxy_names'])} galaxies to go.")
-            write_to_parallel(cwd, kwargs_main, parallel_file = parallel_file)
+            write_to_parallel(cwd, kwargs_main, parallel_file = parallel_file, chunk_size = chunk_size)
             
             try:
                 print("Piping to parallel")
@@ -859,7 +871,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[66]:
+# In[10]:
 
 
 if __name__ == "__main__":
