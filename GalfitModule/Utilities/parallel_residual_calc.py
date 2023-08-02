@@ -23,6 +23,7 @@ from os.path import abspath as absp
 import PIL
 import pickle
 from joblib import Parallel, delayed
+import joblib
 
 import sys
 
@@ -63,7 +64,7 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", 
     except Exception as e:
         print(f"There was an issue opening galaxy {gname}. Continuing...")
         print(e)
-        return None, None
+        return None, None, None
     
     try:
         mask_fits_file = FitsFile(mask_fits_name)
@@ -72,24 +73,24 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", 
         # Logic implemented to handle None
         mask_fits_file = None #np.zeros((500,500))
     
-    if out_dir:
-        _ = fits_file.generate_bulge_mask(pj(out_dir, gname, f"{gname}.csv"))
+    #if out_dir:
+    #    _ = fits_file.generate_bulge_mask(pj(out_dir, gname, f"{gname}.csv"))
         
-    masked_residual_normalized = fits_file.generate_masked_residual(mask_fits_file)
+    masked_residual_normalized = fits_file.generate_masked_residual(mask_fits_file, use_bulge_mask = False)
     if masked_residual_normalized is None:
         print(f"Could not calculate nmr for galaxy {gname}. Continuing...")
-        return None, None
+        return None, None, None
     
     # Doesn't work on Openlab (sadly)
     # Keep this in for actual parallelizing since it's a PITA to read booleans
     # from command line (use the default value to our advantage)
-    if not parallel and to_png:
+    if sp(f"hostname").stdout.split(".")[0] == "bayonet-09" and to_png:
         if isinstance(to_png, str):
             fits_file.to_png(out_png_dir = to_png)
         elif out_dir:
             fits_file.to_png(out_png_dir = pj(out_dir, "galfit_png"))
     
-    return gname, fits_file.nmr#, fits_file.nmrr
+    return gname, fits_file.nmr, fits_file.kstest#, fits_file.nmrr
 
     # output_fits_dict[gname] = fits_file
     # mask_dict[gname] = mask_fits_file
