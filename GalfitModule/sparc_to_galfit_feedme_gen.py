@@ -185,7 +185,7 @@ def path_join(path='.', name='', file_ext=''):
     return file_path
 
 
-# In[10]:
+# In[40]:
 
 
 def scale_var(x, scale = 1):
@@ -196,13 +196,19 @@ def scale_var(x, scale = 1):
     return float(x)*scale
 
 
+# In[37]:
+
+
+print(np.degrees(4.922962), np.degrees(4.192356))
+
+
 # In[39]:
 
 
 def galaxy_information(galaxy_name, galaxy_path):
      
     kwargs_out = {
-        "bulge_rad" : 2,
+        "bulge_maj_axs_len" : 2,
         "bulge_axis_ratio" : 0.5,
         "bulge_rot_angle" : 30,
         "crop_rad" : 30, # New!
@@ -286,7 +292,7 @@ def galaxy_information(galaxy_name, galaxy_path):
             else:
                 scale_fact_ipt = 2*crop_rad/256
 
-            bulge_rad = scale_var(row.get('bulgeMajAxsLen'), scale_fact_ipt)
+            bulge_maj_axs_len = scale_var(row.get('bulgeMajAxsLen'), scale_fact_ipt)
             # TODO: Take bulge axis ratio from SDSS? deVAB_r
             bulge_axis_ratio = float(row.get('bulgeAxisRatio'))
 
@@ -394,7 +400,7 @@ def galaxy_information(galaxy_name, galaxy_path):
 # In[12]:
 
 
-def arc_information(galaxy_name, galaxy_path, num_arms = 2):
+def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2):
 
     kwargs_out = {
         "inner_rad" : 0,
@@ -442,13 +448,19 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2):
 
             # Rudimentary weighting scheme
             weight = (num_arms - i)/num_arms
+            weight_2 = weight
             
             try:
-                theta_sum += (np.degrees(float(arcs_in[i]['math_initial_theta'])) % 360) * weight
-                theta_sum += np.degrees(float(arcs_in[i]['relative_theta_end']))*weight #% 360
+                r_start = float(arcs_in[i]['r_start'])
+                # Punish sparcfire's bulge-related misgivings
+                if scale_var(r_start, scale_fact_std) <= bulge_rad:
+                    weight_2 = 0.5
+                    
+                theta_sum += (np.degrees(float(arcs_in[i]['math_initial_theta'])) % 270) * weight_2
+                theta_sum += (np.degrees(float(arcs_in[i]['relative_theta_end']))  % 270) * weight_2 #% 360
 
-                inner_rad += float(arcs_in[i]['r_start'])*weight
-                outer_rad += float(arcs_in[i]['r_end'])*weight
+                inner_rad += r_start * weight_2
+                outer_rad += float(arcs_in[i]['r_end']) * weight
             except ValueError as ve:
                 break
 
@@ -470,8 +482,8 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2):
         arcs_file.close()
         
         try:
-            inner_rad = scale_var(inner_rad, scale_fact_ipt)
-            outer_rad = scale_var(outer_rad, scale_fact_ipt)
+            inner_rad = scale_var(inner_rad, scale_fact_std)
+            outer_rad = scale_var(outer_rad, scale_fact_std)
         except ValueError as ve:
             pass
 
@@ -638,7 +650,7 @@ def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwarg
         y1crop = round(center_pos_y - crop_rad)
         y2crop = round(center_pos_y + crop_rad)
     
-        arc_dict = arc_information(gname, gfolder, num_arms = galaxy_dict["est_arcs"])
+        arc_dict = arc_information(gname, gfolder, num_arms = galaxy_dict["est_arcs"], bulge_rad = galaxy_dict["bulge_maj_axs_len"])
     
         if galaxy_dict["bar_candidate"].upper() == "FALSE": # According to Chien, if no bar, then r_in = 0 since r_in is more a mathematical construct relating to the bar
             in_rad = 0 #unsure if I'll keep this...
@@ -665,25 +677,29 @@ def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwarg
                               optimize = 0
                              )
         
-        # Take mag from SDSS
-        # Using the default I've been using (for now)
-        # Not worth it except for giant runs
-        petromag = 16 #float(petromags[i])
         
-        # Take bulge axis ratio from SDSS
-        # Not worth it except for giant runs
-        # if bulge_axis_ratios:
-        #     bulge_axis_ratio = float(bulge_axis_ratios[i])
-        # else:
-        #     bulge_axis_ratio = 
+        petromag = 16 #float(petromags[i])
         bulge_axis_ratio = float(galaxy_dict["bulge_axis_ratio"])
+        # Take mag from SDSS and bulge_axis_ratio from SDSS
+        with fits.open(pj(in_dir, f"{gname}.fits")) as gf:
+            try:
+                #SURVEY = SDSS-r  DR7
+                color = gf[0].header["SURVEY"].split()[0][-1]
+                petromag_str = f"pMag_{color}"
+                devab_str = f"devAB_{color}"
+                if petromag_str in gf[0].header and devab_str in gf[0].header:
+                    petromag = gf[0].header[petromag_str]
+                    bulge_axis_ratio = gf[0].header[devab_str]
+            except KeyError:
+                print(f"There is something wrong with the header for {gname}.")
         
         bulge = Sersic(component_number = 1, 
                        position = (center_pos_x, center_pos_y),
-                       magnitude = float(petromag),
-                       effective_radius = galaxy_dict["bulge_rad"],
+                       magnitude = float(petromag) - 1,
+                       # Sometimes sparcfire messes this up
+                       effective_radius = min(max(galaxy_dict["bulge_maj_axs_len"], 2), 0.2*crop_rad),
                        # According to other paper GALFIT usually doesn't have a problem with the index
-                       sersic_index = 1, #4
+                       sersic_index = 4,
                        axis_ratio = bulge_axis_ratio,
                        position_angle = galaxy_dict["bulge_rot_angle"]
                       )
@@ -693,7 +709,7 @@ def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwarg
                        magnitude = float(petromag) - 3,
                        effective_radius = galaxy_dict["disk_maj_axs_len"],
                        # According to comparison tests, this usually ends up much higher than classical probably due to the spiral.
-                       sersic_index = 4,
+                       sersic_index = 1,
                        axis_ratio = galaxy_dict["disk_axis_ratio"],
                        position_angle = galaxy_dict["disk_rot_angle"]
                       )
@@ -714,10 +730,14 @@ def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwarg
         if scale_var(galaxy_dict["max_arc_length"], 1/scale_fact_std) < 75:
             print("Skipping Arms, max arc len is", galaxy_dict["max_arc_length"]/scale_fact_std)
             arms.add_skip(skip_val = 1)
-        else:
+            
+        # May not do the fixing since we run the disk first
+        # may however overwrite the output from the disk for this parameter
+        # to help the arms in go_go_galfit
+        #else:
             # Fixing this to 0.6 to give the arms the best chance to form
-            disk.axis_ratio = 0.6
-            disk.param_values["axis_ratio"] = 0.6
+        #    disk.axis_ratio = 0.6
+        #    disk.param_values["axis_ratio"] = 0.6
 
         fourier = Fourier(component_number = 2)
             
@@ -783,7 +803,7 @@ if __name__ == "__main__":
     write_to_feedmes(top_dir = cwd)
 
 
-# In[26]:
+# In[44]:
 
 
 if __name__ == "__main__":

@@ -242,6 +242,8 @@ def main(**kwargs):
                 print("Skipping Arms")
                 galfit_output.to_file(galfit_output.bulge, galfit_output.disk, galfit_output.sky)
             else:
+                galfit_output.disk.axis_ratio = 0.3
+                galfit_output.disk.update_param_values()
                 galfit_output.to_file()
                 
             run_galfit_cmd = f"{base_galfit_cmd} {feedme_path}"
