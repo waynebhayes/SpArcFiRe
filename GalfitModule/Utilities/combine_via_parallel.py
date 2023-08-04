@@ -40,7 +40,10 @@ if __name__ == "__main__":
         output_file = pj(out_dir, gname, f"{gname}_galfit_out.fits")
         if exists(output_file):
             with fits.open(output_file) as hdul: 
-                output_dict[gname] = hdul[2].header["NMR"]
+                output_dict[gname] = (hdul[2].header["NMR"], 
+                                      hdul[2].header["ks_p"], 
+                                      hdul[2].header["ks_stat"]
+                                     )
     
     # In the future, drop this in out_dir
     pickle_filename = f'{basename}_output_nmr.pkl'

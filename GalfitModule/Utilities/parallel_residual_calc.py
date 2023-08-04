@@ -47,7 +47,9 @@ from Functions.helper_functions import *
 # ==================================================================================================================
 
 def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", to_png = False, parallel = True):
-
+    
+    use_bulge_mask = False
+    
     report_num = 1000
     if parallel:
         report_num = 100
@@ -73,10 +75,12 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", 
         # Logic implemented to handle None
         mask_fits_file = None #np.zeros((500,500))
     
-    #if out_dir:
-    #    _ = fits_file.generate_bulge_mask(pj(out_dir, gname, f"{gname}.csv"))
+    # If skip is enabled then arms are not fit so bulge masking doesn't make sense
+    if out_dir and not fits_file.feedme.arms.param_values.get("skip", 0):
+        _ = fits_file.generate_bulge_mask(pj(out_dir, gname, f"{gname}.csv"))
+        use_bulge_mask = True
         
-    masked_residual_normalized = fits_file.generate_masked_residual(mask_fits_file, use_bulge_mask = False)
+    masked_residual_normalized = fits_file.generate_masked_residual(mask_fits_file, use_bulge_mask = use_bulge_mask)
     if masked_residual_normalized is None:
         print(f"Could not calculate nmr for galaxy {gname}. Continuing...")
         return None, None, None
@@ -232,15 +236,16 @@ def main(**kwargs):
     #                                               )
     
     # In the future, drop this in out_dir
-    pickle_filename_temp = f'{pj(run_dir, basename)}_output_nmr_final.pkl'
+    pickle_filename_temp = f'{pj(out_dir, basename)}_output_nmr_final.pkl'
     pickle.dump(out_nmr, open(pickle_filename_temp, 'wb'))
     
     if not dont_remove_slurm and parallel:
         _ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
-        _ = sp(f"rm -f {pj(run_dir, basename)}*_output_nmr.pkl", capture_output = capture_output)
+        _ = sp(f"rm -f {pj(out_dir, basename)}*_output_nmr.pkl", capture_output = capture_output)
         _ = sp(f"rm -f {parallel_file}", capture_output = capture_output)
         
-    pickle_filename = f'{pj(run_dir, basename)}_output_nmr.pkl'
+    pickle_filename = f'{pj(out_dir, basename)}_output_nmr.pkl'
+    print(f"Outputting results to {pickle_filename}")
     _ = sp(f"mv {pickle_filename_temp} {pickle_filename}", capture_output = capture_output)
 
         #output_fits_dict = dict(zip(out_nmr))
