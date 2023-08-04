@@ -159,7 +159,7 @@ def main(**kwargs):
                                    # bulge_axis_ratios = bulge_axis_ratios
                                   )
                                    
-    max_it = 150
+    max_it = 200
     base_galfit_cmd = f"{run_galfit} -imax {max_it}"
     # TODO: Move output sigma file as well, figure out race condition
     # base_galfit_cmd = f"{run_galfit} -imax {max_it} -outsig"
@@ -181,6 +181,22 @@ def main(**kwargs):
             continue
             
         print(gname)
+        
+        disk_axis_ratio = 0.6
+        with fits.open(pj(in_dir, f"{gname}.fits")) as gf:
+            try:
+                #SURVEY = SDSS-r  DR7
+                #color = gf[0].header["SURVEY"].split()[0][-1]
+                spirality_str = f"spirality"
+                p_spirality = float(gf[0].header.get("spirality", 0))
+                # p_spirality, disk_axis_ratio
+                if p_spirality >= 0.9: 
+                    disk_axis_ratio = 0.4
+                elif p_spirality >= 0.75:
+                    disk_axis_ratio = 0.5
+                    
+            except KeyError:
+                print(f"There is no spirality keyword in the header for {gname}.")
         
         # This doesn't change
         header  = feedme_info[gname].header
@@ -209,31 +225,50 @@ def main(**kwargs):
             print("Disk")
             galfit_output = OutputContainer(sp(run_galfit_cmd), sersic_order = ["disk"], **feedme_info[gname].to_dict())
             
-            if rerun:
-                galfit_output = rerun_galfit(galfit_output,
-                                             base_galfit_cmd,
-                                             # Pass in initial components here to generically
-                                             # determine which were optimized on
-                                             initial_components.disk, initial_components.sky
-                                            )
+            # Assume rerun is to refine final fit
+            # This will also be better for prototyping multiband fits
+            # if rerun:
+            #     galfit_output = rerun_galfit(galfit_output,
+            #                                  base_galfit_cmd,
+            #                                  # Pass in initial components here to generically
+            #                                  # determine which were optimized on
+            #                                  initial_components.disk, initial_components.sky
+            #                                 )
 
             if num_steps == 3:
-                # Fit disk first, now to refine the bulge
+                # For fitting *just* the bulge + a few pixels
+                # Trying Just disk, just bulge, then all together with arms
+#                 bulge_header = deepcopy(feedme_info[gname].header)
+#                 xcenter, ycenter = initial_components.bulge.position
+#                 bulge_rad = 2*initial_components.bulge.effective_radius
+#                 bulge_header.region_to_fit = (
+#                                               round(xcenter - bulge_rad), 
+#                                               round(xcenter + bulge_rad), 
+#                                               round(ycenter - bulge_rad), 
+#                                               round(ycenter + bulge_rad)
+#                                              )
+#                 bulge_header.param_fix["region_to_fit"] = f"{round(ycenter - bulge_rad)} {round(ycenter + bulge_rad)}"
+#                 bulge_header.update_param_values()
+
+#                 bulge_in = pj(out_dir, gname, f"{gname}_bulge.in")
+#                 bulge_header.to_file(bulge_in, initial_components.bulge, galfit_output.sky)
+
+                # Fit disk first, now to fit the bulge and refine the disk
                 bulge_disk_in = pj(out_dir, gname, f"{gname}_bulge+disk.in")
                 
                 # Note initial components disk and galfit output the rest
                 # Those are updated!
                 header.to_file(bulge_disk_in, initial_components.bulge, galfit_output.disk, galfit_output.sky)
                 
-                run_galfit_cmd = f"{base_galfit_cmd} {bulge_disk_in}"
+                run_galfit_cmd = f"{base_galfit_cmd} {bulge_in} {bulge_disk_in}"
                 print("Bulge + Disk")
                 galfit_output = OutputContainer(sp(run_galfit_cmd), **galfit_output.to_dict())
                 
-                if rerun:
-                    galfit_output = rerun_galfit(galfit_output,
-                                                 base_galfit_cmd,
-                                                 initial_components.bulge, galfit_output.disk, galfit_output.sky
-                                                )
+#                 if rerun:
+#                     galfit_output = rerun_galfit(galfit_output,
+#                                                  base_galfit_cmd,
+#                                                  initial_components.bulge, galfit_output.disk, galfit_output.sky
+#                                                 )
     
             # Overwrite original... for now 
             # Also good thing dicts retain order, this frequently comes up
@@ -242,15 +277,16 @@ def main(**kwargs):
                 print("Skipping Arms")
                 galfit_output.to_file(galfit_output.bulge, galfit_output.disk, galfit_output.sky)
             else:
-                galfit_output.disk.axis_ratio = 0.3
+                galfit_output.disk.axis_ratio = disk_axis_ratio
                 galfit_output.disk.update_param_values()
+                #galfit_output.arms.param_fix["outer_rad"] = 1
                 galfit_output.to_file()
                 
             run_galfit_cmd = f"{base_galfit_cmd} {feedme_path}"
             print("Bulge + Disk + Arms (if applicable)")
             final_galfit_output = OutputContainer(sp(run_galfit_cmd), **galfit_output.to_dict(), store_text = True)
             
-        # Dropping this here for final rerun for all num_steps       
+        # Dropping this here for final rerun for all num_steps
         if rerun:
             _ = rerun_galfit(final_galfit_output, 
                              base_galfit_cmd,
