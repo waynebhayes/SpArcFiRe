@@ -370,7 +370,7 @@ def galaxy_information(galaxy_name, galaxy_path):
         #4222 - 0.5625, 8.145239069
         #0761 - 1.1330, 19.53474969
         # anddd adjusted according to comparison results 
-        alpha = 0.07*pitch_angle - 0.3
+        alpha = max(0.07*pitch_angle - 0.3, 0.75)
 
     csv_file.close()
  
@@ -454,7 +454,7 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2):
                 r_start = float(arcs_in[i]['r_start'])
                 # Punish sparcfire's bulge-related misgivings
                 if scale_var(r_start, scale_fact_std) <= bulge_rad:
-                    weight_2 = 0.5
+                    weight_2 = 0.25
                     
                 theta_sum += (np.degrees(float(arcs_in[i]['math_initial_theta'])) % 270) * weight_2
                 theta_sum += (np.degrees(float(arcs_in[i]['relative_theta_end']))  % 270) * weight_2 #% 360
@@ -803,7 +803,7 @@ if __name__ == "__main__":
     write_to_feedmes(top_dir = cwd)
 
 
-# In[44]:
+# In[46]:
 
 
 if __name__ == "__main__":
