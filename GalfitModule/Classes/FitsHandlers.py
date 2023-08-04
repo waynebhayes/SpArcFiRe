@@ -269,7 +269,7 @@ class FitsFile:
             setattr(self, key, value)
 
 
-# In[13]:
+# In[6]:
 
 
 class OutputFits(FitsFile):
@@ -404,17 +404,20 @@ class OutputFits(FitsFile):
                 except AttributeError:
                     print(f"Could not generate bulge mask for {self.gname}. Check location of csv or run generate_bulge_mask with a specified csv file.")
                 except ValueError:
-                    print(f"Could not generate bulge mask for {self.gname}. There may be an issue with sparcfire output due to a broadcast issue.")
+                    print(f"Could not generate bulge mask for {self.gname}. There may be an issue with sparcfire output (broadcast issue).")
         
         try:
             # compare to gaussian with same mean, std via kstest
             # if p value high, not that different
             
             self.masked_residual = (self.observation.data - self.model.data)*crop_mask
-            mean = np.mean(self.masked_residual)
-            std  = np.std(self.masked_residual)
-            gaussian = np.random.normal(mean, std, len(self.masked_residual))
-            self.kstest = kstest(gaussian, self.masked_residual.flatten())
+            exclude_masked_pixels = self.masked_residual[np.abs(self.masked_residual) > 0]
+            mean = np.mean(exclude_masked_pixels)
+            std  = np.std(exclude_masked_pixels)
+            #gaussian = np.random.normal(mean, std, len(exclude_masked_pixels))
+#            stats.norm.rvs(size=100, random_state=rng)
+            gaussian  = norm.rvs(size = len(exclude_masked_pixels), loc = mean, scale = std, random_state = 0)
+            self.kstest = kstest(gaussian, exclude_masked_pixels.flatten())
 
             # TODO: COMPARE PIXEL BY PIXEL AS A RATIO, SAY 1-OBS/MODEL (whichever is higher goes in denom)
             self.norm_observation = slg.norm(crop_mask*self.observation.data)
@@ -448,14 +451,14 @@ class OutputFits(FitsFile):
         return self.masked_residual_normalized
 
 
-# In[14]:
+# In[7]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[15]:
+# In[8]:
 
 
 # Testing from_file
@@ -504,7 +507,7 @@ if __name__ == "__main__":
     print(np.shape(test_obs.observation.data))
 
 
-# In[16]:
+# In[9]:
 
 
 # Unit test to check value of masked residual
@@ -530,7 +533,7 @@ if __name__ == "__main__":
     #print(np.min(test_model.observation.data))
 
 
-# In[18]:
+# In[11]:
 
 
 if __name__ == "__main__":
