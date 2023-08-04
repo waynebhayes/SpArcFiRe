@@ -684,7 +684,7 @@ if __name__ == "__main__":
             parallel_run_name = ""#"GALFITTING"
             parallel_options  = joblib.cpu_count()
             parallel_verbose  = ""
-            chunk_size = kwargs_main["galaxy_names"]//joblib.cpu_count() + 1
+            chunk_size = len(kwargs_main["galaxy_names"])//joblib.cpu_count() + 1
             # Two whole days for big runs
             timeout = 2880 # Minutes
             
@@ -809,7 +809,7 @@ if __name__ == "__main__":
     all_nmr = {}
     if parallel:
         python_parallel   = pj(_MODULE_DIR, "Utilities", "combine_via_parallel.py")
-        parallel_file     = "parallel_combine_parallel"
+        parallel_file     = "parallel_combine_residual"
         
         if parallel == 1:
             # For CPU parallel
@@ -823,12 +823,12 @@ if __name__ == "__main__":
 
         finished_pkl_num = 0
         if restart:
-            finished_pkl_num = max(
-                                   [int(os.path.basename(i).split("_")[0].replace(basename, "")) 
-                                    for i in find_files(out_dir, f'{basename}*_output_nmr.pkl', "f")
-                                    if os.path.basename(i).split("_")[0].replace(basename, "")
-                                   ]
-                                  )
+            check_output_pkl = [int(os.path.basename(i).split("_")[0].replace(basename, "")) 
+                                for i in find_files(out_dir, f'{basename}*_output_nmr.pkl', "f")
+                                if os.path.basename(i).split("_")[0].replace(basename, "")
+                                ]
+            if check_output_pkl:
+                finished_pkl_num = max(check_output_pkl)
 
         chunk_size = 20
         with open(parallel_file, "w") as sf:
@@ -852,7 +852,10 @@ if __name__ == "__main__":
             output_file = pj(out_dir, gname, f"{gname}_galfit_out.fits")
             if exists(output_file):
                 with fits.open(output_file) as hdul: 
-                    all_nmr[gname] = hdul[2].header["NMR"]
+                    all_nmr[gname] = (hdul[2].header["NMR"], 
+                                      hdul[2].header["ks_p"], 
+                                      hdul[2].header["ks_stat"]
+                                     )
 
     # Could split this into the above if/else but this keeps everything output
     # related in one place
@@ -906,7 +909,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[ ]:
+# In[33]:
 
 
 if __name__ == "__main__":
