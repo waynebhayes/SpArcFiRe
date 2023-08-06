@@ -96,7 +96,7 @@ from Functions.helper_functions import *
 #         print("Check Sparcfire output or directories. Cannot proceed.")
 #         raise SystemExit("Quitting.")
 
-# In[7]:
+# In[ ]:
 
 
 # Grabbing filepath from command line
@@ -123,7 +123,7 @@ def command_line(top_dir = os.getcwd(), **kwargs): # = True):
     return absp(in_dir_out), absp(tmp_dir_out), absp(out_dir_out)
 
 
-# In[8]:
+# In[ ]:
 
 
 def get_galaxy_names_list(in_dir, tmp_dir, out_dir, galaxy_names = []):
@@ -169,7 +169,7 @@ def get_galaxy_names_list(in_dir, tmp_dir, out_dir, galaxy_names = []):
     return gnames_out, folders_out
 
 
-# In[9]:
+# In[ ]:
 
 
 def path_join(path='.', name='', file_ext=''):
@@ -185,7 +185,7 @@ def path_join(path='.', name='', file_ext=''):
     return file_path
 
 
-# In[40]:
+# In[ ]:
 
 
 def scale_var(x, scale = 1):
@@ -196,13 +196,7 @@ def scale_var(x, scale = 1):
     return float(x)*scale
 
 
-# In[37]:
-
-
-print(np.degrees(4.922962), np.degrees(4.192356))
-
-
-# In[39]:
+# In[ ]:
 
 
 def galaxy_information(galaxy_name, galaxy_path):
@@ -239,6 +233,7 @@ def galaxy_information(galaxy_name, galaxy_path):
     chirality_2 = 0
     chirality_3 = 0
     pitch_angle = 20
+    spin_parity = ""
     
     failure_modes = ["input rejected", 
                      "Subscript indices must either be real positive integers or logicals.",
@@ -397,7 +392,7 @@ def galaxy_information(galaxy_name, galaxy_path):
     return kwargs_out
 
 
-# In[12]:
+# In[ ]:
 
 
 def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2):
@@ -492,7 +487,7 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2):
     return kwargs_out
 
 
-# In[13]:
+# In[ ]:
 
 
 # def csv_sdss_info(galaxy_names): # to grab petromag and also psf parameter things
@@ -558,7 +553,7 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2):
 #     return gname_info
 
 
-# In[14]:
+# In[ ]:
 
 
 def write_starmask_ascii(starmask_filepath):
@@ -587,7 +582,7 @@ def write_to_feedme(path, list_in, feedme_name = "autogen_feedme_galfit.in"):
         _ = [g.write(f"{value}\n") for value in list_in]
         
     return file_path
-# In[46]:
+# In[ ]:
 
 
 def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwargs):
@@ -803,7 +798,7 @@ if __name__ == "__main__":
     write_to_feedmes(top_dir = cwd)
 
 
-# In[46]:
+# In[5]:
 
 
 if __name__ == "__main__":
