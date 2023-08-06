@@ -731,6 +731,11 @@ if __name__ == "__main__":
             kwargs_main = check_galfit_out_hangups(tmp_fits_dir, out_dir, kwargs_main)
             count += 1
             
+        else:
+            print("Did not finish all galaxies. There is likely an error. Check parallel output files if possible. Restart with -r option.")
+            print("Quitting.")
+            sys.exit()
+            
 #             run_galfit.main(cwd          = cwd,
 #                             in_dir       = in_dir,
 #                             tmp_dir      = tmp_dir,
@@ -909,7 +914,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[33]:
+# In[34]:
 
 
 if __name__ == "__main__":
