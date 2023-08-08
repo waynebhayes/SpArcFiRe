@@ -731,7 +731,7 @@ if __name__ == "__main__":
             kwargs_main = check_galfit_out_hangups(tmp_fits_dir, out_dir, kwargs_main)
             count += 1
             
-        else:
+        if count == 10 or kwargs_main["galaxy_names"]:
             print("Did not finish all galaxies. There is likely an error. Check parallel output files if possible. Restart with -r option.")
             print("Quitting.")
             sys.exit()
@@ -849,7 +849,10 @@ if __name__ == "__main__":
         parallel_run_cmd = f"cat {parallel_file} | {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
         _ = sp(parallel_run_cmd, capture_output = capture_output)
 
-        all_output_pkl = [pj(out_dir, fname) for fname in find_files(out_dir, f'{basename}*_output_nmr.pkl', "f")]
+        all_output_pkl = [pj(out_dir, fname) 
+                          for fname in find_files(out_dir, f'{basename}*_output_nmr.pkl', "f")
+                          if fname != "GALFIT_output_nmr.pkl"
+                         ]
         _ = [all_nmr.update(pickle.load(open(file, 'rb'))) for file in all_output_pkl]
         
     else:
@@ -857,9 +860,9 @@ if __name__ == "__main__":
             output_file = pj(out_dir, gname, f"{gname}_galfit_out.fits")
             if exists(output_file):
                 with fits.open(output_file) as hdul: 
-                    all_nmr[gname] = (hdul[2].header["NMR"], 
-                                      hdul[2].header["ks_p"], 
-                                      hdul[2].header["ks_stat"]
+                    all_nmr[gname] = (hdul[2].header.get("NMR", None), 
+                                      hdul[2].header.get("ks_p", None),
+                                      hdul[2].header.get("ks_stat", None)
                                      )
 
     # Could split this into the above if/else but this keeps everything output
@@ -914,7 +917,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[34]:
+# In[36]:
 
 
 if __name__ == "__main__":
