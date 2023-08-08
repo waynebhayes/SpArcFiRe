@@ -66,7 +66,7 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", 
     except Exception as e:
         print(f"There was an issue opening galaxy {gname}. Continuing...")
         print(e)
-        return None, None, None
+        return gname, None, None, None
     
     try:
         mask_fits_file = FitsFile(mask_fits_name)
@@ -83,7 +83,7 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", 
     masked_residual_normalized = fits_file.generate_masked_residual(mask_fits_file, use_bulge_mask = use_bulge_mask)
     if masked_residual_normalized is None:
         print(f"Could not calculate nmr for galaxy {gname}. Continuing...")
-        return None, None, None
+        return gname, None, None, None
     
     # Doesn't work on Openlab (sadly)
     # Keep this in for actual parallelizing since it's a PITA to read booleans
