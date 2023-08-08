@@ -414,11 +414,11 @@ class OutputFits(FitsFile):
             exclude_masked_pixels = self.masked_residual[np.abs(self.masked_residual) > 0]
             mean = np.mean(exclude_masked_pixels)
             std  = np.std(exclude_masked_pixels)
-            #gaussian  = norm.rvs(size = len(exclude_masked_pixels), loc = mean, scale = std, random_state = 0)
-            #self.kstest = kstest(gaussian, exclude_masked_pixels.flatten())
-            gaussian = norm.rvs(size = len(self.masked_residual)**2, loc = mean, scale = std, random_state = 0)
-            noised_masked_pixels = np.where(np.abs(self.masked_residual.flatten()) > 0, self.masked_residual.flatten(), gaussian)
-            self.kstest = kstest(gaussian, noised_masked_pixels)
+            gaussian  = norm.rvs(size = len(exclude_masked_pixels), loc = mean, scale = std, random_state = 0)
+            self.kstest = kstest(gaussian, exclude_masked_pixels.flatten())
+            # gaussian = norm.rvs(size = len(self.masked_residual)**2, loc = mean, scale = std, random_state = 0)
+            # noised_masked_pixels = np.where(np.abs(self.masked_residual.flatten()) > 0, self.masked_residual.flatten(), gaussian)
+            # self.kstest = kstest(gaussian, noised_masked_pixels)
 
             self.norm_observation = slg.norm(crop_mask*self.observation.data)
             self.norm_model = slg.norm(crop_mask*self.model.data)
