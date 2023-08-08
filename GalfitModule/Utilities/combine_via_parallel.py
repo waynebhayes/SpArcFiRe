@@ -44,6 +44,8 @@ if __name__ == "__main__":
                                       hdul[2].header.get("ks_p", None),
                                       hdul[2].header.get("ks_stat", None)
                                      )
+        else:
+            output_dict[gname] = (None, None, None)
     
     # In the future, drop this in out_dir
     pickle_filename = f'{basename}_output_nmr.pkl'

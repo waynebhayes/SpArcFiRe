@@ -37,7 +37,7 @@ if __name__ == "__main__":
     
     if str.lower(to_png) == "false":
         out_png_dir = False
-    elif str.lower(to_png) == "True":
+    elif str.lower(to_png) == "true":
         out_png_dir = True
         
     all_gname_tmp_out = sys.argv[6].split(",")

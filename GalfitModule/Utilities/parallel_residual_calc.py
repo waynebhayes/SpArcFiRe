@@ -46,7 +46,7 @@ from Functions.helper_functions import *
     
 # ==================================================================================================================
 
-def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", to_png = False, parallel = True):
+def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", to_png = True, parallel = True):
     
     use_bulge_mask = False
     
@@ -94,7 +94,7 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", 
         elif out_dir:
             fits_file.to_png(out_png_dir = pj(out_dir, "galfit_png"))
     
-    return gname, fits_file.nmr, fits_file.kstest#, fits_file.nmrr
+    return gname, fits_file.nmr, fits_file.kstest.pvalue, fits_file.kstest.statistic#, fits_file.nmrr
 
     # output_fits_dict[gname] = fits_file
     # mask_dict[gname] = mask_fits_file
@@ -114,7 +114,8 @@ def parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_dir, to_png, all_gna
                                         )
                    for count, gname in enumerate(all_gname_tmp_out) if not gname.startswith("failed")
                                     )
-    return out_nmr
+        
+    return {i[0] : tuple(i[1:]) for i in out_nmr}
 
 # ==================================================================================================================
 
@@ -163,7 +164,7 @@ def main(**kwargs):
         out_nmr = parallel_wrapper(galfit_tmp_path, 
                                    galfit_mask_path, 
                                    out_dir, 
-                                   None, 
+                                   True, 
                                    all_gname_tmp_out, 
                                    parallel = False
                                   )
@@ -215,7 +216,7 @@ def main(**kwargs):
         else:
             all_output_pkl = glob.glob(pj(run_dir, f'{basename}*_output_nmr.pkl'))
             for file in all_output_pkl:
-                out_nmr.extend(pickle.load(open(file, 'rb')))
+                out_nmr.update(pickle.load(open(file, 'rb')))
 
     else:
         out_nmr = parallel_wrapper(galfit_tmp_path, 
@@ -225,16 +226,7 @@ def main(**kwargs):
                                    all_gname_tmp_out, 
                                    parallel = False
                                   )
-            
-    # out_nmr = Parallel(n_jobs = -2, timeout = 30)(
-    #                    delayed(fill_objects)(
-    #                                          (os.path.basename(i).rstrip("_galfit_out.fits") , i, count),
-    #                                          galfit_mask_path,
-    #                                          out_png_dir
-    #                                         )
-    #                    for count, i in enumerate(all_tmp_out) if not os.path.basename(i).startswith("failed")
-    #                                               )
-    
+        
     # In the future, drop this in out_dir
     pickle_filename_temp = f'{pj(out_dir, basename)}_output_nmr_final.pkl'
     pickle.dump(out_nmr, open(pickle_filename_temp, 'wb'))
