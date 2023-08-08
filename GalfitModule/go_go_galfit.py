@@ -23,7 +23,7 @@ from Functions.helper_functions import *
 from sparc_to_galfit_feedme_gen import *
 from Utilities.parallel_residual_calc import fill_objects #, parallel_wrapper
 
-import star_removal.remove_stars_with_sextractor as remove_stars_with_sextractor
+import star_removal.no_log_remove_stars_with_sextractor as remove_stars_with_sextractor
 
 # This is in helper_functions
 # def check_programs():
