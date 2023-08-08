@@ -348,15 +348,16 @@ def main(**kwargs):
                 shutil.move(galfit_out, pj(out_dir, gname, f"{gname}_galfit.{ext_num}"))
                 
         # Residual calculation, now done all at the same time! And added to the FITS header
-        _, gname_nmr, gname_kstest = fill_objects(gname, 1, tmp_fits_dir, tmp_masks_dir)
+        _, gname_nmr, gname_pvalue, gname_statistic = fill_objects(gname, 1, tmp_fits_dir, tmp_masks_dir)
         with fits.open(tmp_fits_path_gname, mode='update', output_verify='ignore') as hdul:
             hdul[2].header["NMR"] = (gname_nmr, "Norm of the masked residual")
-            if gname_kstest:
-                hdul[2].header["ks_p"] = (round(gname_kstest.pvalue, 4), "p value of kstest vs noise")
-                hdul[2].header["ks_stat"] = (round(gname_kstest.statistic, 4), "statistic value of kstest vs noise")
-            else:
-                hdul[2].header["ks_p"] = (None, "p value of kstest vs noise")
-                hdul[2].header["ks_stat"] = (None, "statistic value of kstest vs noise")
+            # Fixed this issue in parallel_residual_calc, should now always have values for those
+            #if gname_kstest:
+            hdul[2].header["ks_p"] = (round(gname_pvalue, 4), "p value of kstest vs noise")
+            hdul[2].header["ks_stat"] = (round(gname_statistic, 4), "statistic value of kstest vs noise")
+            # else:
+            #     hdul[2].header["ks_p"] = (None, "p value of kstest vs noise")
+            #     hdul[2].header["ks_stat"] = (None, "statistic value of kstest vs noise")
             # Flush done automatically in update mode
             #hdul.flush()
 
