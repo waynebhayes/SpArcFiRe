@@ -99,28 +99,29 @@ from Functions.helper_functions import *
 # In[ ]:
 
 
-# Grabbing filepath from command line
-def command_line(top_dir = os.getcwd(), **kwargs): # = True):
+# # Grabbing filepath from command line
+# def command_line(top_dir = os.getcwd(), **kwargs): # = True):
     
-    in_dir_out  = kwargs.get("in_dir", pj(top_dir, "sparcfire-in"))
-    tmp_dir_out = kwargs.get("tmp_dir", pj(top_dir, "sparcfire-tmp"))
-    out_dir_out = kwargs.get("out_dir", pj(top_dir, "sparcfire-out"))
+#     in_dir_out  = kwargs.get("in_dir", pj(top_dir, "sparcfire-in"))
+#     tmp_dir_out = kwargs.get("tmp_dir", pj(top_dir, "sparcfire-tmp"))
+#     out_dir_out = kwargs.get("out_dir", pj(top_dir, "sparcfire-out"))
         
-    #if not run_as_script:
-    #    return in_dir_out, tmp_dir_out, out_dir_out
+#     #if not run_as_script:
+#     #    return in_dir_out, tmp_dir_out, out_dir_out
     
-    try:
-        if len(sys.argv) != 4: # including name of python script
-            print(f"Using: \n{in_dir_out}\n{tmp_dir_out}\n{out_dir_out}\nto generate feedme.")
+#     try:
+#         if len(sys.argv) != 4: # including name of python script
+#             print(f"Using: \n{in_dir_out}\n{tmp_dir_out}\n{out_dir_out}\nto generate feedme.")
 
-        else:
-            in_dir_out = argv[1]
-            tmp_dir_out = argv[2]
-            out_dir_out = argv[3]
-    except:
-        pass
+#         else:
+#             in_dir_out = argv[1]
+#             tmp_dir_out = argv[2]
+#             out_dir_out = argv[3]
+#             print(f"Using: \n{in_dir_out}\n{tmp_dir_out}\n{out_dir_out}\nto generate feedme.")
+#     except:
+#         pass
 
-    return absp(in_dir_out), absp(tmp_dir_out), absp(out_dir_out)
+#     return absp(in_dir_out), absp(tmp_dir_out), absp(out_dir_out)
 
 
 # In[ ]:
@@ -388,7 +389,7 @@ def galaxy_information(galaxy_name, galaxy_path):
         spin_parity = '' #random.choice(['','-'])
         
     loc = locals()
-    kwargs_out.update({i: loc[i] for i in kwargs_out.keys() if loc[i]})
+    kwargs_out.update({i: loc[i] for i in kwargs_out.keys() if i in loc})
     return kwargs_out
 
 
@@ -410,6 +411,7 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2):
     except:
         print("Can't open to read: ", arcs_filename)
         print("Check Sparcfire output or directories. Proceeding with default values.")
+        return kwargs_out
 
     else:
         reader = csv.DictReader(arcs_file)
@@ -483,7 +485,7 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2):
             pass
 
     loc = locals()
-    kwargs_out.update({i: loc[i] for i in kwargs_out.keys() if loc[i]})
+    kwargs_out.update({i: loc[i] for i in kwargs_out.keys() if i in loc})
     return kwargs_out
 
 
@@ -585,16 +587,16 @@ def write_to_feedme(path, list_in, feedme_name = "autogen_feedme_galfit.in"):
 # In[ ]:
 
 
-def write_to_feedmes(top_dir = "", **kwargs): # single_galaxy_name = "", **kwargs):
+def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name = "", **kwargs):
     
-    if top_dir:
-        in_dir, tmp_dir, out_dir = command_line(top_dir)
-    else:
-        in_dir, tmp_dir, out_dir = command_line()
-        
-    in_dir = kwargs.get("in_dir", in_dir)
-    tmp_dir = kwargs.get("tmp_dir", tmp_dir)
-    out_dir = kwargs.get("out_dir", out_dir)
+    # if top_dir:
+    #     in_dir, tmp_dir, out_dir = command_line(top_dir)
+    # else:
+    #     in_dir, tmp_dir, out_dir = command_line()
+    # cwd = os.getcwd()
+    # in_dir = kwargs.get("in_dir", pj(cwd, "sparcfire-in"))
+    # tmp_dir = kwargs.get("tmp_dir", pj(cwd, "sparcfire-tmp"))
+    # out_dir = kwargs.get("out_dir", pj(cwd, "sparcfire-out"))
     
     galaxy_names, gfolders = get_galaxy_names_list(in_dir, tmp_dir, out_dir, galaxy_names = kwargs.get("galaxy_names", []))
     
@@ -794,11 +796,26 @@ if __name__ == "__main__":
     
     # if in_notebook():
     #     cwd = cwd.replace("ics-home", username)
-    cwd = os.getcwd()    
-    write_to_feedmes(top_dir = cwd)
+    #cwd = os.getcwd()
+    if len(sys.argv) == 4:
+        in_dir = sys.argv[1]
+        tmp_dir = sys.argv[2]
+        out_dir = sys.argv[3]
+    else:
+        cwd = os.getcwd()
+        in_dir = pj(cwd, "sparcfire-in")
+        tmp_dir = pj(cwd, "sparcfire-tmp")
+        out_dir = pj(cwd, "sparcfire-out")
+    
+    print(f"Using: \n{in_dir}\n{tmp_dir}\n{out_dir}\nto generate feedme.")
+    write_to_feedmes(
+                     in_dir = in_dir, 
+                     tmp_dir = tmp_dir, 
+                     out_dir = out_dir
+                    )
 
 
-# In[5]:
+# In[11]:
 
 
 if __name__ == "__main__":
