@@ -122,7 +122,7 @@ def parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_dir, to_png, all_gna
 def main(**kwargs):
     
     # Dirs and name of the run for which the calculation was done
-    run_dir       = kwargs.get("run_dir", os.getcwd())
+    #run_dir       = kwargs.get("run_dir", os.getcwd())
     #in_dir        = kwargs.get("in_dir", pj(run_dir, "sparcfire-in"))
     tmp_dir       = kwargs.get("tmp_dir", pj(run_dir, "sparcfire-tmp"))
     out_dir       = kwargs.get("out_dir", pj(run_dir, "sparcfire-out"))
@@ -138,7 +138,7 @@ def main(**kwargs):
     verbose        = kwargs.get("verbose", False)
     capture_output = kwargs.get("capture_output", True)
     
-    final_pkl_file = f'{pj(run_dir, basename)}_output_nmr.pkl'
+    final_pkl_file = f'{pj(out_dir, basename)}_output_nmr.pkl'
     if not parallel and exists(final_pkl_file):
         ans = input(f"Do you wish to delete the current final output nmr pickle file? Y/N\n{final_pkl_file}\n")
         if ans.upper() == "Y":
@@ -147,16 +147,14 @@ def main(**kwargs):
             print("You selected something other than y/Y. Not deleting. Please backup/rename/delete and try again.")
             print("Quitting.")
             sys.exit()
-    
-    outpath = pj(run_dir, out_dir)
 
-    galfit_tmp_path = pj(run_dir, tmp_dir, "galfits")
-    galfit_mask_path  = pj(run_dir, tmp_dir, "galfit_masks")
-    out_png_dir = pj(outpath, "galfit_png")
+    galfit_tmp_path = pj(tmp_dir, "galfits")
+    galfit_mask_path  = pj(tmp_dir, "galfit_masks")
+    out_png_dir = pj(out_dir, "galfit_png")
     
     all_gname_tmp_out = [os.path.basename(i).replace("_galfit_out.fits","") for i in glob.glob(pj(galfit_tmp_path, "*_galfit_out.fits"))]
     
-    out_nmr = []
+    out_nmr = {}
     
     chunk_size = 1000
     if parallel and chunk_size > len(all_gname_tmp_out)*0.5:
@@ -173,7 +171,10 @@ def main(**kwargs):
     elif parallel:
         _, _, run_python = check_programs()
         python_parallel   = pj(_MODULE_DIR, "Utilities", "residual_via_parallel.py")
-        parallel_file     = "parallel_residual_parallel"
+        parallel_file     = "parallel_combine_residual"
+        
+        if exists(parallel_file):
+            _ = sp(f"rm -f {parallel_file}", capture_output = capture_output)
         
         if parallel == 1:
             run_parallel      = "/home/sana/bin/parallel"
@@ -190,33 +191,38 @@ def main(**kwargs):
         
         finished_pkl_num = 0
         if restart:
-            finished_pkl_num = max(
-                                   [int(os.path.basename(i).replace(basename, "")) 
-                                    for i in glob.glob(pj(run_dir, f'{basename}*_output_nmr.pkl'))
-                                   ]
-                                  )
+            check_output_pkl = [int(os.path.basename(i).split("_")[0].replace(basename, "")) 
+                                for i in find_files(tmp_dir, f'{basename}*_output_nmr.pkl', "f")
+                                if os.path.basename(i).split("_")[0].replace(basename, "")
+                                ]
+            if check_output_pkl:
+                finished_pkl_num = max(check_output_pkl)
         
+        # Use count for restarting purposes i.e. if all pkl files have been generated 
+        # but just need to be combined
+        count = 0
         with open(parallel_file, "w") as sf:
             for i, chunk in enumerate(range(chunk_size, len(all_gname_tmp_out) +  chunk_size, chunk_size)):
                 if i < finished_pkl_num:
                     continue
-                    
+                
                 gal_to_parallel = all_gname_tmp_out[chunk - chunk_size:][:chunk_size]
                 #num_str = f"{i:0>3}"
-                sf.write(f"{run_python} {python_parallel} {pj(run_dir, basename + str(i))} {galfit_tmp_path} {galfit_mask_path} {out_dir} {out_png_dir} {','.join(gal_to_parallel)}\n")
-                
-        print("parallelizing")
-        parallel_run_cmd = f"cat {parallel_file} | {run_parallel} {parallel_run_name} {parallel_options} {parallel_verbose}"
-        completed = sp(parallel_run_cmd, capture_output = capture_output)
+                sf.write(f"{run_python} {python_parallel} {pj(tmp_dir, basename + str(i))} {galfit_tmp_path} {galfit_mask_path} {out_dir} {out_png_dir} {','.join(gal_to_parallel)}\n")
+                count += 1
         
-        if completed.stderr:
-            print(completed.stderr)
-            # Rerun out_nmr
+        if count:
+            print("parallelizing")
+            parallel_run_cmd = f"cat {parallel_file} | {run_parallel} {parallel_run_name} {parallel_options} {parallel_verbose}"
+            completed = sp(parallel_run_cmd, capture_output = capture_output)
+
+            if completed.stderr:
+                print(completed.stderr)
+                # Rerun out_nmr
         
-        else:
-            all_output_pkl = glob.glob(pj(run_dir, f'{basename}*_output_nmr.pkl'))
-            for file in all_output_pkl:
-                out_nmr.update(pickle.load(open(file, 'rb')))
+        #else:
+        all_output_pkl = glob.glob(pj(tmp_dir, f'{basename}*_output_nmr.pkl'))
+        _ = [out_nmr.update(pickle.load(open(file, 'rb'))) for file in all_output_pkl if os.path.basename(file) != f"{basename}_output_nmr.pkl"]
 
     else:
         out_nmr = parallel_wrapper(galfit_tmp_path, 
@@ -228,17 +234,18 @@ def main(**kwargs):
                                   )
         
     # In the future, drop this in out_dir
-    pickle_filename_temp = f'{pj(out_dir, basename)}_output_nmr_final.pkl'
-    pickle.dump(out_nmr, open(pickle_filename_temp, 'wb'))
+    #pickle_filename_temp = f'{pj(out_dir, basename)}_output_nmr_final.pkl'
+    print(f"Outputting results to {final_pkl_file}")
+    pickle.dump(out_nmr, open(final_pkl_file, 'wb'))
     
     if not dont_remove_slurm and parallel:
         _ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
-        _ = sp(f"rm -f {pj(out_dir, basename)}*_output_nmr.pkl", capture_output = capture_output)
+        _ = sp(f"rm -f {pj(tmp_dir, basename)}*_output_nmr.pkl", capture_output = capture_output)
         _ = sp(f"rm -f {parallel_file}", capture_output = capture_output)
         
-    pickle_filename = f'{pj(out_dir, basename)}_output_nmr.pkl'
-    print(f"Outputting results to {pickle_filename}")
-    _ = sp(f"mv {pickle_filename_temp} {pickle_filename}", capture_output = capture_output)
+    #pickle_filename = f'{pj(out_dir, basename)}_output_nmr.pkl'
+    
+    #_ = sp(f"mv {pickle_filename_temp} {pickle_filename}", capture_output = capture_output)
 
         #output_fits_dict = dict(zip(out_nmr))
 

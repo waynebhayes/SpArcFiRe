@@ -546,7 +546,7 @@ def write_to_parallel(cwd,
     _, _, run_python = check_programs()
     kwargs_in        = deepcopy(kwargs_main)
     
-    print(f"Generating input file for parallelziation in {cwd}: {parallel_file}")
+    print(f"Generating input file for parallelization in {cwd}: {parallel_file}")
     with open(pj(cwd, parallel_file), "w") as scf:
         #for gname in kwargs_main["galaxy_names"]:
         for i, chunk in enumerate(range(chunk_size, len(kwargs_main["galaxy_names"]) +  chunk_size, chunk_size)):
@@ -808,13 +808,15 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     basename = "GALFIT"
-    pkl_file = pj(out_dir, f"{basename}_output_nmr.pkl")
-    print(f"Combining all the residual calculations into {pkl_file}")
+    final_pkl_file = pj(out_dir, f"{basename}_output_nmr.pkl")
+    print(f"Combining all the residual calculations into {final_pkl_file}")
 
     all_nmr = {}
     if parallel:
         python_parallel   = pj(_MODULE_DIR, "Utilities", "combine_via_parallel.py")
         parallel_file     = "parallel_combine_residual"
+        if exists(parallel_file):
+            _ = sp(f"rm -f {parallel_file}", capture_output = capture_output)
         
         if parallel == 1:
             # For CPU parallel
@@ -829,13 +831,16 @@ if __name__ == "__main__":
         finished_pkl_num = 0
         if restart:
             check_output_pkl = [int(os.path.basename(i).split("_")[0].replace(basename, "")) 
-                                for i in find_files(out_dir, f'{basename}*_output_nmr.pkl', "f")
+                                for i in find_files(tmp_dir, f'{basename}*_output_nmr.pkl', "f")
                                 if os.path.basename(i).split("_")[0].replace(basename, "")
                                 ]
             if check_output_pkl:
                 finished_pkl_num = max(check_output_pkl)
 
         chunk_size = 20
+        # Use count for restarting purposes i.e. if all pkl files have been generated 
+        # but just need to be combined
+        count = 0
         with open(parallel_file, "w") as sf:
             for i, chunk in enumerate(range(chunk_size, len(galaxy_names) + chunk_size, chunk_size)):
                 if i < finished_pkl_num:
@@ -843,15 +848,17 @@ if __name__ == "__main__":
 
                 gal_to_parallel = galaxy_names[chunk - chunk_size:][:chunk_size]
                 #num_str = f"{i:0>3}"
-                sf.write(f"{run_python} {python_parallel} {pj(out_dir, basename + str(i))} {','.join(gal_to_parallel)}\n")
+                sf.write(f"{run_python} {python_parallel} {pj(tmp_dir, basename + str(i))} {','.join(gal_to_parallel)}\n")
+                count += 1
 
-        print("parallelizing to combine residuals")
-        parallel_run_cmd = f"cat {parallel_file} | {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
-        _ = sp(parallel_run_cmd, capture_output = capture_output)
+        if count:
+            print("parallelizing to combine residuals")
+            parallel_run_cmd = f"cat {parallel_file} | {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
+            _ = sp(parallel_run_cmd, capture_output = capture_output)
 
-        all_output_pkl = [pj(out_dir, fname) 
-                          for fname in find_files(out_dir, f'{basename}*_output_nmr.pkl', "f")
-                          if fname != "GALFIT_output_nmr.pkl"
+        all_output_pkl = [pj(tmp_dir, fname) 
+                          for fname in find_files(tmp_dir, f'{basename}*_output_nmr.pkl', "f")
+                          if fname != f"{basename}_output_nmr.pkl"
                          ]
         _ = [all_nmr.update(pickle.load(open(file, 'rb'))) for file in all_output_pkl]
         
@@ -867,16 +874,17 @@ if __name__ == "__main__":
 
     # Could split this into the above if/else but this keeps everything output
     # related in one place
-    pickle_filename_temp = f'{pj(out_dir, basename)}_output_nmr_final.pkl'
-    pickle.dump(all_nmr, open(pickle_filename_temp, 'wb'))
+    #pickle_filename_temp = f'{pj(out_dir, basename)}_output_nmr_final.pkl'
+    print(f"Outputting results to {final_pkl_file}")
+    pickle.dump(all_nmr, open(final_pkl_file, 'wb'))
     
     if not dont_remove_slurm and parallel:
         _ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
-        _ = sp(f"rm -f {pj(out_dir, basename)}*_output_nmr.pkl", capture_output = capture_output)
+        _ = sp(f"rm -f {pj(tmp_dir, basename)}*_output_nmr.pkl", capture_output = capture_output)
         _ = sp(f"rm -f {parallel_file}", capture_output = capture_output)
         
-    pickle_filename = f'{pj(out_dir, basename)}_output_nmr.pkl'    
-    _ = sp(f"mv {pickle_filename_temp} {pickle_filename}", capture_output = capture_output)
+    #pickle_filename = f'{pj(out_dir, basename)}_output_nmr.pkl'    
+    #_ = sp(f"mv {pickle_filename_temp} {pkl_file}", capture_output = capture_output)
 
 
 # In[ ]:
@@ -917,7 +925,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[36]:
+# In[40]:
 
 
 if __name__ == "__main__":
