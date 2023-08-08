@@ -414,12 +414,12 @@ class OutputFits(FitsFile):
             exclude_masked_pixels = self.masked_residual[np.abs(self.masked_residual) > 0]
             mean = np.mean(exclude_masked_pixels)
             std  = np.std(exclude_masked_pixels)
-            #gaussian = np.random.normal(mean, std, len(exclude_masked_pixels))
-#            stats.norm.rvs(size=100, random_state=rng)
-            gaussian  = norm.rvs(size = len(exclude_masked_pixels), loc = mean, scale = std, random_state = 0)
-            self.kstest = kstest(gaussian, exclude_masked_pixels.flatten())
+            #gaussian  = norm.rvs(size = len(exclude_masked_pixels), loc = mean, scale = std, random_state = 0)
+            #self.kstest = kstest(gaussian, exclude_masked_pixels.flatten())
+            gaussian = norm.rvs(size = len(self.masked_residual)**2, loc = mean, scale = std, random_state = 0)
+            noised_masked_pixels = np.where(np.abs(self.masked_residual.flatten()) > 0, self.masked_residual.flatten(), gaussian)
+            self.kstest = kstest(gaussian, noised_masked_pixels)
 
-            # TODO: COMPARE PIXEL BY PIXEL AS A RATIO, SAY 1-OBS/MODEL (whichever is higher goes in denom)
             self.norm_observation = slg.norm(crop_mask*self.observation.data)
             self.norm_model = slg.norm(crop_mask*self.model.data)
             self.norm_residual = slg.norm(crop_mask*self.residual.data)
@@ -520,6 +520,8 @@ if __name__ == "__main__":
     print(f"Norm of the residual: {test_model.norm_residual:.4f}")
     print(f"Norm of the masked residual: {test_model.nmr:.4f}")
     print(f"Norm of the masked residual ratio: {test_model.nmrr:.8f}")
+    print(f"kstest p value: {test_model.kstest.pvalue:.4f}")
+    print(f"kstest statistic: {test_model.kstest.statistic:.4f}")
     
     print("\nNow with bulge mask")
     _ = test_model.generate_masked_residual(test_mask)
@@ -533,7 +535,7 @@ if __name__ == "__main__":
     #print(np.min(test_model.observation.data))
 
 
-# In[11]:
+# In[10]:
 
 
 if __name__ == "__main__":
