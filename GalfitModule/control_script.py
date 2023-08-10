@@ -848,7 +848,7 @@ if __name__ == "__main__":
 
                 gal_to_parallel = galaxy_names[chunk - chunk_size:][:chunk_size]
                 #num_str = f"{i:0>3}"
-                sf.write(f"{run_python} {python_parallel} {pj(tmp_dir, basename + str(i))} {','.join(gal_to_parallel)}\n")
+                sf.write(f"{run_python} {python_parallel} {pj(tmp_dir, basename + str(i))} {out_dir} {','.join(gal_to_parallel)}\n")
                 count += 1
 
         if count:
@@ -925,7 +925,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[40]:
+# In[41]:
 
 
 if __name__ == "__main__":

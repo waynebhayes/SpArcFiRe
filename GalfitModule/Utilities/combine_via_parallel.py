@@ -31,8 +31,8 @@ import sys
 
 if __name__ == "__main__":
     basename         = sys.argv[1]
-    out_dir          = os.path.dirname(basename)
-    galaxy_names     = sys.argv[2].split(",")
+    out_dir          = sys.argv[2] #os.path.dirname(basename)
+    galaxy_names     = sys.argv[3].split(",")
     
     #out_nmr = parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_png_dir, all_gname_tmp_out)
     output_dict = {}
