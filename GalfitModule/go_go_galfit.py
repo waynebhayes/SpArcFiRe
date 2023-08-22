@@ -348,17 +348,20 @@ def main(**kwargs):
                 shutil.move(galfit_out, pj(out_dir, gname, f"{gname}_galfit.{ext_num}"))
                 
         # Residual calculation, now done all at the same time! And added to the FITS header
-        _, gname_nmr, gname_pvalue, gname_statistic = fill_objects(gname, 1, tmp_fits_dir, tmp_masks_dir)
-        with fits.open(tmp_fits_path_gname, mode='update', output_verify='ignore') as hdul:
-            hdul[2].header["NMR"] = (gname_nmr, "Norm of the masked residual")
+        _ = fill_objects(gname, 1, tmp_fits_dir, tmp_masks_dir)
+        # This is now done via FitsHandler
+        #_, gname_nmr, gname_pvalue, gname_statistic = fill_objects(gname, 1, tmp_fits_dir, tmp_masks_dir)
+        
+#         with fits.open(tmp_fits_path_gname, mode='update', output_verify='ignore') as hdul:
+#             hdul[2].header["NMR"] = (gname_nmr, "Norm of the masked residual")
             
-            # pvalue is sometimes none but round can't handle it
-            if gname_pvalue:
-                hdul[2].header["ks_p"] = (round(gname_pvalue, 4), "p value of kstest vs noise")
-                hdul[2].header["ks_stat"] = (round(gname_statistic, 4), "statistic value of kstest vs noise")
-            else:
-                hdul[2].header["ks_p"] = (None, "p value of kstest vs noise")
-                hdul[2].header["ks_stat"] = (None, "statistic value of kstest vs noise")
+#             # pvalue is sometimes none but round can't handle it
+#             if gname_pvalue:
+#                 hdul[2].header["ks_p"] = (round(gname_pvalue, 4), "p value of kstest vs noise")
+#                 hdul[2].header["ks_stat"] = (round(gname_statistic, 4), "statistic value of kstest vs noise")
+#             else:
+#                 hdul[2].header["ks_p"] = (None, "p value of kstest vs noise")
+#                 hdul[2].header["ks_stat"] = (None, "statistic value of kstest vs noise")
             # Flush done automatically in update mode
             #hdul.flush()
 

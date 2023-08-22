@@ -269,7 +269,7 @@ class FitsFile:
             setattr(self, key, value)
 
 
-# In[6]:
+# In[11]:
 
 
 class OutputFits(FitsFile):
@@ -416,6 +416,8 @@ class OutputFits(FitsFile):
             std  = np.std(exclude_masked_pixels)
             gaussian  = norm.rvs(size = len(exclude_masked_pixels), loc = mean, scale = std, random_state = 0)
             self.kstest = kstest(gaussian, exclude_masked_pixels.flatten())
+            pvalue = self.kstest.pvalue
+            statistic = self.kstest.statistic
             # gaussian = norm.rvs(size = len(self.masked_residual)**2, loc = mean, scale = std, random_state = 0)
             # noised_masked_pixels = np.where(np.abs(self.masked_residual.flatten()) > 0, self.masked_residual.flatten(), gaussian)
             # self.kstest = kstest(gaussian, noised_masked_pixels)
@@ -425,21 +427,32 @@ class OutputFits(FitsFile):
             self.norm_residual = slg.norm(crop_mask*self.residual.data)
             self.masked_residual_normalized = self.masked_residual/min(self.norm_observation, self.norm_model)
             
-            obs_model = 1 - np.divide(
-                                crop_mask*self.observation.data/self.norm_observation, 
-                                crop_mask*self.model.data/self.norm_model + small_number
-                                     )
+#             obs_model = 1 - np.divide(
+#                                 crop_mask*self.observation.data/self.norm_observation, 
+#                                 crop_mask*self.model.data/self.norm_model + small_number
+#                                      )
 
-            model_obs = 1 - np.divide( 
-                                crop_mask*self.model.data/self.norm_model,
-                                crop_mask*self.observation.data/self.norm_observation + small_number
-                                     )
+#             model_obs = 1 - np.divide( 
+#                                 crop_mask*self.model.data/self.norm_model,
+#                                 crop_mask*self.observation.data/self.norm_observation + small_number
+#                                     )
             # Replace negative values with 1 - reciprocal
-            self.masked_residual_ratio = np.where(obs_model >= 0, obs_model, model_obs)
+#            self.masked_residual_ratio = np.where(obs_model >= 0, obs_model, model_obs)
             # Masked residual normalized
             # I seem to use this acronym a lot
             self.nmr  = slg.norm(self.masked_residual_normalized)
-            self.nmrr = slg.norm(self.masked_residual_ratio)
+#            self.nmrr = slg.norm(self.masked_residual_ratio)
+
+            with fits.open(self.filepath, mode='update', output_verify='ignore') as hdul:
+                hdul[2].header["NMR"] = (round(self.nmr, 4), "Norm of the masked residual")
+
+                # pvalue is sometimes none but round can't handle it
+                if pvalue and statistic:
+                    hdul[2].header["ks_p"]    = (round(pvalue, 4), "p value of kstest vs noise")
+                    hdul[2].header["ks_stat"] = (round(statistic, 4), "statistic value of kstest vs noise")
+                else:
+                    hdul[2].header["ks_p"]    = (None, "p value of kstest vs noise")
+                    hdul[2].header["ks_stat"] = (None, "statistic value of kstest vs noise")
 
         except ValueError:
             print(f"There is probably an observation error with galaxy {self.gname}, continuing...")
@@ -519,7 +532,7 @@ if __name__ == "__main__":
     print(f"Norm of the model: {test_model.norm_model:.4f}")
     print(f"Norm of the residual: {test_model.norm_residual:.4f}")
     print(f"Norm of the masked residual: {test_model.nmr:.4f}")
-    print(f"Norm of the masked residual ratio: {test_model.nmrr:.8f}")
+    #print(f"Norm of the masked residual ratio: {test_model.nmrr:.8f}")
     print(f"kstest p value: {test_model.kstest.pvalue:.4f}")
     print(f"kstest statistic: {test_model.kstest.statistic:.4f}")
     
@@ -529,10 +542,21 @@ if __name__ == "__main__":
     print(f"Norm of the model: {test_model.norm_model:.4f}")
     print(f"Norm of the residual: {test_model.norm_residual:.4f}")
     print(f"Norm of the masked residual: {test_model.nmr:.4f}")
-    print(f"Norm of the masked residual ratio: {test_model.nmrr:.8f}")
+    #print(f"Norm of the masked residual ratio: {test_model.nmrr:.8f}")
     print(f"kstest p value: {test_model.kstest.pvalue:.4f}")
     print(f"kstest statistic: {test_model.kstest.statistic:.4f}")
     #print(np.min(test_model.observation.data))
+
+
+# In[10]:
+
+
+if __name__ == "__main__":
+    print("Checking the FITS header (have to reload the object to see the changes)")
+    test_model = OutputFits(model)
+    print(f"Norm of the masked residual {test_model.model.header['NMR']}")
+    print(f"{test_model.model.header['KS_']}")
+    print(f"{test_model.model.header['KS_STAT']}")
 
 
 # In[10]:
