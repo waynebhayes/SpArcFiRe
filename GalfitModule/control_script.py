@@ -67,6 +67,7 @@ from Classes.Components import *
 from Classes.Containers import *
 from Functions.helper_functions import *
 import Utilities.parallel_residual_calc as parallel_residual_calc
+import Utilities.combine_via_parallel as combine_via_parallel
 
 # This should give me numpy and pandas and whatnot
 # also gives this, from os.path import join as pj
@@ -811,7 +812,9 @@ if __name__ == "__main__":
     final_pkl_file = pj(out_dir, f"{basename}_output_nmr.pkl")
     print(f"Combining all the residual calculations into {final_pkl_file}")
 
-    all_nmr = {}
+    #all_nmr = {}
+    output_df = pd.DataFrame()
+    
     if parallel:
         python_parallel   = pj(_MODULE_DIR, "Utilities", "combine_via_parallel.py")
         parallel_file     = "parallel_combine_residual"
@@ -860,23 +863,40 @@ if __name__ == "__main__":
                           for fname in find_files(tmp_dir, f'{basename}*_output_nmr.pkl', "f")
                           if fname != f"{basename}_output_nmr.pkl"
                          ]
-        _ = [all_nmr.update(pickle.load(open(file, 'rb'))) for file in all_output_pkl]
+        #_ = [all_nmr.update(pickle.load(open(file, 'rb'))) for file in all_output_pkl]
+        out_df = pd.concat(
+                           [pd.read_pickle(file) for file in all_output_pkl 
+                            if os.path.basename(file) != f"{basename}_output_nmr.pkl"
+                           ]
+                          ) 
         
     else:
-        for gname in galaxy_names:
-            output_file = pj(out_dir, gname, f"{gname}_galfit_out.fits")
-            if exists(output_file):
-                with fits.open(output_file) as hdul: 
-                    all_nmr[gname] = (hdul[2].header.get("NMR", None), 
-                                      hdul[2].header.get("ks_p", None),
-                                      hdul[2].header.get("ks_stat", None)
-                                     )
+        # for gname in galaxy_names:
+        #     output_file = pj(out_dir, gname, f"{gname}_galfit_out.fits")
+        #     if exists(output_file):
+        #         with fits.open(output_file) as hdul: 
+        #             all_nmr[gname] = (hdul[2].header.get("NMR", None), 
+        #                               hdul[2].header.get("ks_p", None),
+        #                               hdul[2].header.get("ks_stat", None)
+        #                              )
+        #basename         = args[0]
+        #out_dir          = args[1] #os.path.dirname(basename)
+        #galaxy_names     = args[2].split(",")
+        
+        # In this case it's not parallel but I'm just saving some hassle here
+        out_df = combine_via_parallel.main("", out_dir, ",".join(galaxy_names))
 
     # Could split this into the above if/else but this keeps everything output
     # related in one place
     #pickle_filename_temp = f'{pj(out_dir, basename)}_output_nmr_final.pkl'
     print(f"Outputting results to {final_pkl_file}")
-    pickle.dump(all_nmr, open(final_pkl_file, 'wb'))
+    
+    # For when I do it in one of the other scripts
+    if "gname" in out_df.columns:
+        out_df.set_index("gname", inplace = True)
+        
+    #pickle.dump(all_nmr, open(final_pkl_file, 'wb'))
+    out_df.to_pickle(final_pkl_file)
     
     if not dont_remove_slurm and parallel:
         _ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
@@ -925,7 +945,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[41]:
+# In[42]:
 
 
 if __name__ == "__main__":

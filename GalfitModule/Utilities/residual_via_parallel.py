@@ -42,8 +42,10 @@ if __name__ == "__main__":
         
     all_gname_tmp_out = sys.argv[6].split(",")
     
-    out_nmr = parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_dir, to_png, all_gname_tmp_out)
+    out_df = parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_dir, to_png, all_gname_tmp_out)
     
     # In the future, drop this in out_dir
     pickle_filename = f'{basename}_output_nmr.pkl'
-    pickle.dump(out_nmr, open(pickle_filename, 'wb'))
+    #pickle.dump(out_nmr, open(pickle_filename, 'wb'))
+    out_df.set_index("gname", inplace = True)
+    out_df.to_pickle(pickle_filename)

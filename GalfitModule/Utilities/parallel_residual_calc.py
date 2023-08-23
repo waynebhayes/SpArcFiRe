@@ -49,6 +49,7 @@ from Functions.helper_functions import *
 def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", to_png = True, parallel = True):
     
     use_bulge_mask = False
+    output_df = pd.DataFrame()
     
     report_num = 1000
     if parallel:
@@ -66,7 +67,8 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", 
     except Exception as e:
         print(f"There was an issue opening galaxy {gname}. Continuing...")
         print(e)
-        return gname, None, None, None
+        #return gname, None, None, None
+        return None
     
     try:
         mask_fits_file = FitsFile(mask_fits_name)
@@ -83,7 +85,8 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", 
     masked_residual_normalized = fits_file.generate_masked_residual(mask_fits_file, use_bulge_mask = use_bulge_mask)
     if masked_residual_normalized is None:
         print(f"Could not calculate nmr for galaxy {gname}. Continuing...")
-        return gname, None, None, None
+        #return gname, None, None, None
+        return None
     
     # Doesn't work on Openlab (sadly)
     # Keep this in for actual parallelizing since it's a PITA to read booleans
@@ -94,15 +97,20 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", 
         elif out_dir:
             fits_file.to_png(out_png_dir = pj(out_dir, "galfit_png"))
     
-    return gname, fits_file.nmr, fits_file.kstest.pvalue, fits_file.kstest.statistic#, fits_file.nmrr
-
-    # output_fits_dict[gname] = fits_file
-    # mask_dict[gname] = mask_fits_file
+    #return gname, fits_file.nmr, fits_file.kstest.pvalue, fits_file.kstest.statistic#, fits_file.nmrr
+    reloaded  = OutputFits(pj(galfit_tmp_path, fits_filename))
+    output_df = reloaded.feedme.to_pandas()
+    output_df["gname"]   = gname
+    output_df["NMR"]     = reloaded.model.header.get("NMR", None) 
+    output_df["KS_P"]    = reloaded.model.header.get("KS_P", None)
+    output_df["KS_STAT"] = reloaded.model.header.get("KS_STAT", None)
+    
+    return output_df
     
 # ==================================================================================================================
 
 def parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_dir, to_png, all_gname_tmp_out, parallel = True):
-    out_nmr = Parallel(n_jobs = -2)( #, timeout = 30)(
+    out_df = Parallel(n_jobs = -2)( #, timeout = 30)(
                    delayed(fill_objects)(
                                          gname,
                                          count,
@@ -115,7 +123,8 @@ def parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_dir, to_png, all_gna
                    for count, gname in enumerate(all_gname_tmp_out) if not gname.startswith("failed")
                                     )
         
-    return {i[0] : tuple(i[1:]) for i in out_nmr}
+    #return {i[0] : tuple(i[1:]) for i in out_nmr}
+    return pd.concat(out_df)
 
 # ==================================================================================================================
 
@@ -154,18 +163,19 @@ def main(**kwargs):
     
     all_gname_tmp_out = [os.path.basename(i).replace("_galfit_out.fits","") for i in glob.glob(pj(galfit_tmp_path, "*_galfit_out.fits"))]
     
-    out_nmr = {}
+    #out_nmr = {}
+    out_df = pd.DataFrame()
     
     chunk_size = 1000
     if parallel and chunk_size > len(all_gname_tmp_out)*0.5:
         print("No need to (massively) parallelize!")
-        out_nmr = parallel_wrapper(galfit_tmp_path, 
-                                   galfit_mask_path, 
-                                   out_dir, 
-                                   True, 
-                                   all_gname_tmp_out, 
-                                   parallel = False
-                                  )
+        out_df = parallel_wrapper(galfit_tmp_path, 
+                                  galfit_mask_path, 
+                                  out_dir, 
+                                  True, 
+                                  all_gname_tmp_out, 
+                                  parallel = False
+                                 )
         parallel = False
         
     elif parallel:
@@ -222,21 +232,32 @@ def main(**kwargs):
         
         #else:
         all_output_pkl = glob.glob(pj(tmp_dir, f'{basename}*_output_nmr.pkl'))
-        _ = [out_nmr.update(pickle.load(open(file, 'rb'))) for file in all_output_pkl if os.path.basename(file) != f"{basename}_output_nmr.pkl"]
+        #_ = [out_nmr.update(pickle.load(open(file, 'rb'))) for file in all_output_pkl if os.path.basename(file) != f"{basename}_output_nmr.pkl"]
+        out_df = pd.concat(
+                           [pd.read_pickle(file) for file in all_output_pkl 
+                            if os.path.basename(file) != f"{basename}_output_nmr.pkl"
+                           ]
+                          ) 
 
     else:
-        out_nmr = parallel_wrapper(galfit_tmp_path, 
-                                   galfit_mask_path,
-                                   out_dir,
-                                   out_png_dir, 
-                                   all_gname_tmp_out, 
-                                   parallel = False
-                                  )
+        out_df = parallel_wrapper(galfit_tmp_path, 
+                                  galfit_mask_path,
+                                  out_dir,
+                                  out_png_dir, 
+                                  all_gname_tmp_out, 
+                                  parallel = False
+                                 )
         
     # In the future, drop this in out_dir
     #pickle_filename_temp = f'{pj(out_dir, basename)}_output_nmr_final.pkl'
     print(f"Outputting results to {final_pkl_file}")
-    pickle.dump(out_nmr, open(final_pkl_file, 'wb'))
+    #pickle.dump(out_nmr, open(final_pkl_file, 'wb'))
+    
+    # For when I do it in one of the other scripts
+    if "gname" in out_df.columns:
+        out_df.set_index("gname", inplace = True)
+    
+    out_df.to_pickle(final_pkl_file)
     
     if not dont_remove_slurm and parallel:
         _ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
