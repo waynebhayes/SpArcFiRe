@@ -59,7 +59,7 @@ from Classes.Components import *
 from Functions.helper_functions import *
 
 
-# In[4]:
+# In[16]:
 
 
 class ComponentContainer:
@@ -98,8 +98,8 @@ class ComponentContainer:
     
     def to_pandas(self):
         return pd.concat([comp.to_pandas().reset_index() 
-                          for comp in ComponentContainer.to_list(self)], 
-                         axis = 1).drop(columns = ["index"])
+                          for comp in ComponentContainer.to_list(self)
+                         ], axis = 1).drop(columns = ["index"])
         
     def from_pandas(self, input_df):
         pass
@@ -449,44 +449,25 @@ class OutputContainer(FeedmeContainer):
         
         FeedmeContainer.__init__(self, **kwargs)
         
-        galfit_out_text = galfit_out_obj.stdout        
-        galfit_err_text = galfit_out_obj.stderr
+        galfit_out_text    = galfit_out_obj.stdout        
+        galfit_err_text    = galfit_out_obj.stderr
+        galfit_return_code = galfit_out_obj.returncode
         
         # Default to this so it doesn't break if no text is fed in
         self.success = False
         
-        # This is more for cleaning up some functions elsewhere
-        # self.galfit_num = kwargs.get("galfit_num", "01")
+        # 0 is success
+        if not galfit_return_code:
+            self.success = True
+            
+        elif galfit_return_code < 1:
+            # per subprocess documentation
+            # A negative value -N indicates that the child was terminated by signal N (POSIX only).
+            print(f"GALFIT was terminated by signal {galfit_return_code}")
+            print(f"{galfit_err_text}")
         
-        def check_success(self, galfit_out_text, **kwargs) -> None:
-            # I don't like checking for the full line because there are embedded quotes
-            # and one is a backtick I think...: Fit summary is now being saved into `fit.log'.
-            # To be safe I just check the first part
-            success = "Fit summary is now being saved"
-            failure = "...now exiting to system..."
-
-            # Constrain to last 50 lines to save search time
-            # The explosion is 23 lines
-            last_out_lines = galfit_out_text.split("\n")[-50:]
-            if any(line.strip().startswith(success) for line in last_out_lines):
-                self.success = True
-                
-            elif any(line.strip().startswith(failure) for line in last_out_lines):
-                print(f"Galfit failed this run!")
-                last_out_lines = '\n'.join(last_out_lines)
-                #print(f"{last_out_lines}")
-                self.success = False
-                # For debugging
-                # print(galfit_out_text)
-
-            else:
-                print(f"Did not detect either '{success}' or '{failure}' in galfit output. Something must have gone terribly wrong! Printing output...")
-                print(f"{galfit_err_text}")
-                self.success = False
-        
-        if galfit_out_text:
-            kwargs.pop("galfit_out_text", None)
-            check_success(self, galfit_out_text, **kwargs)
+        # else:
+        #     print(f"GALFIT failed!")
 
         # For reading from galfit stdout to update classes
         def update_components(self, galfit_out_text, **kwargs) -> None: #, bulge, disk, arms, fourier, sky):
@@ -549,7 +530,7 @@ class OutputContainer(FeedmeContainer):
             return ""
 
 
-# In[7]:
+# In[24]:
 
 
 if __name__ == "__main__":
