@@ -642,10 +642,10 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
         center_pos_y = float(galaxy_dict["center_pos_y"])
         crop_rad = float(galaxy_dict["crop_rad"])
         
-        x1crop = round(center_pos_x - crop_rad)
-        x2crop = round(center_pos_x + crop_rad)        
-        y1crop = round(center_pos_y - crop_rad)
-        y2crop = round(center_pos_y + crop_rad)
+        x1crop = round(center_pos_x - 2*crop_rad)
+        x2crop = round(center_pos_x + 2*crop_rad)        
+        y1crop = round(center_pos_y - 2*crop_rad)
+        y2crop = round(center_pos_y + 2*crop_rad)
     
         arc_dict = arc_information(gname, gfolder, num_arms = galaxy_dict["est_arcs"], bulge_rad = galaxy_dict["bulge_maj_axs_len"])
     
@@ -815,7 +815,7 @@ if __name__ == "__main__":
                     )
 
 
-# In[11]:
+# In[14]:
 
 
 if __name__ == "__main__":
