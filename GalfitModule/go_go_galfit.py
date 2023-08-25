@@ -19,6 +19,7 @@ sys.path.append(_MODULE_DIR)
     
 from Classes.Components import *
 from Classes.Containers import *
+from Classes.FitsHandlers import *
 from Functions.helper_functions import *
 from sparc_to_galfit_feedme_gen import *
 from Utilities.parallel_residual_calc import fill_objects #, parallel_wrapper
@@ -218,12 +219,27 @@ def main(**kwargs):
             
         elif num_steps >= 2:
             # This ends up being more like a disk fit
+            # Top is disk first, bottom is bulge first, choose your own adventure
             disk_in = pj(out_dir, gname, f"{gname}_disk.in")
+            #bulge_in = pj(out_dir, gname, f"{gname}_bulge.in")
+            
             header.to_file(disk_in, initial_components.disk, initial_components.sky)
+            #header.to_file(bulge_in, initial_components.bulge, initial_components.sky)
             
             run_galfit_cmd = f"{base_galfit_cmd} {disk_in}"
+            #run_galfit_cmd = f"{base_galfit_cmd} {bulge_in}"
+            
             print("Disk")
+            #print("Bulge")
             galfit_output = OutputContainer(sp(run_galfit_cmd), sersic_order = ["disk"], **feedme_info[gname].to_dict())
+            
+            # Only fix sky if first step is successful
+            if galfit_output.success:
+                # Fix sky parameters per Galfit 'tips' recommendation
+                for key in galfit_output.sky.param_fix:
+                    galfit_output.sky.param_fix[key] = 1
+                
+            #galfit_output = OutputContainer(sp(run_galfit_cmd), sersic_order = ["bulge"], **feedme_info[gname].to_dict())
             
             # Assume rerun is to refine final fit
             # This will also be better for prototyping multiband fits
@@ -236,6 +252,7 @@ def main(**kwargs):
             #                                 )
 
             if num_steps == 3:
+                    
                 # For fitting *just* the bulge + a few pixels
                 # Trying Just disk, just bulge, then all together with arms
 #                 bulge_header = deepcopy(feedme_info[gname].header)
@@ -259,6 +276,7 @@ def main(**kwargs):
                 # Note initial components disk and galfit output the rest
                 # Those are updated!
                 header.to_file(bulge_disk_in, initial_components.bulge, galfit_output.disk, galfit_output.sky)
+                #header.to_file(bulge_disk_in, galfit_output.bulge, initial_components.disk, galfit_output.sky)
                 
                 run_galfit_cmd = f"{base_galfit_cmd} {bulge_in} {bulge_disk_in}"
                 print("Bulge + Disk")
@@ -281,6 +299,10 @@ def main(**kwargs):
                 galfit_output.disk.update_param_values()
                 #galfit_output.arms.param_fix["outer_rad"] = 1
                 galfit_output.to_file()
+                
+            # Fix sky parameters per Galfit 'tips' recommendation
+            # for key in galfit_output.sky.param_fix:
+            #     galfit_output.sky.param_fix[key] = 1
                 
             run_galfit_cmd = f"{base_galfit_cmd} {feedme_path}"
             print("Bulge + Disk + Arms (if applicable)")
@@ -310,36 +332,50 @@ def main(**kwargs):
             #failed.append(gname)
             continue
         
-        fitspng_param = "0.25,1" #1,150"
-        
-        fitspng_cmd1 = f"{run_fitspng} -fr \"{fitspng_param}\" -o \
-                        {tmp_png_path}.png {tmp_fits_path_gname}[1]"
-        fitspng_cmd2 = f"{run_fitspng} -fr \"{fitspng_param}\" -o \
-                        {tmp_png_path}_out.png {tmp_fits_path_gname}[2]"
-        fitspng_cmd3 = f"{run_fitspng} -fr \"{fitspng_param}\" -o \
-                        {tmp_png_path}_residual.png {tmp_fits_path_gname}[3]"
-        
-        fitspng_out = sp(fitspng_cmd1)
-        
-        # Because this doesn't work on some of the clusters
-        if "error" not in fitspng_out.stderr:
+        #tmp_fits_path = kwargs.get("tmp_fits_path", self.filepath)
+        # .../galfits -> galfit_png
+        # tmp_png_path  = kwargs.get("tmp_png_path", tmp_png_path)
+        # out_png_dir   = kwargs.get("out_png_dir", "./")
+        #capture_output = bool(kwargs.get("silent", False))
+        if sp(f"hostname").stdout.split(".")[0] == "bayonet-09":
+            tmp_fits_obj = OutputFits(tmp_fits_path_gname)
+            tmp_fits_obj.to_png(tmp_fits_path = tmp_fits_path_gname,
+                                tmp_png_path  = tmp_png_path,
+                                out_png_dir   = out_png_dir
+                               )
             
-            _ = sp(fitspng_cmd2, capture_output = capture_output)
-            _ = sp(fitspng_cmd3, capture_output = capture_output)
-
-            # Combining the images using ImageMagick
-            montage_cmd = f"montage {tmp_png_path}.png \
-                                    {tmp_png_path}_out.png \
-                                    {tmp_png_path}_residual.png \
-                                    -tile 3x1 -geometry \"175x175+2+0<\" \
-                                    {pj(out_png_dir, gname)}_combined.png"
-
-            _ = sp(montage_cmd, capture_output = capture_output)
-            # Drop a copy in the sparfire-out folder of each galaxy for ease of navigating/viewing
             shutil.copy2(f"{pj(out_png_dir, gname)}_combined.png", pj(out_dir, gname))
+
+#         fitspng_param = "0.25,1" #1,150"
+        
+#         fitspng_cmd1 = f"{run_fitspng} -fr \"{fitspng_param}\" -o \
+#                         {tmp_png_path}.png {tmp_fits_path_gname}[1]"
+#         fitspng_cmd2 = f"{run_fitspng} -fr \"{fitspng_param}\" -o \
+#                         {tmp_png_path}_out.png {tmp_fits_path_gname}[2]"
+#         fitspng_cmd3 = f"{run_fitspng} -fr \"{fitspng_param}\" -o \
+#                         {tmp_png_path}_residual.png {tmp_fits_path_gname}[3]"
+        
+#         fitspng_out = sp(fitspng_cmd1)
+        
+#         # Because this doesn't work on some of the clusters
+#         if "error" not in fitspng_out.stderr:
+            
+#             _ = sp(fitspng_cmd2, capture_output = capture_output)
+#             _ = sp(fitspng_cmd3, capture_output = capture_output)
+
+#             # Combining the images using ImageMagick
+#             montage_cmd = f"montage {tmp_png_path}.png \
+#                                     {tmp_png_path}_out.png \
+#                                     {tmp_png_path}_residual.png \
+#                                     -tile 3x1 -geometry \"175x175+2+0<\" \
+#                                     {pj(out_png_dir, gname)}_combined.png"
+
+#             _ = sp(montage_cmd, capture_output = capture_output)
+#             # Drop a copy in the sparfire-out folder of each galaxy for ease of navigating/viewing
+#             shutil.copy2(f"{pj(out_png_dir, gname)}_combined.png", pj(out_dir, gname))
                 
-        else:
-            print("Skipping fitspng conversion... there is likely a library (libcfitsio) issue.")
+#         else:
+#             print("Skipping fitspng conversion... there is likely a library (libcfitsio) issue.")
 
         # No point in doing this in parallel because race conditions
         if not parallel:
