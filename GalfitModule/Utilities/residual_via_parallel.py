@@ -30,10 +30,11 @@ from parallel_residual_calc import parallel_wrapper
 
 if __name__ == "__main__":
     basename         = sys.argv[1]
-    galfit_tmp_path  = sys.argv[2]
-    galfit_mask_path = sys.argv[3]
-    out_dir          = sys.argv[4]
-    to_png           = sys.argv[5]
+    pkl_end_str      = sys.argv[2]
+    galfit_tmp_path  = sys.argv[3]
+    galfit_mask_path = sys.argv[4]
+    out_dir          = sys.argv[5]
+    to_png           = sys.argv[6]
     
     if str.lower(to_png) == "false":
         out_png_dir = False
@@ -45,7 +46,7 @@ if __name__ == "__main__":
     out_df = parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_dir, to_png, all_gname_tmp_out)
     
     # In the future, drop this in out_dir
-    pickle_filename = f'{basename}_output_nmr.pkl'
+    pickle_filename = f'{basename}_{pkl_end_str}.pkl'
     #pickle.dump(out_nmr, open(pickle_filename, 'wb'))
     out_df.set_index("gname", inplace = True)
     out_df.to_pickle(pickle_filename)

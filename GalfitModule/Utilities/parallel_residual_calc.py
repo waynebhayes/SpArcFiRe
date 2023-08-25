@@ -136,6 +136,9 @@ def main(**kwargs):
     tmp_dir       = kwargs.get("tmp_dir", pj(run_dir, "sparcfire-tmp"))
     out_dir       = kwargs.get("out_dir", pj(run_dir, "sparcfire-out"))
     basename      = kwargs.get("basename", "GALFIT")
+    #pkl_end_str   = kwargs.get("pkl_end_str", "output_results")
+    # No need to make this an option... for now(?)
+    pkl_end_str = "output_results"
     
     # Of course the important things
     parallel          = kwargs.get("parallel", 1)
@@ -147,7 +150,7 @@ def main(**kwargs):
     verbose        = kwargs.get("verbose", False)
     capture_output = kwargs.get("capture_output", True)
     
-    final_pkl_file = f'{pj(out_dir, basename)}_output_nmr.pkl'
+    final_pkl_file = f'{pj(out_dir, basename)}_{pkl_end_str}.pkl'
     if not parallel and exists(final_pkl_file):
         ans = input(f"Do you wish to delete the current final output nmr pickle file? Y/N\n{final_pkl_file}\n")
         if ans.upper() == "Y":
@@ -194,7 +197,7 @@ def main(**kwargs):
         elif parallel == 2:
             # TODO: Add check if not on Slurm capable machine
             run_parallel      = "~wayne/bin/distrib_slurm"
-            parallel_run_name = "CALCULATE_NMR"
+            parallel_run_name = "CALCULATE_COMBINE_GALFIT_RESULTS"
             parallel_options  = "-M all"
             
         parallel_verbose  = "-v" if verbose else ""
@@ -202,7 +205,7 @@ def main(**kwargs):
         finished_pkl_num = 0
         if restart:
             check_output_pkl = [int(os.path.basename(i).split("_")[0].replace(basename, "")) 
-                                for i in find_files(tmp_dir, f'{basename}*_output_nmr.pkl', "f")
+                                for i in find_files(tmp_dir, f'{basename}*_{pkl_end_str}.pkl', "f")
                                 if os.path.basename(i).split("_")[0].replace(basename, "")
                                 ]
             if check_output_pkl:
@@ -231,11 +234,11 @@ def main(**kwargs):
                 # Rerun out_nmr
         
         #else:
-        all_output_pkl = glob.glob(pj(tmp_dir, f'{basename}*_output_nmr.pkl'))
+        all_output_pkl = glob.glob(pj(tmp_dir, f'{basename}*_{pkl_end_str}.pkl'))
         #_ = [out_nmr.update(pickle.load(open(file, 'rb'))) for file in all_output_pkl if os.path.basename(file) != f"{basename}_output_nmr.pkl"]
         out_df = pd.concat(
                            [pd.read_pickle(file) for file in all_output_pkl 
-                            if os.path.basename(file) != f"{basename}_output_nmr.pkl"
+                            if os.path.basename(file) != f"{basename}_{pkl_end_str}.pkl"
                            ]
                           ) 
 
@@ -261,7 +264,7 @@ def main(**kwargs):
     
     if not dont_remove_slurm and parallel:
         _ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
-        _ = sp(f"rm -f {pj(tmp_dir, basename)}*_output_nmr.pkl", capture_output = capture_output)
+        _ = sp(f"rm -f {pj(tmp_dir, basename)}*_{pkl_end_str}.pkl", capture_output = capture_output)
         _ = sp(f"rm -f {parallel_file}", capture_output = capture_output)
         
     #pickle_filename = f'{pj(out_dir, basename)}_output_nmr.pkl'

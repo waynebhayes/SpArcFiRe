@@ -39,8 +39,9 @@ from Functions.helper_functions import *
 
 def main(*args):
     basename         = args[0]
-    out_dir          = args[1] #os.path.dirname(basename)
-    galaxy_names     = args[2].split(",")
+    pkl_end_str      = args[1]
+    out_dir          = args[2] #os.path.dirname(basename)
+    galaxy_names     = args[3].split(",")
     
     #out_nmr = parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_png_dir, all_gname_tmp_out)
     all_df = pd.DataFrame()
@@ -71,7 +72,7 @@ def main(*args):
     all_df.set_index("gname", inplace = True)
     
     if basename:
-        pickle_filename = f'{basename}_output_nmr.pkl'
+        pickle_filename = f'{basename}_{pkl_end_str}.pkl'
         all_df.to_pickle(pickle_filename)
     #pickle.dump(output_dict, open(pickle_filename, 'wb'))
     
@@ -79,7 +80,8 @@ def main(*args):
 
 if __name__ == "__main__":
     basename         = sys.argv[1]
-    out_dir          = sys.argv[2] #os.path.dirname(basename)
-    galaxy_names     = sys.argv[3] #.split(",")
+    pkl_end_str      = sys.argv[2]
+    out_dir          = sys.argv[3] #os.path.dirname(basename)
+    galaxy_names     = sys.argv[4] #.split(",")
     
-    main(basename, out_dir, galaxy_names)
+    main(basename, pkl_end_str, out_dir, galaxy_names)
