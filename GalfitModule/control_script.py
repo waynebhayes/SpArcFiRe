@@ -102,6 +102,7 @@ if __name__ == "__main__":
               [-r | --restart]
               [-RrG | --rerun-galfit]
               [-v | --verbose]
+              [-n | --name]
 
     This script is the wrapping script for running GALFIT using SpArcFiRe to inform 
     the input. By default, it runs from the RUN (or current) directory and uses the
@@ -179,6 +180,14 @@ if __name__ == "__main__":
                         help     = 'Run GALFIT again after the final fit to hopefully refine said fit.'
                        )
     
+    parser.add_argument('-n', '--basename',
+                        dest     = 'basename', 
+                        action   = 'store',
+                        type     = str,
+                        default  = "GALFIT",
+                        help     = 'Basename of the output results pkl file ([name]_output_results.pkl).'
+                       )
+    
     parser.add_argument('-v', '--verbose',
                         dest     = 'verbose', 
                         action   = 'store_const',
@@ -204,6 +213,7 @@ if __name__ == "__main__":
         
         rerun             = args.rerun
         restart           = args.restart
+        basename          = args.basename
         
         verbose           = args.verbose
         capture_output    = not args.verbose
@@ -808,8 +818,9 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    basename = "GALFIT"
-    final_pkl_file = pj(out_dir, f"{basename}_output_nmr.pkl")
+    #basename = "GALFIT"
+    pkl_end_str = "output_results"
+    final_pkl_file = pj(out_dir, f"{basename}_{pkl_end_str}.pkl")
     print(f"Combining all the residual calculations into {final_pkl_file}")
 
     #all_nmr = {}
@@ -828,13 +839,13 @@ if __name__ == "__main__":
             
         elif parallel == 2:
             # For SLURM/Cluster Computing
-            parallel_run_name = "COMBINE_NMR"
+            parallel_run_name = "COMBINE_RESULTS"
             parallel_options  = "-M all"
 
         finished_pkl_num = 0
         if restart:
             check_output_pkl = [int(os.path.basename(i).split("_")[0].replace(basename, "")) 
-                                for i in find_files(tmp_dir, f'{basename}*_output_nmr.pkl', "f")
+                                for i in find_files(tmp_dir, f'{basename}*_{pkl_end_str}.pkl', "f")
                                 if os.path.basename(i).split("_")[0].replace(basename, "")
                                 ]
             if check_output_pkl:
@@ -860,13 +871,13 @@ if __name__ == "__main__":
             _ = sp(parallel_run_cmd, capture_output = capture_output)
 
         all_output_pkl = [pj(tmp_dir, fname) 
-                          for fname in find_files(tmp_dir, f'{basename}*_output_nmr.pkl', "f")
-                          if fname != f"{basename}_output_nmr.pkl"
+                          for fname in find_files(tmp_dir, f'{basename}*_{pkl_end_str}.pkl', "f")
+                          if fname != f"{basename}_{pkl_end_str}.pkl"
                          ]
         #_ = [all_nmr.update(pickle.load(open(file, 'rb'))) for file in all_output_pkl]
         out_df = pd.concat(
                            [pd.read_pickle(file) for file in all_output_pkl 
-                            if os.path.basename(file) != f"{basename}_output_nmr.pkl"
+                            if os.path.basename(file) != f"{basename}_{pkl_end_str}.pkl"
                            ]
                           ) 
         
@@ -888,7 +899,6 @@ if __name__ == "__main__":
 
     # Could split this into the above if/else but this keeps everything output
     # related in one place
-    #pickle_filename_temp = f'{pj(out_dir, basename)}_output_nmr_final.pkl'
     print(f"Outputting results to {final_pkl_file}")
     
     # For when I do it in one of the other scripts
@@ -900,10 +910,9 @@ if __name__ == "__main__":
     
     if not dont_remove_slurm and parallel:
         _ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
-        _ = sp(f"rm -f {pj(tmp_dir, basename)}*_output_nmr.pkl", capture_output = capture_output)
+        _ = sp(f"rm -f {pj(tmp_dir, basename)}*_{pkl_end_str}.pkl", capture_output = capture_output)
         _ = sp(f"rm -f {parallel_file}", capture_output = capture_output)
         
-    #pickle_filename = f'{pj(out_dir, basename)}_output_nmr.pkl'    
     #_ = sp(f"mv {pickle_filename_temp} {pkl_file}", capture_output = capture_output)
 
 
@@ -945,7 +954,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[42]:
+# In[43]:
 
 
 if __name__ == "__main__":
