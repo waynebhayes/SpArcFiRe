@@ -59,7 +59,7 @@ from Classes.Components import *
 from Functions.helper_functions import *
 
 
-# In[16]:
+# In[4]:
 
 
 class ComponentContainer:
@@ -460,6 +460,12 @@ class OutputContainer(FeedmeContainer):
         if not galfit_return_code:
             self.success = True
             
+            # Pop previous galfit out if stored on the assumption that we don't need it anymore
+            # even if we decide not to store the next iteration
+            # This way we can leave the call explicit in update_components and not have to worry
+            # about using an old fit
+            kwargs.pop("galfit_out_text", None)
+            
         elif galfit_return_code < 1:
             # per subprocess documentation
             # A negative value -N indicates that the child was terminated by signal N (POSIX only).
@@ -472,6 +478,9 @@ class OutputContainer(FeedmeContainer):
         # For reading from galfit stdout to update classes
         def update_components(self, galfit_out_text, **kwargs) -> None: #, bulge, disk, arms, fourier, sky):
             
+            #if not kwargs.get("galfit_out_text"):
+            #    raise("Cannot update components, no output text provided.")
+                
             last_it = galfit_out_text.split("Iteration")[-1]
 
             s_count = 0
@@ -530,7 +539,7 @@ class OutputContainer(FeedmeContainer):
             return ""
 
 
-# In[24]:
+# In[7]:
 
 
 if __name__ == "__main__":
@@ -793,7 +802,7 @@ if __name__ == "__main__":
     #good_output.header.to_file(output_filename, good_output.bulge, good_output.disk, good_output.arms, good_output.fourier, good_output.sky)
 
 
-# In[15]:
+# In[ ]:
 
 
 if __name__ == "__main__":
