@@ -123,7 +123,7 @@ class ComponentContainer:
         return out_str
 
 
-# In[5]:
+# In[50]:
 
 
 class FeedmeContainer(ComponentContainer):
@@ -190,6 +190,16 @@ class FeedmeContainer(ComponentContainer):
                 final_idx  = -1
             
             component_list = self.to_list()
+            
+            # Header does not fit the COMP paradigm used below so we explicitly account for it here
+            # Reinclude magzpt since it the end is exclusive
+            header_keys = input_keys[input_keys.index("INITFILE"):input_keys.index("MAGZPT")] + \
+                          ["MAGZPT"]
+                
+            header_dict = {k:v for k,v in input_dict.items() if k in header_keys}
+            
+            component_list[0].from_file_helper(header_dict)
+            
             component_list_num = 1
             
             send_to_helper = {}
@@ -331,17 +341,36 @@ class FeedmeContainer(ComponentContainer):
             
             input_file = [line.rstrip("\n") for line in input_file_obj.readlines()]
             
+            # Header is guaranteed to come first***
             component_list = self.to_list()
-            component_list_num = 0
+            
+            header_begin_end_idx = [i + 1 
+                                    for i, line in enumerate(input_file) 
+                                    if line.startswith("# IMAGE and GALFIT CONTROL PARAMETERS")
+                                    or line.startswith("P)")
+                                   ]
+            
+            component_list[0].from_file_helper(
+                input_file[header_begin_end_idx[0]:header_begin_end_idx[1]]
+            )
+            
+            component_list_num = 1
             #send_to_helper = []
             #store = False
             #component_exists = False
             
-            component_idx_nums = [(i + 1, line[-1]) for i, line in enumerate(input_file) if line.startswith("# Component number")]
+            component_idx_nums = [(i + 1, line[-1]) 
+                                  for i, line in enumerate(input_file) 
+                                  if line.startswith("# Component number")
+                                  #or line.startswith("# IMAGE and GALFIT CONTROL PARAMETERS")
+                                 ]
             
             for idx, (component_begin, component_num) in enumerate(component_idx_nums):
                 # White space *before* component number or end of file
-                component_end = [i for i,line in enumerate(input_file) if line.strip().startswith("="*10)][-1] - 1
+                component_end = [i for i,line in enumerate(input_file) 
+                                 if line.strip().startswith("="*10)
+                                 #or line.strip().startswith("# INITIAL FITTING PARAMETERS")
+                                 ][-1] - 1
                 
                 if idx + 1 < len(component_idx_nums):
                     component_end = component_idx_nums[idx + 1][0] - 2
@@ -441,7 +470,7 @@ class FeedmeContainer(ComponentContainer):
         #_ = [c.update_param_values() for c in self.to_list()]
 
 
-# In[6]:
+# In[51]:
 
 
 class OutputContainer(FeedmeContainer):
@@ -539,7 +568,7 @@ class OutputContainer(FeedmeContainer):
             return ""
 
 
-# In[7]:
+# In[52]:
 
 
 if __name__ == "__main__":
@@ -552,14 +581,14 @@ if __name__ == "__main__":
     print(container_df)
 
 
-# In[8]:
+# In[53]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[9]:
+# In[54]:
 
 
 # Testing FeedmeContainer kwargs and to_file
@@ -593,7 +622,7 @@ if __name__ == "__main__":
     container.to_file()
 
 
-# In[10]:
+# In[55]:
 
 
 # Testing FeedmeContainer from_file
@@ -613,11 +642,12 @@ if __name__ == "__main__":
     print("*"*80)
     print("*"*80)
     
+    container = new_container()
     container.from_file(example_fits)
     print(iff(str(container)))
 
 
-# In[11]:
+# In[57]:
 
 
 # Testing FeedmeContainer from_file with just bulge
@@ -638,6 +668,7 @@ if __name__ == "__main__":
     print("*"*80)
     print("*"*80)
     
+    container = new_container()
     container.from_file(example_fits)
     print(iff(str(container)))
 
@@ -802,7 +833,7 @@ if __name__ == "__main__":
     #good_output.header.to_file(output_filename, good_output.bulge, good_output.disk, good_output.arms, good_output.fourier, good_output.sky)
 
 
-# In[ ]:
+# In[15]:
 
 
 if __name__ == "__main__":
