@@ -13,7 +13,7 @@
 # 
 # TO RUN: `python3 sparc_to_galfit_feedme_gen.py`
 
-# In[1]:
+# In[2]:
 
 
 import numpy as np
@@ -28,7 +28,7 @@ from copy import deepcopy
 from astropy.io import fits
 
 
-# In[2]:
+# In[3]:
 
 
 # For debugging purposes
@@ -42,7 +42,7 @@ def in_notebook():
         return False
 
 
-# In[3]:
+# In[4]:
 
 
 import sys
@@ -692,7 +692,7 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
         
         bulge = Sersic(component_number = 1, 
                        position = (center_pos_x, center_pos_y),
-                       magnitude = float(petromag) - 1,
+                       magnitude = float(petromag) - 2,
                        # Sometimes sparcfire messes this up
                        effective_radius = min(max(galaxy_dict["bulge_maj_axs_len"], 2), 0.2*crop_rad),
                        # According to other paper GALFIT usually doesn't have a problem with the index
@@ -703,7 +703,7 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
         
         disk  = Sersic(component_number = 2, 
                        position = (center_pos_x, center_pos_y),
-                       magnitude = float(petromag) - 3,
+                       magnitude = float(petromag) - 2,
                        effective_radius = galaxy_dict["disk_maj_axs_len"],
                        # According to comparison tests, this usually ends up much higher than classical probably due to the spiral.
                        sersic_index = 1,
@@ -815,7 +815,7 @@ if __name__ == "__main__":
                     )
 
 
-# In[14]:
+# In[5]:
 
 
 if __name__ == "__main__":
