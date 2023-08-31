@@ -179,11 +179,14 @@ class FitsFile:
         gname         = kwargs.get("gname", self.gname)
         
         # TODO: BAD ASSUMPTION MOVING FORWARD
-        tmp_fits_path = kwargs.get("tmp_fits_path", self.filepath)
+        #tmp_fits_path = kwargs.get("tmp_fits_path", self.filepath)
+        fits_path = kwargs.get("fits_path", self.filepath)
         # .../galfits -> galfit_png
-        tmp_png_dir   = os.path.split(tmp_fits_path)[0].rstrip("s") + "_png"
+        #tmp_png_dir   = os.path.split(tmp_fits_path)[0].rstrip("s") + "_png"
+        tmp_png_dir   = kwargs.get("tmp_png_dir", "./")
         tmp_png_path  = pj(tmp_png_dir, gname)
         tmp_png_path  = kwargs.get("tmp_png_path", tmp_png_path)
+        
         out_png_dir   = kwargs.get("out_png_dir", "./")
         
         capture_output = bool(kwargs.get("silent", False))
@@ -191,17 +194,23 @@ class FitsFile:
         fitspng_param = "0.25,1" #1,150"
         
         # run_fitspng from helper_functions, string path to fitspng program
-        fitspng_cmd1 = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}.png {tmp_fits_path}[1]"
+        fitspng_cmd1 = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}.png {fits_path}[1]"
         
-        fitspng_cmd2 = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}_out.png {tmp_fits_path}[2]"
+        fitspng_cmd2 = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}_out.png {fits_path}[2]"
         
-        fitspng_cmd3 = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}_residual.png {tmp_fits_path}[3]"
+        fitspng_cmd3 = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}_residual.png {fits_path}[3]"
         
         cmds = [fitspng_cmd1, fitspng_cmd2, fitspng_cmd3]
         
         # sp is from helper_functions, subprocess.run call
         for cmd in cmds[:self.num_imgs]:
-            _ = sp(cmd, capture_output = capture_output)
+            # We must capture this call to check if the conversion worked
+            fitspng_out = sp(cmd, capture_output = True)
+            
+            if "error" in fitspng_out.stderr:
+                print("Skipping fitspng conversion... there is likely a library (libcfitsio) issue.")
+                self.combined_png = ""
+                return
         
         im1 = f"{tmp_png_path}.png"
         im2 = f"{tmp_png_path}_out.png"
@@ -269,7 +278,7 @@ class FitsFile:
             setattr(self, key, value)
 
 
-# In[11]:
+# In[6]:
 
 
 class OutputFits(FitsFile):
@@ -554,12 +563,12 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     print("Checking the FITS header (have to reload the object to see the changes)")
     test_model = OutputFits(model)
-    print(f"Norm of the masked residual {test_model.model.header['NMR']}")
-    print(f"{test_model.model.header['KS_']}")
-    print(f"{test_model.model.header['KS_STAT']}")
+    print(f"Norm of the masked residual per FITS header: {test_model.model.header['NMR']}")
+    print(f"kstest pvalue per FITS header: {test_model.model.header['KS_P']}")
+    print(f"kstest statistic per FITS header: {test_model.model.header['KS_STAT']}")
 
 
-# In[10]:
+# In[11]:
 
 
 if __name__ == "__main__":
