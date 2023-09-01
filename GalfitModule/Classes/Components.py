@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[2]:
 
 
 import os
@@ -17,7 +17,7 @@ import pandas as pd
 import numpy as np
 
 
-# In[ ]:
+# In[3]:
 
 
 # For debugging purposes
@@ -31,7 +31,7 @@ def in_notebook():
         return False
 
 
-# In[ ]:
+# In[4]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -57,7 +57,7 @@ sys.path.append(_MODULE_DIR)
 from Functions.helper_functions import *
 
 
-# In[ ]:
+# In[5]:
 
 
 class GalfitComponent:
@@ -420,7 +420,7 @@ class GalfitComponent:
     #     return self.__dict__.iteritems()
 
 
-# In[ ]:
+# In[6]:
 
 
 class Sersic(GalfitComponent):
@@ -557,7 +557,7 @@ class Sersic(GalfitComponent):
         return
 
 
-# In[ ]:
+# In[7]:
 
 
 class Power(GalfitComponent):
@@ -682,7 +682,7 @@ class Power(GalfitComponent):
         return
 
 
-# In[ ]:
+# In[17]:
 
 
 class Fourier(GalfitComponent):
@@ -701,6 +701,17 @@ class Fourier(GalfitComponent):
         self.param_fix = {}
         
         self.include_fn(n = n)
+        
+        amplitudes   = []
+        phase_angles = []
+        for k,v in self.param_values.items():
+            amplitudes.append(v[0])
+            phase_angles.append(v[1])
+        
+        # TODO: FIND SOME WAY TO UPDATE THIS WHEN OBJECT IS UPDATED
+        # preferably without copying and pasting things
+        self.amplitudes   = amplitudes
+        self.phase_angles = phase_angles
         
         p_numbers = list(self.param_numbers.keys())
         # For reading from file
@@ -791,7 +802,7 @@ class Fourier(GalfitComponent):
         return
 
 
-# In[ ]:
+# In[18]:
 
 
 class Sky(GalfitComponent):
@@ -898,7 +909,7 @@ class Sky(GalfitComponent):
         return
 
 
-# In[ ]:
+# In[19]:
 
 
 class GalfitHeader(GalfitComponent):
@@ -1051,14 +1062,14 @@ class GalfitHeader(GalfitComponent):
         return
 
 
-# In[ ]:
+# In[20]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[ ]:
+# In[21]:
 
 
 # Unit Test for GalfitComponent
@@ -1069,7 +1080,7 @@ if __name__ == "__main__":
         print(k,v)
 
 
-# In[ ]:
+# In[22]:
 
 
 if __name__ == "__main__":
@@ -1108,7 +1119,7 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps""".
     print(header)
 
 
-# In[ ]:
+# In[23]:
 
 
 if __name__ == "__main__":
@@ -1157,7 +1168,7 @@ if __name__ == "__main__":
     print(bulge)
 
 
-# In[ ]:
+# In[24]:
 
 
 if __name__ == "__main__":
@@ -1202,7 +1213,7 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
     print(arms)
 
 
-# In[ ]:
+# In[25]:
 
 
 if __name__ == "__main__":
@@ -1240,7 +1251,7 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
     print(fourier)
 
 
-# In[ ]:
+# In[16]:
 
 
 if __name__ == "__main__":
@@ -1256,7 +1267,7 @@ if __name__ == "__main__":
     bulge.to_file(f"{base_out}_PowerFourierSkip.txt", arms, fourier)
 
 
-# In[ ]:
+# In[17]:
 
 
 if __name__ == "__main__":
@@ -1298,7 +1309,7 @@ if __name__ == "__main__":
     print(sky)
 
 
-# In[ ]:
+# In[18]:
 
 
 if __name__ == "__main__":
