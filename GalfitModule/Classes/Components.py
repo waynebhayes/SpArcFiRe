@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
+# In[1]:
 
 
 import os
@@ -17,7 +17,7 @@ import pandas as pd
 import numpy as np
 
 
-# In[3]:
+# In[2]:
 
 
 # For debugging purposes
@@ -31,7 +31,7 @@ def in_notebook():
         return False
 
 
-# In[4]:
+# In[3]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -57,7 +57,7 @@ sys.path.append(_MODULE_DIR)
 from Functions.helper_functions import *
 
 
-# In[5]:
+# In[4]:
 
 
 class GalfitComponent:
@@ -420,7 +420,7 @@ class GalfitComponent:
     #     return self.__dict__.iteritems()
 
 
-# In[6]:
+# In[5]:
 
 
 class Sersic(GalfitComponent):
@@ -557,7 +557,7 @@ class Sersic(GalfitComponent):
         return
 
 
-# In[7]:
+# In[6]:
 
 
 class Power(GalfitComponent):
@@ -682,7 +682,7 @@ class Power(GalfitComponent):
         return
 
 
-# In[17]:
+# In[7]:
 
 
 class Fourier(GalfitComponent):
@@ -705,8 +705,9 @@ class Fourier(GalfitComponent):
         amplitudes   = []
         phase_angles = []
         for k,v in self.param_values.items():
-            amplitudes.append(v[0])
-            phase_angles.append(v[1])
+            if k.lower() != "skip":
+                amplitudes.append(v[0])
+                phase_angles.append(v[1])
         
         # TODO: FIND SOME WAY TO UPDATE THIS WHEN OBJECT IS UPDATED
         # preferably without copying and pasting things
@@ -802,7 +803,7 @@ class Fourier(GalfitComponent):
         return
 
 
-# In[18]:
+# In[8]:
 
 
 class Sky(GalfitComponent):
@@ -909,7 +910,7 @@ class Sky(GalfitComponent):
         return
 
 
-# In[19]:
+# In[9]:
 
 
 class GalfitHeader(GalfitComponent):
@@ -1062,14 +1063,14 @@ class GalfitHeader(GalfitComponent):
         return
 
 
-# In[20]:
+# In[10]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[21]:
+# In[11]:
 
 
 # Unit Test for GalfitComponent
@@ -1080,7 +1081,7 @@ if __name__ == "__main__":
         print(k,v)
 
 
-# In[22]:
+# In[12]:
 
 
 if __name__ == "__main__":
@@ -1119,7 +1120,7 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps""".
     print(header)
 
 
-# In[23]:
+# In[13]:
 
 
 if __name__ == "__main__":
@@ -1168,7 +1169,7 @@ if __name__ == "__main__":
     print(bulge)
 
 
-# In[24]:
+# In[14]:
 
 
 if __name__ == "__main__":
@@ -1213,7 +1214,7 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
     print(arms)
 
 
-# In[25]:
+# In[15]:
 
 
 if __name__ == "__main__":
