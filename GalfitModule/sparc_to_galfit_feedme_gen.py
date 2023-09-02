@@ -206,7 +206,7 @@ def galaxy_information(galaxy_name, galaxy_path):
         "bulge_maj_axs_len" : 2,
         "bulge_axis_ratio" : 0.5,
         "bulge_rot_angle" : 30,
-        "crop_rad" : 30, # New!
+        "crop_rad" : 30, 
         "center_pos_x" : 30,
         "center_pos_y" : 30,
         "disk_maj_axs_len" : 30,
@@ -222,12 +222,14 @@ def galaxy_information(galaxy_name, galaxy_path):
         "bar_candidate" : 'FALSE',
         "bar_len"  : 5, 
         # spin_parity handled by if 
-        "spin_parity" : '' #random.choice(['','-'])
+        "spin_parity" : '', #random.choice(['','-'])
+        "scale_fact_std" : 1,
+        "scale_fact_ipt" : 1
                     }
            
     # Making this global since I'm now grabbing the necessary info from the csv
     # std for standardized image
-    global scale_fact_std
+    #global scale_fact_std
     scale_fact_std = 2*kwargs_out["crop_rad"]/256
         
     chirality = 0
@@ -282,7 +284,7 @@ def galaxy_information(galaxy_name, galaxy_path):
         # fit state which still result in an empty csv
         try:
             input_size    = int(row.get('iptSz', "[256 256]").strip().split()[0][1:])
-            global scale_fact_ipt
+            #global scale_fact_ipt
             if input_size:
                 scale_fact_ipt = 2*crop_rad/input_size
             else:
@@ -396,7 +398,7 @@ def galaxy_information(galaxy_name, galaxy_path):
 # In[ ]:
 
 
-def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2):
+def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2, scale_fact_std = 1):
 
     kwargs_out = {
         "inner_rad" : 0,
@@ -637,6 +639,7 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
         # ************
         
         galaxy_dict = galaxy_information(gname, gfolder)
+        scale_fact_std = galaxy_dict["scale_fact_std"]
         
         center_pos_x = float(galaxy_dict["center_pos_x"])
         center_pos_y = float(galaxy_dict["center_pos_y"])
@@ -647,7 +650,13 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
         y1crop = round(center_pos_y - 2*crop_rad)
         y2crop = round(center_pos_y + 2*crop_rad)
     
-        arc_dict = arc_information(gname, gfolder, num_arms = galaxy_dict["est_arcs"], bulge_rad = galaxy_dict["bulge_maj_axs_len"])
+        arc_dict = arc_information(
+                                   gname, 
+                                   gfolder, 
+                                   num_arms = galaxy_dict["est_arcs"], 
+                                   bulge_rad = galaxy_dict["bulge_maj_axs_len"], 
+                                   scale_fact_std = scale_fact_std
+                                  )
     
         if galaxy_dict["bar_candidate"].upper() == "FALSE": # According to Chien, if no bar, then r_in = 0 since r_in is more a mathematical construct relating to the bar
             in_rad = 0 #unsure if I'll keep this...
@@ -815,7 +824,7 @@ if __name__ == "__main__":
                     )
 
 
-# In[5]:
+# In[6]:
 
 
 if __name__ == "__main__":
