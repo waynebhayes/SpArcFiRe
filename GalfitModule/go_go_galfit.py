@@ -269,10 +269,10 @@ def main(**kwargs):
             galfit_output = OutputContainer(sp(run_galfit_cmd), sersic_order = ["disk"], **feedme_info[gname].to_dict())
             
             # Only fix sky if first step is successful
-            if galfit_output.success:
-                # Fix sky parameters per Galfit 'tips' recommendation
-                for key in galfit_output.sky.param_fix:
-                    galfit_output.sky.param_fix[key] = 0
+            # if galfit_output.success:
+            #     # Fix sky parameters per Galfit 'tips' recommendation
+            #     for key in galfit_output.sky.param_fix:
+            #         galfit_output.sky.param_fix[key] = 0
                 
             #galfit_output = OutputContainer(sp(run_galfit_cmd), sersic_order = ["bulge"], **feedme_info[gname].to_dict())
             
