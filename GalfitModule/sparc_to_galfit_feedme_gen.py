@@ -395,15 +395,17 @@ def galaxy_information(galaxy_name, galaxy_path):
     return kwargs_out
 
 
-# In[ ]:
+# In[15]:
 
 
 def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2, scale_fact_std = 1):
 
     kwargs_out = {
-        "inner_rad" : 0,
-        "outer_rad" : 20,
-        "cumul_rot" : 60
+        "inner_rad"   : 0,
+        "outer_rad"   : 20,
+        "cumul_rot"   : 60,
+        "pitch_angle" : 0,
+        "weight_div"  : 1, # For when I want to recover totals
                  }
     
     try:
@@ -419,10 +421,10 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2, scale
         reader = csv.DictReader(arcs_file)
         arcs_in = list(reader)
         
-        # Nested dictionaries
-        theta_sum = 0
-        inner_rad = 0
-        outer_rad = 0
+        theta_sum   = 0
+        inner_rad   = 0
+        outer_rad   = 0
+        pitch_angle = 0
 
         i = 0
         count = 0
@@ -435,7 +437,7 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2, scale
             # one message per galaxy instead of doing it for arcs and galaxy info
             return kwargs_out
 
-        while i < num_arms:
+        while count < num_arms:
             try:
                 _ = arcs_in[i]['pitch_angle']
             except IndexError as ie:
@@ -460,6 +462,9 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2, scale
 
                 inner_rad += r_start * weight_2
                 outer_rad += float(arcs_in[i]['r_end']) * weight
+                
+                pitch_angle += float(arcs_in[i]['pitch_angle']) * weight
+                
             except ValueError as ve:
                 break
 
@@ -470,13 +475,15 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2, scale
         # and hence where the cumulative rotation out point is. Note, this already takes into account the relative
         # starting point of the arms which is the hard part... 
         
-        # Averaging, tack on 180 to limit some of the craziness
-        # Galfit tends to like the outer_rad smaller, hence larger divisor
+        # Averaging
+        # Add 1 to denominator because galfit seems to like a shorter outer radius
         weight_div = 1/max(1, count + 1) #1/np.math.factorial(count)
         cumul_rot = abs(theta_sum)*weight_div # NOT A STRING
 
-        inner_rad = inner_rad*weight_div # Averaging the inner distance to both arcs
-        outer_rad = outer_rad*weight_div # Averaging outer distance
+        inner_rad *= weight_div # Averaging the inner distance to both arcs
+        outer_rad *= weight_div # Averaging outer distance
+        
+        pitch_angle /= max(1, count)
         
         arcs_file.close()
         
@@ -824,7 +831,7 @@ if __name__ == "__main__":
                     )
 
 
-# In[6]:
+# In[14]:
 
 
 if __name__ == "__main__":
