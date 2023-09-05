@@ -433,7 +433,7 @@ if __name__ == "__main__":
         sp(f"mv {pj(tmp_dir,'*_star-rm.fits')} {tmp_masks_dir}", capture_output = capture_output)
         
     #star_masks = glob.glob(pj(tmp_masks_dir, "*_star-rm.fits"))
-    star_masks      = find_files(tmp_masks_dir, "*_star-rm.fits", "f")
+    #star_masks      = find_files(tmp_masks_dir, "*_star-rm.fits", "f")
 
 
 # In[ ]:
@@ -986,7 +986,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[5]:
+# In[6]:
 
 
 if __name__ == "__main__":
