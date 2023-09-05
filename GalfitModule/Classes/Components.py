@@ -57,7 +57,7 @@ sys.path.append(_MODULE_DIR)
 from Functions.helper_functions import *
 
 
-# In[4]:
+# In[22]:
 
 
 class GalfitComponent:
@@ -110,7 +110,11 @@ class GalfitComponent:
         # Values are the only thing that will change via instance.param_name
         # We need to update the dictionary that holds all of them since I use
         # a deepcopy to save myself some lines of code/typing (cheeky)
+        
+        # TODO: Catch values which I use param fix to cheat on 
         self.param_values.update({k:v for k,v in self.__dict__.items() if k in self.param_values})
+        if self.component_type == "header":
+            self.param_fix["region_to_fit"] = f'{self.__dict__["region_to_fit"][2]} {self.__dict__["region_to_fit"][3]}'
         
 # ==========================================================================================================
 
@@ -142,6 +146,8 @@ class GalfitComponent:
 # ==========================================================================================================
   
     def __str__(self):
+        # TODO update param_values here so that output is always up to date?
+        # Or find a way not to use it...
         output_str = ""
         num_type = ".4f"
         l_align = "<11"
@@ -420,7 +426,7 @@ class GalfitComponent:
     #     return self.__dict__.iteritems()
 
 
-# In[5]:
+# In[23]:
 
 
 class Sersic(GalfitComponent):
@@ -557,7 +563,7 @@ class Sersic(GalfitComponent):
         return
 
 
-# In[6]:
+# In[24]:
 
 
 class Power(GalfitComponent):
@@ -682,7 +688,7 @@ class Power(GalfitComponent):
         return
 
 
-# In[7]:
+# In[25]:
 
 
 class Fourier(GalfitComponent):
@@ -803,7 +809,7 @@ class Fourier(GalfitComponent):
         return
 
 
-# In[8]:
+# In[26]:
 
 
 class Sky(GalfitComponent):
@@ -910,7 +916,7 @@ class Sky(GalfitComponent):
         return
 
 
-# In[9]:
+# In[27]:
 
 
 class GalfitHeader(GalfitComponent):
@@ -1063,14 +1069,14 @@ class GalfitHeader(GalfitComponent):
         return
 
 
-# In[10]:
+# In[28]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[11]:
+# In[29]:
 
 
 # Unit Test for GalfitComponent
@@ -1081,7 +1087,7 @@ if __name__ == "__main__":
         print(k,v)
 
 
-# In[12]:
+# In[30]:
 
 
 if __name__ == "__main__":
