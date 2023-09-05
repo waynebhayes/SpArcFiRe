@@ -398,7 +398,7 @@ class OutputFits(FitsFile):
 
         # To invert the matrix since galfit keeps 0 valued areas
         crop_mask = 1
-        if np.any(mask):
+        if np.any(mask.data):
             crop_mask = 1 - mask.data[xbox_min:xbox_max, ybox_min:ybox_max]
             
         if use_bulge_mask:
@@ -568,7 +568,7 @@ if __name__ == "__main__":
     print(f"kstest statistic per FITS header: {test_model.model.header['KS_STAT']}")
 
 
-# In[11]:
+# In[ ]:
 
 
 if __name__ == "__main__":
