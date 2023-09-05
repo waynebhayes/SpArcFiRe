@@ -326,8 +326,8 @@ if __name__ == "__main__":
     #tmp_psf_dir     = pj(tmp_dir, "psf_files")
     tmp_png_dir     = pj(tmp_dir, "galfit_png")
     
+    sim_fitting_dir = pj(tmp_dir, "sim_fitting")
     if simultaneous_fitting:
-        sim_fitting_dir = pj(tmp_dir, "sim_fitting")
         sf_in_dir       = pj(sim_fitting_dir, "sparcfire-in")
         sf_tmp_dir      = pj(sim_fitting_dir, "sparcfire-tmp")
         sf_out_dir      = pj(sim_fitting_dir, "sparcfire-out")
@@ -986,7 +986,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[6]:
+# In[7]:
 
 
 if __name__ == "__main__":
