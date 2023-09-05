@@ -446,6 +446,10 @@ if __name__ == "__main__":
         if not exists(pj(tmp_masks_dir, 'remove_stars_with_sextractor.log')):
             # remove_stars_with_sextractor needs this available before it can log
             _ = sp(f"touch {pj(tmp_masks_dir, 'remove_stars_with_sextractor.log')}", capture_output = capture_output)
+            
+        if simultaneous_fitting and not exists(pj(sf_masks_dir, 'remove_stars_with_sextractor.log')):
+            # remove_stars_with_sextractor needs this available before it can log
+            _ = sp(f"touch {pj(sf_masks_dir, 'remove_stars_with_sextractor.log')}", capture_output = capture_output)
         
 #         try:
 #             star_removal_path = pj(os.environ["SPARCFIRE_HOME"], "star_removal")
@@ -461,10 +465,11 @@ if __name__ == "__main__":
         # Compare against output folders because extra observations may be in input directory
         # GALFIT can only run on what's there... I mean there are defaults for SpArcFiRe
         # but this is the more appropriate choice. 
-        if len(output_folders) != len(star_masks):
-            print("The temp directory has a different number of star masks than the number of output directories.") 
-        else:
-            generate_starmasks = False
+        # Now done in go_go_galfit
+        # if len(output_folders) != len(star_masks):
+        #     print("The temp directory has a different number of star masks than the number of output directories.") 
+        # else:
+        #     generate_starmasks = False
             
 # DEPRECATED
                            
@@ -981,7 +986,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[4]:
+# In[5]:
 
 
 if __name__ == "__main__":

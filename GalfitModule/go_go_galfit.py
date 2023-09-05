@@ -73,6 +73,11 @@ def touch_failed_fits(gname, tmp_fits_dir):
     fail_fileout = pj(tmp_fits_dir, f"{prefix}{gname}_galfit_out.fits")
     sp(f"touch {fail_fileout}", capture_output = False)
     
+def check_for_starmasks(gnames, masks_dir):
+    masks_in_dir = [os.path.basename(i).split("_star-rm.fits")[0] for i in find_files(masks_dir, "*star-rm.fits", "f")]
+    return list(set(gnames).difference(set(masks_in_dir)))
+    
+    
 def main(**kwargs):
     
     # Main Directories
@@ -91,8 +96,16 @@ def main(**kwargs):
     
     # Of course the important things
     num_steps = int(kwargs.get("num_steps", 2))
-    rerun     = kwargs.get("rerun", False)
     parallel  = kwargs.get("parallel", 1)
+    
+    # For simultaneous fitting
+    simultaneous_fitting = kwargs.get("simultaneous_fitting", True)
+    sim_fitting_dir  = kwargs.get("sim_fitting_dir", pj(tmp_dir, "sim_fitting"))
+    
+    sf_in_dir    = kwargs.get("sim_fitting_in_dir", pj(sim_fitting_dir, "sparcfire-in"))
+    sf_tmp_dir   = kwargs.get("sim_fitting_tmp_dir", pj(sim_fitting_dir, "sparcfire-tmp"))
+    sf_out_dir   = kwargs.get("sim_fitting_out_dir", pj(sim_fitting_dir, "sparcfire-out"))
+    sf_masks_dir = kwargs.get("sim_fitting_masks_dir", pj(sf_tmp_dir, "galfit_masks"))
     
     # For verbosity, default to capturing output
     # Keep both for clarity
@@ -142,13 +155,16 @@ def main(**kwargs):
                 _ = sp(f"mkdir -p {v}")
     
     if generate_starmasks:
-        print("Generating Starmasks")
+        print("Generating Starmasks (if need be)")
         
-        # I think we have to change path for source extractor
-        star_removal_path = pj(_MODULE_DIR, "star_removal")
-        os.chdir(star_removal_path)
-        remove_stars_with_sextractor.main(in_dir, tmp_masks_dir, galaxy_names)
-        os.chdir(cwd)
+        galaxies_to_mask = check_for_starmasks(galaxy_names, tmp_masks_dir)
+        
+        if galaxies_to_mask:
+            # I think we have to change path for source extractor
+            star_removal_path = pj(_MODULE_DIR, "star_removal")
+            os.chdir(star_removal_path)
+            remove_stars_with_sextractor.main(in_dir, tmp_masks_dir, galaxies_to_mask)
+            os.chdir(cwd)
         
     print("Running feedme generator...")
     feedme_info = write_to_feedmes(top_dir = cwd,
@@ -159,6 +175,25 @@ def main(**kwargs):
                                    # petromags = petromags,
                                    # bulge_axis_ratios = bulge_axis_ratios
                                   )
+    
+    if simultaneous_fitting:
+        
+        galaxies_to_mask = check_for_starmasks(galaxy_names, sf_masks_dir)
+        
+        if galaxies_to_mask:
+            star_removal_path = pj(_MODULE_DIR, "star_removal")
+            os.chdir(star_removal_path)
+            remove_stars_with_sextractor.main(sf_in_dir, sf_masks_dir, galaxies_to_mask)
+            os.chdir(cwd)
+        
+        sf_feedme_info = write_to_feedmes(top_dir = cwd,
+                                          galaxy_names = galaxy_names,
+                                          in_dir  = sf_in_dir,
+                                          tmp_dir = sf_tmp_dir,
+                                          out_dir = sf_out_dir
+                                          # petromags = petromags,
+                                          # bulge_axis_ratios = bulge_axis_ratios
+                                          )
                                    
     max_it = 200
     base_galfit_cmd = f"{run_galfit} -imax {max_it}"
@@ -237,7 +272,7 @@ def main(**kwargs):
             if galfit_output.success:
                 # Fix sky parameters per Galfit 'tips' recommendation
                 for key in galfit_output.sky.param_fix:
-                    galfit_output.sky.param_fix[key] = 1
+                    galfit_output.sky.param_fix[key] = 0
                 
             #galfit_output = OutputContainer(sp(run_galfit_cmd), sersic_order = ["bulge"], **feedme_info[gname].to_dict())
             
@@ -300,23 +335,59 @@ def main(**kwargs):
                 #galfit_output.arms.param_fix["outer_rad"] = 1
                 galfit_output.to_file()
                 
-            # Fix sky parameters per Galfit 'tips' recommendation
-            # for key in galfit_output.sky.param_fix:
-            #     galfit_output.sky.param_fix[key] = 1
-                
             run_galfit_cmd = f"{base_galfit_cmd} {feedme_path}"
             print("Bulge + Disk + Arms (if applicable)")
             final_galfit_output = OutputContainer(sp(run_galfit_cmd), **galfit_output.to_dict(), store_text = True)
             
-        # Dropping this here for final rerun for all num_steps
-        if rerun:
-            _ = rerun_galfit(final_galfit_output, 
-                             base_galfit_cmd,
-                             *galfit_output.to_list()
-                            )
-        
-        if verbose:
-            print(str(final_galfit_output))
+        # Dropping this here for final simultaneous fitting following all num_steps
+        if simultaneous_fitting:
+            print("Fitting again via Simultaneous Fitting technique")
+            sf_info = sf_feedme_info[gname]
+            
+            if exists(sf_info.header.input_image):
+                # TODO: Update centers
+                header = final_galfit_output.header
+                sf_header = sf_info.header
+
+                header.input_image   = sf_header.input_image
+                header.region_to_fit = sf_header.region_to_fit
+                
+                if exists(sf_header.psf):
+                    header.psf           = sf_header.psf
+
+                header.pixel_mask    = sf_header.pixel_mask
+                # Compare across g hardcoded for now
+                # Values found here https://classic.sdss.org/dr7/algorithms/fluxcal.php
+                header.mag_zeropoint = 25.11 #sf_header.mag_zeropoint
+
+                # This should work because pass by reference
+                # aka mutability wink wink
+                header.update_param_values()
+                #header.param_fix["region_to_fit"] = f"{header.region_to_fit[2]} {header.region_to_fit[3]}"
+                
+                # Usually within a pixel but to be abundantly safe
+                # Save a line of code by updating the dictionary from which things are output itself
+                final_galfit_output.bulge.param_values["position"] = sf_info.bulge.position
+                final_galfit_output.disk.param_values["position"]  = sf_info.disk.position
+                
+                # Allow sky background to optimize again just in case
+                for key in final_galfit_output.sky.param_fix:
+                    final_galfit_output.sky.param_fix[key] = 1
+                    
+                if final_galfit_output.arms.param_values.get("skip", 0):
+                    # By default includes the header
+                    final_galfit_output.to_file(final_galfit_output.bulge, final_galfit_output.disk, final_galfit_output.sky)
+                else:
+                    final_galfit_output.to_file()
+
+                final_galfit_output = OutputContainer(sp(run_galfit_cmd), **final_galfit_output.to_dict(), store_text = True)
+                # _ = rerun_galfit(final_galfit_output,
+                #                  base_galfit_cmd,
+                #                  *galfit_output.to_list()
+                #                 )
+
+            if verbose:
+                print(str(final_galfit_output))
 
         tmp_png_path  = pj(tmp_png_dir, gname)
         tmp_fits_path_gname = pj(tmp_fits_dir, f"{gname}_galfit_out.fits")
@@ -384,7 +455,10 @@ def main(**kwargs):
                 shutil.move(galfit_out, pj(out_dir, gname, f"{gname}_galfit.{ext_num}"))
                 
         # Residual calculation, now done all at the same time! And added to the FITS header
-        _ = fill_objects(gname, 1, tmp_fits_dir, tmp_masks_dir)
+        if simultaneous_fitting:
+            _ = fill_objects(gname, 1, tmp_fits_dir, sf_masks_dir)
+        else:
+            _ = fill_objects(gname, 1, tmp_fits_dir, tmp_masks_dir)
         # This is now done via FitsHandler
         #_, gname_nmr, gname_pvalue, gname_statistic = fill_objects(gname, 1, tmp_fits_dir, tmp_masks_dir)
         
