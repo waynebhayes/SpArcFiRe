@@ -340,47 +340,47 @@ def main(**kwargs):
             final_galfit_output = OutputContainer(sp(run_galfit_cmd), **galfit_output.to_dict(), store_text = True)
             
         # Dropping this here for final simultaneous fitting following all num_steps
-        if simultaneous_fitting:
+        if simultaneous_fitting and gname in sf_feedme_info:
             print("Fitting again via Simultaneous Fitting technique")
-            sf_info = sf_feedme_info[gname]
-            
-            if exists(sf_info.header.input_image):
-                # TODO: Update centers
-                header = final_galfit_output.header
-                sf_header = sf_info.header
+        #elif exists(sf_info.header.input_image):
+            sf_info = sf_feedme_info.get(gname, None)
 
-                header.input_image   = sf_header.input_image
-                header.region_to_fit = sf_header.region_to_fit
-                
-                if exists(sf_header.psf):
-                    header.psf           = sf_header.psf
+            # TODO: Update centers
+            header = final_galfit_output.header
+            sf_header = sf_info.header
 
-                header.pixel_mask    = sf_header.pixel_mask
-                # Compare across g hardcoded for now
-                # Values found here https://classic.sdss.org/dr7/algorithms/fluxcal.php
-                header.mag_zeropoint = 25.11 #sf_header.mag_zeropoint
+            header.input_image   = sf_header.input_image
+            header.region_to_fit = sf_header.region_to_fit
 
-                # This should work because pass by reference
-                # aka mutability wink wink
-                header.update_param_values()
-                #header.param_fix["region_to_fit"] = f"{header.region_to_fit[2]} {header.region_to_fit[3]}"
-                
-                # Usually within a pixel but to be abundantly safe
-                # Save a line of code by updating the dictionary from which things are output itself
-                final_galfit_output.bulge.param_values["position"] = sf_info.bulge.position
-                final_galfit_output.disk.param_values["position"]  = sf_info.disk.position
-                
-                # Allow sky background to optimize again just in case
-                for key in final_galfit_output.sky.param_fix:
-                    final_galfit_output.sky.param_fix[key] = 1
-                    
-                if final_galfit_output.arms.param_values.get("skip", 0):
-                    # By default includes the header
-                    final_galfit_output.to_file(final_galfit_output.bulge, final_galfit_output.disk, final_galfit_output.sky)
-                else:
-                    final_galfit_output.to_file()
+            if exists(sf_header.psf):
+                header.psf           = sf_header.psf
 
-                final_galfit_output = OutputContainer(sp(run_galfit_cmd), **final_galfit_output.to_dict(), store_text = True)
+            header.pixel_mask    = sf_header.pixel_mask
+            # Compare across g hardcoded for now
+            # Values found here https://classic.sdss.org/dr7/algorithms/fluxcal.php
+            header.mag_zeropoint = 25.11 #sf_header.mag_zeropoint
+
+            # This should work because pass by reference
+            # aka mutability wink wink
+            header.update_param_values()
+            #header.param_fix["region_to_fit"] = f"{header.region_to_fit[2]} {header.region_to_fit[3]}"
+
+            # Usually within a pixel but to be abundantly safe
+            # Save a line of code by updating the dictionary from which things are output itself
+            final_galfit_output.bulge.param_values["position"] = sf_info.bulge.position
+            final_galfit_output.disk.param_values["position"]  = sf_info.disk.position
+
+            # Allow sky background to optimize again just in case
+            for key in final_galfit_output.sky.param_fix:
+                final_galfit_output.sky.param_fix[key] = 1
+
+            if final_galfit_output.arms.param_values.get("skip", 0):
+                # By default includes the header
+                final_galfit_output.to_file(final_galfit_output.bulge, final_galfit_output.disk, final_galfit_output.sky)
+            else:
+                final_galfit_output.to_file()
+
+            final_galfit_output = OutputContainer(sp(run_galfit_cmd), **final_galfit_output.to_dict(), store_text = True)
                 # _ = rerun_galfit(final_galfit_output,
                 #                  base_galfit_cmd,
                 #                  *galfit_output.to_list()
