@@ -185,7 +185,7 @@ for i in $sfDir/*; do
     fi
 done
 
-ls $pngDir/*.png >/dev/null || die "can't find any png images in $pngDir;
+find $pngDir -type f -name '*.png' >/dev/null || die "can't find any png images in $pngDir;
 note that you must include an inDir (and it must exist) even if you start with PNG images."
 
 if "$WEB"; then  # don't allow huge images

@@ -17,7 +17,7 @@ import scipy.ndimage as ndimage
 import scipy.stats as stats
 # This and astropy likely need to be pip installed
 # Along with csv2tsv for regression tests
-import imageio
+import imageio.v3 as iio
 import shutil
 import subprocess
 import sys
@@ -529,12 +529,13 @@ if __name__ == '__main__':
                 #fits.writeto(out_filepath + '_star-mask-aggressive.fits', depad_img * star_mask_aggressive)
                 
                 logger.info("wrote {0}".format(out_filepath))
-                
-            imageio.imwrite(os.path.join(out_dirpath, in_imgname + '_starmask.png'), mask_levels)
+            
+            iio.imwrite(os.path.join(out_dirpath, in_imgname + '_starmask.png'), mask_levels, mode = "LA")
         except Exception as e:
             logger.warning("could not create starmask for " + in_imgname)
             logger.warning(e)
             continue
-if not keep_seg_img:
-    shutil.rmtree(tmpdir)
-    logger.info("removed temporary directory: {0}".format(tmpdir))
+            
+    if not keep_seg_img:
+        shutil.rmtree(tmpdir)
+        logger.info("removed temporary directory: {0}".format(tmpdir))
