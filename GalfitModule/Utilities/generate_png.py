@@ -22,7 +22,7 @@ from Classes.Containers import *
 from Classes.FitsHandlers import *
 from Functions.helper_functions import *
 
-def wrapper(gfits):
+def wrapper(gfits, out_png_dir):
     output = OutputFits(gfits)
     output.to_png(out_png_dir = out_png_dir)
 
@@ -32,10 +32,15 @@ if __name__ == "__main__":
     out_png_dir = sys.argv[1]
     list_o_fits = sys.argv[2].split(" ")
     
+    # Assume it's a dir of fits
+    if len(list_o_fits) == 1:
+        dir_name = sys.argv[2]
+        list_o_fits = [pj(dir_name, gfit) for gfit in find_files(sys.argv[2], "*.fits")]
+    
     if sp(f"hostname").stdout.split(".")[0] == "bayonet-09":
         if len(list_o_fits) > 500:
-            Parallel(n_jobs = -2)(delayed(wrapper)(gfits) for gfits in list_o_fits)
+            Parallel(n_jobs = -2)(delayed(wrapper)(gfits, out_png_dir) for gfits in list_o_fits)
         else:
-            _ = [wrapper(gfits) for gfits in list_o_fits]
+            _ = [wrapper(gfits, out_png_dir) for gfits in list_o_fits]
     else:
         print("Not on bayonet, can't generate galaxies.")
