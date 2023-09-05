@@ -5,7 +5,7 @@
 # 
 # **Date (Github date will likely be more accurate): 4/17/23**
 
-# In[19]:
+# In[1]:
 
 
 import sys
@@ -23,7 +23,7 @@ import pickle
 import joblib
 
 
-# In[3]:
+# In[2]:
 
 
 # For debugging purposes
@@ -37,7 +37,7 @@ def in_notebook():
         return False
 
 
-# In[4]:
+# In[3]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -100,7 +100,7 @@ if __name__ == "__main__":
               [-ac | --aggressive-clean]
               [-NS | --num-steps] 
               [-r | --restart]
-              [-RrG | --rerun-galfit]
+              [-nsf | --no-simultaneous-fitting]
               [-v | --verbose]
               [-n | --name]
 
@@ -172,12 +172,12 @@ if __name__ == "__main__":
                         help     = 'Restart control script on the premise that some have already run (likely in parallel).'
                        )
     
-    parser.add_argument('-RrG', '--rerun-galfit',
-                        dest     = 'rerun', 
+    parser.add_argument('-nsf', '--no-simultaneous-fitting',
+                        dest     = 'simultaneous_fitting',
                         action   = 'store_const',
-                        const    = True,
-                        default  = False,
-                        help     = 'Run GALFIT again after the final fit to hopefully refine said fit.'
+                        const    = False,
+                        default  = True,
+                        help     = 'Turn off simultaneous fitting.'
                        )
     
     parser.add_argument('-n', '--basename',
@@ -211,9 +211,10 @@ if __name__ == "__main__":
         run_from_tmp      = args.run_from_tmp
         aggressive_clean  = args.aggressive_clean
         
-        rerun             = args.rerun
         restart           = args.restart
         basename          = args.basename
+        
+        simultaneous_fitting = args.simultaneous_fitting
         
         verbose           = args.verbose
         capture_output    = not args.verbose
@@ -252,7 +253,7 @@ if __name__ == "__main__":
             
     else:
         parallel = 0
-        rerun = ""
+        #rerun = ""
         num_steps = 2
         # Avoid some... nasty surprises for when debugging
         restart = True
@@ -324,6 +325,22 @@ if __name__ == "__main__":
     # Now dropping these in the individual galaxy folders
     #tmp_psf_dir     = pj(tmp_dir, "psf_files")
     tmp_png_dir     = pj(tmp_dir, "galfit_png")
+    
+    if simultaneous_fitting:
+        sim_fitting_dir = pj(tmp_dir, "sim_fitting")
+        sf_in_dir       = pj(sim_fitting_dir, "sparcfire-in")
+        sf_tmp_dir      = pj(sim_fitting_dir, "sparcfire-tmp")
+        sf_out_dir      = pj(sim_fitting_dir, "sparcfire-out")
+        sf_masks_dir    = pj(sf_tmp_dir, "galfit_masks")
+        
+        # These really the necessary ones, tmp and masks not so much but kept for posterity
+        for path in [sim_fitting_dir, sf_in_dir, sf_out_dir]:
+            if not exists(path):
+                simultaenous_fitting = False
+                print(f"Simultaneous Fitting cannot be performed, {path} does not exist!")
+                print("Continuing...")
+                break
+        
     #need_masks_dir  = pj(tmp_dir, "need_masks")
     
     #all_galfit_out = pj(out_dir, "all_galfit_out")
@@ -358,6 +375,14 @@ if __name__ == "__main__":
                                tmp_png_dir, 
                                out_png_dir
                               )#, 
+                               #need_masks_dir) 
+         if not exists(i)
+        ]
+    
+    if simultaneous_fitting:
+        _ = [os.mkdir(i) for i in (sf_tmp_dir, 
+                                   sf_masks_dir
+                                  )#, 
                                #need_masks_dir) 
          if not exists(i)
         ]
@@ -657,18 +682,20 @@ if __name__ == "__main__":
 #         print(f"Could not find {gzoo_file}. Proceeding.")
 #         gzoo_data = None
 
-    kwargs_main = {"cwd"                : cwd,
-                   "in_dir"             : in_dir,
-                   "tmp_dir"            : tmp_dir,
-                   "out_dir"            : out_dir,
-                   "num_steps"          : num_steps,
-                   "rerun"              : rerun,
-                   "parallel"           : parallel,
-                   "verbose"            : verbose,
-                   "capture_output"     : capture_output,
-                   "generate_starmasks" : generate_starmasks,
-                   "run_from_tmp"       : run_from_tmp,
-                   "aggressive_clean"   : aggressive_clean,
+    kwargs_main = {"cwd"                  : cwd,
+                   "in_dir"               : in_dir,
+                   "tmp_dir"              : tmp_dir,
+                   "out_dir"              : out_dir,
+                   "num_steps"            : num_steps,
+                   #"rerun"                : rerun,
+                   "parallel"             : parallel,
+                   "verbose"              : verbose,
+                   "capture_output"       : capture_output,
+                   "generate_starmasks"   : generate_starmasks,
+                   "run_from_tmp"         : run_from_tmp,
+                   "aggressive_clean"     : aggressive_clean,
+                   "simultaneous_fitting" : simultaneous_fitting,
+                   "sim_fitting_dir"      : sim_fitting_dir,
                    # "petromags"          : petromags,
                    # "bulge_axis_ratios"  : bulge_axis_ratios,
                    # Keep this last just in case
@@ -954,7 +981,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[44]:
+# In[4]:
 
 
 if __name__ == "__main__":
