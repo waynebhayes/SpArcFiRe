@@ -340,6 +340,7 @@ def main(**kwargs):
             final_galfit_output = OutputContainer(sp(run_galfit_cmd), **galfit_output.to_dict(), store_text = True)
             
         # Dropping this here for final simultaneous fitting following all num_steps
+        replacement_sf_masks = []
         if simultaneous_fitting and gname in sf_feedme_info:
             print("Fitting again via Simultaneous Fitting technique")
         #elif exists(sf_info.header.input_image):
@@ -385,10 +386,16 @@ def main(**kwargs):
                 #                  base_galfit_cmd,
                 #                  *galfit_output.to_list()
                 #                 )
-
+        
             if verbose:
                 print(str(final_galfit_output))
 
+        # For when Simultaneous fitting fails we don't want to use that residual mask
+        # for calculating the residual. I think everything else is handled
+        else:
+            shutil.copy2(pj(tmp_masks_dir, f"{gname}_star-rm.fits"), sf_masks_dir)
+            replacement_sf_masks.append(pj(sf_masks_dir, f"{gname}_star-rm.fits"))
+                
         tmp_png_path  = pj(tmp_png_dir, gname)
         tmp_fits_path_gname = pj(tmp_fits_dir, f"{gname}_galfit_out.fits")
         
@@ -459,6 +466,10 @@ def main(**kwargs):
             _ = fill_objects(gname, 1, tmp_fits_dir, sf_masks_dir)
         else:
             _ = fill_objects(gname, 1, tmp_fits_dir, tmp_masks_dir)
+            
+        # Remove copied masks
+        _ = sp(f"rm -f {' '.join(replacement_sf_masks)}", capture_output = capture_output)
+        
         # This is now done via FitsHandler
         #_, gname_nmr, gname_pvalue, gname_statistic = fill_objects(gname, 1, tmp_fits_dir, tmp_masks_dir)
         
