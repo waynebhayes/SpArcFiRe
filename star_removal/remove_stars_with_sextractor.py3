@@ -530,7 +530,14 @@ if __name__ == '__main__':
                 
                 logger.info("wrote {0}".format(out_filepath))
             
-            iio.imwrite(os.path.join(out_dirpath, in_imgname + '_starmask.png'), mask_levels, mode = "LA")
+            # Sparcfire produces an error when there's no star_mask values and does not proceed
+            # I believe that is an error but for now, take this as a temporary fix
+            if np.any(star_mask):
+                iio.imwrite(os.path.join(out_dirpath, in_imgname + '_starmask.png'), mask_levels, mode = "LA")
+                
+            # if np.any(star_mask_aggressive):
+            #     iio.imwrite(os.path.join(out_dirpath, in_imgname + '_starmask_aggressive.png'), mask_levels, mode = "LA")
+                
         except Exception as e:
             logger.warning("could not create starmask for " + in_imgname)
             logger.warning(e)
