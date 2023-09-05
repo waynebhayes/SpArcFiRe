@@ -70,6 +70,7 @@ def pitch_angle(*args):
         denom = 2*r_out*(np.cosh(C + B*r/r_out))**2
     except OverflowError:
         return None, None
+    
     dp1 = B/denom
 
     denom = r_out + r
@@ -180,6 +181,39 @@ def send_to_parallel(gpath, in_dir, out_dir, num_pts = 100):
     xmax = fit_region[1] - fit_region[0] #outer_rad*np.cos(arms.cumul_rot)
     ymax = fit_region[3] - fit_region[2] #outer_rad*np.sin(arms.cumul_rot)
     rvals_grid  = np.linspace(xmin, 0.5*xmax, num_pts)
+    
+    galaxy_dict = galaxy_information(gname, pj(out_dir, gname))
+    crop_rad = galaxy_dict["crop_rad"]
+    scale_fact_std = 2*crop_rad/256
+    
+    #num_arms = 2 #galaxy_dict["est_arcs"]
+
+    # Set num_arms to 1 to just grab info from the longest arc
+    arc_info = arc_information(
+                               gname, 
+                               pj(out_dir, gname), 
+                               num_arms = 2, #num_arms, 
+                               bulge_rad = galaxy_dict["bulge_maj_axs_len"], 
+                               scale_fact_std = scale_fact_std
+                              )
+    
+    multiplier = 1/arc_info["weight_div"] # = max(1, count + 1)
+    #multiplier = num_arms + 1
+    inner_rad = arc_info["inner_rad"]*multiplier/max(1, multiplier - 1)
+    outer_rad = max(arc_info["outer_rad"]*multiplier/max(1, multiplier - 1), arms.outer_rad)
+    #sparcfire_arms_pitch_angles = arc_info["pitch_angle"]
+
+    inner_idx = np.argmin(np.abs(rvals_grid - inner_rad))
+    outer_idx = np.argmin(np.abs(rvals_grid - outer_rad)) + 1
+    
+    old_inner = rvals_grid[:inner_idx]
+    old_outer = rvals_grid[outer_idx:]
+    
+    # Basic dynamic grid, get higher resolution between inner and outer arm radius according to sparcfire
+    high_res_grid = np.linspace(rvals_grid[inner_idx], rvals_grid[outer_idx - 1], num_pts//2)
+    
+    rvals_grid = np.concatenate([old_inner, high_res_grid, old_outer])
+    num_pts = len(rvals_grid)
 
 #        rvals_grid = np.meshgrid(rvals_full)
 
@@ -212,22 +246,8 @@ def send_to_parallel(gpath, in_dir, out_dir, num_pts = 100):
     #bad_fits[gname] = plotting_pa(gname, rvals_full, pa, theta_r, arms.sky_position_angle)
     #pa_rgrid_theta[gname] = (pitch_angles, np.dstack((rvals_grid, thetas))[0,:])
 
-
-    galaxy_dict = galaxy_information(gname, pj(out_dir, gname))
-    crop_rad = galaxy_dict["crop_rad"]
-    scale_fact_std = 2*crop_rad/256
-
-    # Set num_arms to 1 to just grab info from the longest arc
-    arc_info = arc_information(
-                               gname, 
-                               pj(out_dir, gname), 
-                               num_arms = 2, #galaxy_dict["est_arcs"], 
-                               bulge_rad = galaxy_dict["bulge_maj_axs_len"], 
-                               scale_fact_std = scale_fact_std
-                              )
-
-    inner_rad = arc_info["inner_rad"]
-    outer_rad = max(arc_info["outer_rad"], arms.outer_rad)
+    # inner_rad = arc_info["inner_rad"]
+    # outer_rad = max(arc_info["outer_rad"], arms.outer_rad)
 
     inner_idx = np.argmin(np.abs(rvals_grid - inner_rad))
     outer_idx = np.argmin(np.abs(rvals_grid - outer_rad)) + 1
@@ -237,20 +257,20 @@ def send_to_parallel(gpath, in_dir, out_dir, num_pts = 100):
 #         adjust_outer = outer_idx + idx_adjust
 
     if outer_idx >= len(pitch_angles):
-        outer_idx = len(pitch_angles)
+        outer_idx = len(pitch_angles) - 1
 
     avg_constrained_pa = np.mean(pitch_angles[inner_idx : outer_idx])
     
     #avg_constrained_pa = np.mean(pitch_angles[adjust_inner : adjust_outer])
     
-    return avg_constrained_pa
+    return avg_constrained_pa, rvals_grid[inner_idx], rvals_grid[outer_idx]
       
 def main(in_dir, out_dir, num_pts = 100):
     
     gpaths = glob.glob(pj(out_dir, "123*"))
     gnames = [os.path.basename(i) for i in gpaths]
     
-    avg_pitch_angles = Parallel(n_jobs = -2)(
+    pa_inner_outer = Parallel(n_jobs = -2)(
                            delayed(send_to_parallel)(
                                                  gpath,
                                                  in_dir,
@@ -260,10 +280,10 @@ def main(in_dir, out_dir, num_pts = 100):
                            for gpath in gpaths
                                             )
     
-    pa_dict = dict(zip(gnames, avg_pitch_angles))
+    pa_dict = {gname : pa_inner_outer[i] for i, gname in enumerate(gnames)} #dict(zip(gnames, avg_pitch_angles))
     pitch_angle_df = pd.DataFrame()
         
-    return pitch_angle_df.from_dict(pa_dict, orient = "index", columns = ["avg_constrained_pitch_angle"])
+    return pitch_angle_df.from_dict(pa_dict, orient = "index", columns = ["avg_pitch_angle", "inner_rad", "outer_rad"])
 
 if __name__ == "__main__":
     
