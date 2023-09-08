@@ -45,18 +45,21 @@ cp -r $TMP/meanFITS/"$1".fits $TMP/SDSS/G.in/
 /extra/wayne1/preserve/skylarjh/SpArcFiRe/scripts/SpArcFiRe -convert-FITS $TMP/SDSS/G.in $TMP/SDSS/G.tmp $TMP/SDSS/G.out -writeBulgeMask 1
 cp -r $TMP/SDSS/G.out $TMP/guide/
 
+rm -rf $TMP/SDSS/G.in/*
+
 
 for waveband in $(ls $TMP/"$1" | sed -e 's/\.fits$//')
-do  
+do
     for threshold in 0 0.25 0.5 0.75 1
-    do  
+    do
+
+        rm -rf $TMP/SDSS/G.tmp/*
         rm -rf $TMP/SDSS/G.in/*
         cp $TMP/"$1"/"$waveband".fits $TMP/SDSS/G.in/"$1".fits
-        /extra/wayne1/preserve/skylarjh/SpArcFiRe/scripts/SpArcFiRe -convert-FITS -guide_dir $TMP/guide $TMP/SDSS/G.in $TMP/SDSS/G.tmp $TMP/SDSS/G.out -writeBulgeMask 1 -imageGuidingThreshold "$threshold"
-        mkdir -p "$2"/$HASH/"$1"/"$threshold"/
-        cp $TMP/SDSS/G.out/"$1"/* "$2"/$HASH/"$1"/"$threshold"/*
-    done
+        SpArcFiRe -convert-FITS -guide_dir $TMP/guide $TMP/SDSS/G.in $TMP/SDSS/G.tmp $TMP/SDSS/G.out -writeBulgeMask 1 -imageGuidingThreshold "$threshold"
+        mkdir -p "$2"/$HASH/"$1"/"$threshold"/"$waveband"
+        cp -r $TMP/SDSS/G.out "$2"/"$HASH"/"$1"/"$threshold"/"$waveband"
 done
-
+done
 
 rm -rf $TMP
