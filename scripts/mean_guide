@@ -7,6 +7,7 @@ HASH="${1#"${1%???}"}"
 
 ALIGPATH="/extra/wayne1/research/drdavis/SDSS/FITS/2020/SDSS_DR12_Aligned/ByColor"
 MEANPATH="/extra/wayne1/research/drdavis/SDSS/FITS/2020/SDSS_DR12_Aligned/AllColorsSummed"
+ELPSPATH="/home/kimiay/sparc_stuff/elps_dir"
 
 if [ ! -d "${ALIGPATH}/${HASH}/$1" ]
 then
@@ -45,6 +46,11 @@ cp -r $TMP/meanFITS/"$1".fits $TMP/SDSS/G.in/
 /extra/wayne1/preserve/skylarjh/SpArcFiRe/scripts/SpArcFiRe -convert-FITS $TMP/SDSS/G.in $TMP/SDSS/G.tmp $TMP/SDSS/G.out -writeBulgeMask 1
 cp -r $TMP/SDSS/G.out $TMP/guide/
 
+
+mkdir $TMP/elps_dir
+cp $TMP/SDSS/G.out/$1/$1-elps-fit-params.txt $TMP/elps_dir/$1_elps.txt
+
+
 rm -rf $TMP/SDSS/G.in/*
 
 
@@ -56,7 +62,7 @@ do
         rm -rf $TMP/SDSS/G.tmp/*
         rm -rf $TMP/SDSS/G.in/*
         cp $TMP/"$1"/"$waveband".fits $TMP/SDSS/G.in/"$1".fits
-        SpArcFiRe -convert-FITS -guide_dir $TMP/guide $TMP/SDSS/G.in $TMP/SDSS/G.tmp $TMP/SDSS/G.out -writeBulgeMask 1 -imageGuidingThreshold "$threshold"
+        SpArcFiRe -convert-FITS -elps_dir $TMP/elps_dir -guide_dir $TMP/guide $TMP/SDSS/G.in $TMP/SDSS/G.tmp $TMP/SDSS/G.out -writeBulgeMask 1 -imageGuidingThreshold "$threshold" 
         mkdir -p "$2"/$HASH/"$1"/"$threshold"/"$waveband"
         cp -r $TMP/SDSS/G.out "$2"/"$HASH"/"$1"/"$threshold"/"$waveband"
 done
