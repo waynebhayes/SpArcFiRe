@@ -41,7 +41,7 @@ if __name__ == "__main__":
     elif str.lower(to_png) == "true":
         out_png_dir = True
         
-    all_gname_tmp_out = sys.argv[6].split(",")
+    all_gname_tmp_out = sys.argv[7].split(",")
     
     out_df = parallel_wrapper(galfit_tmp_path, galfit_mask_path, out_dir, to_png, all_gname_tmp_out)
     
