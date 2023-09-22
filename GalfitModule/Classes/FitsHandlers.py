@@ -220,7 +220,8 @@ class FitsFile:
         if self.num_imgs > 1:
             combined = "_combined"
         
-        montage_cmd = "montage " + \
+        # Adding 'magick' to use the portable version in the GalfitModule
+        montage_cmd = "magick montage " + \
                       " ".join(im_cmd for idx, im_cmd in enumerate([im1, im2, im3]) 
                                if idx <= self.num_imgs)
         
@@ -398,7 +399,7 @@ class OutputFits(FitsFile):
 
         # To invert the matrix since galfit keeps 0 valued areas
         crop_mask = 1
-        if np.any(mask.data):
+        if mask is not None and np.any(mask.data):
             crop_mask = 1 - mask.data[xbox_min:xbox_max, ybox_min:ybox_max]
             
         if use_bulge_mask:
@@ -464,7 +465,8 @@ class OutputFits(FitsFile):
                     hdul[2].header["ks_stat"] = (None, "statistic value of kstest vs noise")
 
         except ValueError:
-            print(f"There is probably an observation error with galaxy {self.gname}, continuing...")
+            print(f"There may be a broadcast issue, observation, model, crop mask: ", end = "")
+            print(f"{np.shape(self.observation.data)}, {np.shape(self.model.data)}, {np.shape(crop_mask)}")
             # print(np.shape(mask_fits_file.data))
             # print(np.shape(fits_file.data))
             # print(crop_box)
@@ -568,7 +570,7 @@ if __name__ == "__main__":
     print(f"kstest statistic per FITS header: {test_model.model.header['KS_STAT']}")
 
 
-# In[ ]:
+# In[11]:
 
 
 if __name__ == "__main__":
