@@ -8,19 +8,22 @@
 #Galfit will output a series of files, called galfit.01, galfit.02, ... etc
 #This script simply moves the file to the corresponding galaxy directory
 
-# TODO: Check if the generateFitQuality variable has been set so that this is safer
-
 #INDIR=$1 #original directory that the script was called from
 #BASEOUTDIR=$2 #directory where all of SpArcFiRe's output directories are
 # Dropping in some code for making a temp directory for future reference
 # TMPDIR=`mktemp -d /tmp/galfit_junk.XXXXXX`
-GJUNK="/tmp/galfit_junk"
+TMP_DIR="/tmp/"
+GJUNK="galfit_junk"
 
 #echo "Moving Galfit Files"
-echo "Deleting GALFIT Files matching $GJUNK..."
+echo "Deleting GALFIT Files matching $GJUNK in $TMP_DIR..."
 #find /tmp/ -type d -name "$GJUNK*" 2>/dev/null
 
-trap "/bin/rm -rf $GJUNK*" 0 1 2 3 15
+#trap "/bin/rm -rf $GJUNK*" 0 1 2 3 15
+# Being extra safe checking for user
+# Since we check for "permission denied" user check is unnecessary but I'll leave it in because it's probably safer
+trap 'find "$TMP_DIR" -type d -user $(whoami) -name "$GJUNK*" -exec rm -r {} + 2>&1 | grep -v "Permission denied"' 0 1 2 3 15
+
 #mkdir $GJUNK
 
 #for file in $(find "$INDIR" -iregex '.*/galfit\.[0-9]+')

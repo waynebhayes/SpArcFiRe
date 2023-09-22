@@ -110,3 +110,9 @@ done
 echo "Enter 'help' for syntax; blank line or 'exit' or 'quit' exits. Wait for MATLAB to start..."
 # only argument is a settings file, NONE for none.
 tee SpArcFiRe-stdin.stdin.txt | exec $SPARCFIRE_HOME/scripts/ArcServer/run_findClusterArcsServer.sh $MCRROOT NONE
+
+# Clean up galfit files
+if [[ "$GENERATEFITQUALITY" -eq "1" ]]; then
+    $SPARCFIRE_HOME/scripts/moveGalfitFiles.sh #$cwd $outDir
+fi
+
