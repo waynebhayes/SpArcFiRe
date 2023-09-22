@@ -57,10 +57,7 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", 
         
     if not count % report_num:
         print(count, gname)
-
-    star_mask_name = f"{gname}_star-rm.fits"
-    mask_fits_name = pj(galfit_mask_path, star_mask_name)
-
+    
     try:
         fits_filename = f"{gname}_galfit_out.fits"
         fits_file = OutputFits(pj(galfit_tmp_path, fits_filename))
@@ -69,6 +66,29 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", 
         print(e)
         #return gname, None, None, None
         return None
+    
+    #last_feedme_file = pj(out_dir, gname, f"{gname}.in")
+    #if not exists(last_feedme_file):
+    #feedme_files = glob.glob(pj(out_dir, gname, f"*.in"))
+    mask_fits_name = pj(galfit_mask_path, f"{gname}_star-rm.fits")
+    
+    # For simultaneous fitting
+#     if feedme_files: 
+#         feedme_files.sort(key = os.path.getmtime)
+#         last_feedme_file = feedme_files[-1]
+
+#         feedme = FeedmeContainer()
+#         feedme.from_file(last_feedme_file)
+        
+        # if feedme.bulge.position == fits_file.feedme.bulge.position:       
+        #     fits_file.feedme.header.region_to_fit = feedme.header.region_to_fit
+        #     mask_fits_name = feedme.header.pixel_mask
+        
+       # fits_file.feedme.header.update_param_values()
+        
+           
+    #if "sim_fitting" in fits_file.feedme.header.input_image:
+        #mask_fits_name = pj(sf_mask_path, star_mask_name)
     
     try:
         mask_fits_file = FitsFile(mask_fits_name)
@@ -144,6 +164,7 @@ def main(**kwargs):
     parallel          = kwargs.get("parallel", 1)
     dont_remove_slurm = kwargs.get("dont_remove_slurm", False)
     restart           = kwargs.get("restart", False)
+    #simultaneous_fitting = kwargs.get("simultaneous_fitting", True)
     
     # For verbosity, default to capturing output
     # Keep both for clarity
@@ -162,6 +183,7 @@ def main(**kwargs):
 
     galfit_tmp_path = pj(tmp_dir, "galfits")
     galfit_mask_path  = pj(tmp_dir, "galfit_masks")
+    #sf_mask_path = pj(tmp_dir, "sim_fitting", "sparcfire-tmp", "galfit_masks")
     out_png_dir = pj(out_dir, "galfit_png")
     
     all_gname_tmp_out = [os.path.basename(i).replace("_galfit_out.fits","") for i in glob.glob(pj(galfit_tmp_path, "*_galfit_out.fits"))]
@@ -173,10 +195,10 @@ def main(**kwargs):
     if parallel and chunk_size > len(all_gname_tmp_out)*0.5:
         print("No need to (massively) parallelize!")
         out_df = parallel_wrapper(galfit_tmp_path, 
-                                  galfit_mask_path, 
+                                  galfit_mask_path,
                                   out_dir, 
                                   True, 
-                                  all_gname_tmp_out, 
+                                  all_gname_tmp_out,
                                   parallel = False
                                  )
         parallel = False
@@ -315,6 +337,14 @@ if __name__ == "__main__":
                         default  = False,
                         help     = 'Choose NOT to remove all old slurm files (they may contain basic info about each fit but there will be a bunch!)')
     
+    # parser.add_argument('-nsf', '--no-simultaneous-fitting',
+    #                     dest     = 'simultaneous_fitting',
+    #                     action   = 'store_const',
+    #                     const    = False,
+    #                     default  = True,
+    #                     help     = 'Turn off simultaneous fitting.'
+    #                    )
+    
     parser.add_argument('-r', '--restart',
                         dest     = 'restart', 
                         action   = 'store_const',
@@ -341,6 +371,7 @@ if __name__ == "__main__":
     dont_remove_slurm = args.dont_remove_slurm
     restart = args.restart
     verbose = args.verbose
+    #simultaneous_fitting = args.simultaneous_fitting
     
     if len(args.paths) == 3:
             in_dir, tmp_dir, out_dir = args.paths[0], args.paths[1], args.paths[2]
@@ -359,17 +390,19 @@ if __name__ == "__main__":
     #in_dir  = absp(in_dir)
     tmp_dir = absp(tmp_dir)
     out_dir = absp(out_dir)
-    
+        
     kwargs = {
               #"in_dir"            : in_dir,
-              "tmp_dir"           : tmp_dir,
-              "out_dir"           : out_dir,
-              "basename"          : basename,
-              "parallel"          : parallel,
-              "dont_remove_slurm" : dont_remove_slurm,
-              "restart"           : restart,
-              "verbose"           : verbose,
-              "capture_output"    : not verbose
+              "tmp_dir"              : tmp_dir,
+              "out_dir"              : out_dir,
+              "basename"             : basename,
+              "parallel"             : parallel,
+              "dont_remove_slurm"    : dont_remove_slurm,
+              "restart"              : restart,
+              #"simultaneous_fitting" : simultaneous_fitting,
+              #"sf_tmp_dir"           : sf_tmp_dir
+              "verbose"              : verbose,
+              "capture_output"       : not verbose
              }
     
     main(**kwargs)
