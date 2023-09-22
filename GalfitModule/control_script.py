@@ -214,7 +214,8 @@ if __name__ == "__main__":
         restart           = args.restart
         basename          = args.basename
         
-        simultaneous_fitting = args.simultaneous_fitting
+        # TODO: This isn't working, forcing false for now
+        simultaneous_fitting = False #args.simultaneous_fitting
         
         verbose           = args.verbose
         capture_output    = not args.verbose
@@ -986,7 +987,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[7]:
+# In[8]:
 
 
 if __name__ == "__main__":

@@ -128,6 +128,10 @@ def main(**kwargs):
     # bulge_axis_ratios = kwargs.get("bulge_axis_ratios", [])
     if isinstance(galaxy_names, str):
         galaxy_names = galaxy_names.split(",")
+        
+    if not galaxy_names:
+        print("No galaxy names fed into go_go_galfit.")
+        return None
         # petromags    = petromags.split(",")
         # bulge_axis_ratios    = bulge_axis_ratios.split(",")
     #     galaxy_names = [galaxy_names]
@@ -339,60 +343,61 @@ def main(**kwargs):
             print("Bulge + Disk + Arms (if applicable)")
             final_galfit_output = OutputContainer(sp(run_galfit_cmd), **galfit_output.to_dict(), store_text = True)
             
+        # TODO: GET THIS WORKING... so many issues
         # Dropping this here for final simultaneous fitting following all num_steps
         replacement_sf_masks = []
-        if simultaneous_fitting and gname in sf_feedme_info:
-            print("Fitting again via Simultaneous Fitting technique")
-        #elif exists(sf_info.header.input_image):
-            sf_info = sf_feedme_info.get(gname, None)
+#         if simultaneous_fitting and gname in sf_feedme_info:
+#             print("Fitting again via Simultaneous Fitting technique")
+#         #elif exists(sf_info.header.input_image):
+#             sf_info = sf_feedme_info.get(gname, None)
 
-            # TODO: Update centers
-            header = final_galfit_output.header
-            sf_header = sf_info.header
+#             header = final_galfit_output.header
+#             sf_header = sf_info.header
 
-            header.input_image   = sf_header.input_image
-            header.region_to_fit = sf_header.region_to_fit
+#             header.input_image   = sf_header.input_image
+#             header.region_to_fit = sf_header.region_to_fit
 
-            if exists(sf_header.psf):
-                header.psf           = sf_header.psf
+#             if exists(sf_header.psf):
+#                 header.psf = sf_header.psf
 
-            header.pixel_mask    = sf_header.pixel_mask
-            # Compare across g hardcoded for now
-            # Values found here https://classic.sdss.org/dr7/algorithms/fluxcal.php
-            header.mag_zeropoint = 25.11 #sf_header.mag_zeropoint
+#             header.pixel_mask = sf_header.pixel_mask
+#             # Compare across g hardcoded for now
+#             # Values found here https://classic.sdss.org/dr7/algorithms/fluxcal.php
+#             header.mag_zeropoint = 25.11 #sf_header.mag_zeropoint
 
-            # This should work because pass by reference
-            # aka mutability wink wink
-            header.update_param_values()
-            #header.param_fix["region_to_fit"] = f"{header.region_to_fit[2]} {header.region_to_fit[3]}"
+#             # This should work because pass by reference
+#             # aka mutability wink wink
+#             header.update_param_values()
+#             #header.param_fix["region_to_fit"] = f"{header.region_to_fit[2]} {header.region_to_fit[3]}"
 
-            # Usually within a pixel but to be abundantly safe
-            # Save a line of code by updating the dictionary from which things are output itself
-            final_galfit_output.bulge.param_values["position"] = sf_info.bulge.position
-            final_galfit_output.disk.param_values["position"]  = sf_info.disk.position
+#             # Usually within a pixel but to be abundantly safe
+#             # Save a line of code by updating the dictionary from which things are output itself
+#             final_galfit_output.bulge.param_values["position"] = sf_info.bulge.position
+#             final_galfit_output.disk.param_values["position"]  = sf_info.disk.position
 
-            # Allow sky background to optimize again just in case
-            for key in final_galfit_output.sky.param_fix:
-                final_galfit_output.sky.param_fix[key] = 1
+#             # Allow sky background to optimize again just in case
+#             for key in final_galfit_output.sky.param_fix:
+#                 final_galfit_output.sky.param_fix[key] = 1
 
-            if final_galfit_output.arms.param_values.get("skip", 0):
-                # By default includes the header
-                final_galfit_output.to_file(final_galfit_output.bulge, final_galfit_output.disk, final_galfit_output.sky)
-            else:
-                final_galfit_output.to_file()
+#             if final_galfit_output.arms.param_values.get("skip", 0):
+#                 # By default includes the header
+#                 final_galfit_output.to_file(final_galfit_output.bulge, final_galfit_output.disk, final_galfit_output.sky)
+#             else:
+#                 final_galfit_output.to_file()
 
-            final_galfit_output = OutputContainer(sp(run_galfit_cmd), **final_galfit_output.to_dict(), store_text = True)
-                # _ = rerun_galfit(final_galfit_output,
-                #                  base_galfit_cmd,
-                #                  *galfit_output.to_list()
-                #                 )
+#             final_galfit_output = OutputContainer(sp(run_galfit_cmd), **final_galfit_output.to_dict(), store_text = True)
+#                 # _ = rerun_galfit(final_galfit_output,
+#                 #                  base_galfit_cmd,
+#                 #                  *galfit_output.to_list()
+#                 #                 )
         
-            if verbose:
-                print(str(final_galfit_output))
+        if verbose:
+            print(str(final_galfit_output))
 
         # For when Simultaneous fitting fails we don't want to use that residual mask
         # for calculating the residual. I think everything else is handled
         else:
+            # TODO: MAY NOT NEED THIS ANY MORE FIXED IN RESIDUAL CALC
             shutil.copy2(pj(tmp_masks_dir, f"{gname}_star-rm.fits"), sf_masks_dir)
             replacement_sf_masks.append(pj(sf_masks_dir, f"{gname}_star-rm.fits"))
                 
@@ -420,6 +425,7 @@ def main(**kwargs):
             tmp_fits_obj.to_png(tmp_fits_path = tmp_fits_path_gname,
                                 tmp_png_path  = tmp_png_path,
                                 out_png_dir   = out_png_dir
+                                #cleanup = False # TEMPORARY UNTIL IMAGEMAGICK WORKS AGAIN
                                )
             
             shutil.copy2(f"{pj(out_png_dir, gname)}_combined.png", pj(out_dir, gname))
@@ -464,12 +470,13 @@ def main(**kwargs):
         # Residual calculation, now done all at the same time! And added to the FITS header
         if simultaneous_fitting:
             _ = fill_objects(gname, 1, tmp_fits_dir, sf_masks_dir)
+            
+            # Remove copied masks
+            _ = sp(f"rm -f {' '.join(replacement_sf_masks)}", capture_output = capture_output)
         else:
             _ = fill_objects(gname, 1, tmp_fits_dir, tmp_masks_dir)
             
-        # Remove copied masks
-        _ = sp(f"rm -f {' '.join(replacement_sf_masks)}", capture_output = capture_output)
-        
+
         # This is now done via FitsHandler
         #_, gname_nmr, gname_pvalue, gname_statistic = fill_objects(gname, 1, tmp_fits_dir, tmp_masks_dir)
         
