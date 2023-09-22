@@ -170,7 +170,7 @@ def get_galaxy_names_list(in_dir, tmp_dir, out_dir, galaxy_names = []):
     return gnames_out, folders_out
 
 
-# In[ ]:
+# In[30]:
 
 
 def path_join(path='.', name='', file_ext=''):
@@ -186,7 +186,7 @@ def path_join(path='.', name='', file_ext=''):
     return file_path
 
 
-# In[ ]:
+# In[32]:
 
 
 def scale_var(x, scale = 1):
@@ -197,7 +197,7 @@ def scale_var(x, scale = 1):
     return float(x)*scale
 
 
-# In[ ]:
+# In[48]:
 
 
 def galaxy_information(galaxy_name, galaxy_path):
@@ -206,7 +206,7 @@ def galaxy_information(galaxy_name, galaxy_path):
         "bulge_maj_axs_len" : 2,
         "bulge_axis_ratio" : 0.5,
         "bulge_rot_angle" : 30,
-        "crop_rad" : 30, 
+        "crop_rad" : 1, 
         "center_pos_x" : 30,
         "center_pos_y" : 30,
         "disk_maj_axs_len" : 30,
@@ -224,13 +224,9 @@ def galaxy_information(galaxy_name, galaxy_path):
         # spin_parity handled by if 
         "spin_parity" : '', #random.choice(['','-'])
         "scale_fact_std" : 1,
-        "scale_fact_ipt" : 1
+        "scale_fact_ipt" : 1,
+        "input_size"     : 256
                     }
-           
-    # Making this global since I'm now grabbing the necessary info from the csv
-    # std for standardized image
-    #global scale_fact_std
-    scale_fact_std = 2*kwargs_out["crop_rad"]/256
         
     chirality = 0
     chirality_2 = 0
@@ -275,6 +271,7 @@ def galaxy_information(galaxy_name, galaxy_path):
             center_pos_y = float(row.get('inputCenterC'))
 
             crop_rad = float(row.get('cropRad'))
+            scale_fact_std = 2*crop_rad/256
 
         except (ValueError, TypeError) as ve:
             print(f"SpArcFiRe likely failed on this galaxy, {ve}. Proceeding with default values...")
@@ -395,7 +392,7 @@ def galaxy_information(galaxy_name, galaxy_path):
     return kwargs_out
 
 
-# In[15]:
+# In[49]:
 
 
 def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2, scale_fact_std = 1):
@@ -413,7 +410,7 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2, scale
         arcs_filename = path_join(galaxy_path, galaxy_name, '_arcs.csv')
         arcs_file = open(arcs_filename, 'r')
     except:
-        print("Can't open to read: ", arcs_filename)
+        print("Can't open to read arcs csv for: ", galaxy_name)
         print("Check Sparcfire output or directories. Proceeding with default values.")
         return kwargs_out
 
@@ -437,7 +434,8 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2, scale
             # one message per galaxy instead of doing it for arcs and galaxy info
             return kwargs_out
 
-        while count < num_arms:
+        # Use i instead of count because est_arcs is usually way too high
+        while i < num_arms:
             try:
                 _ = arcs_in[i]['pitch_angle']
             except IndexError as ie:
@@ -476,8 +474,8 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2, scale
         # starting point of the arms which is the hard part... 
         
         # Averaging
-        # Add 1 to denominator because galfit seems to like a shorter outer radius
-        weight_div = 1/max(1, count + 1) #1/np.math.factorial(count)
+        # Galfit seems to like these values to be smaller
+        weight_div = 1/max(1, count + 2) #1/np.math.factorial(count)
         cumul_rot = abs(theta_sum)*weight_div # NOT A STRING
 
         inner_rad *= weight_div # Averaging the inner distance to both arcs
@@ -651,11 +649,14 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
         center_pos_x = float(galaxy_dict["center_pos_x"])
         center_pos_y = float(galaxy_dict["center_pos_y"])
         crop_rad = float(galaxy_dict["crop_rad"])
+        input_size = int(galaxy_dict["input_size"])
         
-        x1crop = round(center_pos_x - 2*crop_rad)
-        x2crop = round(center_pos_x + 2*crop_rad)        
-        y1crop = round(center_pos_y - 2*crop_rad)
-        y2crop = round(center_pos_y + 2*crop_rad)
+        # Guarantee lowest bound doesn't go below 0
+        # GALFIT can handle it but still
+        x1crop = max(round(center_pos_x - 2*crop_rad), 0)
+        x2crop = min(round(center_pos_x + 2*crop_rad), input_size)
+        y1crop = max(round(center_pos_y - 2*crop_rad), 0)
+        y2crop = min(round(center_pos_y + 2*crop_rad), input_size)
     
         arc_dict = arc_information(
                                    gname, 
@@ -831,7 +832,7 @@ if __name__ == "__main__":
                     )
 
 
-# In[14]:
+# In[50]:
 
 
 if __name__ == "__main__":
