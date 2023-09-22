@@ -53,7 +53,7 @@ for (( cpu_num=0; cpu_num<$cpu_count; ++cpu_num )); do
     # Run sparcfire with defaults on assuming it has already been setup
     # Also no need for star masking
     if [[ $arr_start -lt $input_count ]]; then
-        echo "SpArcFiRe -convert-FITS -ignore-starmask $new_dir $default_tmp $default_out -generateFitQuality 0 -writeBulgeMask 1"
+        echo "SpArcFiRe -convert-FITS -compute-starmask false -ignore-starmask $new_dir $default_tmp $default_out -generateFitQuality 0 -writeBulgeMask 1"
     fi
     
     arr_start=$(( $cpu_num*$per_cpu  ))
