@@ -1,24 +1,54 @@
 #!/bin/bash
 
-#usage: mean_guide galaxy_number output_directory
-TMP=`mktemp -d`
-HASH="${1#"${1%???}"}"
+#usage: mean_guide [-a /path/to/aligned/by/color/galaxies] [-m /path/to/aligned/sumOrMean/of/wavebands] galaxy_number output_directory
+# The paths should include ALIGPATH/HASH/GALAXYNUM/galaxyNum_wb.fits and MEANPATH/HASH/galaxyNum-ugriz.fits
+
+
+
+USAGE="USAGE: $0 [-a /path/to/aligned/by/color/galaxies] [-m /path/to/aligned/sumOrMean/of/wavebands] galaxy_number output_directory
+If -a and -m not specified; we use openlab paths. 
+The paths should include ALIGPATH/HASH/GALAXYNUM/galaxyNum_wb.fits for -a and MEANPATH/HASH/galaxyNum-ugriz.fits for -m"
+NL='
+'
+die() { echo "$USAGE${NL}FATAL ERROR: $@" >&2; exit 1;}
+
 
 
 ALIGPATH="/extra/wayne1/research/drdavis/SDSS/FITS/2020/SDSS_DR12_Aligned/ByColor"
 MEANPATH="/extra/wayne1/research/drdavis/SDSS/FITS/2020/SDSS_DR12_Aligned/AllColorsSummed"
-ELPSPATH="/home/kimiay/sparc_stuff/elps_dir"
+
+
+
+while getopts ":a:m:" opt; do
+  case $opt in
+    a) ALIGPATH="$OPTARG"
+    echo got a option $ALIGPATH
+    ;;
+    m) MEANPATH="$OPTARG"
+    echo got m option $MEANPATH
+    ;;
+    \?) echo "Invalid option -$OPTARG" >&2
+    ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+
+
+TMP=`mktemp -d`
+HASH="${1#"${1%???}"}"
+
+
 
 if [ ! -d "${ALIGPATH}/${HASH}/$1" ]
 then
-    echo "ERROR: GALAXY NUMBER DOES NOT EXIST"
-    exit 1
+    die "GALAXY NUMBER DOES NOT EXIST"
 fi
 
 if [ ! -d "$2" ]
 then
-    echo "ERROR: OUTPUT DIRECTORY DOES NOT EXIST"
-    exit 1
+    die "OUTPUT DIRECTORY DOES NOT EXIST"
 fi
 
 
