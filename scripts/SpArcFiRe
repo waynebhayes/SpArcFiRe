@@ -232,9 +232,6 @@ ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\
     $SPARCFIRE_HOME/scripts/SpArcFiRe-stdin.sh -lookForBulge 1 -writeSettingsForEveryImage 1 -generateOrientationFieldPdf 1 "$@" | tee $outDir/SpArcFiRe.log
 ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\.[Ff][Ii][Tt][Ss]$//' | fgrep -v -f "$SKIP"
 
-# Clean up galfit files
-$SPARCFIRE_HOME/scripts/moveGalfitFiles.sh $cwd $outDir
-
 # Now extract the CSV files
 cd $outDir
 arc2csv.sh matout galaxy > arc2csv.log

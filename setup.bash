@@ -69,7 +69,7 @@ export PYTHON_SUFFIX="$PYTHON_SUFFIX"
 #if python3 --version 2>&1 | grep -q '3\.[1,7-9]\?[0-9]\.[0-9]\?[0-9]'; then
 echo ""
 echo "Now checking for python3(.7 or greater) for GalfitModule."
-PIP_NEED3='numpy|Pillow|scipy|astropy|pandas'
+PIP_NEED3='numpy|Pillow|scipy|astropy|pandas|IPython'
 if python3 -c 'import sys; assert sys.version_info >= (3,7), "Python3.7 or newer needed."'; then
     export PYTHON3=python3
     PIP_HAVE3=`(pip3 list; $PYTHON -m pip list) 2>/dev/null | awk '{print $1}' | sort -u | egrep "$PIP_NEED3"`
