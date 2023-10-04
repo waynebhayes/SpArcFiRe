@@ -99,7 +99,7 @@ def main(**kwargs):
     parallel  = kwargs.get("parallel", 1)
     
     # For simultaneous fitting
-    simultaneous_fitting = kwargs.get("simultaneous_fitting", True)
+    simultaneous_fitting = kwargs.get("simultaneous_fitting", False)
     sim_fitting_dir  = kwargs.get("sim_fitting_dir", pj(tmp_dir, "sim_fitting"))
     
     sf_in_dir    = kwargs.get("sim_fitting_in_dir", pj(sim_fitting_dir, "sparcfire-in"))
@@ -396,10 +396,10 @@ def main(**kwargs):
 
         # For when Simultaneous fitting fails we don't want to use that residual mask
         # for calculating the residual. I think everything else is handled
-        else:
+        #else:
             # TODO: MAY NOT NEED THIS ANY MORE FIXED IN RESIDUAL CALC
-            shutil.copy2(pj(tmp_masks_dir, f"{gname}_star-rm.fits"), sf_masks_dir)
-            replacement_sf_masks.append(pj(sf_masks_dir, f"{gname}_star-rm.fits"))
+        #    shutil.copy2(pj(tmp_masks_dir, f"{gname}_star-rm.fits"), sf_masks_dir)
+        #    replacement_sf_masks.append(pj(sf_masks_dir, f"{gname}_star-rm.fits"))
                 
         tmp_png_path  = pj(tmp_png_dir, gname)
         tmp_fits_path_gname = pj(tmp_fits_dir, f"{gname}_galfit_out.fits")
