@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[1]:
 
 
 import os
@@ -21,7 +21,7 @@ from skimage.draw import disk, ellipse
 import matplotlib.pyplot as plt
 
 
-# In[ ]:
+# In[2]:
 
 
 # For debugging purposes
@@ -35,7 +35,7 @@ def in_notebook():
         return False
 
 
-# In[ ]:
+# In[3]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -63,7 +63,7 @@ from Classes.Components import *
 from Classes.Containers import *
 
 
-# In[ ]:
+# In[4]:
 
 
 class HDU:
@@ -90,7 +90,7 @@ class HDU:
         return output_str
 
 
-# In[ ]:
+# In[5]:
 
 
 class FitsFile:
@@ -279,7 +279,7 @@ class FitsFile:
             setattr(self, key, value)
 
 
-# In[ ]:
+# In[6]:
 
 
 class OutputFits(FitsFile):
@@ -476,14 +476,14 @@ class OutputFits(FitsFile):
         return self.masked_residual_normalized
 
 
-# In[ ]:
+# In[7]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[ ]:
+# In[8]:
 
 
 # Testing from_file
@@ -532,7 +532,7 @@ if __name__ == "__main__":
     print(np.shape(test_obs.observation.data))
 
 
-# In[ ]:
+# In[9]:
 
 
 # Unit test to check value of masked residual
@@ -561,28 +561,28 @@ if __name__ == "__main__":
     #print(np.min(test_model.observation.data))
 
 
-# In[ ]:
+# In[10]:
 
 
 if __name__ == "__main__":
-    model = pj(TEST_OUTPUT_DIR, "test-out", gname, f"{gname}_galfit_out.fits")
+    model_to_update = pj(TEST_OUTPUT_DIR, f"temp_galfit_out.fits")
     
-    if exists(model):
-        test_model = OutputFits(model)
-        print("Checking FITS header update with NMR")
-        print("These may be different from the values above.")
+    if not exists(model_to_update):
+        _ = sp(f"cp {model} {model_to_update}")
 
-        _ = test_model.generate_masked_residual(test_mask)
-        test_model = OutputFits(model)
+    test_model = OutputFits(model_to_update)
+    print("Checking FITS header update with NMR")
+    print("These may be different from the values above.")
 
-        print(f"Norm of the masked residual: {test_model.header['NMR']:.4f}")
-        print(f"kstest p value: {test_model.header['KS_P']:.4f}")
-        print(f"kstest statistic: { test_model.header['KS_STAT']:.4f}")
-    else:
-        print(f"{model} doesn't exist, cannot test updating FITS header with NMR, and KStest values.")
+    _ = test_model.generate_masked_residual(test_mask)
+    test_model = OutputFits(model_to_update)
+
+    print(f"Norm of the masked residual: {test_model.header['NMR']:.4f}")
+    print(f"kstest p value: {test_model.header['KS_P']:.4f}")
+    print(f"kstest statistic: { test_model.header['KS_STAT']:.4f}")
 
 
-# In[ ]:
+# In[11]:
 
 
 if __name__ == "__main__":
