@@ -1,12 +1,12 @@
 
 # Component number: 1
  0) sersic              # Component type
- 1) 67.3796 67.7662 0 0 # Position x, y
- 3) 111.0000    1       # Integrated magnitude
- 4) 112.0000    1       # R_e (effective radius)   [pix]
- 5) 113.0000    1       # Sersic index n (de Vaucouleurs n=4)
- 9) 0.6214      1       # Axis ratio (b/a)
-10) -19.1534    1       # Position angle (PA) [deg: Up=0, Left=90]
+ 1) 62.9000 62.9000 0 0 # Position x, y
+ 3) 14.1100     1       # Integrated magnitude
+ 4) 13.7500     1       # R_e (effective radius)   [pix]
+ 5) 0.3000      1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.6300      1       # Axis ratio (b/a)
+10) 60.8200     1       # Position angle (PA) [deg: Up=0, Left=90]
  Z) 0.0                 # Skip this model in output image?  (yes=1, no=0)
 
 ================================================================================

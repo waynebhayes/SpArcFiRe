@@ -1,18 +1,18 @@
 
 #  Input menu file: 1237668589728366770.in
 
-#  000; HDU: z00
+#  
 
 ================================================================================
 # IMAGE and GALFIT CONTROL PARAMETERS
 A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237668589728366770.fits # Input data image (FITS file)
 B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237668589728366770_galfit_out.fits # Output data image block
 C) none                 # Sigma image name (made from data if blank or 'none')
-D) none                 # Input PSF image and (optional) diffusion kernel
+D) 1237668589728366770_psf.fits # Input PSF image and (optional) diffusion kernel
 E) 1                    # PSF fine sampling factor relative to data
 F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237668589728366770_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
-H) 25      61   26   62 # Image region to fit (xmin xmax ymin ymax)
+H) 7       79   8   80  # Image region to fit (xmin xmax ymin ymax)
 I) 50      50           # Size of the convolution box (x y)
 J) 24.8                 # Magnitude photometric zeropoint
 K) 0.396   0.396        # Plate scale (dx dy)   [arcsec per pixel]
@@ -39,35 +39,35 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 # Component number: 1
  0) sersic              # Component type
  1) 43.4409 43.8034 0 0 # Position x, y
- 3) 12.2200     1       # Integrated magnitude
- 4) 15.3400     1       # R_e (effective radius)   [pix]
- 5) 1.6900      1       # Sersic index n (de Vaucouleurs n=4)
- 9) 0.7600      1       # Axis ratio (b/a)
-10) 83.0700     1       # Position angle (PA) [deg: Up=0, Left=90]
+ 3) 14.0000     1       # Integrated magnitude
+ 4) 3.6000      1       # R_e (effective radius)   [pix]
+ 5) 4.0000      1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.8364      1       # Axis ratio (b/a)
+10) 127.5192    1       # Position angle (PA) [deg: Up=0, Left=90]
 
 # Component number: 2
  0) sersic              # Component type
- 1) 43.4409 43.8034 0 0 # Position x, y
- 3) 13.0000     1       # Integrated magnitude
- 4) 5.0487      1       # R_e (effective radius)   [pix]
- 5) 4.0000      1       # Sersic index n (de Vaucouleurs n=4)
+ 1) 43.4400 43.8000 0 0 # Position x, y
+ 3) 12.9100     1       # Integrated magnitude
+ 4) 8.7000      1       # R_e (effective radius)   [pix]
+ 5) 1.1500      1       # Sersic index n (de Vaucouleurs n=4)
  9) 0.6000      1       # Axis ratio (b/a)
-10) 38.7219     1       # Position angle (PA) [deg: Up=0, Left=90]
+10) 80.8400     1       # Position angle (PA) [deg: Up=0, Left=90]
 
 R0) power               # PA rotation func. (power, log, none)
 R1) 0.0000      0       # Spiral inner radius [pixels]
-R2) 5.2105      0       # Spiral outer radius [pixels]
-R3) -101.1450   1       # Cumul. rotation out to outer radius [degrees]
+R2) 3.9079      0       # Spiral outer radius [pixels]
+R3) -75.8588    1       # Cumul. rotation out to outer radius [degrees]
 R4) 1.0606      1       # Asymptotic spiral powerlaw
 R9) -42.7492    1       # Inclination to L.o.S. [degrees]
-R10) 90.0000     1      # Sky position angle
+R10) 112.5562    1      # Sky position angle
 F1) 0.0500  45.0000 1 1 # Azim. Fourier mode 1, amplitude, & phase angle
 F3) 0.0500  25.0000 1 1 # Azim. Fourier mode 3, amplitude, & phase angle
 
 # Component number: 3
  0) sky                 # Component type
- 1) 1129.4700   1       # Sky background at center of fitting region [ADUs]
- 2) -0.0272     1       # dsky/dx (sky gradient in x)     [ADUs/pix]
- 3) -0.0272     1       # dsky/dy (sky gradient in y)     [ADUs/pix]
+ 1) 1145.1200   1       # Sky background at center of fitting region [ADUs]
+ 2) 0.0015      1       # dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) -0.0099     1       # dsky/dy (sky gradient in y)     [ADUs/pix]
 
 ================================================================================

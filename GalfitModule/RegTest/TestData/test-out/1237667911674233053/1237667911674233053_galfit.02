@@ -1,21 +1,21 @@
 
 #  Input menu file: /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-out/1237667911674233053/1237667911674233053.in
 
-#  Chi^2/nu = 0.239,  Chi^2 = 437.346,  Ndof = 1828
+#  Chi^2/nu = 0.949,  Chi^2 = 6813.319,  Ndof = 7176
 
 ================================================================================
 # IMAGE and GALFIT CONTROL PARAMETERS
 A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237667911674233053.fits      # Input data image (FITS file)
 B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237667911674233053_galfit_out.fits      # Output data image block
 C) none                # Sigma image name (made from data if blank or "none") 
-D) none                # Input PSF image and (optional) diffusion kernel
+D) 1237667911674233053_psf.fits          # Input PSF image and (optional) diffusion kernel
 E) 1                   # PSF fine sampling factor relative to data 
 F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237667911674233053_star-rm.fits      # Bad pixel mask (FITS image or ASCII coord list)
 G) none                # File with parameter constraints (ASCII file) 
-H) 35   77   35   77   # Image region to fit (xmin xmax ymin ymax)
+H) 14   98   14   98   # Image region to fit (xmin xmax ymin ymax)
 I) 50     50           # Size of the convolution box (x y)
-J) 24.800              # Magnitude photometric zeropoint 
-K) 0.396  0.396        # Plate scale (dx dy)   [arcsec per pixel]
+J) 24.8000             # Magnitude photometric zeropoint 
+K) 0.3960  0.3960      # Plate scale (dx dy)   [arcsec per pixel]
 O) regular             # Display type (regular, curses, both)
 P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 
@@ -39,44 +39,44 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 # Component number: 1
  0) sersic                 #  Component type
  1) 55.9116  55.7516  0 0  #  Position x, y
- 3) 14.8569     1          #  Integrated magnitude 
- 4) 11.3321     1          #  R_e (effective radius)   [pix]
- 5) 0.3264      1          #  Sersic index n (de Vaucouleurs n=4) 
+ 3) 14.2510     1          #  Integrated magnitude 
+ 4) 9.9851      1          #  R_e (effective radius)   [pix]
+ 5) 1.5668      1          #  Sersic index n (de Vaucouleurs n=4) 
  6) 0.0000      0          #     ----- 
  7) 0.0000      0          #     ----- 
  8) 0.0000      0          #     ----- 
- 9) 0.5479      1          #  Axis ratio (b/a)  
-10) 64.6135     1          #  Position angle (PA) [deg: Up=0, Left=90]
+ 9) 0.8073      1          #  Axis ratio (b/a)  
+10) -1.6321     1          #  Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 # Component number: 2
  0) sersic                 #  Component type
- 1) 55.9116  55.7516  0 0  #  Position x, y
- 3) 13.1561     1          #  Integrated magnitude 
- 4) 14.4468     1          #  R_e (effective radius)   [pix]
- 5) 1.4197      1          #  Sersic index n (de Vaucouleurs n=4) 
+ 1) 55.9100  55.7500  0 0  #  Position x, y
+ 3) 13.7908     1          #  Integrated magnitude 
+ 4) 11.6453     1          #  R_e (effective radius)   [pix]
+ 5) 0.5135      1          #  Sersic index n (de Vaucouleurs n=4) 
  6) 0.0000      0          #     ----- 
  7) 0.0000      0          #     ----- 
  8) 0.0000      0          #     ----- 
- 9) 0.8691      1          #  Axis ratio (b/a)  
-10) 113.4986    1          #  Position angle (PA) [deg: Up=0, Left=90]
+ 9) 0.8485      1          #  Axis ratio (b/a)  
+10) 142.0094    1          #  Position angle (PA) [deg: Up=0, Left=90]
 
 R0) power                  #  PA rotation func. (power, log, none)
 R1) 0.0000      0          #  Spiral inner radius [pixels]
-R2) 7.2368      0          #  Spiral outer radius [pixels]
-R3) 106.8984    1          #  Cumul. rotation out to outer radius [degrees]
-R4) -5.6765     1          #  Asymptotic spiral powerlaw 
-R9) 27.8790     1          #  Inclination to L.o.S. [degrees]
-R10) 101.0604   1          #  Sky position angle
-F1) 0.1034   16.6678  1 1  #  Azim. Fourier mode 1, amplitude, & phase angle
-F3) -0.0535  -46.9959 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle
+R2) 5.9512      0          #  Spiral outer radius [pixels]
+R3) -159.7802    1          #  Cumul. rotation out to outer radius [degrees]
+R4) 0.6611      1          #  Asymptotic spiral powerlaw 
+R9) -44.1446    1          #  Inclination to L.o.S. [degrees]
+R10) 149.1968   1          #  Sky position angle
+F1) 0.0928   -170.4538 1 1  #  Azim. Fourier mode 1, amplitude, & phase angle
+F3) 0.0631   42.1446  1 1  #  Azim. Fourier mode 3, amplitude, & phase angle
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 # Component number: 3
  0) sky                    #  Component type
- 1) 1100.4701    1          #  Sky background at center of fitting region [ADUs]
- 2) -1.932e-02     1       #  dsky/dx (sky gradient in x)     [ADUs/pix]
- 3) 1.438e-02      1       #  dsky/dy (sky gradient in y)     [ADUs/pix]
+ 1) 1102.9858    1          #  Sky background at center of fitting region [ADUs]
+ 2) 1.178e-03      1       #  dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) 2.386e-03      1       #  dsky/dy (sky gradient in y)     [ADUs/pix]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 ================================================================================

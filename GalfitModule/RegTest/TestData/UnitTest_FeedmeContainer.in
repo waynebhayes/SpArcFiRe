@@ -8,7 +8,7 @@
 A) tester.fits          # Input data image (FITS file)
 B) tester_galfit_out.fits # Output data image block
 C) none                 # Sigma image name (made from data if blank or 'none')
-D) none                 # Input PSF image and (optional) diffusion kernel
+D) tester_psf.fits      # Input PSF image and (optional) diffusion kernel
 E) 1                    # PSF fine sampling factor relative to data
 F) tester_star-rm.fits  # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)

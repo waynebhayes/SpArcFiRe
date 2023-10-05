@@ -1,21 +1,21 @@
 
-#  Input menu file: /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-out/1237667735565238388/1237667735565238388_bulge.in
+#  Input menu file: /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-out/1237667735565238388/1237667735565238388_disk.in
 
-#  Chi^2/nu = 0.728,  Chi^2 = 988.026,  Ndof = 1357
+#  Chi^2/nu = 1.533,  Chi^2 = 8012.679,  Ndof = 5228
 
 ================================================================================
 # IMAGE and GALFIT CONTROL PARAMETERS
 A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237667735565238388.fits      # Input data image (FITS file)
 B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237667735565238388_galfit_out.fits      # Output data image block
 C) none                # Sigma image name (made from data if blank or "none") 
-D) none                # Input PSF image and (optional) diffusion kernel
+D) 1237667735565238388_psf.fits          # Input PSF image and (optional) diffusion kernel
 E) 1                   # PSF fine sampling factor relative to data 
 F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237667735565238388_star-rm.fits      # Bad pixel mask (FITS image or ASCII coord list)
 G) none                # File with parameter constraints (ASCII file) 
-H) 30   66   29   65   # Image region to fit (xmin xmax ymin ymax)
+H) 12   84   11   83   # Image region to fit (xmin xmax ymin ymax)
 I) 50     50           # Size of the convolution box (x y)
-J) 24.800              # Magnitude photometric zeropoint 
-K) 0.396  0.396        # Plate scale (dx dy)   [arcsec per pixel]
+J) 24.8000             # Magnitude photometric zeropoint 
+K) 0.3960  0.3960      # Plate scale (dx dy)   [arcsec per pixel]
 O) regular             # Display type (regular, curses, both)
 P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 
@@ -39,21 +39,21 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 # Component number: 1
  0) sersic                 #  Component type
  1) 47.5102  47.1619  0 0  #  Position x, y
- 3) 13.3258     1          #  Integrated magnitude 
- 4) 9.7353      1          #  R_e (effective radius)   [pix]
- 5) 1.5759      1          #  Sersic index n (de Vaucouleurs n=4) 
+ 3) 13.3816     1          #  Integrated magnitude 
+ 4) 8.9974      1          #  R_e (effective radius)   [pix]
+ 5) 1.4836      1          #  Sersic index n (de Vaucouleurs n=4) 
  6) 0.0000      0          #     ----- 
  7) 0.0000      0          #     ----- 
  8) 0.0000      0          #     ----- 
- 9) 0.7193      1          #  Axis ratio (b/a)  
-10) -66.5336    1          #  Position angle (PA) [deg: Up=0, Left=90]
+ 9) 0.7442      1          #  Axis ratio (b/a)  
+10) -64.4676    1          #  Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 # Component number: 2
  0) sky                    #  Component type
- 1) 1114.9611    1          #  Sky background at center of fitting region [ADUs]
- 2) -0.1090     1          #  dsky/dx (sky gradient in x)     [ADUs/pix]
- 3) -5.143e-03     1       #  dsky/dy (sky gradient in y)     [ADUs/pix]
+ 1) 1114.8694    1          #  Sky background at center of fitting region [ADUs]
+ 2) -1.503e-02     1       #  dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) 3.405e-03      1       #  dsky/dy (sky gradient in y)     [ADUs/pix]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 ================================================================================
