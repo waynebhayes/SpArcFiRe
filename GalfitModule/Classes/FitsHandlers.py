@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[ ]:
 
 
 import os
@@ -21,7 +21,7 @@ from skimage.draw import disk, ellipse
 import matplotlib.pyplot as plt
 
 
-# In[2]:
+# In[ ]:
 
 
 # For debugging purposes
@@ -35,7 +35,7 @@ def in_notebook():
         return False
 
 
-# In[3]:
+# In[ ]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -63,7 +63,7 @@ from Classes.Components import *
 from Classes.Containers import *
 
 
-# In[4]:
+# In[ ]:
 
 
 class HDU:
@@ -90,7 +90,7 @@ class HDU:
         return output_str
 
 
-# In[5]:
+# In[ ]:
 
 
 class FitsFile:
@@ -279,7 +279,7 @@ class FitsFile:
             setattr(self, key, value)
 
 
-# In[6]:
+# In[ ]:
 
 
 class OutputFits(FitsFile):
@@ -388,7 +388,7 @@ class OutputFits(FitsFile):
         return bulge_mask
         
         
-    def generate_masked_residual(self, mask, use_bulge_mask = True):
+    def generate_masked_residual(self, mask, use_bulge_mask = True, update_fits_header = True):
 
         small_number = 1e-8
         
@@ -453,16 +453,17 @@ class OutputFits(FitsFile):
             self.nmr  = slg.norm(self.masked_residual_normalized)
 #            self.nmrr = slg.norm(self.masked_residual_ratio)
 
-            with fits.open(self.filepath, mode='update', output_verify='ignore') as hdul:
-                hdul[2].header["NMR"] = (round(self.nmr, 4), "Norm of the masked residual")
+            if update_fits_header:
+                with fits.open(self.filepath, mode='update', output_verify='ignore') as hdul:
+                    hdul[2].header["NMR"] = (round(self.nmr, 4), "Norm of the masked residual")
 
-                # pvalue is sometimes none but round can't handle it
-                if pvalue and statistic:
-                    hdul[2].header["ks_p"]    = (round(pvalue, 4), "p value of kstest vs noise")
-                    hdul[2].header["ks_stat"] = (round(statistic, 4), "statistic value of kstest vs noise")
-                else:
-                    hdul[2].header["ks_p"]    = (None, "p value of kstest vs noise")
-                    hdul[2].header["ks_stat"] = (None, "statistic value of kstest vs noise")
+                    # pvalue is sometimes none but round can't handle it
+                    if pvalue and statistic:
+                        hdul[2].header["ks_p"]    = (round(pvalue, 4), "p value of kstest vs noise")
+                        hdul[2].header["ks_stat"] = (round(statistic, 4), "statistic value of kstest vs noise")
+                    else:
+                        hdul[2].header["ks_p"]    = (None, "p value of kstest vs noise")
+                        hdul[2].header["ks_stat"] = (None, "statistic value of kstest vs noise")
 
         except ValueError:
             print(f"There may be a broadcast issue, observation, model, crop mask: ", end = "")
@@ -475,14 +476,14 @@ class OutputFits(FitsFile):
         return self.masked_residual_normalized
 
 
-# In[7]:
+# In[ ]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[8]:
+# In[ ]:
 
 
 # Testing from_file
@@ -531,14 +532,15 @@ if __name__ == "__main__":
     print(np.shape(test_obs.observation.data))
 
 
-# In[9]:
+# In[ ]:
 
 
 # Unit test to check value of masked residual
 if __name__ == "__main__":
     
+    # Turn off updating FITS header to avoid modifying test data
     print("No bulge mask")
-    _ = test_model.generate_masked_residual(test_mask, use_bulge_mask = False)
+    _ = test_model.generate_masked_residual(test_mask, use_bulge_mask = False, update_fits_header = False)
     print(f"Norm of the observation: {test_model.norm_observation:.4f}")
     print(f"Norm of the model: {test_model.norm_model:.4f}")
     print(f"Norm of the residual: {test_model.norm_residual:.4f}")
@@ -548,7 +550,7 @@ if __name__ == "__main__":
     print(f"kstest statistic: {test_model.kstest.statistic:.4f}")
     
     print("\nNow with bulge mask")
-    _ = test_model.generate_masked_residual(test_mask)
+    _ = test_model.generate_masked_residual(test_mask, update_fits_header = False)
     print(f"Norm of the observation: {test_model.norm_observation:.4f}")
     print(f"Norm of the model: {test_model.norm_model:.4f}")
     print(f"Norm of the residual: {test_model.norm_residual:.4f}")
@@ -559,18 +561,28 @@ if __name__ == "__main__":
     #print(np.min(test_model.observation.data))
 
 
-# In[10]:
+# In[ ]:
 
 
 if __name__ == "__main__":
-    print("Checking the FITS header (have to reload the object to see the changes)")
-    test_model = OutputFits(model)
-    print(f"Norm of the masked residual per FITS header: {test_model.model.header['NMR']}")
-    print(f"kstest pvalue per FITS header: {test_model.model.header['KS_P']}")
-    print(f"kstest statistic per FITS header: {test_model.model.header['KS_STAT']}")
+    model = pj(TEST_OUTPUT_DIR, "test-out", gname, f"{gname}_galfit_out.fits")
+    
+    if exists(model):
+        test_model = OutputFits(model)
+        print("Checking FITS header update with NMR")
+        print("These may be different from the values above.")
+
+        _ = test_model.generate_masked_residual(test_mask)
+        test_model = OutputFits(model)
+
+        print(f"Norm of the masked residual: {test_model.header['NMR']:.4f}")
+        print(f"kstest p value: {test_model.header['KS_P']:.4f}")
+        print(f"kstest statistic: { test_model.header['KS_STAT']:.4f}")
+    else:
+        print(f"{model} doesn't exist, cannot test updating FITS header with NMR, and KStest values.")
 
 
-# In[11]:
+# In[ ]:
 
 
 if __name__ == "__main__":
