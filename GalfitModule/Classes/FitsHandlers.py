@@ -561,25 +561,29 @@ if __name__ == "__main__":
     #print(np.min(test_model.observation.data))
 
 
-# In[10]:
+# In[14]:
 
 
 if __name__ == "__main__":
     model_to_update = pj(TEST_OUTPUT_DIR, f"temp_galfit_out.fits")
     
-    if not exists(model_to_update):
-        _ = sp(f"cp {model} {model_to_update}")
+    if exists(model_to_update):
+        sp(f"rm -f {model_to_update}")
+        
+    _ = sp(f"cp {model} {model_to_update}")
 
     test_model = OutputFits(model_to_update)
     print("Checking FITS header update with NMR")
-    print("These may be different from the values above.")
-
+    
+    print("Does the updated FITS file contain NMR and KStest keys?")
+    keys_to_check = ("NMR", "KS_P", "KS_STAT")
+    
+    print("Before...", all(k in test_model.header for k in keys_to_check))
+    
     _ = test_model.generate_masked_residual(test_mask)
     test_model = OutputFits(model_to_update)
 
-    print(f"Norm of the masked residual: {test_model.header['NMR']:.4f}")
-    print(f"kstest p value: {test_model.header['KS_P']:.4f}")
-    print(f"kstest statistic: { test_model.header['KS_STAT']:.4f}")
+    print("After...", all(k in test_model.header for k in keys_to_check))
 
 
 # In[11]:
