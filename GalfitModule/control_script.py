@@ -75,7 +75,7 @@ from sparc_to_galfit_feedme_gen import *
 import go_go_galfit
 
 
-# In[13]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -854,6 +854,17 @@ if __name__ == "__main__":
     #basename = "GALFIT"
     pkl_end_str = "output_results"
     final_pkl_file = pj(out_dir, f"{basename}_{pkl_end_str}.pkl")
+    num = 1
+    
+    while exists(final_pkl_file) and num < 100:
+        final_pkl_file = pj(out_dir, f"{basename}_{pkl_end_str}{num}.pkl")
+        num += 1
+        
+    if num == 100:
+        print("Stopping the iterative naming just in case...")
+        print("Use the -n option to specify a new run name. Exitting.")
+        sys.exit()
+        
     print(f"Combining all the residual calculations into {final_pkl_file}")
 
     #all_nmr = {}
@@ -987,7 +998,7 @@ if __name__ == "__main__":
     os.chdir(old_cwd)
 
 
-# In[8]:
+# In[ ]:
 
 
 if __name__ == "__main__":
