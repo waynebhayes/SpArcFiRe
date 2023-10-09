@@ -157,7 +157,7 @@ class BaseParameter():
 # ==========================================================================================================
 
 
-# In[14]:
+# In[5]:
 
 
 class HeaderParameter(BaseParameter, str):
@@ -170,7 +170,7 @@ class HeaderParameter(BaseParameter, str):
         self.fix_value = ""
 
 
-# In[15]:
+# In[6]:
 
 
 class NumParameter(BaseParameter, float):
@@ -181,7 +181,7 @@ class NumParameter(BaseParameter, float):
         
         BaseParameter.__init__(self, value, **kwargs)
         
-        self.value = round(self.value, 4)
+        self.value = float(round(self.value, 4))
         
 #         self.fix_value        = kwargs.get("fix_value", 0)
 #         self.name             = kwargs.get("name", "")
@@ -205,7 +205,7 @@ class NumParameter(BaseParameter, float):
 # ==========================================================================================================
 
 
-# In[16]:
+# In[7]:
 
 
 class ComponentType(BaseParameter, str):
@@ -227,11 +227,13 @@ class ComponentType(BaseParameter, str):
     #     return f"{self.parameter_number:>2}) {self.name:<11} {empty_str:<10} #  {self.comment}"
 
 
-# In[17]:
+# In[57]:
 
 
 class MultiParameter(BaseParameter):
     def __init__(self, value = (0,0), **kwargs):
+        
+        BaseParameter.__init__(self, 0, **kwargs)
         
         # Generically use x and y
         if len(value) == 2:
@@ -247,7 +249,7 @@ class MultiParameter(BaseParameter):
             if self.y == int(self.y):
                 y_str = f"{self.y:.0f}"
                 
-            value_str  = f"{x_str} {y_str}"
+            self.value_str  = f"{x_str} {y_str}"
             self.value = (self.x, self.y)
             
         elif len(value) == 4:
@@ -256,17 +258,20 @@ class MultiParameter(BaseParameter):
             self.ymin = int(kwargs.get("ymin", value[2]))
             self.ymax = int(kwargs.get("ymax", value[3]))
 
-            value_str  = f"{self.xmin}   {self.xmax}   {self.ymin}   {self.ymax}"
+            self.value_str  = f"{self.xmin}   {self.xmax}   {self.ymin}   {self.ymax}"
             self.value = (self.xmin, self.xmax, self.ymin, self.ymax)
-            
-        BaseParameter.__init__(self, value_str, **kwargs)
-    
+        
         self.fix_value        = ""
         self.fix_x            = ""
         self.fix_y            = ""
+        
+    # Override BaseParameter
+    def __str__(self):
+        pre_comment = f"{self.parameter_number:>2}) {self.value_str:<11} {self.fix_value}"
+        return f"{pre_comment:<23} # {self.comment}"
 
 
-# In[18]:
+# In[58]:
 
 
 class Position(MultiParameter):
@@ -282,10 +287,10 @@ class Position(MultiParameter):
         self.fix_y            = self.fix_value[-1]
 
 
-# In[19]:
+# In[93]:
 
 
-class FourierMode(BaseParameter):
+class FourierMode(MultiParameter):
     def __init__(self, mode, amplitude = 0, phase_angle = 0, **kwargs):
         
         self.mode        = mode
@@ -297,11 +302,10 @@ class FourierMode(BaseParameter):
             self.amplitude   = amplitude[0]
             self.phase_angle = amplitude[1]
             
-        value_str  = f"{self.amplitude} {self.phase_angle}"
-        self.value = f"{value_str:<11}"
+        self.value_str  = f"{self.amplitude} {self.phase_angle}"
+        self.value = (self.amplitude, self.phase_angle) #f"{value_str:<11}"
+        MultiParameter.__init__(self, self.value, **kwargs)
         
-        BaseParameter.__init__(self, self.value, **kwargs)
-    
         self.name             = "position"
         self.parameter_number = f"F{self.mode}"
         self.comment         = f"Azim. Fourier mode {self.mode}, amplitude, & phase angle"
@@ -310,7 +314,7 @@ class FourierMode(BaseParameter):
         self.fix_phase_angle = self.fix_value[-1]
 
 
-# In[24]:
+# In[94]:
 
 
 #class BendingModes(BaseParameter, float):
@@ -328,12 +332,14 @@ class BendingMode(NumParameter):
         self.comment         = f"Bending mode {self.mode} amplitude"
 
 
-# In[25]:
+# In[95]:
 
 
-class ImageRegionToFit(MultiParameter, HeaderParameter):
+class ImageRegionToFit(HeaderParameter, MultiParameter):
     def __init__(self, value = (0, 256, 0, 256), **kwargs):
         
+        # Header Parameter first so that we don't overwrite
+        # multiparameter fix value
         HeaderParameter.__init__(self, value, **kwargs)
         MultiParameter.__init__(self, value, **kwargs)
         
@@ -347,7 +353,7 @@ class CropRegion(ImageRegionToFit):
         ImageRegionToFit.__init__(self, *values, **kwargs)
 
 
-# In[26]:
+# In[96]:
 
 
 if __name__ == "__main__":
@@ -364,11 +370,12 @@ if __name__ == "__main__":
     print(crop_region)
 
 
-# In[27]:
+# In[97]:
 
 
-class ConvolutionBox(MultiParameter, HeaderParameter):
+class ConvolutionBox(HeaderParameter, MultiParameter):
     def __init__(self, value = (50, 50), **kwargs):
+        
         
         HeaderParameter.__init__(self, value, **kwargs)
         MultiParameter.__init__(self, value, **kwargs)
@@ -378,10 +385,10 @@ class ConvolutionBox(MultiParameter, HeaderParameter):
         self.comment = "Size of the convolution box (x y)"
 
 
-# In[28]:
+# In[98]:
 
 
-class PlateScale(MultiParameter, HeaderParameter):
+class PlateScale(HeaderParameter, MultiParameter):
     def __init__(self, value = (0.396, 0.396), **kwargs):
         HeaderParameter.__init__(self, value, **kwargs)
         MultiParameter.__init__(self, value, **kwargs)
@@ -394,7 +401,7 @@ class PlateScale(MultiParameter, HeaderParameter):
         self.comment = "Plate scale (dx dy)   [arcsec per pixel]"
 
 
-# In[29]:
+# In[99]:
 
 
 if __name__ == "__main__":
@@ -411,14 +418,14 @@ if __name__ == "__main__":
     print(plate_scale)
 
 
-# In[30]:
+# In[100]:
 
 
 # if __name__ == "__main__":
 #     from RegTest.RegTest import *
 
 
-# In[31]:
+# In[101]:
 
 
 if __name__ == "__main__":
@@ -433,7 +440,7 @@ if __name__ == "__main__":
     print(sky_line)
 
 
-# In[32]:
+# In[102]:
 
 
 if __name__ == "__main__":
@@ -455,7 +462,7 @@ if __name__ == "__main__":
     print(position)
 
 
-# In[33]:
+# In[103]:
 
 
 if __name__ == "__main__":
@@ -472,7 +479,7 @@ if __name__ == "__main__":
     print(magnitude + magnitude)
 
 
-# In[34]:
+# In[107]:
 
 
 if __name__ == "__main__":
@@ -494,7 +501,7 @@ if __name__ == "__main__":
     print(fourier3)
 
 
-# In[35]:
+# In[108]:
 
 
 if __name__ == "__main__":
@@ -513,7 +520,7 @@ if __name__ == "__main__":
     print(bending3)
 
 
-# In[36]:
+# In[109]:
 
 
 # Parameters with defaults for Sersic profile
@@ -586,7 +593,7 @@ def load_default_sersic_parameters(component_number = None):
     return loc
 
 
-# In[37]:
+# In[110]:
 
 
 def load_default_power_parameters(component_number = None):
@@ -665,7 +672,7 @@ def load_default_power_parameters(component_number = None):
     return loc
 
 
-# In[38]:
+# In[111]:
 
 
 def load_default_fourier_parameters(component_number = None):
@@ -702,7 +709,7 @@ def load_default_fourier_parameters(component_number = None):
     return loc
 
 
-# In[39]:
+# In[112]:
 
 
 # Parameters with defaults for Sky profile
@@ -742,7 +749,7 @@ def load_default_sky_parameters(component_number = None):
     return loc
 
 
-# In[40]:
+# In[113]:
 
 
 # Parameters with defaults for Sky profile
@@ -839,7 +846,7 @@ def load_default_header_parameters():
     return loc
 
 
-# In[41]:
+# In[114]:
 
 
 if __name__ == "__main__":
@@ -854,7 +861,22 @@ if __name__ == "__main__":
     _ = [print(v) for v in load_default_sky_parameters().values()]
 
 
-# In[16]:
+# In[115]:
+
+
+if __name__ == "__main__":
+    _ = [print(type(v.value), v) for v in load_default_header_parameters().values()]
+    print()
+    _ = [print(type(v.value), v) for v in load_default_sersic_parameters().values()]
+    print()
+    _ = [print(type(v.value), v) for v in load_default_power_parameters().values()]
+    print()
+    _ = [print(type(v.value), v) for v in load_default_fourier_parameters().values()]
+    print()
+    _ = [print(type(v.value), v) for v in load_default_sky_parameters().values()]
+
+
+# In[30]:
 
 
 if __name__ == "__main__":
