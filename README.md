@@ -128,7 +128,7 @@ Controls how much the contrast of the image is increased prior to being processe
 
 Controls the spread of how the image to be processed is unsharpened, the higher the value the higher the spread and vice versa.
 
-**-useDeProjectStrech &lt;0 | 1> {Default is 1}**
+**-useDeProjectStretch &lt;0 | 1> {Default is 1}**
 
 If set to 1 then when cropping the image for processing the image will also be rotated and stretched to make the galaxy fill up as much of the image as possible.
 
