@@ -43,16 +43,21 @@ else:
         _SPARCFIRE_DIR = os.environ["SPARCFIRE_HOME"]
         _MODULE_DIR = pj(_SPARCFIRE_DIR, "GalfitModule")
     except KeyError:
-        # print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
-        # print("Running on the assumption that GalfitModule is in your home directory... (if not this will fail and quit!)") 
-        _MODULE_DIR = pj(_HOME_DIR, "GalfitModule")
+        if __name__ == "__main__":
+            print("SPARCFIRE_HOME is not set. Please run 'setup.bash' inside SpArcFiRe directory if not done so already.")
+            print("Checking the current directory for GalfitModule, otherwise quitting.")
+            
+        _MODULE_DIR = pj(os.getcwd(), "GalfitModule")
+        
+        if not exists(_MODULE_DIR):
+            raise Exception("Could not find GalfitModule!")
 
 sys.path.append(_MODULE_DIR)
 
-from Functions.HelperFunctions import *
+from Functions.helper_functions import *
 
 
-# In[4]:
+# In[22]:
 
 
 class GalfitComponent:
@@ -87,6 +92,7 @@ class GalfitComponent:
 
     def add_skip(self, skip_val = 0):
         key = "skip"
+        #self.skip = skip_val
         self.param_numbers["Z"] = key
         self.param_values[key] = skip_val
         self.param_desc[key] = "Skip this model in output image?  (yes=1, no=0)"
@@ -104,7 +110,11 @@ class GalfitComponent:
         # Values are the only thing that will change via instance.param_name
         # We need to update the dictionary that holds all of them since I use
         # a deepcopy to save myself some lines of code/typing (cheeky)
+        
+        # TODO: Catch values which I use param fix to cheat on 
         self.param_values.update({k:v for k,v in self.__dict__.items() if k in self.param_values})
+        if self.component_type == "header":
+            self.param_fix["region_to_fit"] = f'{self.__dict__["region_to_fit"][2]} {self.__dict__["region_to_fit"][3]}'
         
 # ==========================================================================================================
 
@@ -136,6 +146,8 @@ class GalfitComponent:
 # ==========================================================================================================
   
     def __str__(self):
+        # TODO update param_values here so that output is always up to date?
+        # Or find a way not to use it...
         output_str = ""
         num_type = ".4f"
         l_align = "<11"
@@ -365,6 +377,10 @@ class GalfitComponent:
 # ==========================================================================================================
 
     def to_file(self, filename, *args):
+        # For skipped power and fourier
+        if self.param_values.get("skip",0) == 1 and self.component_type in ("power", "fourier"):
+            return None
+        
         try:
             with open(filename, "w") as f:
                 f.write("\n")
@@ -381,6 +397,10 @@ class GalfitComponent:
                     fourier_index = comp_names.index("fourier")
 
                 for i, component in enumerate(args):
+                    # For skipped power and fourier
+                    if component.param_values.get("skip",0) == 1 and component.component_type in ("power", "fourier"):
+                        continue
+                        
                     f.write(str(component))
                     if i != fourier_index - 1:
                         f.write("\n")
@@ -406,7 +426,7 @@ class GalfitComponent:
     #     return self.__dict__.iteritems()
 
 
-# In[5]:
+# In[23]:
 
 
 class Sersic(GalfitComponent):
@@ -523,22 +543,27 @@ class Sersic(GalfitComponent):
         # example
         # sersic    : (  [62.90],  [62.90])  14.11     13.75    0.30    0.63    60.82
         # does not include position
-        params = in_line.split("])")[1]
-        params = " ".join(params.split())
-        params = params.split()
-        params = [i.strip("*") for i in params]
+        #params = in_line.split("])")[1]
+        #params = " ".join(params.split())
+        #params = params.split()
+        #params = [i.strip("*") for i in params]
+        #params = [i.strip("[]") for i in params.split()]
+        params = [i.strip("[*,]()") for i in in_line.split() 
+                  if any(map(str.isdigit, i))
+                 ]
         
-        self.magnitude        = float(params[0])
-        self.effective_radius = float(params[1])
-        self.sersic_index     = float(params[2])
-        self.axis_ratio       = float(params[3])
-        self.position_angle   = float(params[4])
+        self.position         = (float(params[0]), float(params[1]))
+        self.magnitude        = float(params[2])
+        self.effective_radius = float(params[3])
+        self.sersic_index     = float(params[4])
+        self.axis_ratio       = float(params[5])
+        self.position_angle   = float(params[6])
         self.update_param_values()
         
         return
 
 
-# In[18]:
+# In[24]:
 
 
 class Power(GalfitComponent):
@@ -646,24 +671,24 @@ class Power(GalfitComponent):
     def update_from_log(self, in_line):
         # example
         # power   :     [0.00]   [23.51]  219.64     -0.16     ---  -44.95   -15.65
-        # does not include inner/outer rad
-        # Assumes those are the only ones fixed
         
-        params = in_line.split("]")[2] 
-        params = " ".join(params.split())
-        params = params.split()
-        params = [i.strip("*") for i in params]
+        #params = in_line.split("]")[2] 
+        #params = " ".join(params.split())
+        params = [i.strip("[*]") for i in in_line.split() 
+                  if any(map(str.isdigit, i))
+                 ]
         
-        self.cumul_rot          = float(params[0])
-        self.powerlaw           = float(params[1])
-        # Some dashed line here...
-        self.inclination        = float(params[3])
-        self.sky_position_angle = float(params[4])
+        self.inner_rad          = float(params[0])
+        self.outer_rad          = float(params[1])
+        self.cumul_rot          = float(params[2])
+        self.powerlaw           = float(params[3])
+        self.inclination        = float(params[4])
+        self.sky_position_angle = float(params[5])
         self.update_param_values()
         return
 
 
-# In[19]:
+# In[25]:
 
 
 class Fourier(GalfitComponent):
@@ -682,6 +707,18 @@ class Fourier(GalfitComponent):
         self.param_fix = {}
         
         self.include_fn(n = n)
+        
+        amplitudes   = []
+        phase_angles = []
+        for k,v in self.param_values.items():
+            if k.lower() != "skip":
+                amplitudes.append(v[0])
+                phase_angles.append(v[1])
+        
+        # TODO: FIND SOME WAY TO UPDATE THIS WHEN OBJECT IS UPDATED
+        # preferably without copying and pasting things
+        self.amplitudes   = amplitudes
+        self.phase_angles = phase_angles
         
         p_numbers = list(self.param_numbers.keys())
         # For reading from file
@@ -772,7 +809,7 @@ class Fourier(GalfitComponent):
         return
 
 
-# In[8]:
+# In[26]:
 
 
 class Sky(GalfitComponent):
@@ -863,19 +900,23 @@ class Sky(GalfitComponent):
         # example
         #sky       : [ 63.00,  63.00]  1130.51  -4.92e-02  1.00e-02
         
-        params = in_line.split("]")[1]
-        params = " ".join(params.split())
-        params = params.split()
-        params = [i.strip("*") for i in params]
+        # params = in_line.split("]")[1]
+        # params = " ".join(params.split())
+        # params = params.split()
+        # params = [i.strip("*") for i in params]
+        params = [i.strip("[*,]") for i in in_line.split() 
+                  if any(map(str.isdigit, i))
+                 ]
         
-        self.sky_background = float(params[0])
-        self.dsky_dx = float(params[1])
-        self.dsky_dy = float(params[1])
+        # params[0] and [1] are position
+        self.sky_background = float(params[2])
+        self.dsky_dx = float(params[3])
+        self.dsky_dy = float(params[4])
         self.update_param_values()
         return
 
 
-# In[9]:
+# In[27]:
 
 
 class GalfitHeader(GalfitComponent):
@@ -887,7 +928,7 @@ class GalfitHeader(GalfitComponent):
         self.input_image     = kwargs.get("input_image", f"{galaxy_name}.fits")
         self.output_image    = kwargs.get("output_image", f"{galaxy_name}_galfit_out.fits")
         self.sigma_image     = kwargs.get("sigma_image", "none")
-        self.psf             = kwargs.get("psf", "none") # May add gname to this
+        self.psf             = kwargs.get("psf", f"{galaxy_name}_psf.fits") # May add gname to this
         self.fine_sampling   = kwargs.get("fine_sampling", 1)
         self.pixel_mask      = kwargs.get("pixel_mask", f"{galaxy_name}_star-rm.fits")
         self.constraints     = kwargs.get("constraints", "none")
@@ -1028,14 +1069,14 @@ class GalfitHeader(GalfitComponent):
         return
 
 
-# In[10]:
+# In[28]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[11]:
+# In[29]:
 
 
 # Unit Test for GalfitComponent
@@ -1046,7 +1087,7 @@ if __name__ == "__main__":
         print(k,v)
 
 
-# In[12]:
+# In[30]:
 
 
 if __name__ == "__main__":
@@ -1090,16 +1131,16 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps""".
 
 if __name__ == "__main__":
     bogus_list = """ 0) sersic                 #  Component type
-     1) 76.7000  76.5000  0 0  #  Position x, y
-     3) 12.9567     1          #  Integrated magnitude
-     4) 18.5147     1          #  R_e (effective radius)   [pix]
-     5) 0.6121      1          #  Sersic index n (de Vaucouleurs n=4)
-     6) 0.0000      0          #     -----
-     7) 0.0000      0          #     -----
-     8) 0.0000      0          #     -----
-     9) 0.3943      1          #  Axis ratio (b/a)
-    10) -48.3372    1          #  Position angle (PA) [deg: Up=0, Left=90]
-     Z) 0                      #  Skip this model in output image?  (yes=1, no=0)""".split("\n")
+ 1) 76.7000  76.5000  0 0  #  Position x, y
+ 3) 12.9567     1          #  Integrated magnitude
+ 4) 18.5147     1          #  R_e (effective radius)   [pix]
+ 5) 0.6121      1          #  Sersic index n (de Vaucouleurs n=4)
+ 6) 0.0000      0          #     -----
+ 7) 0.0000      0          #     -----
+ 8) 0.0000      0          #     -----
+ 9) 0.3943      1          #  Axis ratio (b/a)
+ 10) -48.3372    1          #  Position angle (PA) [deg: Up=0, Left=90]
+ Z) 0                      #  Skip this model in output image?  (yes=1, no=0)""".split("\n")
 
     bogus_dict = eval("""{'1_XC': '[67.3796]',
      '1_YC': '[67.7662]',
@@ -1126,6 +1167,11 @@ if __name__ == "__main__":
     bulge_df.iloc[0,1] = 112
     bulge_df.iloc[0,2] = 113
     bulge.from_pandas(bulge_df)
+    print(bulge)
+    
+    log_line = "sersic    : (  [62.90],  [62.90])  14.11*     13.75    0.30    0.63    60.82"
+    
+    bulge.update_from_log(log_line)
     print(bulge)
 
 
@@ -1167,6 +1213,11 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
     arms_df.iloc[0,2] = 113
     arms.from_pandas(arms_df)
     print(arms)
+    
+    log_line = "power   :     [0.00]   23.51  219.64     -0.16*     ---  -44.95   -15.65"
+    
+    arms.update_from_log(log_line)
+    print(arms)
 
 
 # In[15]:
@@ -1200,9 +1251,30 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
     fourier_df.iloc[0,2] = 113
     fourier.from_pandas(fourier_df)
     print(fourier)
+    
+    log_line = "fourier : (1:  0.06,   -6.67)   (3:  0.05,    0.18)"
+    
+    fourier.update_from_log(log_line)
+    print(fourier)
 
 
 # In[16]:
+
+
+if __name__ == "__main__":
+    arms.add_skip(skip_val = 1)
+    fourier.add_skip(skip_val = 1)
+    
+    # We should see an RZ, FZ which is nonsensical but when we write to file
+    # the power and fourier functions simply won't show
+
+    print(arms)
+    print(fourier)
+    
+    bulge.to_file(f"{base_out}_PowerFourierSkip.txt", arms, fourier)
+
+
+# In[17]:
 
 
 if __name__ == "__main__":
@@ -1212,18 +1284,18 @@ if __name__ == "__main__":
  3) 1.813e-02      1       #  dsky/dy (sky gradient in y)     [ADUs/pix]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)""".split("\n")
 
+    sky = Sky(3)
+    sky.from_file_helper(bogus_list)
+    #sky.update_param_values()
+    sky.to_file(f"{base_out}_Sky.txt")
+    print(sky)
+    
     bogus_dict = eval("""{'COMP_3': 'sky',
  '3_XC': '[67.0000]',
  '3_YC': '[68.0000]',
  '3_SKY': '1133.4166 +/- 0.1595',
  '3_DSDX': '0.0119 +/- 0.0048',
  '3_DSDY': '-0.0131 +/- 0.0047'}""")
-
-    sky = Sky(3)
-    sky.from_file_helper(bogus_list)
-    #sky.update_param_values()
-    sky.to_file(f"{base_out}_Sky.txt")
-    print(sky)
 
     sky.from_file_helper(bogus_dict)
     #sky.update_param_values()
@@ -1237,9 +1309,14 @@ if __name__ == "__main__":
     sky_df.iloc[0,2] = 113
     sky.from_pandas(sky_df)
     print(sky)
+    
+    log_line = "sky       : [ 63.00,  63.00]  1130.51  -4.92e-02  1.00e-02"
+    
+    sky.update_from_log(log_line)
+    print(sky)
 
 
-# In[17]:
+# In[18]:
 
 
 if __name__ == "__main__":

@@ -4,11 +4,16 @@ import subprocess
 import shutil
 from glob import glob
 import argparse
+import numpy as np
+import pandas as pd
 
 from os.path import join as pj
 from os.path import exists
 
+from astropy.io import fits
+
 # For debugging purposes
+# Keep for importing RegTest to Notebooks
 from IPython import get_ipython
 def in_notebook():
     ip = get_ipython()
@@ -40,12 +45,12 @@ TEST_DATA_DIR   = pj(REG_TEST_DIR, "TestData")
 
 base_out = pj(TEST_OUTPUT_DIR, "UnitTest")
 
-# Force >python 3.6 for f string compatibility
-out_str = """\t Python3.6 or greater required! Exitting without generating feedmes... 
+# Force >python 3.7 for f string compatibility
+out_str = """\t Python3.7 or greater required! Exitting without generating feedmes... 
             if feedmes have already been generated, galfit will run with those.\n"""
-assert sys.version_info >= (3, 6), out_str
+assert sys.version_info >= (3, 7), out_str
 
-# ignore_feedme_filepaths
+# ignore feedme filepaths
 def iff(feedme_str):
     out_str = feedme_str.split("\n")
     G_idx = [idx for idx,i in enumerate(out_str) if i.startswith("G)")][0]
@@ -127,7 +132,7 @@ if __name__ == "__main__":
 
     # Run all unit tests
     list_of_classes = ["Components", "Containers", "FitsHandlers"]
-    list_of_helpers = ["HelperFunctions"]
+    list_of_helpers = ["helper_functions"]
     
     all_stdout     = {}
     all_unit_error = {}
@@ -152,11 +157,13 @@ if __name__ == "__main__":
         print("Function helper must have failed! Adding to failure count and creating file.")
         total_fail_count += 1
     
-    # As output by HelperFunctions script per its own unit test
+    # As output by helper_functions script per its own unit test
     with open(stdout_path, "a") as f:
         for name, out_list in all_stdout.items():
             out_str = "\n".join(out_list)
             f.write(f"{name}\n{out_str}")
+            f.write("="*80)
+            f.write("="*80)
             
 # Reg tests come next
 if __name__ == "__main__":
@@ -177,8 +184,18 @@ if __name__ == "__main__":
     
     # Run control script!
     ctrl_script = pj(_MODULE_DIR, "control_script.py")
-    print("Running GALFIT (capturing output)...")
-    result = sp(f"python3 {ctrl_script} {in_dir} {tmp_dir} {out_dir}")
+    base_run_name = "RegTest"
+    steps = ("1-step", "2-step")
+    
+    print("Running GALFIT with single-step fitting (capturing output)...")
+    result = sp(f"python3 {ctrl_script} -p 0 -NS 1 -n {base_run_name}_{steps[0]} {in_dir} {tmp_dir} {out_dir}")
+    
+    if verbose:
+        print(result.stdout)
+        print(result.stderr)
+    
+    print("Running GALFIT with default two-step fitting (capturing output)...")
+    result = sp(f"python3 {ctrl_script} -p 0 -n {base_run_name}_{steps[1]} {in_dir} {tmp_dir} {out_dir}")
     
     # try:
     #     shutil.move(pj(os.getcwd(), "galfit_failed.txt"), TEST_OUTPUT_DIR)
@@ -189,7 +206,7 @@ if __name__ == "__main__":
         print(result.stdout)
         print(result.stderr)
         
-    # As output by HelperFunctions script per its own unit test
+    # As output by helper_functions script per its own unit test
     # Will have a filepath issue at the end of this as well as potentially an ordering
     # issue so we don't use this output after all.
     # with open(stdout_path, "a") as f:
@@ -233,43 +250,93 @@ if __name__ == "__main__":
             if result.stdout:
                 #print(result.stdout)
                 print(f"Diff check for {filename} failed!")
+                if filename == "UnitTestStdOutput.txt":
+                    print(f"Since {filename} contains the standard output for several tests")
+                    print(f"the number of unit tests which actually failed may be higher than the final count.")
+                
                 fail_count += 1
                 all_diff_error[filename] = f"{filename}\n{result.stdout}"
             
-    # Diff checking GALFIT input/output
-    # Diff does not work on FITS files
-    # That and all the info we really need from those is in the galfit.# files anyway
-    print("Performing diff check for Galfit input/output.")
-    gnames = [os.path.basename(i) for i in glob(pj(in_dir, "*.fits"))]
-    things_to_check = ["galfit.01", "galfit.02", ".in", "bulge.in"]
+    # Diff checking GALFIT input 
+    # Output may vary depending on compute differences b/t clusters (GALFIT issue)
+    print("Performing diff check for Galfit input.")
+    gnames = [os.path.basename(i).rstrip(".fits") for i in glob(pj(in_dir, "*.fits"))]
+    things_to_check = [".in", "_disk.in"]
     
     for gname in gnames:
-        data = pj(TEST_DATA_DIR, gname)
-        output  = pj(TEST_OUTPUT_DIR, gname)
+        data    = pj(TEST_DATA_DIR, "test-out", gname, gname)
+        output  = pj(TEST_OUTPUT_DIR, "test-out", gname, gname)
+        
+        # Check galfit text output files
         for suffix in things_to_check:
             # This may produce a stderr if the file doesn't exist
             # say when galfit failes. Just a heads-up, shouldn't be a problem.
             # tail is to start at line 15 of each file to ignore the file path differences
             # for input/output/star mask/etc.
-            result = sp(f"diff <(tail -n +15 {data}_{suffix}) <(tail -n +15 {output}_{suffix})")
+            result = sp(f"diff <(tail -n +15 {data}{suffix}) <(tail -n +15 {output}{suffix})")
             
             if verbose:
                 print(result.stdout)
                 print(result.stderr)
         
             if result.stdout:
-                print(f"Diff check for {gname}_{suffix} failed!")
+                # Deprecated choice
+                # Carve a special exception for 1237655463239155886 since we randomize the spin parity
+                #if result.stdout.split("\n")[0] == "60c60" and gname == "1237655463239155886":
+                #    continue
+                    
+                print(f"Diff check for {gname}{suffix} failed!")
                 fail_count += 1
-                all_diff_error[f"{gname}_{suffix}"] = f"{data}_{suffix}\n{result.stdout}"
+                all_diff_error[f"{gname}{suffix}"] = f"{data}{suffix}\n{result.stdout}"
                 
+        # Check _out_old FITS files using Astropy since this RegTest shouldn't call FitsHandler except to check it
+#         suffixes = ["galfit_out.fits", "galfit_out_old.fits"]
+#         for suffix in suffixes:
+#             if exists(f"{data}_{suffix}"):
+#                 data_fits   = fits.open(f"{data}_{suffix}")[2].data
+                
+#                 try:
+#                     output_fits = fits.open(f"{output}_{suffix}")[2].data
+#                 except FileNotFoundError as fnfe:
+#                     fail_count += 1 
+#                     all_diff_error[f"{gname}_{suffix}"] = f"{gname} did not successfully fit, something went wrong."
+#                     continue
+
+#                 # The tolerance can be quite high because when GALFIT is off, it will differ significantly
+#                 # I set a tolerance in the first place for machine error/differences under the hood across clusters
+#                 if not np.allclose(data_fits, output_fits, atol = 1e-2):
+#                     fail_count += 1
+#                     all_diff_error[f"{gname}_{suffix}"] = f"Single Component Fit differs for {gname}!"
+
+#             elif exists(f"{output}_{suffix}"):
+#                 fail_count += 1
+#                 all_diff_error[f"{gname}_{suffix}"] = f"{gname} should not have successfully fit, something went... wrong (right?)."
+          
     with open(error_path, "a") as ef:
         for name, err_str in all_diff_error.items():
             #err_str = "\n".join(err_list)
-            ef.write(f"{name}\n{err_str}")
+            ef.write(f"{name}\n{err_str}\n")
             
     print(f"{fail_count} regression tests failed.")
     if fail_count:
         print(f"See {error_path} for more information.")
         total_fail_count += fail_count
+        
+    print("Checking existence and readability of output pkl files.")
+    for s in steps:
+        filename = pj(out_dir, f"{base_run_name}_{s}_output_results.pkl")
+        if not exists(filename):
+            print(f"{filename} does not exist!")
+            total_fail_count += 1
+        else:
+            try:
+                _ = pd.read_pickle(filename)
+                
+            except Exception as e:
+                print(f"Something went wrong reading {filename} via pandas.")
+                total_fail_count += 1
+                
+                if verbose:
+                    print(e)
             
     print(f"Total number of tests failed: {total_fail_count}")

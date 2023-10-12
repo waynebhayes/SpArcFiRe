@@ -17,7 +17,7 @@ import scipy.ndimage as ndimage
 import scipy.stats as stats
 # This and astropy likely need to be pip installed
 # Along with csv2tsv for regression tests
-import imageio
+import imageio.v3 as iio
 import shutil
 import subprocess
 import sys
@@ -524,17 +524,25 @@ if __name__ == '__main__':
             
             if write_masked_img:
                 out_filepath = os.path.join(out_dirpath, in_imgname)
-                fits.writeto(out_filepath +  '_star-rm.fits', galfit_mask_levels)
-                #fits.writeto(out_filepath + '_star-mask.fits', depad_img * star_mask)
-                #fits.writeto(out_filepath + '_star-mask-aggressive.fits', depad_img * star_mask_aggressive)
+                fits.writeto(out_filepath +  '_star-rm.fits', galfit_mask_levels, overwrite = True)
+                #fits.writeto(out_filepath + '_star-mask.fits', depad_img * star_mask, overwrite = True)
+                #fits.writeto(out_filepath + '_star-mask-aggressive.fits', depad_img * star_mask_aggressive, overwrite = True)
                 
                 logger.info("wrote {0}".format(out_filepath))
+            
+            # Sparcfire produces an error when there's no star_mask values and does not proceed
+            # I believe that is an error but for now, take this as a temporary fix
+            if np.any(star_mask):
+                iio.imwrite(os.path.join(out_dirpath, in_imgname + '_starmask.png'), mask_levels, mode = "LA")
                 
-            imageio.imwrite(os.path.join(out_dirpath, in_imgname + '_starmask.png'), mask_levels)
+            # if np.any(star_mask_aggressive):
+            #     iio.imwrite(os.path.join(out_dirpath, in_imgname + '_starmask_aggressive.png'), mask_levels, mode = "LA")
+                
         except Exception as e:
             logger.warning("could not create starmask for " + in_imgname)
             logger.warning(e)
             continue
-if not keep_seg_img:
-    shutil.rmtree(tmpdir)
-    logger.info("removed temporary directory: {0}".format(tmpdir))
+            
+    if not keep_seg_img:
+        shutil.rmtree(tmpdir)
+        logger.info("removed temporary directory: {0}".format(tmpdir))
