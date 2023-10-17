@@ -14,6 +14,7 @@ while [ "X$1" != X ]; do
 	fi
 	shift
 	;;
+    -make) echo "nothing to make; ignoring this option" >&2; shift;;
     *) [ -f "$1" ] || die "unknown option '$1'"
 	break ;;
     esac
