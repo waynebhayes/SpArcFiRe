@@ -3,9 +3,9 @@
 in_dir=$1
 out_dir=$2
 
-default_in="sparcfire-in"
-default_tmp="sparcfire-tmp"
-default_out="sparcfire-out"
+default_in="$(pwd)"/"sparcfire-in"
+default_tmp="$(pwd)"/"sparcfire-tmp"
+default_out="$(pwd)"/"sparcfire-out"
 
 if [[ ! $in_dir || ! $out_dir ]]; then
     echo "No input or output directories supplied as cmd line arguments."
@@ -25,6 +25,18 @@ pre_galfit_out="pre_galfit-out"
 post_galfit_in="post_galfit-in"
 post_galfit_out="post_galfit-out"
 
+if [[ -d $post_galfit_in ]]; then
+    echo "Deleting already existing $post_galfit_in in 5 seconds"
+    sleep 5
+    rm -rf $post_galfit_in
+fi
+
+if [[ -d $post_galfit_out ]]; then
+    echo "Deleting already existing $post_galfit_out in 5 seconds"
+    sleep 5
+    rm -rf $post_galfit_out
+fi
+
 mv $in_dir $pre_galfit_in
 mv $out_dir $pre_galfit_out
 
@@ -37,7 +49,8 @@ mkdir -p $default_in $default_tmp $default_out
 python3 "${SPARCFIRE_HOME}/GalfitModule/Utilities/grab_model_from_output.py" $pre_galfit_in $pre_galfit_out $default_in
 
 # Prep for parallel
-input_arr=($(ls "$default_in/"*".fits"))
+#input_arr=($(ls "$default_in/"*".fits"))
+input_arr=($(find "$default_in" -name "*.fits"))
 input_count="${#input_arr[@]}"
 cpu_count=$(nproc --all)
 cpu_count=$(( cpu_count < input_count ? cpu_count : input_count ))
@@ -53,7 +66,7 @@ for (( cpu_num=0; cpu_num<$cpu_count; ++cpu_num )); do
     # Run sparcfire with defaults on assuming it has already been setup
     # Also no need for star masking
     if [[ $arr_start -lt $input_count ]]; then
-        echo "SpArcFiRe -convert-FITS -compute-starmask false -ignore-starmask $new_dir $default_tmp $default_out -generateFitQuality 0 -writeBulgeMask 1"
+        echo "SpArcFiRe -convert-FITS -compute-starmask false -ignore-starmask $new_dir $default_tmp $default_out -generateFitQuality 0 -writeBulgeMask 1 -mirrorLR 1 -allowArcBeyond2pi 0 -unsharpMaskAmt 10 -useDeProjectStretch 0 -fixToCenter 1 -errRatioThres 3"
     fi
     
     arr_start=$(( $cpu_num*$per_cpu  ))
@@ -85,6 +98,9 @@ cp $post_galfit_out/"galaxy_arcs.csv" $post_galfit_out/"post_sparcfire_galaxy_ar
 
 mv $pre_galfit_in $in_dir
 mv $pre_galfit_out $out_dir
+
+cp $post_galfit_out/"post_sparcfire_galaxy.csv" $out_dir/"post_sparcfire_galaxy.csv"
+cp $post_galfit_out/"post_sparcfire_galaxy_arcs.csv" $out_dir/"post_sparcfire_galaxy_arcs.csv"
 
 # Cleanup
 rm -rf $parallel_file "sparcfire-in_"*
