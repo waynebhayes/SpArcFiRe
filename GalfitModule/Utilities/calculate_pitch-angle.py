@@ -345,7 +345,8 @@ def plot_validation(pitch_angles,
         
     return filename
 
-def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, validation_plot = False):
+# Recommend turning use_inner_outer_rad for pictures otherwise this is more informative
+def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, validation_plot = False, use_inner_outer_rad = False):
     
     gname = os.path.basename(gpath)   
     try:
@@ -378,10 +379,12 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
     ygrid = np.linspace(ymin, ymax, num_pts)
     y0    = disk.position[1] - fit_region[2] #0 #0.5*ymax
     
+    rvals_grid = np.sqrt((xgrid - x0)**2 + ((ygrid - y0)/q)**2)
+    
     galaxy_info = pd.read_csv(pj(out_dir, gname, f"{gname}.csv"))
     crop_rad = float(galaxy_info[" cropRad"].iloc[0])
     scale_fact_std = 2*crop_rad/256
-    
+
     try:
         arc_info = pd.read_csv(pj(out_dir, gname, f"{gname}_arcs.csv"))
         inner_rad = scale_fact_std*min(arc_info.loc[0, "r_start"], arc_info.loc[1, "r_start"])
@@ -390,33 +393,42 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
         print(f"Something went wrong reading arc info from {gname}_arcs.csv")
         #continue
         return None
+        
+    if use_inner_outer_rad:
+        #cond  = (rvals_grid > inner_rad) & (rvals_grid <= outer_rad)
+        cond  = (rvals_grid > 0) & (rvals_grid <= 1.5*outer_rad)
 
-#     inner_idx = np.argmin(np.abs(np.abs(rvals_grid) - inner_rad))
-#     outer_idx = np.argmin(np.abs(np.abs(rvals_grid) - outer_rad)) + 1
-    
-#     if outer_idx >= len(rvals_grid):
-#         outer_idx = len(rvals_grid) - 1
-    
-    
-#     old_inner = rvals_grid[:inner_idx]
-#     old_outer = rvals_grid[outer_idx:]
-    
-#     # Basic dynamic grid, get higher resolution between inner and outer arm radius according to sparcfire
-#     high_res_xgrid = np.linspace(xgrid[inner_idx], xgrid[outer_idx - 1], num_pts)
-#     high_res_ygrid = np.linspace(ygrid[inner_idx], ygrid[outer_idx - 1], num_pts)
-#     high_res_rgrid = np.linspace(rvals_grid[inner_idx], rvals_grid[outer_idx - 1], num_pts)
-    
-#     xgrid      = np.concatenate([old_inner, high_res_xgrid, old_outer])
-#     ygrid      = np.concatenate([old_inner, high_res_ygrid, old_outer])
-#     rvals_grid = np.concatenate([old_inner, high_res_rgrid, old_outer])
-    
-#     num_pts    = len(rvals_grid)
+    #     inner_idx = np.argmin(np.abs(np.abs(rvals_grid) - inner_rad))
+    #     outer_idx = np.argmin(np.abs(np.abs(rvals_grid) - outer_rad)) + 1
 
-    rvals_grid = np.sqrt((xgrid - x0)**2 + ((ygrid - y0)/q)**2)
-    
-    #cond  = (rvals_grid > inner_rad) & (rvals_grid <= outer_rad)
-    cond  = (rvals_grid > 0) & (rvals_grid <= 1.5*outer_rad)
-    
+    #     if outer_idx >= len(rvals_grid):
+    #         outer_idx = len(rvals_grid) - 1
+
+
+    #     old_inner = rvals_grid[:inner_idx]
+    #     old_outer = rvals_grid[outer_idx:]
+
+    #     # Basic dynamic grid, get higher resolution between inner and outer arm radius according to sparcfire
+    #     high_res_xgrid = np.linspace(xgrid[inner_idx], xgrid[outer_idx - 1], num_pts)
+    #     high_res_ygrid = np.linspace(ygrid[inner_idx], ygrid[outer_idx - 1], num_pts)
+    #     high_res_rgrid = np.linspace(rvals_grid[inner_idx], rvals_grid[outer_idx - 1], num_pts)
+
+    #     xgrid      = np.concatenate([old_inner, high_res_xgrid, old_outer])
+    #     ygrid      = np.concatenate([old_inner, high_res_ygrid, old_outer])
+    #     rvals_grid = np.concatenate([old_inner, high_res_rgrid, old_outer])
+
+    #     num_pts    = len(rvals_grid)
+
+    else:
+        inner_rad = 0
+        outer_rad = np.sqrt(xmax**2 + ymax**2)
+        
+        cond  = (rvals_grid > 0) & (rvals_grid <= outer_rad)
+
+    if not np.any(cond):
+        print("There was an issue constraining the radial grid via inner and outer rad.")
+        return None
+
     xgrid = np.linspace(xgrid[cond][0], xgrid[cond][-1], num_pts)
     ygrid = np.linspace(ygrid[cond][0], ygrid[cond][-1], num_pts)
     
