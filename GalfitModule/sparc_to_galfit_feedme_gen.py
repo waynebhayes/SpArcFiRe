@@ -725,7 +725,7 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
                        # According to comparison tests, this usually ends up much higher than classical probably due to the spiral.
                        sersic_index = 1,
                        axis_ratio = galaxy_dict["disk_axis_ratio"],
-                       position_angle = galaxy_dict["disk_rot_angle"]
+                       position_angle = 0.3 #galaxy_dict["disk_rot_angle"]
                       )
             
         arms  = Power(component_number = 2,
@@ -832,7 +832,7 @@ if __name__ == "__main__":
                     )
 
 
-# In[50]:
+# In[51]:
 
 
 if __name__ == "__main__":
