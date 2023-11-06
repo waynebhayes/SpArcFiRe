@@ -243,6 +243,10 @@ def main(**kwargs):
         feedme_path = feedme_info[gname].path_to_feedme
         # feedme_info[gname] is a FeedmeContainer object
         
+        # This is to grab *just* the components, no header info
+        # Reminder, these are references to the originals so changes here will
+        # change the values in the dictionary (as demo'd in num_steps 1 below)
+        # This is also to clean up the code and make it easier to understand
         initial_components = feedme_info[gname].extract_components()
                
         # Note to self, OutputContainer is *just* for handling output
@@ -254,6 +258,11 @@ def main(**kwargs):
         # they won't update the new parameters
         if num_steps == 1:
             run_galfit_cmd = f"{base_galfit_cmd} {feedme_path}"
+            
+            initial_components.disk.axis_ratio = disk_axis_ratio
+            initial_components.disk.update_param_values()
+            feedme_info[gname].to_file()
+            
             final_galfit_output = OutputContainer(sp(run_galfit_cmd), **feedme_info[gname].to_dict())
             
         elif num_steps >= 2:
