@@ -40,8 +40,8 @@ fi
 mv $in_dir $pre_galfit_in
 mv $out_dir $pre_galfit_out
 
-cp $pre_galfit_out/"galaxy.csv" $pre_galfit_out/"pre_sparcfire_galaxy.csv"
-cp $pre_galfit_out/"galaxy_arcs.csv" $pre_galfit_out/"pre_sparcfire_galaxy_arcs.csv"
+cp $pre_galfit_out/"galaxy.csv" $pre_galfit_out/"pre_galfit_galaxy.csv"
+cp $pre_galfit_out/"galaxy_arcs.csv" $pre_galfit_out/"pre_galfit_galaxy_arcs.csv"
 
 mkdir -p $default_in $default_tmp $default_out
 
@@ -93,14 +93,14 @@ cat $parallel_file | $parallel_script $cpu_count
 mv $in_dir $post_galfit_in
 mv $out_dir $post_galfit_out
 
-cp $post_galfit_out/"galaxy.csv" $post_galfit_out/"post_sparcfire_galaxy.csv"
-cp $post_galfit_out/"galaxy_arcs.csv" $post_galfit_out/"post_sparcfire_galaxy_arcs.csv"
+cp $post_galfit_out/"galaxy.csv" $post_galfit_out/"post_galfit_galaxy.csv"
+cp $post_galfit_out/"galaxy_arcs.csv" $post_galfit_out/"post_galfit_galaxy_arcs.csv"
 
 mv $pre_galfit_in $in_dir
 mv $pre_galfit_out $out_dir
 
-cp $post_galfit_out/"post_sparcfire_galaxy.csv" $out_dir/"post_sparcfire_galaxy.csv"
-cp $post_galfit_out/"post_sparcfire_galaxy_arcs.csv" $out_dir/"post_sparcfire_galaxy_arcs.csv"
+cp $post_galfit_out/"post_sparcfire_galaxy.csv" $out_dir/"post_galfit_galaxy.csv"
+cp $post_galfit_out/"post_sparcfire_galaxy_arcs.csv" $out_dir/"post_galfit_galaxy_arcs.csv"
 
 # Cleanup
 rm -rf $parallel_file "sparcfire-in_"*

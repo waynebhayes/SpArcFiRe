@@ -30,7 +30,7 @@ def wrapper(gfits, out_png_dir):
 if __name__ == "__main__":
     
     out_png_dir = sys.argv[1]
-    list_o_fits = sys.argv[2].split(" ")
+    list_o_fits = sys.argv[2:]#.split(" ")
     
     # Assume it's a dir of fits
     if len(list_o_fits) == 1:
