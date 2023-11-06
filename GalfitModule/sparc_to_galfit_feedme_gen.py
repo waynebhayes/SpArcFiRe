@@ -724,7 +724,7 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
                        effective_radius = galaxy_dict["disk_maj_axs_len"],
                        # According to comparison tests, this usually ends up much higher than classical probably due to the spiral.
                        sersic_index = 1,
-                       axis_ratio = 0.3, #galaxy_dict["disk_axis_ratio"],
+                       axis_ratio = galaxy_dict["disk_axis_ratio"],
                        position_angle = galaxy_dict["disk_rot_angle"]
                       )
             
@@ -832,7 +832,7 @@ if __name__ == "__main__":
                     )
 
 
-# In[6]:
+# In[7]:
 
 
 if __name__ == "__main__":
