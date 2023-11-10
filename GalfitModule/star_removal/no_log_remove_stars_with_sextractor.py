@@ -585,12 +585,16 @@ if __name__ == '__main__':
         print("usage: remove_stars_with_sextractor in_dir out_dir [galaxy_names,]")
         sys.exit()
 
+    elif len(sys.argv) > 4:
+        print("multiple galaxies should be specified without spacing, i.e. galaxy1,galaxy2,...")
+        sys.exit()
+
     in_dir  = sys.argv[1]
     out_dir = sys.argv[2]
 
     galaxy_names = []
     try:
-        galaxy_names = sys.argv[3:].split(",")
+        galaxy_names = sys.argv[3].split(",")
     except IndexError:
         pass
 
