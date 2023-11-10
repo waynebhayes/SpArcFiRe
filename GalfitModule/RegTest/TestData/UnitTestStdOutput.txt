@@ -286,7 +286,7 @@ ignoring filepaths for reg tests...
 
 G) none                 # File with parameter constraints (ASCII file)
 H) 7       59 7 59      # Image region to fit (xmin xmax ymin ymax)
-I) 50      50           # Size of the convolution box (x y)
+I) 52      52           # Size of the convolution box (x y)
 J) 24.8                 # Magnitude photometric zeropoint
 K) 0.396   0.396        # Plate scale (dx dy)   [arcsec per pixel]
 O) regular              # Display type (regular, curses, both)
@@ -528,7 +528,7 @@ ignoring filepaths for reg tests...
 
 G) none                 # File with parameter constraints (ASCII file)
 H) 17      81 18 82     # Image region to fit (xmin xmax ymin ymax)
-I) 50      50           # Size of the convolution box (x y)
+I) 52      52           # Size of the convolution box (x y)
 J) 24.8                 # Magnitude photometric zeropoint
 K) 0.396   0.396        # Plate scale (dx dy)   [arcsec per pixel]
 O) regular              # Display type (regular, curses, both)
@@ -636,7 +636,7 @@ Key: path_to_feedme
 
 G) none                 # File with parameter constraints (ASCII file)
 H) 0       255   0   255 # Image region to fit (xmin xmax ymin ymax)
-I) 50      50           # Size of the convolution box (x y)
+I) 52      52           # Size of the convolution box (x y)
 J) 24.8                 # Magnitude photometric zeropoint
 K) 0.396   0.396        # Plate scale (dx dy)   [arcsec per pixel]
 O) regular              # Display type (regular, curses, both)
