@@ -1,4 +1,5 @@
 #!/bin/bash
+# NOTE: this file assumes 8-column tabstops but 4-column "shift width". In vim, use the command ":set sw=4 ts=8"
 USAGE="USAGE: $0 [-convert-FITS] [-compute-starmask <false|true>] [-ignore-starmask] [-elps_dir DIR] [-web] {inDir} {pngDir} {outDir} [SpArcFiRe-stdin.sh options]
     (\"SpArcFiRe-stdin.sh -help\" will tell you the other options.)
 
@@ -25,7 +26,7 @@ FATAL ERROR: $@" >&2
 }
 warn() { echo "WARNING: $@" >&2
 }
-[ -d "$SPARCFIRE_HOME" ] || die "you forgot to run 'source ./setup.sh SPARCFIRE_REPO_DIRECTORY' from the base of the SpArcFiRe repo"
+[ -d "$SPARCFIRE_HOME" ] || die "you forgot to run 'source ./setup.bash SPARCFIRE_REPO_DIRECTORY' from the base of the SpArcFiRe repo"
 COMMAND_LINE="$0 $@"
 
 [ $# -eq 0 ] && die "Expecting at least 3 arguments"
@@ -53,16 +54,16 @@ TTY=`tty || echo /dev/null`
 for i in "$@"
 do
     case "$1" in
-    -elps_dir) ELPS_DIR="$2"; shift 2
+    -elps[-_]dir) ELPS_DIR="$2"; shift 2
 	[ -d "$ELPS_DIR" ] || die " -elps_dir '$ELPS_DIR' is not a directory"
 	;;
-    -guide_dir) GUIDE_DIR="$2"; shift 2
-    [ -d "$GUIDE_DIR" ] || die " -guide_dir '$GUIDE_DIR' is not a directory"
-    ;;
-    -ignore-starmask) STARMASK="NONE"; shift;;
-    -compute-starmask) [ $2 = true -o $2 = false ] || die "-compute-starmask argument must be 'true' or 'false'";
+    -guide[-_]dir) GUIDE_DIR="$2"; shift 2
+	[ -d "$GUIDE_DIR" ] || die " -guide_dir '$GUIDE_DIR' is not a directory"
+	;;
+    -ignore[-_]starmask) STARMASK="NONE"; shift;;
+    -compute[-_]starmask) [ $2 = true -o $2 = false ] || die "-compute-starmask argument must be 'true' or 'false'";
 	COMPUTE_STARMASK=$2; shift 2;;
-    -convert-args) CONVERT_ARGS="$2"; shift 2;;
+    -convert[-_]args) CONVERT_ARGS="$2"; shift 2;;
     -convert-FITS) FITS=true; shift
 	case "$1" in
 	-p) FITS_PARAMS="$2 $3 $4"; shift 4;;
@@ -87,11 +88,11 @@ trap "/bin/rm -rf $sfDir" 0 1 2 3 15
 mkdir -p $sfDir
 
 # The echo and sed below is to remove trailing slashes, which confuse MATLAB.
-inDir=`echo "$1" | sed 's,/$,,'`; shift
+inDir=`echo "$1" | sed 's,//*$,,'`; shift
 [ -d "$inDir" ] || die "inDir is missing"
-pngDir=`echo "$1" | sed 's,/$,,'`; shift
+pngDir=`echo "$1" | sed 's,//*$,,'`; shift
 [ -d "$pngDir" ] || die "pngDir is missing"
-outDir=`echo "$1" | sed 's,/$,,'`; shift
+outDir=`echo "$1" | sed 's,//*$,,'`; shift
 [ -d "$outDir" ] || die "outDir is missing"
 
 
@@ -115,7 +116,7 @@ case "$SKIP" in
 esac
 
 # Make csv2tsv and any other files that may need compiling
-(cd $SPARCFIRE_HOME && make all) || die "could not compile files via 'make'. Is '$SPARCFIRE_HOME' correctly set?"
+(cd $SPARCFIRE_HOME && make all) || die "could not compile files via 'make'. Is 'SPARCFIRE_HOME' correctly set?"
 
 # copy only the necessary (non-skip) files to sfDir
 (cd "$inDir" && (ls | fgrep -v -f "$SKIP" | xargs --no-run-if-empty $SPARCFIRE_HOME/scripts/reverse-cp.sh $sfDir)) || die "could not copy files from '$inDir' to $sfDir"
@@ -137,7 +138,6 @@ cd $sfDir
 
 
 case `hostname` in
-theory-monster*) : ;;
 *) PATH=$SPARCFIRE_HOME/.local/bin:$SPARCFIRE_HOME/scripts:$PATH ;;
 esac
 export PATH
@@ -150,9 +150,8 @@ $FITS && $COMPUTE_STARMASK && (
     else
 	echo ""
     fi
-    cd $SPARCFIRE_HOME/scripts/ArcPNGcreator/star_removal
+    cd $SPARCFIRE_HOME/scripts/ArcPNGcreator/star_removal || die "cd failed!"
     case `hostname` in
-    theory-monster*) $SPARCFIRE_PYTHON "remove_stars_with_sextractor${PYTHON_SUFFIX}" "$sfDir" "$pngDir" ;;
     bayonet-06*) 
         #source $SPARCFIRE_HOME/scripts/SpArcFiRe-pyvenv-bayonet-06/bin/activate;
         $SPARCFIRE_PYTHON "remove_stars_with_sextractor-bayonet-06${PYTHON_SUFFIX}" "$sfDir" "$pngDir";;
@@ -168,13 +167,13 @@ $FITS && $COMPUTE_STARMASK && (
 $FITS && ((echo "Converting FITS images to PNG..."; $SPARCFIRE_HOME/scripts/ArcPNGcreator/convertFromFits.0.sh -p $FITS_PARAMS $STARMASK $sfDir $pngDir >$outDir/convertFromFits.log) || die "something went wrong...")
 echo "Preparing PNG and JPG files to $pngDir..."
 for i in $sfDir/*; do
-    case $i in
-    *.[Pp][Nn][Gg]) b=`echo $i | sed -e 's,.*/,,' -e 's/\.[Pp][Nn][Gg]$//'`; cp $i $pngDir/$b.png;;
+    case "$i" in
+    *.[Pp][Nn][Gg]) b=`echo "$i" | sed -e 's,.*/,,' -e 's/\.[Pp][Nn][Gg]$//'`; cp "$i" "$pngDir/$b.png";;
     *.[Ff][Ii][Tt]|*.[Ff][Ii][Tt][Ss]) b=`echo $i | sed -e 's,.*/,,' -e 's/\.[Ff][Ii][Tt][Ss]*$//'`;
 	if [ ! -f $pngDir/$b.png ]; then warn "`basename $i`: no corresponding PNG file in pngDir"; fi;;
     *.[Jj][Pp]*[Gg])  b=`echo $i | sed -e 's,.*/,,' -e 's/\.[Jj][Pp][eE]*[Gg]$//'`
 	if [ -f $i ] && echo "$i" | not fgrep -i '.fits'; then
-	    convert $CONVERT_ARGS $i $pngDir/$b.png
+	    convert $CONVERT_ARGS "$i" "$pngDir/$b.png"
 	fi;;
     esac
     sizex=`file $pngDir/$b.png | sed -e 's/.*://' -e 's/,//g' | awk '{printf $4}'`
@@ -197,15 +196,14 @@ if "$WEB"; then  # don't allow huge images
 fi
 
 # Finally, run SpArcFiRe itself
-ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\.[Ff][Ii][Tt][Ss]$//' | fgrep -v -f "$SKIP" |
+ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\.[Ff][Ii][Tt][Ss]*$//' | fgrep -v -f "$SKIP" |
     (   while read f; do
-	if [ -f $pngDir/${f}_starmask.png ]; then
+	if [ -f "$pngDir/${f}_starmask.png" ]; then
 	    SM=$STARMASK
 	else
+	    [ "$STARMASK" != NONE ] && warn "STARMASKS is '$STARMASK' but '$pngDir/${f}_starmask.png' doesn't exist... did SourceExtractor fail? The original input MUST be FITS for starmasks to be created"
 	    SM='NONE'
-	    if [ "$STARMASK" != NONE -a -f "$sfDir/${f}.fits" ]; then
-		warn "$f: you didn't ignore starmasks and there's a FITS image but no starmask; proceeding without starmask anyway"
-	    fi
+	    [ "$STARMASK" != NONE -a -f "$sfDir/${f}.fits" ] && warn "$f: you didn't ignore starmasks and there's a FITS image but no starmask; proceeding without starmask anyway"
 	fi
 	if [ "$ELPS_DIR" == NONE ]; then
 	    EF='NONE'
