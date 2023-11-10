@@ -290,27 +290,27 @@ if __name__ == "__main__":
                 all_diff_error[f"{gname}{suffix}"] = f"{data}{suffix}\n{result.stdout}"
                 
         # Check _out_old FITS files using Astropy since this RegTest shouldn't call FitsHandler except to check it
-#         suffixes = ["galfit_out.fits", "galfit_out_old.fits"]
-#         for suffix in suffixes:
-#             if exists(f"{data}_{suffix}"):
-#                 data_fits   = fits.open(f"{data}_{suffix}")[2].data
+        suffixes = ["galfit_out.fits", "galfit_out_old.fits"]
+        for suffix in suffixes:
+            if exists(f"{data}_{suffix}"):
+                data_fits   = fits.open(f"{data}_{suffix}")[2].data
                 
-#                 try:
-#                     output_fits = fits.open(f"{output}_{suffix}")[2].data
-#                 except FileNotFoundError as fnfe:
-#                     fail_count += 1 
-#                     all_diff_error[f"{gname}_{suffix}"] = f"{gname} did not successfully fit, something went wrong."
-#                     continue
+                try:
+                    output_fits = fits.open(f"{output}_{suffix}")[2].data
+                except FileNotFoundError as fnfe:
+                    fail_count += 1 
+                    all_diff_error[f"{gname}_{suffix}"] = f"{gname} did not successfully fit, something went wrong."
+                    continue
 
-#                 # The tolerance can be quite high because when GALFIT is off, it will differ significantly
-#                 # I set a tolerance in the first place for machine error/differences under the hood across clusters
-#                 if not np.allclose(data_fits, output_fits, atol = 1e-2):
-#                     fail_count += 1
-#                     all_diff_error[f"{gname}_{suffix}"] = f"Single Component Fit differs for {gname}!"
+                # The tolerance can be quite high because when GALFIT is off, it will differ significantly
+                # I set a tolerance in the first place for machine error/differences under the hood across clusters
+                if not np.allclose(data_fits, output_fits, atol = 1e-2):
+                    fail_count += 1
+                    all_diff_error[f"{gname}_{suffix}"] = f"Single Component Fit differs for {gname}!"
 
-#             elif exists(f"{output}_{suffix}"):
-#                 fail_count += 1
-#                 all_diff_error[f"{gname}_{suffix}"] = f"{gname} should not have successfully fit, something went... wrong (right?)."
+            elif exists(f"{output}_{suffix}"):
+                fail_count += 1
+                all_diff_error[f"{gname}_{suffix}"] = f"{gname} should not have successfully fit, something went... wrong (right?)."
           
     with open(error_path, "a") as ef:
         for name, err_str in all_diff_error.items():
