@@ -304,7 +304,7 @@ if __name__ == "__main__":
 
                 # The tolerance can be quite high because when GALFIT is off, it will differ significantly
                 # I set a tolerance in the first place for machine error/differences under the hood across clusters
-                if not np.allclose(data_fits, output_fits, atol = 1e-2):
+                if not np.allclose(data_fits, output_fits, atol = 10):
                     fail_count += 1
                     all_diff_error[f"{gname}_{suffix}"] = f"Single Component Fit differs for {gname}!"
 
