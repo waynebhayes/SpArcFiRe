@@ -761,8 +761,10 @@ if __name__ == "__main__":
         
         count = 2
         while kwargs_main["galaxy_names"] and count < 10:
-            print("Did not finish all galaxies, parallelizing again...\n")
-            print(f"{len(kwargs_main['galaxy_names'])} galaxies to go.")
+            if not restart:
+                print("Did not finish all galaxies, parallelizing again...\n")
+                print(f"{len(kwargs_main['galaxy_names'])} galaxies to go.")
+
             write_to_parallel(cwd, kwargs_main, parallel_file = parallel_file, chunk_size = chunk_size)
             
             try:
