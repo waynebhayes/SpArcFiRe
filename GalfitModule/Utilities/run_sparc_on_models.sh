@@ -37,6 +37,7 @@ if [[ -d $post_galfit_out ]]; then
     rm -rf $post_galfit_out
 fi
 
+# Be careful about restarting
 mv $in_dir $pre_galfit_in
 mv $out_dir $pre_galfit_out
 
@@ -48,9 +49,24 @@ mkdir -p $default_in $default_tmp $default_out
 # Populate input folder with models
 python3 "${SPARCFIRE_HOME}/GalfitModule/Utilities/grab_model_from_output.py" $pre_galfit_in $pre_galfit_out $default_in
 
+ext="*.fits"
+conv_fits="-convert-FITS "
+
+if [ -x "`/bin/which fitspng 2>/dev/null`" ]; then
+    fitspng=$(/bin/which fitspng)
+    working_dir=$(pwd)
+    
+    cd $default_in
+    $fitspng *".fits"
+    cd $working_dir
+    
+    ext="*.png"
+    conv_fits=""
+fi
+
 # Prep for parallel
 #input_arr=($(ls "$default_in/"*".fits"))
-input_arr=($(find "$default_in" -name "*.fits"))
+input_arr=($(find "$default_in" -name "$ext"))
 input_count="${#input_arr[@]}"
 cpu_count=$(nproc --all)
 cpu_count=$(( cpu_count < input_count ? cpu_count : input_count ))
@@ -66,7 +82,7 @@ for (( cpu_num=0; cpu_num<$cpu_count; ++cpu_num )); do
     # Run sparcfire with defaults on assuming it has already been setup
     # Also no need for star masking
     if [[ $arr_start -lt $input_count ]]; then
-        echo "SpArcFiRe -convert-FITS -compute-starmask false -ignore-starmask $new_dir $default_tmp $default_out -generateFitQuality 0 -writeBulgeMask 1 -mirrorLR 1 -allowArcBeyond2pi 0 -unsharpMaskAmt 10 -useDeProjectStretch 0 -fixToCenter 1 -errRatioThres 3"
+        echo "${SPARCFIRE_HOME}/scripts/SpArcFiRe ${conv_fits}-compute-starmask false -ignore-starmask $new_dir $default_tmp $default_out -generateFitQuality 0 -writeBulgeMask 1 -allowArcBeyond2pi 0 -unsharpMaskAmt 8 -useDeProjectStretch 0 -fixToCenter 1 -errRatioThres 3"
     fi
     
     arr_start=$(( $cpu_num*$per_cpu  ))
@@ -83,8 +99,8 @@ for (( cpu_num=0; cpu_num<$cpu_count; ++cpu_num )); do
     done
 done > $parallel_file
 
-#$parallel_script="~wayne/bin/distrib_slurm"
-parallel_script="/home/sana/bin/parallel"
+#parallel_script="${SPARCFIRE_HOME}/GalfitModule/ParallelDrivers/distrib_slurm"
+parallel_script="${SPARCFIRE_HOME}/GalfitModule/ParallelDrivers/parallel"
 
 # RUN SPARCFIRE
 echo "Running SpArcFiRe (again) with $cpu_count nodes"
