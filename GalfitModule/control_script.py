@@ -352,11 +352,11 @@ if __name__ == "__main__":
     
     if parallel == 1:
         # CPU Parallel
-        pipe_to_parallel_cmd = "/home/sana/bin/parallel"
+        pipe_to_parallel_cmd = pj(_MODULE_DIR, "ParallelDrivers", "parallel")
         
     elif parallel == 2:
         # SLURM/Cluster Computing
-        pipe_to_parallel_cmd = "~wayne/bin/distrib_slurm"
+        pipe_to_parallel_cmd = pj(_MODULE_DIR, "ParallelDrivers", "distrib_slurm")
     
     if not restart:
         # Remove old
