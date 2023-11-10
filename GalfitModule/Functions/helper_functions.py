@@ -184,9 +184,9 @@ if __name__ == "__main__":
 # Unit test for list_files
 if __name__ == "__main__":
     
-    print(find_files(pj(TEST_DATA_DIR, "test-in"), "*.fits", "f"))
+    print(sorted(find_files(pj(TEST_DATA_DIR, "test-in"), "*.fits", "f")))
     print()
-    print(find_files(pj(TEST_DATA_DIR, "test-out"), "123*", "d"))
+    print(sorted(find_files(pj(TEST_DATA_DIR, "test-out"), "123*", "d")))
 
 
 # In[12]:
@@ -199,7 +199,7 @@ if __name__ == "__main__":
     print("Does test-spout exist?", exists(pj(TEST_DATA_DIR, "test-spout")))
 
 
-# In[14]:
+# In[13]:
 
 
 if __name__ == "__main__":
