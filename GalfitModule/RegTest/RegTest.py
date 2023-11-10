@@ -317,7 +317,7 @@ if __name__ == "__main__":
             #err_str = "\n".join(err_list)
             ef.write(f"{name}\n{err_str}\n")
             
-    print(f"{fail_count} regression tests failed.")
+    print(f"{fail_count} unit tests failed.")
     if fail_count:
         print(f"See {error_path} for more information.")
         total_fail_count += fail_count
