@@ -5,7 +5,7 @@ The scripts in this folder are written to automatically generate GALFIT input fi
 Please note, this module is still a work-in-progress and relies on some assumptions having to do with SpArcFiRe's conventions.
 These will be fixed in a future update, likely after Matthew finishes his Ph.D.
 
-Written by Matthew Portman, portmanm@uci.edu
+Developed by Matthew Portman, <portmanm@uci.edu>
 
 <h3> INTRODUCTION </h3>
 
@@ -130,5 +130,10 @@ PNGs are then deleted and all that is left is the combined/paneled image in a se
 
 
 ------------------------------------------------------------------------------------
-Newest scripts written by Matthew Portman under the tutelage of Dr. Wayne Hayes, UCI.
-Others written by the SDSS team and Darren Davis who also made SpArcFiRe. 
+GalfitModule is developed and maintained by Matthew Portman under the tutelage of Dr. Wayne Hayes, UCI.
+Email: <portmanm@uci.edu>
+
+Big thanks to: 
+Chien Peng for all his help with GALFIT and creating the program in the first place.
+Darren Davis who wrote SpArcFiRe.
+Wayne... I guess.
