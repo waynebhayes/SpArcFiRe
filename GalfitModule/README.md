@@ -42,14 +42,6 @@ See the 'Current Directory Structure' section below for an example of what files
 to do most of the leg work, so it may be more of a rabbit hole than anything else. It is currently only somewhat documented but feel
 free to contact Matthew if something is unclear.
 
-DEPRECATED ~~There is now an additional script, *in_out_comparison.py* which compares our automatically generated input with GALFIT's output to 
-determine where it may be improved. A version of this will be used for error detection in the future but for now, it simply offers
-the user a chance to see how much the two differ. *in_out_comparison.py* outputs two types of files: ~~~~
-* ~~one file per galaxy and located in the galaxy's folder which contains the parameter information from the input, output, and the difference 
-between the two as a text file called *galfit_io_compare.txt*~~
-~~* one file which contains *all* of the difference values between the two for every galaxy but just the differences. This is called~~
-~~*comparison_params.csv* and will be generated in the folder *all_galfit_out*.~~
-
 ---
 
 <h3> Current Directory Structure </h3> 
