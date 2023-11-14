@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[ ]:
 
 
 import os
@@ -17,7 +17,7 @@ import pandas as pd
 import numpy as np
 
 
-# In[2]:
+# In[ ]:
 
 
 # For debugging purposes
@@ -31,7 +31,7 @@ def in_notebook():
         return False
 
 
-# In[3]:
+# In[ ]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -57,9 +57,10 @@ sys.path.append(_MODULE_DIR)
 from Functions.helper_functions import *
 
 
-# In[22]:
+# In[ ]:
 
 
+# TODO: MAKE ITERABLE
 class GalfitComponent:
     def __init__(self,
                  component_type = "", 
@@ -204,6 +205,7 @@ class GalfitComponent:
         
 # ==========================================================================================================
 
+    # TODO: Update to work with series 
     def from_pandas(self, input_df):
         param_names  = [n.split(f"_{self.component_type}")[0] for n in input_df.columns]
         param_values = input_df.iloc[0].values.astype(float)
@@ -426,7 +428,7 @@ class GalfitComponent:
     #     return self.__dict__.iteritems()
 
 
-# In[23]:
+# In[ ]:
 
 
 class Sersic(GalfitComponent):
@@ -563,7 +565,7 @@ class Sersic(GalfitComponent):
         return
 
 
-# In[24]:
+# In[ ]:
 
 
 class Power(GalfitComponent):
@@ -688,7 +690,7 @@ class Power(GalfitComponent):
         return
 
 
-# In[25]:
+# In[ ]:
 
 
 class Fourier(GalfitComponent):
@@ -717,6 +719,7 @@ class Fourier(GalfitComponent):
         
         # TODO: FIND SOME WAY TO UPDATE THIS WHEN OBJECT IS UPDATED
         # preferably without copying and pasting things
+        # TODO: These do not update via update_param_values...
         self.amplitudes   = amplitudes
         self.phase_angles = phase_angles
         
@@ -809,7 +812,7 @@ class Fourier(GalfitComponent):
         return
 
 
-# In[26]:
+# In[ ]:
 
 
 class Sky(GalfitComponent):
@@ -916,7 +919,7 @@ class Sky(GalfitComponent):
         return
 
 
-# In[27]:
+# In[ ]:
 
 
 class GalfitHeader(GalfitComponent):
@@ -933,7 +936,7 @@ class GalfitHeader(GalfitComponent):
         self.pixel_mask      = kwargs.get("pixel_mask", f"{galaxy_name}_star-rm.fits")
         self.constraints     = kwargs.get("constraints", "none")
         self.region_to_fit   = kwargs.get("region_to_fit", (0, 255, 0, 255))
-        self.convolution_box = kwargs.get("convolution_box", (50, 50))
+        self.convolution_box = kwargs.get("convolution_box", (52, 52))
         self.mag_zeropoint   = kwargs.get("mag_zeropoint" , 24.800) # SDSS DR7
         self.plate_scale     = kwargs.get("plate_scale", (0.396, 0.396)) # SDSS DR7
         self.display_type    = kwargs.get("display_type", "regular")
@@ -1055,7 +1058,7 @@ class GalfitHeader(GalfitComponent):
                                 int(file_dict["H"][1]), 
                                 int(file_dict["H"][2]), 
                                 int(file_dict["H"][3]))
-        self.param_fix["region_to_fit"] = f"{int(file_dict['H'][2])} {int(file_dict['H'][3])}"
+        #self.param_fix["region_to_fit"] = f"{int(file_dict['H'][2])} {int(file_dict['H'][3])}"
         
         self.convolution_box = (int(file_dict["I"][0]), 
                                 int(file_dict["I"][1]))
@@ -1069,14 +1072,14 @@ class GalfitHeader(GalfitComponent):
         return
 
 
-# In[28]:
+# In[ ]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[29]:
+# In[ ]:
 
 
 # Unit Test for GalfitComponent
@@ -1087,7 +1090,7 @@ if __name__ == "__main__":
         print(k,v)
 
 
-# In[30]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1126,7 +1129,7 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps""".
     print(header)
 
 
-# In[13]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1175,7 +1178,7 @@ if __name__ == "__main__":
     print(bulge)
 
 
-# In[14]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1220,7 +1223,7 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
     print(arms)
 
 
-# In[15]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1258,7 +1261,7 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
     print(fourier)
 
 
-# In[16]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1274,7 +1277,7 @@ if __name__ == "__main__":
     bulge.to_file(f"{base_out}_PowerFourierSkip.txt", arms, fourier)
 
 
-# In[17]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1316,7 +1319,7 @@ if __name__ == "__main__":
     print(sky)
 
 
-# In[18]:
+# In[ ]:
 
 
 if __name__ == "__main__":

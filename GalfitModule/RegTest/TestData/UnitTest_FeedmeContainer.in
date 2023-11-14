@@ -13,7 +13,7 @@ E) 1                    # PSF fine sampling factor relative to data
 F) tester_star-rm.fits  # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 0       255   0   255 # Image region to fit (xmin xmax ymin ymax)
-I) 50      50           # Size of the convolution box (x y)
+I) 52      52           # Size of the convolution box (x y)
 J) 24.8                 # Magnitude photometric zeropoint
 K) 0.396   0.396        # Plate scale (dx dy)   [arcsec per pixel]
 O) regular              # Display type (regular, curses, both)

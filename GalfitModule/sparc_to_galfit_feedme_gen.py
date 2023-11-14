@@ -13,7 +13,7 @@
 # 
 # TO RUN: `python3 sparc_to_galfit_feedme_gen.py`
 
-# In[2]:
+# In[1]:
 
 
 import numpy as np
@@ -28,7 +28,7 @@ from copy import deepcopy
 from astropy.io import fits
 
 
-# In[3]:
+# In[2]:
 
 
 # For debugging purposes
@@ -42,7 +42,7 @@ def in_notebook():
         return False
 
 
-# In[4]:
+# In[3]:
 
 
 import sys
@@ -170,7 +170,7 @@ def get_galaxy_names_list(in_dir, tmp_dir, out_dir, galaxy_names = []):
     return gnames_out, folders_out
 
 
-# In[30]:
+# In[ ]:
 
 
 def path_join(path='.', name='', file_ext=''):
@@ -186,7 +186,7 @@ def path_join(path='.', name='', file_ext=''):
     return file_path
 
 
-# In[32]:
+# In[ ]:
 
 
 def scale_var(x, scale = 1):
@@ -197,7 +197,7 @@ def scale_var(x, scale = 1):
     return float(x)*scale
 
 
-# In[48]:
+# In[ ]:
 
 
 def galaxy_information(galaxy_name, galaxy_path):
@@ -392,7 +392,7 @@ def galaxy_information(galaxy_name, galaxy_path):
     return kwargs_out
 
 
-# In[49]:
+# In[ ]:
 
 
 def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2, scale_fact_std = 1):
@@ -677,6 +677,7 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
             print("Defaulting the average inner distance to the arms.")
         
         tmp_dir_basename = os.path.basename(tmp_dir)
+        out_dir_basename = os.path.basename(out_dir)
         header = GalfitHeader(input_menu_file = gname,
                               #extra_header_info = f"{run}{camcol}{field}; HDU: z{psf_row}{psf_col}",
                               galaxy_name = gname,
@@ -685,7 +686,7 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
                               # Unfortunately have to use a relative path here since GALFIT
                               # breaks when the filename is too long
                               #psf = pj("..", "..", tmp_dir_basename, "psf_files", f"{gname}_psf.fits"),
-                              psf = f"{gname}_psf.fits",
+                              psf = pj(".", out_dir_basename, gname, f"{gname}_psf.fits"),
                               pixel_mask = pj(tmp_dir, "galfit_masks", f"{gname}_star-rm.fits"),
                               region_to_fit = (x1crop, x2crop, y1crop, y2crop),
                               optimize = 0
@@ -832,7 +833,7 @@ if __name__ == "__main__":
                     )
 
 
-# In[50]:
+# In[4]:
 
 
 if __name__ == "__main__":

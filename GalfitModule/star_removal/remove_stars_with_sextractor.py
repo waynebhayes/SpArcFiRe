@@ -572,19 +572,23 @@ def main(in_dirpath, out_dirpath, galaxy_names = []):
         shutil.rmtree(tmpdir)
         logger.info("removed temporary directory: {0}".format(tmpdir))
         
-    if __name__ == '__main__':
-        
-        if len(sys.argv) < 3:
-            print("usage: remove_stars_with_sextractor in_dir out_dir [galaxy_names,]")
-            sys.exit()
-            
-        in_dir  = sys.argv[1]
-        out_dir = sys.argv[2]
-        
-        galaxy_names = []
-        try:
-            galaxy_names = sys.argv[3:].split(",")
-        except IndexError:
-            pass
-        
-        _ = main(in_dir, out_dir, galaxy_names)
+if __name__ == '__main__':
+
+    if len(sys.argv) < 3:
+        print("usage: remove_stars_with_sextractor in_dir out_dir [galaxy_names,]")
+        sys.exit()
+    
+    elif len(sys.argv) > 4:
+        print("multiple galaxies should be specified without spacing, i.e. galaxy1,galaxy2,...")
+        sys.exit()
+
+    in_dir  = sys.argv[1]
+    out_dir = sys.argv[2]
+
+    galaxy_names = []
+    try:
+        galaxy_names = sys.argv[3].split(",")
+    except IndexError:
+        pass
+
+    main(in_dir, out_dir, galaxy_names)

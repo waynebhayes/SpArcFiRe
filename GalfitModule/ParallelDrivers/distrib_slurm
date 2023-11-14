@@ -1,0 +1,87 @@
+#!/bin/sh
+NL='
+'
+MEM= #"--mem=20480" #"--mem-per-cpu=1" # artificial constraint to force more than 1 process per machine
+CPU="-c 1 --ntasks-per-core=1"
+USAGE="USAGE: cat {list-of-commands,one-per-line} | $0 JobName HOST_SPEC
+PURPOSE: execute a set of command lines in parallel accross a cluster. Each command line must be completely independent,
+    since each will be run independently of all the others (ie., it's not a script).
+    You must provide a Job Name, and a HOST_SPEC which specifies some simple properties the hosts must satisfy.
+    You can specify multiple host specs.
+HOST_SPECs include the following:
+
+    Options on host usage:
+      -w, --nodelist=hosts...     request a specific list of hosts
+      -x, --exclude=hosts...      exclude a specific list of hosts
+      -F, --nodefile=filename     request a specific list of hosts
+      -M, --clusters=names        Comma separated list of clusters to use (eg 'all').  Default is current cluster
+
+    Resource requirements:
+      -c, --cpus-per-task=ncpus   number of cpus required per task (eg '-c 8' for multi-sana aligning 8 networks)
+	  --ntasks-per-core=n     number of tasks to invoke on each core (default 1, which is best)
+	  --spread-job            spread job across as many nodes as possible
+	  --mincpus=n             minimum number of logical processors (threads) required per node
+	  --ntasks-per-node=n     number of tasks to invoke on each node (eg one if you need all the RAM)
+	  --mem=MB                minimum amount of real memory
+	  --tmp=MB                minimum amount of temporary disk
+      -t, --time=minutes          time limit
+
+      Misc options:
+      -N, --nodes=N               number of nodes on which to run (N = min[-max])
+      -n, --ntasks=ntasks         number of tasks to run
+      -s, --oversubscribe         over subscribe resources with other jobs
+      -S, --core-spec=cores       count of reserved cores
+	  --thread-spec=threads   count of reserved threads
+      -v, --verbose               verbose mode (multiple -v's increase verbosity)
+	  --cluster-constraint=[!]list specify a list of cluster constraints
+      -C, --constraint=list       specify a list of constraints
+	  --reservation=name      allocate resources from named reservation
+	  --exclusive[=user]      allocate nodes in exclusive mode when cpu consumable resource is enabled
+	  --mem-per-cpu=MB        maximum amount of real memory per allocated cpu required by the job.
+	  --ntasks-per-socket=n   number of tasks to invoke on each socket
+      -m, --distribution=type     distribution method for processes to nodes (type = block|cyclic|arbitrary)
+"
+die() { echo "$USAGE$@" >&2; exit 1
+}
+
+if [ ! -x "`/bin/which sbatch 2>/dev/null`" ]; then
+    echo "can't find 'sbatch'; you probably need to run the following command:
+
+module load slurm
+" >&2
+    exit 1
+fi
+
+COLON='-e s/:/-/g'
+DATE="`date '+%Y-%m-%e-%T' | sed -e 's/ /0/g' $COLON`"
+case $# in
+[3-9])  JOB="$1"; shift
+    OUTDIR=.
+    JOBFILE="$HOME/.distrib_slurm/$JOB,$DATE.PID$$"
+    [ -f "$JOBFILE" ] && die "$JOBFILE already exists, try another name"
+    ;;
+*) die "must specify jobName and HOST_SPEC; unknown syntax:" "$@" ;;
+esac
+TURDS="$HOME/SLURM_turds/$JOB" # SLURM_turds is where all the stdout and stderr files go.
+trap "fgrep 'Submitted batch job' /tmp/sbatch.$$ | awk '{print \$4}' | while read i; do echo '${NL}Cancelling SLURM job' \$i; scancel \$i; done" 2 3 15
+trap "/bin/rm -f /tmp/sbatch.$$; cd '$TURDS'; ls -l | awk '\$5==0{print \$NF}' | xargs /bin/rm -rf" 0
+mkdir -p "$HOME/.distrib_slurm" "$TURDS"
+cat > "$JOBFILE"
+NUMJOBS=`wc -l < "$JOBFILE"`
+if [ $NUMJOBS -eq 0 ]; then
+    echo "No jobs to submit"; rm "$JOBFILE";
+    exit 0
+fi
+chmod -R go+rX "$HOME/.distrib_slurm" "$HOME/SLURM_turds" 2>/dev/null &
+EXE_DIR=`dirname "$0"`
+WAIT=-W
+NICE="--nice=1000" # higher=nicer
+PRIORITY="--priority=TOP"
+sbatch $MEM $CPU $NICE $PRIORITY --chdir=`pwd` -o "$TURDS/%j-%N-%t.out" -e "$TURDS/%j-%N-%t.err" $WAIT -a 1-$NUMJOBS -J "$JOB" --requeue --export=ALL -k "$@" $EXE_DIR/distrib_slurm_run "$EXE_DIR" "$JOBFILE" >/tmp/sbatch.$$ 2>&1 || cat /tmp/sbatch.$$ && exit 1 &
+until grep '^Submitted batch job [0-9]' /tmp/sbatch.$$ >/dev/null 2>&1; do sleep 1; done
+cat /tmp/sbatch.$$
+BATCH=`fgrep 'Submitted batch job' /tmp/sbatch.$$ | awk '{print \$4}'`
+NEWJOBFILE="$HOME/.distrib_slurm/$JOB,$BATCH,$DATE.PID$$"
+ln "$JOBFILE" "$NEWJOBFILE"
+echo Submitted $NUMJOBS jobs from JOBFILE "$NEWJOBFILE"
+wait # now wait for it to finish
