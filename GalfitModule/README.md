@@ -47,11 +47,11 @@ determine where it may be improved. A version of this will be used for error det
 the user a chance to see how much the two differ. *in_out_comparison.py* outputs two types of files: ~~~~
 * ~~one file per galaxy and located in the galaxy's folder which contains the parameter information from the input, output, and the difference 
 between the two as a text file called *galfit_io_compare.txt*~~
-* ~~one file which contains *all* of the difference values between the two for every galaxy but just the differences. This is called
-*comparison_params.csv* and will be generated in the folder *all_galfit_out*. ~~~~
+~~* one file which contains *all* of the difference values between the two for every galaxy but just the differences. This is called~~
+~~*comparison_params.csv* and will be generated in the folder *all_galfit_out*.~~
 
 ---
-When the script is run, input files will be placed into each galaxy directory inside of the "-out" dir (which can be specified on the command line),
+
 <h3> Current Directory Structure </h3> 
 
 ```
@@ -59,17 +59,19 @@ control_script.sh
 
 sparc_to_galfit_feedme_gen.py
 
-*sparcfire-in -- input FITS files
+*...-in  -- input FITS files
 
-                      *galfit_masks -- SExtractor Star Masks
-*sparcfire-tmp --  <- *galfits      -- Output FITS models
-                      *psf_files    -- PSFs generated for input FITS
-                                 
-*sparcfire-out -- *galfit_png       -- FITS models converted to PNG
-                  
-                  DEPRECATED
-                                    -- Output FITS models
-                  *all_galfit_out -- <- comparison_param.csv
+               *galfit_masks -- SExtractor Star Masks
+*...-tmp -- <- *galfits      -- Output FITS models (and empty files to indicate failure)
+               *galfit_png   -- PNG files generated from output FITS
+
+*...-out -- <- *galfit_png   -- FITS models converted to PNG
+
+                                Output 'combined' PNG (observation, model, residual)
+               *galaxy_dirs  <- Output FITS model
+                                File(s) used for input to GALFIT
+                                (PSFs go here as galaxyname_psf.fits)
+
 ```
 
 ---
