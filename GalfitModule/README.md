@@ -72,7 +72,8 @@ sparc_to_galfit_feedme_gen.py
 
 These two scripts should be placed in the same directory as the containing directory for the in, tmp, and out folders
 used with SpArcFiRe. Since it's still a WIP, ***please name these folders [name]-in, [name]-tmp, [name]-out or
-the script(s) won't work. Preferably sparcfire-in, sparfire-tmp, sparcfire-out just in case...*** 
+the script(s) won't work. **control_script.py** defaults to "sparcfire-in", "sparcfire-tmp", and "sparcfire-out".
+Feel free to use those if you'd like!*** 
 
 ---
 
