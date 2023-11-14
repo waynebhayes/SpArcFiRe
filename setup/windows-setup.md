@@ -44,6 +44,7 @@ git clone https://github.com/waynebhayes/SpArcFiRe.git
 Now that you have cloned the SpArcFiRe repo, we are ready to setup SpArcFiRe for WSL.
 
 Now I have good news, and bad news. First the bad news, we have to all of the following: 
+* Install unzip and ImageMagick
 * Install MATLAB's Runtime Compiler (version R2017a)
 * Install Python2.7 and Python Libraries: numpy, astropy, scipy, Pillow
 * Install GCC (a C-compiler)
@@ -63,14 +64,19 @@ Now type the command: `./run-full-wsl-setup.bash`
 If there was an issue, take a look at the step by step instructions (you may just have to run a single step again). If everything works, congrats, now it is time to [run SpArcFiRe](https://github.com/cora-schallock/SpArcFiRe/blob/master/setup/windows-setup.md#section-4-running-sparcfire)
 
 ### Step-Step-Setup:
-**Important Note:** Please make sure you are in the following directory before running any of these commands: `cd ~/SpArcFiRe/scripts/setup-scripts/`
+**Important Note:** Please make sure you are in the following directory before running any of these commands: `cd ~/SpArcFiRe/setup/setup-scripts/`
+
+#### Install Unzip and ImageMagick
+Command: `sudo apt install unzip`
+Command: `sudo apt install imagemagick`
+Usage: These are useful in the following installation, if you haven't install unzip, you may can't install MATLAB's Runtime Compiler successfully.
 
 #### Install MATLAB's Runtime Compiler (version R2017a)
 **Important Note:** By running this script you are agreeing to MATLAB's terms and conditions [^3] and copy of which can be found [here](https://github.com/cora-schallock/SpArcFiRe/blob/master/setup/licenses/MCR_license.txt).
 Command: `install-mrc.bash`
 Usage: This Install MATLAB's Runtime Compiler (version R2017a) which is used to run all the MATLAB SpArcFiRe scripts. This is done using silent install (meaning it won't need any additional input to run).
 
-#### Install Python2.7 and Python Libraries: numpy, astropy, scipy, Pillow
+#### Install Python2.7 and Python Libraries: numpy, astropy, scipy, Pillow ,tsv
 Command: `install-python2-plus-libraries.bash`
 Usage: Installs Python2.7 and libraries to run SpArcFiRe's script. Note that Python2.7 has been deprecated, but as of now the code has not been moved to Python3 (so we use Python2.7).
 
@@ -113,7 +119,34 @@ This command is equiallent to running:
 
 If you want to run SpArcFiRe with different command line arguments, please see our [README.md](https://github.com/waynebhayes/SpArcFiRe#readme)).
 
-## Section 5: Debugging Issues
+## Section 5: Install package needed for GALFIT
+All the effort above is to make sure you can run the basic function of SpArcFiRe, and if you want to run GALFIT module, these following packages are needed for python3
+
+Install numpy,if you haven't, by using Command `python3 -m pip instal1 numpy`
+Install scipy,if you haven't, by using Command `python3 -m pip instal1 scipy`
+Install astropyif you haven't, by using Command `python3 -m pip install astropy`
+Install pandas if you haven't, by using Command `python3 -m pip install pandas`
+Install lpython if you haven't, by using Command `python3 -m pip instal1 Ipython`
+Install skimage if you haven't, by using Command `python3 -m pip install scikit-image`
+Install matplotlib if you haven't, by using Command `python3 -m pip instal1 matplotlib`
+Install pickle if you haven't by using Command `python3 -m pip install pickle-mixin`
+Install joblib if you haven't, by using Command `python3 -m pip install joblib`
+
+By the way, we also need to install GALFIT, if you want to learn more about it, click [here](https://users.obs.carnegiescience.edu/peng/work/galfit/galfit.html) to get more information. Here are instructions about how to install galfit.
+
+1) Download [GALFIT for Ubuntu](https://users.obs.carnegiescience.edu/peng/work/galfit/galfit3-debian64.tar.gz) and remove the package to `~/.local/bin`
+2) unzip the package by command `tar -zxvf galfit3-debian64.tar.gz`(change the file name if necessary)
+3) delete the package by `rm galfit3-debian64.tar.gz`
+4) use command `ls` to make sure galfit it in the list
+
+## Section 6: Test SpArcFiRe
+Now you finall have installed everything needed for SpArcFiRe, try to run the test to check your efforts!
+```
+cd ~/SpArcFiRe
+./regression-test-all.sh
+```
+
+## Section 7: Debugging Issues
 Please refer to the debugging list in the [windows-debug.md](https://github.com/waynebhayes/SpArcFiRe/blob/master/setup/windows-debug.md) file.
 
 ## References:
