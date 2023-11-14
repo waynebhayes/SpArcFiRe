@@ -51,6 +51,7 @@ python3 "${SPARCFIRE_HOME}/GalfitModule/Utilities/grab_model_from_output.py" $pr
 
 ext="*.fits"
 conv_fits="-convert-FITS "
+img_standardize="1"
 
 if [ -x "`/bin/which fitspng 2>/dev/null`" ]; then
     fitspng=$(/bin/which fitspng)
@@ -58,10 +59,36 @@ if [ -x "`/bin/which fitspng 2>/dev/null`" ]; then
     
     cd $default_in
     $fitspng *".fits"
+    
+    # Ignore case, and suppress errors if no files 
+    shopt -s nullglob
+    shopt -s nocaseglob
+
+    # Process all image files
+    for f in *".png"; do
+
+        # Get image's width and height, in one go
+        read w h < <(identify -format "%w %h" "$f")
+        
+        if [ $((w % 2)) -eq 1 ]
+        then
+            w=$((++w))
+        fi
+
+        if [ $((w/2 % 2)) -eq 1 ]
+        then
+            w=$((w+2))
+        fi
+        
+        convert "$f" "-resize" "${w}x${w}" "$f"
+
+    done
+
     cd $working_dir
     
     ext="*.png"
     conv_fits=""
+    img_std="0"
 fi
 
 # Prep for parallel
@@ -81,8 +108,9 @@ for (( cpu_num=0; cpu_num<$cpu_count; ++cpu_num )); do
 
     # Run sparcfire with defaults on assuming it has already been setup
     # Also no need for star masking
+    # Pad images to even so that we can turn off image standardization
     if [[ $arr_start -lt $input_count ]]; then
-        echo "${SPARCFIRE_HOME}/scripts/SpArcFiRe ${conv_fits}-compute-starmask false -ignore-starmask $new_dir $default_tmp $default_out -generateFitQuality 0 -writeBulgeMask 1 -allowArcBeyond2pi 0 -unsharpMaskAmt 8 -useDeProjectStretch 0 -fixToCenter 1 -errRatioThres 3"
+        echo "${SPARCFIRE_HOME}/scripts/SpArcFiRe ${conv_fits}-compute-starmask false -ignore-starmask $new_dir $default_tmp $default_out -generateFitQuality 0 -writeBulgeMask 1 -allowArcBeyond2pi 0 -unsharpMaskAmt 8 -useDeProjectStretch 0 -fixToCenter 1 -errRatioThres 3 -medFiltRad 0 -useImageStandardization $img_std"
     fi
     
     arr_start=$(( $cpu_num*$per_cpu  ))
@@ -104,7 +132,7 @@ parallel_script="${SPARCFIRE_HOME}/GalfitModule/ParallelDrivers/parallel"
 
 # RUN SPARCFIRE
 echo "Running SpArcFiRe (again) with $cpu_count nodes"
-cat $parallel_file | $parallel_script $cpu_count
+cat "$parallel_file" | "$parallel_script" "$cpu_count"
 
 mv $in_dir $post_galfit_in
 mv $out_dir $post_galfit_out
@@ -115,8 +143,8 @@ cp $post_galfit_out/"galaxy_arcs.csv" $post_galfit_out/"post_galfit_galaxy_arcs.
 mv $pre_galfit_in $in_dir
 mv $pre_galfit_out $out_dir
 
-cp $post_galfit_out/"post_sparcfire_galaxy.csv" $out_dir/"post_galfit_galaxy.csv"
-cp $post_galfit_out/"post_sparcfire_galaxy_arcs.csv" $out_dir/"post_galfit_galaxy_arcs.csv"
+cp $post_galfit_out/"post_galfit_galaxy.csv" $out_dir/"post_galfit_galaxy.csv"
+cp $post_galfit_out/"post_galfit_galaxy_arcs.csv" $out_dir/"post_galfit_galaxy_arcs.csv"
 
 # Cleanup
 rm -rf $parallel_file "sparcfire-in_"*
