@@ -1,32 +1,57 @@
 <h2> README (work in progress) </h2>
 
 The scripts in this folder are written to automatically generate GALFIT input files from SpArcFiRe output.
-Please note, this script is still a work-in-progress and relies on the hard-coding of some things including
-directory structure. 
+
+Please note, this module is still a work-in-progress and relies on some assumptions having to do with SpArcFiRe's conventions.
+These will be fixed in a future update, likely after Matthew finishes his Ph.D.
+
+Written by Matthew Portman, portmanm@uci.edu
 
 <h3> INTRODUCTION </h3>
 
-The previous version, *s2g.py* and its related scripts, are written to automatically generate the disk and bulge
-parameters for GALFIT. This version intended to include the generation of spiral arc parameters but was halted
+The previous version of the GALFIT processing was simply a few scripts, **s2g.py** and others, written to automatically generate the disk and bulge
+parameters for GALFIT. **s2g.py** was intended to include the generation of spiral arc parameters but was halted
 before it could be completed.
 
-The new version, **sparc_to_galfit_feedme_gen.py**, includes the generation of spiral arc parameters. Due to the nature
-of the work however, one cannot run **sparc_to_galfit_feedme_gen.py** and then immediately GALFIT; **sparc_to_galfit_feedme_gen.py**
-places each feedme into the individual output folder for each galaxy. Furthermore, the feedme generated allots for the inclusion
-of star masking, (and soon) PSFs, which are stored separately. For these reasons and more, we use a bash script aptly named
-**control_script.sh** to handle all the nuts and bolts. To reiterate, for the components and parameters, you may run
-**sparc_to_galfit_feedme_gen.py** alone. 
+The current version of the code has been written as a Python module in order to use an OOP framework.
+In the GalfitModule, OOP constitutes the underlying framework and much of the pre and post-processing relies on it. 
+The creation of the module in this framework is twofold:
+1) OOP allows us to utilize distributed computing with multi-step fitting (necessary for certain GALFIT practices) and
+2) The OOP framework can be used by others to streamline their usage of GALFIT with Python.
+Note, the GalfitModule in its current state _requires_ **Python3.7 or greater**. This choice has been made to utilize
+the CaptureOutput feature of the Subprocess Python Module, which is crucial during multi-step fitting.
 
-~~There is now an additional script, *in_out_comparison.py* which compares our automatically generated input with GALFIT's output to 
+There are three main scripts which are run to perform the fitting, 
+**sparc_to_galfit_feedme_gen.py**, which generates the galfit input file from the results from SpArcFiRe,
+**go_go_galfit.py**, which more or less runs GALFIT and is the script that is sent to the compute nodes in distributed computing, and
+**control_script.py**, which prepares everything for **go_go_galfit.py** and processes the output.
+
+**sparc_to_galfit_feedme_gen.py** is written such that it can be run on its own from the command line to generate the GALFIT input
+files without actually running them. These files are placed in the individual galaxy directories. We recommend doing this on
+a first installation to verify that everything is working correctly before running **control_script.py**.
+
+The **control_script.py** operates on the assumption that there are three directories, input, temporary, and output to coincide
+with SpArcFiRe's convention of the same. The script is currently restricted to directories which end in _"-in", "-tmp", "-out"_
+for convention reasons and some assumptions used in the module when processing. Again, this will likely disappear in a production version.
+**control_script.py** defaults to using on-node parallelization via **parallel** which can be found in the ParallelDrivers directory,
+an executable written by Wayne Hayes at UCI. It can be run in serial and has several options which can be accessed by running
+**control_script.py --help** on the command line.
+See the 'Current Directory Structure' section below for an example of what files are put where when **control_script.py** is run.
+
+**go_go_galfit.py** need not be touched. In fact, it may be a little confusing since it uses many functionalities from the OOP framework
+to do most of the leg work, so it may be more of a rabbit hole than anything else. It is currently only somewhat documented but feel
+free to contact Matthew if something is unclear.
+
+DEPRECATED ~~There is now an additional script, *in_out_comparison.py* which compares our automatically generated input with GALFIT's output to 
 determine where it may be improved. A version of this will be used for error detection in the future but for now, it simply offers
-the user a chance to see how much the two differ. *in_out_comparison.py* outputs two types of files: ~~
+the user a chance to see how much the two differ. *in_out_comparison.py* outputs two types of files: ~~~~
 * ~~one file per galaxy and located in the galaxy's folder which contains the parameter information from the input, output, and the difference 
 between the two as a text file called *galfit_io_compare.txt*~~
 * ~~one file which contains *all* of the difference values between the two for every galaxy but just the differences. This is called
-*comparison_params.csv* and will be generated in the folder *all_galfit_out*. ~~
+*comparison_params.csv* and will be generated in the folder *all_galfit_out*. ~~~~
 
 ---
-
+When the script is run, input files will be placed into each galaxy directory inside of the "-out" dir (which can be specified on the command line),
 <h3> Current Directory Structure </h3> 
 
 ```
