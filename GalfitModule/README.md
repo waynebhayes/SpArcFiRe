@@ -154,9 +154,10 @@ Extra output including star masks, PNG conversions, and galfit output
 Galaxy folders from SpArcFiRe which will also hold the output from this script 
 including `.in` files, final galfit output, and final output 'combined' pngs.
 
-_Since the module is still a WIP, please name these folders [name]-in, [name]-tmp, [name]-out or
+***Since the module is still a WIP, please name these folders [name]-in, [name]-tmp, [name]-out or
 the script(s) won't work. `control_script.py` defaults to "sparcfire-in", "sparcfire-tmp", and "sparcfire-out".
-Feel free to use those if you'd like!_
+Feel free to use those if you'd like!***
+
 ---
 
 <h2> JUST THE FEEDME PARAMETERS </h2>
