@@ -44,27 +44,33 @@ See the 'Current Directory Structure' section below for an example of what files
 to do most of the leg work, so it may be more of a rabbit hole than anything else. It is currently only somewhat documented but feel
 free to contact Matthew if something is unclear.
 
+Most OOP implementation things can be found in the `Classes` directory in the module. We recommend taking a look at the 
+Jupyter Notebook version of these codes which can be found in the `Notebooks` dirs located inside each class folder in order
+to familiarize yourself (until tutorials come along). 
+
+Several utility scripts can be found in the (aptly named) `Utilities` folder some of which are currently used by 
+`control_script.py` and `go_go_galfit.py`. There is also a Notebook which details a tentative analysis procedure
+entitled `residual_calc.ipynb`. We recommend starting there if you have results you'd like to look at or analyze.
+
+There is also a regression test which can be run from the `RegTest` directory as `python3 RegTest.py`.
+
 ---
 
-<h2> Directory Structure </h2> 
+<h2> Output Directory Structure </h2> 
 
 ```
-control_script.sh
+*[IN-DIRECTORY]  --    input FITS files
 
-sparc_to_galfit_feedme_gen.py
+                       *galfit_masks -- SExtractor Star Masks
+*[TMP-DIRECTORY] -- <- *galfits      -- Output FITS models (and empty files to indicate failure)
+                       *galfit_png   -- PNG files generated from output FITS
 
-*...-in  -- input FITS files
+*[OUT-DIRECTORY] -- <- *galfit_png   -- FITS models converted to PNG
 
-               *galfit_masks -- SExtractor Star Masks
-*...-tmp -- <- *galfits      -- Output FITS models (and empty files to indicate failure)
-               *galfit_png   -- PNG files generated from output FITS
-
-*...-out -- <- *galfit_png   -- FITS models converted to PNG
-
-                                Output 'combined' PNG (observation, model, residual)
-               *galaxy_dirs  <- Output FITS model
-                                File(s) used for input to GALFIT
-                                (PSFs go here as galaxyname_psf.fits)
+                                        Output 'combined' PNG (observation, model, residual)
+                       *galaxy_dirs  <- Output FITS model
+                                        File(s) used for input to GALFIT
+                                        (PSFs go here as galaxyname_psf.fits)
 
 ```
 
