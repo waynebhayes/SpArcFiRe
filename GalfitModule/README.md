@@ -5,13 +5,15 @@ The scripts in this folder are written to automatically generate GALFIT input fi
 Please note, this module is still a work-in-progress and relies on some assumptions having to do with SpArcFiRe's conventions.
 These will be fixed in a future update, likely after Matthew finishes his Ph.D.
 
+Also, when the module is split from SpArcFiRe, the README will be updated with more module specific details.
+
 Developed by Matthew Portman, <portmanm@uci.edu>
 
 <h3> INTRODUCTION </h3>
 
-The previous version of the GALFIT processing was simply a few scripts, **s2g.py** and others, written to automatically generate the disk and bulge
-parameters for GALFIT. **s2g.py** was intended to include the generation of spiral arc parameters but was halted
-before it could be completed.
+The previous version of the GALFIT processing was simply a few scripts, **s2g.py** and others, 
+written to automatically generate the disk and bulge parameters for GALFIT. **s2g.py** was 
+intended to include the generation of spiral arc parameters but was halted before it could be completed.
 
 The current version of the code has been written as a Python module in order to use an OOP framework.
 In the GalfitModule, OOP constitutes the underlying framework and much of the pre and post-processing relies on it. 
@@ -44,7 +46,7 @@ free to contact Matthew if something is unclear.
 
 ---
 
-<h3> Current Directory Structure </h3> 
+<h3> Directory Structure </h3> 
 
 ```
 control_script.sh
@@ -70,11 +72,70 @@ sparc_to_galfit_feedme_gen.py
 
 <h3> TO RUN: </h3>
 
-These two scripts should be placed in the same directory as the containing directory for the in, tmp, and out folders
-used with SpArcFiRe. Since it's still a WIP, ***please name these folders [name]-in, [name]-tmp, [name]-out or
+Note: _SpArcFiRe_'s setup.bash _must_ be run first so that the *SPARCFIRE_HOME* environment variable is set. From there,
+the module can figure everything else out pathing-wise.
+
+`python3 control_script.py [OPTION] [[RUN-DIRECTORY] IN-DIRECTORY TMP-DIRECTORY OUT-DIRECTORY]`
+
+Ex:
+
+`python3 control_script.py -p 0 -NS 1 -v`
+
+Arguments:
+(these can also be seen by running `python3 control_script.py --help`)
+
+-p | --parallel \[0,1,2\] (default 1)
+Run algorithm with/without intensive parallelization. Defaults to on machine parallel.
+Options are:
+  0: in serial,
+  1: on machine parallel,
+  2: cluster computing via SLURM
+                                    
+-drs | --dont-remove-slurm (default False, i.e. removal)
+Choose NOT to remove all old slurm files (they may contain basic info about each fit but there will be a bunch!)
+
+-t  | --tmp (default False)
+Indicates to the program a run from a directory in /tmp/ local to each cluster machine.
+WARNING: either output to a different location or copy from tmp to said location
+under the assumption that tmp will be wiped at some point in the near future.
+
+-ac | --aggressive-clean
+Aggressively clean-up directories, removing -in, temp output, psf, and mask files after galfit runs
+
+-NS | --num-steps (default 2)
+Run GALFIT using step-by-step component selection (up to 3), i.e.
+  1: Bulge + Disk + Arms,
+  2: Disk -> Bulge + Disk + Arms,
+  3: Disk -> Bulge + Disk -> Bulge + Disk + Arms
+                                    
+-r | --restart (default False)
+Restart control script on the premise that some have already run (likely in parallel).
+
+-nsf | --no-simultaneous-fitting (default True, also not currently implemented)
+Turn off simultaneous fitting.
+
+-v | --verbose
+Verbose output. Includes standard out.
+
+-n | --basename (default "GALFIT")
+Basename of the output results pkl file (\[name\]_output_results.pkl).
+
+RUN-DIRECTORY (default current working directory)
+The directory from which the script should be run 
+
+IN-DIRECTORY (default cwd/sparcfire-in)
+Images used by SpArcFiRe, _must_ be FITS files, GALFIT does not take PNG as input.
+
+TMP-DIRECTORY (default cwd/sparcfire-tmp)
+Extra output including star masks, PNG conversions, and galfit output
+
+OUT-DIRECTORY (default cwd/sparcfire-out)
+Galaxy folders from SpArcFiRe which will also hold the output from this script 
+including `.in` files, final galfit output, and final output 'combined' pngs.
+
+Since the module is still a WIP, ***please name these folders [name]-in, [name]-tmp, [name]-out or
 the script(s) won't work. **control_script.py** defaults to "sparcfire-in", "sparcfire-tmp", and "sparcfire-out".
 Feel free to use those if you'd like!*** 
-
 ---
 
 <h3> JUST THE FEEDME PARAMETERS </h3>
@@ -85,22 +146,23 @@ Feel free to use those if you'd like!***
 We recommend running this alone upon first installation to ensure it works correctly.
 
 ---
+<h3> OUTPUT </h3>
 
-<h3> THE FEEDMEs + GALFIT </h3>
+Several items are output as a result of this script which are detailed in the **Directory Structure**
+section above. Importantly, the results of the fits, i.e. the final GALFIT parameters used to generate
+the model for each galaxy, are tabulated into a Pandas DataFrame saved as a pickle file, `[basename]_output_results[num].pkl`
+(note for [security reasons](https://docs.python.org/3/library/pickle.html), this may be updated to a csv 
+or more secure storage format in the future). The format of the DataFrame arises from the OOP framework
+and uses dynamnically named column headers that follow the convention: `[parameter name]_[component type]_[component_number]`
+e.g. `magnitude_sersic_1` or `position_x_sersic_2`. 
 
-`python3 control_script.py`
+The DataFrame is the *easiest* way to extract parameters from the fitting process but parameter 
+extraction can also be achieved by using classes and methods from the GalfitModule to read the 
+output FITS files themselves.
 
----
-<h3> OUTPUT FILE STRUCTURE </h3>
-
-The folder ~~*all_galfit_out*~~ *sparcfire-tmp/galfits* contains a summary of sorts of all pertinent output: models as FITS files, the models converted to PNGs,
-and the *comparison_params.csv* file comparing the values between the input and output parameter files for GALFIT. This folder and
-its subfolders are generated by **control_script.py**. **control_script.py** also creates folders inside *sparcfire-tmp* to hold
-the masks, PSF files, and galfits (just in case GALFIT 'explodes') while the control script is still running. This alleviates the 
-error catching burden when tidying up! 
-
-You can also find all of the above in the individual galaxy folders - with the exception of PNGs and the overall comparison between
-galaxies.~~; there is instead a single text file, *galfit_io_compare.txt* which contains the input, output, and difference between the two.~~
+We also recommend taking a look at the _combined_ pngs in the `OUT-DIRECTORY/galfit_png` folder or
+in the `OUT-DIRECTORY/[galaxy name]` folder itself. The conversion for FITS to PNG is not straightforward
+but these images can serve as a litmus test for the goodness of fit, especially when viewing the residual.
 
 ---
 
