@@ -18,6 +18,7 @@ import scipy.stats as stats
 # This and astropy likely need to be pip installed
 # Along with csv2tsv for regression tests
 import imageio
+from PIL import Image
 import shutil
 import subprocess
 import sys
@@ -542,9 +543,11 @@ def main(in_dirpath, out_dirpath, galaxy_names = []):
             # old aggressive masking left only the galaxy, new actually masks individual sources
             # ... as is the intention for when it's used in sparcfire. This is good for calculating
             # the residuals and I bet for providing a better fit.
-            mask_levels[isobj] = 1
-            mask_levels[star_mask] = 2
-            mask_levels[star_mask_aggressive] = 3
+            
+            # New values for updated implementation
+            mask_levels[isobj] = 85
+            mask_levels[star_mask] = 170
+            mask_levels[star_mask_aggressive] = 255
             
             galfit_mask_levels[isobj] = 1
             galfit_mask_levels[star_mask_aggressive] = 0
@@ -559,7 +562,7 @@ def main(in_dirpath, out_dirpath, galaxy_names = []):
             
             if write_masked_img:
                 out_filepath = os.path.join(out_dirpath, in_imgname)
-                fits.writeto(out_filepath +  '_star-rm.fits', galfit_mask_levels)
+                fits.writeto(out_filepath +  '_star-rm.fits', galfit_mask_levels, overwrite = True)
                 #fits.writeto(out_filepath + '_star-mask.fits', depad_img * star_mask)
                 #fits.writeto(out_filepath + '_star-mask-aggressive.fits', depad_img * star_mask_aggressive)
                 
@@ -567,6 +570,8 @@ def main(in_dirpath, out_dirpath, galaxy_names = []):
              
             # For GalfitModule, this is uneccessary. 
             #imageio.imwrite(os.path.join(out_dirpath, in_imgname + '_starmask.png'), mask_levels)
+            #image = Image.fromarray(np.uint8(mask_levels), mode = "L")
+            #image.save(out_filepath + '_starmask.png')
             
         except Exception as e:
             print("could not create starmask for " + in_imgname)
