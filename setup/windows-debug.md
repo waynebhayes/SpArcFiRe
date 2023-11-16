@@ -96,3 +96,28 @@ You should see a path that looks like: `/pkg/matlab/R2017a/sys/os/glnxa64/libstd
 Sources:
 [Matlab Answers](https://www.mathworks.com/matlabcentral/answers/275176-matlab-crashes-on-startup-segmentation-violation#answer_231458)
 
+
+#### Issue #4: libncurses.so.5: cannot open shared object file: No such file
+Note: This is similar to the libstdc++.so.6 in issue #2 and #3
+If you encounter an error along the lines of: `libncurses.so.5: cannot open shared object file: No such file`, follow these commands may help
+```
+sudo apt install apt-file
+sudo apt-file update
+sudo apt-file find libncurses.so.5
+sudo apt install libncurses5
+sudo apt install libncurses*
+```
+
+Sollution:[Follow this guide](https://blog.csdn.net/qq_35078688/article/details/125326873)
+
+#### Issue #4: Warning: header column name "XXX" does not appear in all input files
+if you face the warning like this or like below, it may result in lacking tsv module for python2
+```
+Warning:
+****************
+****************
+**************** ABOVE ERRORS (60 header, 0 diff) MAY BE FATAL; SUPPRESSING FURTHER WARNINGS
+****************
+****************
+```
+Solve this by command `python2 -m install tsv`
