@@ -57,26 +57,29 @@ sys.path.append(_MODULE_DIR)
 from Functions.helper_functions import *
 
 
-# In[4]:
+# In[34]:
 
 
 class BaseParameter():
     def __init__(self, value, **kwargs):
         
-        self.value            = value
-        self.fix_value        = kwargs.get("fix_value", 1)
-        self.name             = kwargs.get("name", "")
-        self.parameter_number = kwargs.get("parameter_number", "#")
-        self.comment          = kwargs.get("comment", "")
+        # All underscored attributes are likely to change
+        # And are thus relegated to @properties below for ease
+        # of updating
+        self._value            = value
+        self._fix_value        = kwargs.get("fix_value", 1)
+        self.name              = kwargs.get("name", "")
+        self.parameter_number  = kwargs.get("parameter_number", "#")
+        self.comment           = kwargs.get("comment", "")
         
         # Not sure if I'll need these but keeping them in for now
-        self.component_name   = kwargs.get("component_name", "")
-        self.component_number = kwargs.get("component_number", "")
+        self.component_name    = kwargs.get("component_name", "")
+        self.component_number  = kwargs.get("component_number", "")
         
 # ==========================================================================================================
 
     # Formerly __str__
-    # def __str__(self):
+    # def __repr__(self):
     #     return f"{self.value}"
 
     # Formerly __repr__
@@ -86,78 +89,46 @@ class BaseParameter():
           
 # ==========================================================================================================
 
-    # def update_values(self, **kwargs):
-    #     for key, value in kwargs.items():
-    #         setattr(self, key, value)
-        
-# ==========================================================================================================
-
-#     def from_pandas(self, input_df):
-#         param_names  = [n.split(f"_{self.component_type}")[0] for n in input_df.columns]
-#         param_values = input_df.iloc[0].values.astype(float)
-#         new_param_dict = dict(zip(param_names, param_values))
-        
-#         pos = "position"
-#         if pos in self.param_values:
-#             new_param_dict[pos] = (new_param_dict[f"{pos}_x"], new_param_dict[f"{pos}_y"])
-#             new_param_dict.pop(f"{pos}_x")
-#             new_param_dict.pop(f"{pos}_y")
-        
-#         # No graceful way to do this...
-#         # TODO: Can this be used for bending modes as well?
-#         if self.component_type in ("fourier"):
-#             f_modes = set([pn.split("_")[0] for pn in param_names])
-#             a   = "amplitude"
-#             pha = "phase_angle"
-            
-#             for mode in f_modes:
-#                 new_param_dict[mode] = (new_param_dict[f"{mode}_{a}"], new_param_dict[f"{mode}_{pha}"])
-#                 new_param_dict.pop(f"{mode}_{a}")
-#                 new_param_dict.pop(f"{mode}_{pha}")
-        
-#         self.param_values.update(new_param_dict)
-#         self.update_values()
-
-# # ==========================================================================================================
-
-#     def to_pandas(self):
-#         name = f"{self.component_type}_{self.component_number}"
-#         param_values = deepcopy(self.param_values)
-        
-        
-#         if "Component type" in param_values:
-#             param_values.pop("Component type")
-            
-#         multi_valued = [(k,v) for k,v in param_values.items() if isinstance(v, tuple)]
-        
-#         if multi_valued:
-#             # For components which contain multi values, i.e. position
-#             tuple_names = {"sersic"  : ("x","y"),
-#                            "fourier" : ("amplitude", "phase_angle")}
-            
-#             # Usually only two but to keep things generic we can loop
-#             for tup in multi_valued:
-#                 tup_value = param_values.pop(tup[0])
-                
-#                 for i, val in enumerate(tup_value):
-#                     param_values[f"{tup[0]}_{tuple_names[self.component_type][i]}"] = val
-        
-#         param_names  = [f"{i}_{name}" for i in param_values.keys()]
-#         param_values = np.array(list(param_values.values()))
-#         param_values = param_values.reshape(1, len(param_values))
-        
-#         # Redundancy in index name and column names is intentional!
-#         all_data = pd.DataFrame(param_values, 
-#                                 index = [name], 
-#                                 columns = param_names,
-#                                 dtype = np.float32)
-        
-#         return all_data
-
-# ==========================================================================================================
+    @property
+    def value(self):
+        return self._value
+    
+    @value.setter
+    def value(self, new_val):
+        self._value = new_val
+    
+    @property
+    def fix_value(self):
+        return self._fix_value
+    
+    @fix_value.setter
+    def fix_value(self, new_val):
+        self._fix_value = new_val
 
 
-# In[5]:
+# In[35]:
+
+
+class ComponentType(BaseParameter, str):
+    def __new__(cls, name, **kwargs):    
+        return super(ComponentType, cls).__new__(cls, name)
+    
+    def __init__(self, name, **kwargs):
+        
+        BaseParameter.__init__(self, name, **kwargs)
+        self._fix_value = ""
+        self.parameter_number = kwargs.get("parameter_number", 0)
+        
+        # self.value            = value
+        self.comment          = "Component type"
+        # self.component_number = kwargs.get("component_number", 0)
+        
+    # def __str__(self):
+    #     empty_str = ""
+    #     return f"{self.parameter_number:>2}) {self.name:<11} {empty_str:<10} #  {self.comment}"
+
+
+# In[36]:
 
 
 class HeaderParameter(BaseParameter, str):
@@ -167,10 +138,10 @@ class HeaderParameter(BaseParameter, str):
     def __init__(self, value, **kwargs):
         BaseParameter.__init__(self, value, **kwargs)
     
-        self.fix_value = ""
+        self._fix_value = ""
 
 
-# In[6]:
+# In[37]:
 
 
 class NumParameter(BaseParameter, float):
@@ -181,7 +152,7 @@ class NumParameter(BaseParameter, float):
         
         BaseParameter.__init__(self, value, **kwargs)
         
-        self.value = float(round(self.value, 4))
+        self.value = float(round(self._value, 4))
         
 #         self.fix_value        = kwargs.get("fix_value", 0)
 #         self.name             = kwargs.get("name", "")
@@ -205,73 +176,231 @@ class NumParameter(BaseParameter, float):
 # ==========================================================================================================
 
 
-# In[7]:
+# In[38]:
 
 
-class ComponentType(BaseParameter, str):
-    def __new__(cls, name, **kwargs):    
-        return super(ComponentType, cls).__new__(cls, name)
+class Skip(BaseParameter, int):
+    def __new__(cls, value = 0, **kwargs):    
+        return super(Skip, cls).__new__(cls, value)
     
-    def __init__(self, name, **kwargs):
+    def __init__(self, value = 0, **kwargs):
         
-        BaseParameter.__init__(self, name, **kwargs)
-        self.fix_value = ""
-        self.parameter_number = kwargs.get("parameter_number", 0)
+        self._value = value
         
-        # self.value            = value
-        self.comment          = "Component type"
-        # self.component_number = kwargs.get("component_number", 0)
+        # In case it is accidentally given as a string such as 5.0
+        try:
+            self._value = int(value)
+        except ValueError as ve:
+            try:
+                self._value = int(float(value))
+            except ValueError as ve2:
+                if "could not convert string to float" in ve2:
+                    print("For Skip class:", ve2)
+                    print("Resorting to default.")
         
-    # def __str__(self):
-    #     empty_str = ""
-    #     return f"{self.parameter_number:>2}) {self.name:<11} {empty_str:<10} #  {self.comment}"
+        name             = "skip"
+        parameter_number = f"Z"
+        comment          = f"Skip this model in output image?  (yes=1, no=0)"
+        fix_value        = ""
+        
+        BaseParameter.__init__(
+            self, 
+            self._value,
+            name             = name,
+            parameter_number = parameter_number,
+            comment          = comment,
+            fix_value        = fix_value
+        )
 
 
-# In[57]:
+# In[136]:
 
 
 class MultiParameter(BaseParameter):
-    def __init__(self, value = (0,0), **kwargs):
+    def __init__(self, value = (0,0,0,0), **kwargs):
         
         BaseParameter.__init__(self, 0, **kwargs)
         
         # Generically use x and y
         if len(value) == 2:
-            self.x = float(kwargs.get("x", value[0]))
-            x_str = f"{self.x:.4f}"
+            self._x1 = float(kwargs.get("x", value[0]))
+            x_str = f"{self._x1:.4f}"
             
-            self.y = float(kwargs.get("y", value[1]))
-            y_str = f"{self.y:.4f}"
+            self._y1 = float(kwargs.get("y", value[1]))
+            y_str = f"{self._y1:.4f}"
 
-            if self.x == int(self.x):
-                x_str = f"{self.x:.0f}"
+            if self._x1 == int(self._x1):
+                x_str = f"{self._x1:.0f}"
                 
-            if self.y == int(self.y):
-                y_str = f"{self.y:.0f}"
+            if self._y1 == int(self._y1):
+                y_str = f"{self._y1:.0f}"
                 
-            self.value_str  = f"{x_str} {y_str}"
-            self.value = (self.x, self.y)
+            #self.x = self._x1
+            #self.y = self._y1
+            self._value = (self._x1, self._y1)
+            #self._value_str  = f"{x_str} {y_str}"
             
         elif len(value) == 4:
-            self.xmin = int(kwargs.get("xmin", value[0]))
-            self.xmax = int(kwargs.get("xmax", value[1]))
-            self.ymin = int(kwargs.get("ymin", value[2]))
-            self.ymax = int(kwargs.get("ymax", value[3]))
-
-            self.value_str  = f"{self.xmin}   {self.xmax}   {self.ymin}   {self.ymax}"
-            self.value = (self.xmin, self.xmax, self.ymin, self.ymax)
+            self._x1 = int(kwargs.get("xmin", value[0]))
+            self._x2 = int(kwargs.get("xmax", value[1]))
+            self._y1 = int(kwargs.get("ymin", value[2]))
+            self._y2 = int(kwargs.get("ymax", value[3]))
+            
+            # Redundancy for ease of use
+            # self.xmin   = self._x1
+            # self.xmax   = self._x2
+            # self.ymin   = self._y1
+            # self.ymax   = self._y2
+            
+            self._value = (self._x1, self._x2, self._y1, self._y2)
+            #self._value_str  = f"{self._x1}   {self._x2}   {self._y1}   {self._y2}"
         
-        self.fix_value        = ""
+        self._fix_value        = ""
         self.fix_x            = ""
         self.fix_y            = ""
         
+# ==========================================================================================================
+
+    @property
+    def x(self):
+        return self._x1
+    
+    @x.setter
+    def x(self, new_val):
+        self._x1 = new_val
+        
+    @property
+    def y(self):
+        return self._y1
+    
+    @y.setter
+    def y(self, new_val):
+        self._y1 = new_val
+
+# ==========================================================================================================
+
+    @property
+    def x1(self):
+        return self._x1
+    
+    @x1.setter
+    def x1(self, new_val):
+        self._x1 = new_val
+        
+    @property
+    def x2(self):
+        return self._x2
+    
+    @x2.setter
+    def x2(self, new_val):
+        self._x2 = new_val
+        
+    @property
+    def y1(self):
+        return self._y1
+    
+    @y1.setter
+    def y1(self, new_val):
+        self._y1 = new_val
+        
+    @property
+    def y2(self):
+        return self._y2
+    
+    @y2.setter
+    def y2(self, new_val):
+        self._y2 = new_val
+
+# ==========================================================================================================
+
+    @property
+    def xmin(self):
+        return self._x1
+    
+    @xmin.setter
+    def xmin(self, new_val):
+        self._x1 = new_val
+        
+    @property
+    def xmax(self):
+        return self._x2
+    
+    @xmax.setter
+    def xmax(self, new_val):
+        self._x2 = new_val
+        
+    @property
+    def ymin(self):
+        return self._y1
+    
+    @ymin.setter
+    def ymin(self, new_val):
+        self._y1 = new_val
+        
+    @property
+    def ymax(self):
+        return self._y2
+    
+    @ymax.setter
+    def ymax(self, new_val):
+        self._y2 = new_val
+        
+# ==========================================================================================================
+
+    @property
+    def value(self):
+        return self._value
+    
+    @value.setter
+    def value(self, new_tuple):
+        if not isinstance(new_tuple, tuple):
+            raise("The new value for this attribute must be a tuple!")
+            
+        self._value = new_tuple
+    
+#     @property
+#     def value_str(self):
+#         return self._value_str
+    
+#     @value_str.setter
+#     def value_str(self, new_str):
+#         self._value_str = new_str
+        
+    @property
+    def fix_value(self):
+        return self._fix_value
+    
+    @fix_value.setter
+    def fix_value(self, new_str):
+        if not isinstance(new_str, str):
+            raise("The new value for this attribute must be a string!")
+            
+        self._fix_value = new_str
+        
+# ==========================================================================================================
+
     # Override BaseParameter
     def __str__(self):
-        pre_comment = f"{self.parameter_number:>2}) {self.value_str:<11} {self.fix_value}"
+        if len(self.value) == 2:
+            x_str = f"{self.x1:.4f}"
+            y_str = f"{self.y1:.4f}"
+            
+            if self.x1 == int(self.x1):
+                x_str = f"{self.x1:.0f}"
+                
+            if self.y1 == int(self.y1):
+                y_str = f"{self.y1:.0f}"
+                
+            value_str  = f"{x_str} {y_str}"
+            
+        elif len(self.value) == 4:
+            value_str  = f"{self.x1}   {self.x2}   {self.y1}   {self.y2}"
+        
+        pre_comment = f"{self.parameter_number:>2}) {value_str:<11} {self.fix_value}"
         return f"{pre_comment:<23} # {self.comment}"
 
 
-# In[58]:
+# In[137]:
 
 
 class Position(MultiParameter):
@@ -279,60 +408,145 @@ class Position(MultiParameter):
         
         MultiParameter.__init__(self, value, **kwargs)
     
-        self.name             = "position"
-        self.parameter_number = 1
-        self.comment          = "Position x, y"
-        self.fix_value        = kwargs.get("fix_value", "0 0")
-        self.fix_x            = self.fix_value[0]
-        self.fix_y            = self.fix_value[-1]
+        self.name              = "position"
+        self.parameter_number  = 1
+        self.comment           = "Position x, y"
+        self._fix_value        = kwargs.get("fix_value", "0 0")
+        self._fix_x            = kwargs.get("fix_x", self.fix_value[0])
+        self._fix_y            = kwargs.get("fix_y", self.fix_value[-1])
+        
+# ==========================================================================================================
+        
+    @property
+    def fix_x(self):
+        return self._fix_x
+    
+    @fix_x.setter
+    def fix_x(self, new_val):
+        self._fix_x = new_val
+    
+    @property
+    def fix_y(self):
+        return self._fix_y
+    
+    @fix_y.setter
+    def fix_y(self, new_val):
+        self._fix_y = new_val
 
 
-# In[93]:
+# In[138]:
 
 
 class FourierMode(MultiParameter):
-    def __init__(self, mode, amplitude = 0, phase_angle = 0, **kwargs):
+    def __init__(self, mode, amplitude_in = 0, phase_angle_in = 0, **kwargs):
         
-        self.mode        = mode
+        self._mode        = mode
         
-        self.amplitude   = amplitude
-        self.phase_angle = phase_angle
+#         self._x1 = amplitude        
+#         self._y1 = phase_angle
         
         if isinstance(amplitude, tuple):
-            self.amplitude   = amplitude[0]
-            self.phase_angle = amplitude[1]
+            phase_angle_in = amplitude_in[1]
+            amplitude_in = amplitude_in[0]
             
-        self.value_str  = f"{self.amplitude} {self.phase_angle}"
-        self.value = (self.amplitude, self.phase_angle) #f"{value_str:<11}"
-        MultiParameter.__init__(self, self.value, **kwargs)
+        # Override these properties later
+        #self.amplitude   = self._amplitude
+        #self.phase_angle = self._phase_angle
+        
+        #self.value_str  = f"{self.amplitude} {self.phase_angle}"
+        
+        MultiParameter.__init__(self, (amplitude_in, phase_angle_in), **kwargs)
+        
+        #self._value = (self.amplitude, self.phase_angle)
         
         self.name             = "position"
         self.parameter_number = f"F{self.mode}"
         self.comment         = f"Azim. Fourier mode {self.mode}, amplitude, & phase angle"
+        
         self.fix_value       = kwargs.get("fix_value", "1 1")
-        self.fix_amplitude   = self.fix_value[0]
-        self.fix_phase_angle = self.fix_value[-1]
+        
+        self._fix_amplitude   = kwargs.get("fix_amplitude", self.fix_value[0])
+        self._fix_phase_angle = kwargs.get("fix_phase_angle", self.fix_value[-1])
+
+        
+# ==========================================================================================================
+    @property
+    def amplitude(self):
+        return self.x1
+
+    @amplitude.setter
+    def amplitude(self, new_val):
+        self.x1 = new_val
+
+    @property
+    def phase_angle(self):
+        return self.y1
+
+    @phase_angle.setter
+    def phase_angle(self, new_val):
+        self.y1 = new_val
+        
+    @property
+    def mode(self):
+        return self._mode
+    
+    @mode.setter
+    def mode(self, new_val):
+        self._mode = new_val
+        
+    @property
+    def fix_amplitude(self):
+        return self._fix_amplitude
+    
+    @fix_amplitude.setter
+    def fix_amplitude(self, new_val):
+        self._fix_amplitude = new_val
+        
+    @property
+    def fix_phase_angle(self):
+        return self._fix_phase_angle
+    
+    @fix_phase_angle.setter
+    def fix_phase_angle(self, new_val):
+        self._fix_phase_angle = new_val
 
 
-# In[94]:
+# In[152]:
 
 
 #class BendingModes(BaseParameter, float):
 class BendingMode(NumParameter):
     def __init__(self, mode, amplitude, **kwargs):
         
-        self.mode        = mode
-        self.amplitude   = amplitude
-        self.value       = amplitude
+        self._mode        = mode
+        # self._amplitude   = amplitude
         
-        NumParameter.__init__(self, self.value, **kwargs)
+        NumParameter.__init__(self, amplitude, **kwargs)
     
         self.name             = "bending mode"
         self.parameter_number = f"B{self.mode}"
         self.comment         = f"Bending mode {self.mode} amplitude"
+        
+# ==========================================================================================================
+    
+    @property
+    def amplitude(self):
+        return self.value
+    
+    @amplitude.setter
+    def amplitude(self, new_val):
+        self.value = new_val
+        
+    @property
+    def mode(self):
+        return self._mode
+    
+    @mode.setter
+    def mode(self, new_val):
+        self._mode = new_val
 
 
-# In[95]:
+# In[153]:
 
 
 class ImageRegionToFit(HeaderParameter, MultiParameter):
@@ -353,24 +567,7 @@ class CropRegion(ImageRegionToFit):
         ImageRegionToFit.__init__(self, *values, **kwargs)
 
 
-# In[96]:
-
-
-if __name__ == "__main__":
-    crop_region = ImageRegionToFit(
-        (0, 100, 0, 100)
-    )
-    
-    print(crop_region)
-    
-    crop_region = CropRegion(
-        (45, 145, 45, 145)
-    )
-    
-    print(crop_region)
-
-
-# In[97]:
+# In[154]:
 
 
 class ConvolutionBox(HeaderParameter, MultiParameter):
@@ -385,7 +582,7 @@ class ConvolutionBox(HeaderParameter, MultiParameter):
         self.comment = "Size of the convolution box (x y)"
 
 
-# In[98]:
+# In[165]:
 
 
 class PlateScale(HeaderParameter, MultiParameter):
@@ -393,15 +590,62 @@ class PlateScale(HeaderParameter, MultiParameter):
         HeaderParameter.__init__(self, value, **kwargs)
         MultiParameter.__init__(self, value, **kwargs)
         
-        self.dx = self.x
-        self.dy = self.y
+        #self._dx = self._x
+        #self._dy = self._y
         
         self.fix_value = ""
         self.parameter_number = "K"
         self.comment = "Plate scale (dx dy)   [arcsec per pixel]"
+        
+    @property
+    def dx(self):
+        return self.x1
+    
+    @dx.setter
+    def dx(self, new_val):
+        self.x1 = new_val
+    
+    @property
+    def dy(self):
+        return self.y1
+    
+    @dy.setter
+    def dy(self, new_val):
+        self.y1 = new_val
 
 
-# In[99]:
+# In[156]:
+
+
+# if __name__ == "__main__":
+#     from RegTest.RegTest import *
+
+
+# In[157]:
+
+
+if __name__ == "__main__":
+    crop_region = ImageRegionToFit(
+        (0, 100, 0, 100)
+    )
+    
+    print(crop_region)
+    
+    crop_region = CropRegion(
+        (45, 145, 45, 145)
+    )
+    
+    print(crop_region)
+    
+    crop_region.xmin = 1
+    crop_region.xmax = 155
+    crop_region.ymin = 1
+    crop_region.ymax = 155
+    
+    print(crop_region)
+
+
+# In[158]:
 
 
 if __name__ == "__main__":
@@ -415,17 +659,15 @@ if __name__ == "__main__":
         (0.396, 0.396)
     )
     
+    print(plate_scale)  
+    
+    plate_scale.x = 0.4
+    plate_scale.y = 0.4
+    
     print(plate_scale)
 
 
-# In[100]:
-
-
-# if __name__ == "__main__":
-#     from RegTest.RegTest import *
-
-
-# In[101]:
+# In[159]:
 
 
 if __name__ == "__main__":
@@ -440,7 +682,7 @@ if __name__ == "__main__":
     print(sky_line)
 
 
-# In[102]:
+# In[160]:
 
 
 if __name__ == "__main__":
@@ -460,9 +702,12 @@ if __name__ == "__main__":
     )
     
     print(position)
+    position.x = 102
+    position.y = 102
+    print(position)
 
 
-# In[103]:
+# In[161]:
 
 
 if __name__ == "__main__":
@@ -476,10 +721,27 @@ if __name__ == "__main__":
     )
     
     print(magnitude)
-    print(magnitude + magnitude)
+    print("sum of magnitudes", magnitude + magnitude)
+    
+    magnitude.value = 5
+    print(magnitude)
 
 
-# In[107]:
+# In[162]:
+
+
+if __name__ == "__main__":
+    skip = Skip(
+        component_name = "Sersic",
+        component_number = 1
+    )
+    
+    print(skip)
+    skip.value = 1
+    print(skip)
+
+
+# In[163]:
 
 
 if __name__ == "__main__":
@@ -499,9 +761,14 @@ if __name__ == "__main__":
     )
     
     print(fourier3)
+    
+    fourier1.amplitude   = 0.003
+    fourier1.phase_angle = 47
+    
+    print(fourier1)
 
 
-# In[108]:
+# In[164]:
 
 
 if __name__ == "__main__":
@@ -518,9 +785,14 @@ if __name__ == "__main__":
     )
     
     print(bending3)
+    
+    bending3.mode = 4
+    bending3.amplitude = 1.004
+    
+    print(bending3)
 
 
-# In[109]:
+# In[ ]:
 
 
 # Parameters with defaults for Sersic profile
@@ -578,11 +850,8 @@ def load_default_sersic_parameters(component_number = None):
         component_number = component_number
     )
     
-    skip = NumParameter(
+    skip = Skip(
         0,
-        name = "skip",
-        parameter_number = "Z",
-        comment = "Skip this model in output image?  (yes=1, no=0)",
         component_name = "Sersic",
         component_number = component_number
     )
@@ -593,7 +862,7 @@ def load_default_sersic_parameters(component_number = None):
     return loc
 
 
-# In[110]:
+# In[26]:
 
 
 def load_default_power_parameters(component_number = None):
@@ -656,11 +925,8 @@ def load_default_power_parameters(component_number = None):
         component_number = component_number
     )
     
-    # skip = Parameter(
+    # skip = Skip(
     #     0,
-    #     name = "skip",
-    #     parameter_number = "Z",
-    #     comment = "Skip this model in output image?  (yes=1, no=0)",
     #     component_name = "Power",
     #     component_number = component_number
     # )
@@ -672,7 +938,7 @@ def load_default_power_parameters(component_number = None):
     return loc
 
 
-# In[111]:
+# In[27]:
 
 
 def load_default_fourier_parameters(component_number = None):
@@ -693,11 +959,8 @@ def load_default_fourier_parameters(component_number = None):
         component_number = component_number
     )
     
-    skip = NumParameter(
+    skip = Skip(
         0,
-        name = "skip",
-        parameter_number = "Z",
-        comment = "Skip this model in output image?  (yes=1, no=0)",
         component_name = "Fourier",
         component_number = component_number
     )
@@ -709,7 +972,7 @@ def load_default_fourier_parameters(component_number = None):
     return loc
 
 
-# In[112]:
+# In[28]:
 
 
 # Parameters with defaults for Sky profile
@@ -749,7 +1012,7 @@ def load_default_sky_parameters(component_number = None):
     return loc
 
 
-# In[113]:
+# In[29]:
 
 
 # Parameters with defaults for Sky profile
@@ -846,7 +1109,7 @@ def load_default_header_parameters():
     return loc
 
 
-# In[114]:
+# In[30]:
 
 
 if __name__ == "__main__":
@@ -861,7 +1124,7 @@ if __name__ == "__main__":
     _ = [print(v) for v in load_default_sky_parameters().values()]
 
 
-# In[115]:
+# In[31]:
 
 
 if __name__ == "__main__":
@@ -876,7 +1139,7 @@ if __name__ == "__main__":
     _ = [print(type(v.value), v) for v in load_default_sky_parameters().values()]
 
 
-# In[30]:
+# In[32]:
 
 
 if __name__ == "__main__":
