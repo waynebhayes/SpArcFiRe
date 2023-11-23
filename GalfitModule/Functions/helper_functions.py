@@ -150,11 +150,28 @@ def exists(filename):
 # In[9]:
 
 
+def generate_get_set(input_dict, exclude = []):
+    exec_str = ""
+    for key,v in input_dict.items():
+        exec_str += f"""@property
+def {key}(self):
+    return self.{v}
+            
+@{key}.setter
+def {key}(self, new_val):
+    self.{v} = new_val
+"""
+    return exec_str
+
+
+# In[10]:
+
+
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[10]:
+# In[11]:
 
 
 # Unit test for sp
@@ -178,7 +195,7 @@ if __name__ == "__main__":
         raise(Exception())
 
 
-# In[11]:
+# In[12]:
 
 
 # Unit test for list_files
@@ -189,7 +206,7 @@ if __name__ == "__main__":
     print(sorted(find_files(pj(TEST_DATA_DIR, "test-out"), "123*", "d")))
 
 
-# In[12]:
+# In[13]:
 
 
 # Unit test for exists
@@ -199,7 +216,25 @@ if __name__ == "__main__":
     print("Does test-spout exist?", exists(pj(TEST_DATA_DIR, "test-spout")))
 
 
-# In[13]:
+# In[14]:
+
+
+if __name__ == "__main__":
+    print(generate_get_set({"x" : "_x1"}))
+    
+    class Fake():
+        def __init__(self):
+            self._x1 = "bye"
+
+        exec(generate_get_set({"x" : "_x1"}))
+        
+    y = Fake()
+    print(y.x)
+    y.x = "hi"
+    print(y._x1)
+
+
+# In[ ]:
 
 
 if __name__ == "__main__":

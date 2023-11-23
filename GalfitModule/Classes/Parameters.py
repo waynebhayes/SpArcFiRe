@@ -92,21 +92,22 @@ class BaseParameter():
           
 # ==========================================================================================================
 
-    @property
-    def value(self):
-        return self._value
+    exec(
+        generate_get_set(
+            {
+                "value"     : "_value",
+                "fix_value" : "_fix_value"
+            }
+        )
+    )
     
-    @value.setter
-    def value(self, new_val):
-        self._value = new_val
+#     @property
+#     def fix_value(self):
+#         return self._fix_value
     
-    @property
-    def fix_value(self):
-        return self._fix_value
-    
-    @fix_value.setter
-    def fix_value(self, new_val):
-        self._fix_value = new_val
+#     @fix_value.setter
+#     def fix_value(self, new_val):
+#         self._fix_value = new_val
 
 
 # In[5]:
@@ -144,7 +145,7 @@ class HeaderParameter(BaseParameter, str):
         self.fix_value = ""
 
 
-# In[7]:
+# In[33]:
 
 
 class NumParameter(BaseParameter, float):
@@ -167,6 +168,14 @@ class NumParameter(BaseParameter, float):
 #         self.component_number = kwargs.get("component_number", "")
         
 # ==========================================================================================================
+
+    @property
+    def value(self):
+        return self._value
+    
+    @value.setter
+    def value(self, new_val):
+        self._value = float(new_val)
 
     # Formerly __str__
     # def __str__(self):
@@ -214,6 +223,28 @@ class Skip(BaseParameter, int):
             comment          = comment,
             fix_value        = fix_value
         )
+        
+    @property
+    def value(self):
+        return self._value
+    
+    @value.setter
+    def value(self, new_val):
+        try:
+            self._value = int(new_val)
+        except ValueError as ve:
+            try:
+                self._value = int(float(new_val))
+            except ValueError as ve:
+                raise Exception("Value given to Skip must be convertible to an int or a float.")
+                
+    @property
+    def fix_value(self):
+        return ""
+    
+    @fix_value.setter
+    def fix_value(self, new_val):
+        pass
 
 
 # In[9]:
@@ -261,106 +292,150 @@ class MultiParameter(BaseParameter):
         #self._fix_value        = ""
         self._fix_x            = ""
         self._fix_y            = ""
-        
+    
+    def check_type(*iterable_in):
+        assert isinstance(iterable_in, (list, tuple)), "The new value for this attribute must be a list/tuple!"
+    def check_len(*iterable_in):
+        assert len(iterable_in) in (2,4), "The length of this iterable is not 2 or 4, MultiParameter cannot correctly update."
 # ==========================================================================================================
 
-    @property
-    def x(self):
-        return self._x1
+#     @property
+#     def x(self):
+#         return self._x1
     
-    @x.setter
-    def x(self, new_val):
-        self._x1 = new_val
+#     @x.setter
+#     def x(self, new_val):
+#         self._x1 = new_val
         
-    @property
-    def y(self):
-        return self._y1
+#     @property
+#     def y(self):
+#         return self._y1
     
-    @y.setter
-    def y(self, new_val):
-        self._y1 = new_val
+#     @y.setter
+#     def y(self, new_val):
+#         self._y1 = new_val
 
-# ==========================================================================================================
-
-    @property
-    def x1(self):
-        return self._x1
-    
-    @x1.setter
-    def x1(self, new_val):
-        self._x1 = new_val
-        
-    @property
-    def x2(self):
-        return self._x2
-    
-    @x2.setter
-    def x2(self, new_val):
-        self._x2 = new_val
-        
-    @property
-    def y1(self):
-        return self._y1
-    
-    @y1.setter
-    def y1(self, new_val):
-        self._y1 = new_val
-        
-    @property
-    def y2(self):
-        return self._y2
-    
-    @y2.setter
-    def y2(self, new_val):
-        self._y2 = new_val
+    exec(
+        generate_get_set(
+            {
+                "x" : "_x1",
+                "y" : "_y1"
+            }
+        )
+    )
 
 # ==========================================================================================================
 
-    @property
-    def xmin(self):
-        return self._x1
+#     @property
+#     def x1(self):
+#         return self._x1
     
-    @xmin.setter
-    def xmin(self, new_val):
-        self._x1 = new_val
+#     @x1.setter
+#     def x1(self, new_val):
+#         self._x1 = new_val
         
-    @property
-    def xmax(self):
-        return self._x2
+#     @property
+#     def x2(self):
+#         return self._x2
     
-    @xmax.setter
-    def xmax(self, new_val):
-        self._x2 = new_val
+#     @x2.setter
+#     def x2(self, new_val):
+#         self._x2 = new_val
         
-    @property
-    def ymin(self):
-        return self._y1
+#     @property
+#     def y1(self):
+#         return self._y1
     
-    @ymin.setter
-    def ymin(self, new_val):
-        self._y1 = new_val
+#     @y1.setter
+#     def y1(self, new_val):
+#         self._y1 = new_val
         
-    @property
-    def ymax(self):
-        return self._y2
+#     @property
+#     def y2(self):
+#         return self._y2
     
-    @ymax.setter
-    def ymax(self, new_val):
-        self._y2 = new_val
+#     @y2.setter
+#     def y2(self, new_val):
+#         self._y2 = new_val
+        
+    exec(
+        generate_get_set(
+            {
+                "x1" : "_x1",
+                "x2" : "_x2",
+                "y1" : "_y1",
+                "y2" : "_y2"
+            }
+        )
+    )
+
+# ==========================================================================================================
+
+#     @property
+#     def xmin(self):
+#         return self._x1
+    
+#     @xmin.setter
+#     def xmin(self, new_val):
+#         self._x1 = new_val
+        
+#     @property
+#     def xmax(self):
+#         return self._x2
+    
+#     @xmax.setter
+#     def xmax(self, new_val):
+#         self._x2 = new_val
+        
+#     @property
+#     def ymin(self):
+#         return self._y1
+    
+#     @ymin.setter
+#     def ymin(self, new_val):
+#         self._y1 = new_val
+        
+#     @property
+#     def ymax(self):
+#         return self._y2
+    
+#     @ymax.setter
+#     def ymax(self, new_val):
+#         self._y2 = new_val
+        
+    exec(
+        generate_get_set(
+            {
+                "xmin" : "_x1",
+                "xmax" : "_x2",
+                "ymin" : "_y1",
+                "ymax" : "_y2"
+            }
+        )
+    )
         
 # ==========================================================================================================
 
     @property
     def value(self):
-        return self._value
+        self.check_len(self._value)
+        
+        if len(self._value) == 2:
+            return (self.x1, self.y1)
+        elif len(self._value) == 4:
+            return (self.x1, self.y1, self.x2, self.y2)
     
     @value.setter
     def value(self, new_tuple):
-        if not isinstance(new_tuple, tuple):
-            raise("The new value for this attribute must be a tuple!")
-            
-        self._value = new_tuple
-    
+        self.check_type(new_tuple)
+        self.check_len(new_tuple)
+          
+        new_tuple = (float(i) for i in new_tuple)
+        if len(self._value) == 2:
+            self._value = (self.x1, self.y1)
+        elif len(self._value) == 4:
+            self._value = (self.x1, self.y1, self.x2, self.y2)
+        
 #     @property
 #     def value_str(self):
 #         return self._value_str
@@ -371,34 +446,52 @@ class MultiParameter(BaseParameter):
 
 # ==========================================================================================================
 
+#     @property
+#     def fix_x(self):
+#         return self._fix_x
+    
+#     @fix_x.setter
+#     def fix_x(self, new_str):            
+#         self._fix_x = new_str
+        
+#     @property
+#     def fix_y(self):
+#         return self._fix_y
+    
+#     @fix_y.setter
+#     def fix_y(self, new_str):            
+#         self._fix_y = new_str
+        
+    exec(
+        generate_get_set(
+            {
+                "fix_x" : "_fix_x",
+                "fix_y" : "_fix_y"
+            }
+        )
+    )
+    
     @property
     def fix_value(self):
         return self._fix_value
     
     @fix_value.setter
-    def fix_value(self, new_str):
-        if not isinstance(new_str, str):
-            raise("The new value for this attribute must be a string!")
+    def fix_value(self, new_val):
+        if isinstance(new_val, str):
+            self._fix_value = new_val
             
-        self._fix_value = new_str
-        
-    @property
-    def fix_x(self):
-        return self._fix_x
-    
-    @fix_x.setter
-    def fix_x(self, new_str):            
-        self._fix_x = new_str
-        
-    @property
-    def fix_y(self):
-        return self._fix_y
-    
-    @fix_y.setter
-    def fix_y(self, new_str):            
-        self._fix_y = new_str
+        elif isinstance(new_val, (list, tuple)):
+            self.fix_x = new_val[0]
+            self.fix_y = new_val[1]
+            
+            self._fix_value = f"{new_val[0]} {new_val[1]}"
+        else:
+            raise Exception("The new value for this attribute must be a string, list, or tuple!")
         
 # ==========================================================================================================
+
+    def __repr__(self):
+        return repr(self.value)
 
     # Override BaseParameter
     def __str__(self):
@@ -417,6 +510,9 @@ class MultiParameter(BaseParameter):
         elif len(self.value) == 4:
             value_str  = f"{self.x1}   {self.x2}   {self.y1}   {self.y2}"
         
+        else:
+            raise Exception(f"Something went wrong! Value in multiparameter is {self.value}")
+            
         pre_comment = f"{self.parameter_number:>2}) {value_str:<11} {self.fix_value}"
         return f"{pre_comment:<23} # {self.comment}"
 
@@ -424,6 +520,8 @@ class MultiParameter(BaseParameter):
 # In[10]:
 
 
+# Use NamedTuples so we can access this like a dictionary
+# while also using the indexing of a tuple where necessary
 ntPosition = namedtuple("ntPosition", "x y")
 
 class Position(MultiParameter):
@@ -441,7 +539,22 @@ class Position(MultiParameter):
         self.fix_x            = kwargs.get("fix_x", self.fix_value[0])
         self.fix_y            = kwargs.get("fix_y", self.fix_value[-1])
         
-# # ==========================================================================================================
+# ==========================================================================================================
+
+    @property
+    def value(self):
+        self._value = ntPosition(self.x, self.y)
+        return self._value
+    
+    @value.setter
+    def value(self, new_tuple):
+        self.check_type(new_tuple)
+        self.check_len(new_tuple)
+        
+        new_tuple = (float(i) for i in new_tuple)
+        self._value = ntPosition(*new_tuple)
+        self.x      = self._value[0]
+        self.y      = self._value[1]
         
 #     @property
 #     def fix_x(self):
@@ -473,7 +586,7 @@ class FourierMode(MultiParameter):
 #         self._x1 = amplitude        
 #         self._y1 = phase_angle
         
-        if isinstance(amplitude, tuple):
+        if isinstance(amplitude, (list, tuple)):
             phase_angle = amplitude[1]
             amplitude = amplitude[0]
             
@@ -498,45 +611,80 @@ class FourierMode(MultiParameter):
 
         
 # ==========================================================================================================
-    @property
-    def amplitude(self):
-        return self.x1
+#     @property
+#     def amplitude(self):
+#         return self.x1
 
-    @amplitude.setter
-    def amplitude(self, new_val):
-        self.x1 = new_val
+#     @amplitude.setter
+#     def amplitude(self, new_val):
+#         self.x1 = new_val
 
-    @property
-    def phase_angle(self):
-        return self.y1
+#     @property
+#     def phase_angle(self):
+#         return self.y1
 
-    @phase_angle.setter
-    def phase_angle(self, new_val):
-        self.y1 = new_val
+#     @phase_angle.setter
+#     def phase_angle(self, new_val):
+#         self.y1 = new_val
         
-    @property
-    def mode(self):
-        return self._mode
+    exec(
+        generate_get_set(
+            {
+                "amplitude" : "x1",
+                "phase_angle" : "y1"
+            }
+        )
+    )
     
-    @mode.setter
-    def mode(self, new_val):
-        self._mode = new_val
+# ==========================================================================================================   
+
+    exec(
+        generate_get_set(
+            {
+                "mode" : "_mode",
+                "fix_amplitude" : "fix_x",
+                "fix_phase_angle" : "fix_y"
+            }
+        )
+    )
+    
+    @property
+    def value(self):
+        self._value = ntFourier(self.amplitude, self.phase_angle)
+        return self._value
+    
+    @value.setter
+    def value(self, new_tuple):
+        self.check_type(new_tuple)
         
-    @property
-    def fix_amplitude(self):
-        return self.fix_x
-    
-    @fix_amplitude.setter
-    def fix_amplitude(self, new_val):
-        self.fix_x = new_val
+        new_tuple = (float(i) for i in new_tuple)
+        self._value      = ntFourier(*new_tuple)
+        self.amplitude   = self._value[0]
+        self.phase_angle = self._value[1]
         
-    @property
-    def fix_phase_angle(self):
-        return self.fix_y
+#     @property
+#     def mode(self):
+#         return self._mode
     
-    @fix_phase_angle.setter
-    def fix_phase_angle(self, new_val):
-        self.fix_y = new_val
+#     @mode.setter
+#     def mode(self, new_val):
+#         self._mode = new_val
+        
+#     @property
+#     def fix_amplitude(self):
+#         return self.fix_x
+    
+#     @fix_amplitude.setter
+#     def fix_amplitude(self, new_val):
+#         self.fix_x = new_val
+        
+#     @property
+#     def fix_phase_angle(self):
+#         return self.fix_y
+    
+#     @fix_phase_angle.setter
+#     def fix_phase_angle(self, new_val):
+#         self.fix_y = new_val
 
 
 # In[12]:
@@ -557,21 +705,30 @@ class BendingMode(NumParameter):
         
 # ==========================================================================================================
     
-    @property
-    def amplitude(self):
-        return self.value
+    exec(
+        generate_get_set(
+            {
+                "amplitude" : "value",
+                "mode" : "_mode"
+            }
+        )
+    )
     
-    @amplitude.setter
-    def amplitude(self, new_val):
-        self.value = new_val
+#     @property
+#     def amplitude(self):
+#         return self.value
+    
+#     @amplitude.setter
+#     def amplitude(self, new_val):
+#         self.value = new_val
         
-    @property
-    def mode(self):
-        return self._mode
+#     @property
+#     def mode(self):
+#         return self._mode
     
-    @mode.setter
-    def mode(self, new_val):
-        self._mode = new_val
+#     @mode.setter
+#     def mode(self, new_val):
+#         self._mode = new_val
 
 
 # In[13]:
@@ -592,7 +749,23 @@ class ImageRegionToFit(HeaderParameter, MultiParameter):
         self.fix_value = ""
         self.parameter_number = "H"
         self.comment = "Image region to fit (xmin xmax ymin ymax)"
-
+        
+    @property
+    def value(self):
+        self._value = ntImageRegionToFit(self.x1, self.y1, self.x2, self.y2)
+        return self._value
+    
+    @value.setter
+    def value(self, new_tuple):
+        self.check_type(new_tuple)
+            
+        new_tuple = (int(i) for i in new_tuple)
+        self._value = ntImageRegionToFit(*new_tuple)
+        self.x1     = self._value[0]
+        self.y1     = self._value[1]
+        self.x2     = self._value[2]
+        self.y2     = self._value[3]
+        
 # Redundant because I may use different naming conventions elsewhere
 class CropRegion(ImageRegionToFit):
     def __init__(self, *values, **kwargs):
@@ -602,6 +775,9 @@ class CropRegion(ImageRegionToFit):
 # In[14]:
 
 
+# This is functionally the same as position but for clarity...
+ntConvolutionBox = namedtuple("ntConvolutionBox", "x y")
+
 class ConvolutionBox(HeaderParameter, MultiParameter):
     def __init__(self, value = (50, 50), **kwargs):
         
@@ -609,11 +785,28 @@ class ConvolutionBox(HeaderParameter, MultiParameter):
         HeaderParameter.__init__(self, value, **kwargs)
         MultiParameter.__init__(self, value, **kwargs)
         
-        self.value     = ntPosition(*self.value)
+        self.value     = ntConvolutionBox(*self.value)
         
         self.fix_value = ""
         self.parameter_number = "I"
         self.comment = "Size of the convolution box (x y)"
+        
+# ==========================================================================================================
+
+    @property
+    def value(self):
+        self._value = ntConvolutionBox(self.x, self.y)
+        return self._value
+    
+    @value.setter
+    def value(self, new_tuple):
+        self.check_type(new_tuple)
+        self.check_len(new_tuple)
+            
+        new_tuple = (float(i) for i in new_tuple)
+        self._value = ntConvolutionBox(*new_tuple)
+        self.x      = self._value[0]
+        self.y      = self._value[1]
 
 
 # In[15]:
@@ -634,21 +827,43 @@ class PlateScale(HeaderParameter, MultiParameter):
         self.parameter_number = "K"
         self.comment = "Plate scale (dx dy)   [arcsec per pixel]"
         
+    exec(
+        generate_get_set(
+            {
+                "dx" : "x1",
+                "dy" : "y1"
+            }
+        )
+    )
+    
     @property
-    def dx(self):
-        return self.x1
+    def value(self):
+        self._value = ntPlateScale(self.dx, self.dy)
+        return self._value
     
-    @dx.setter
-    def dx(self, new_val):
-        self.x1 = new_val
+    @value.setter
+    def value(self, new_tuple):
+        self.check_type(new_tuple)
+            
+        self._value = ntPlateScale(*new_tuple)
+        self.dx     = float(self._value[0])
+        self.dy     = float(self._value[1])
+
+#     @property
+#     def dx(self):
+#         return self.x1
     
-    @property
-    def dy(self):
-        return self.y1
+#     @dx.setter
+#     def dx(self, new_val):
+#         self.x1 = new_val
     
-    @dy.setter
-    def dy(self, new_val):
-        self.y1 = new_val
+#     @property
+#     def dy(self):
+#         return self.y1
+    
+#     @dy.setter
+#     def dy(self, new_val):
+#         self.y1 = new_val
 
 
 # In[16]:
@@ -667,12 +882,16 @@ if __name__ == "__main__":
     )
     
     print(crop_region)
+    print(repr(crop_region))
+    print()
     
     crop_region = CropRegion(
         (45, 145, 45, 145)
     )
     
     print(crop_region)
+    print(repr(crop_region))
+    print()
     
     crop_region.xmin = 1
     crop_region.xmax = 155
@@ -680,6 +899,7 @@ if __name__ == "__main__":
     crop_region.ymax = 155
     
     print(crop_region)
+    print(repr(crop_region))
 
 
 # In[18]:
@@ -691,17 +911,23 @@ if __name__ == "__main__":
     )
     
     print(conv_box)
+    print(repr(conv_box))
+    print()
     
     plate_scale = PlateScale(
         (0.396, 0.396)
     )
     
-    print(plate_scale)  
+    print(plate_scale)
+    print(repr(plate_scale))
+    print()
     
     plate_scale.x = 0.4
     plate_scale.y = 0.4
     
     print(plate_scale)
+    print(repr(plate_scale))
+    print()
 
 
 # In[19]:
@@ -730,18 +956,18 @@ if __name__ == "__main__":
     )
     
     print(position)
+    print(repr(position))
+    print()
     
-    position = Position(
-        x = 101,
-        y = 101,
-        component_name = "Sersic",
-        component_number = 1
-    )
+    position.x = 101
+    position.y = 101
+    print(position)
+    print(repr(position))
+    print()
     
+    position.value = (102, 102)
     print(position)
-    position.x = 102
-    position.y = 102
-    print(position)
+    print(repr(position))
 
 
 # In[21]:
@@ -1134,7 +1360,7 @@ def load_default_header_parameters():
     )
     
     optimize = HeaderParameter(
-        1,
+        0,
         name = "optimize",
         parameter_number = "P",
         comment = "Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps",
@@ -1176,7 +1402,7 @@ if __name__ == "__main__":
     _ = [print(type(v.value), v) for v in load_default_sky_parameters().values()]
 
 
-# In[ ]:
+# In[32]:
 
 
 if __name__ == "__main__":
