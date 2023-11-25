@@ -517,7 +517,7 @@ class MultiParameter(BaseParameter):
         return f"{pre_comment:<23} # {self.comment}"
 
 
-# In[ ]:
+# In[10]:
 
 
 # Use NamedTuples so we can access this like a dictionary
@@ -573,7 +573,7 @@ class Position(MultiParameter):
 #         self._fix_y = new_val
 
 
-# In[ ]:
+# In[11]:
 
 
 ntFourier = namedtuple("ntFourier", "amplitude phase_angle")
@@ -687,7 +687,7 @@ class FourierMode(MultiParameter):
 #         self.fix_y = new_val
 
 
-# In[ ]:
+# In[12]:
 
 
 #class BendingModes(BaseParameter, float):
@@ -731,7 +731,7 @@ class BendingMode(NumParameter):
 #         self._mode = new_val
 
 
-# In[ ]:
+# In[13]:
 
 
 ntImageRegionToFit = namedtuple("ntImageRegionToFit", "x1 x2 y1 y2")
@@ -772,7 +772,7 @@ class CropRegion(ImageRegionToFit):
         ImageRegionToFit.__init__(self, *values, **kwargs)
 
 
-# In[ ]:
+# In[14]:
 
 
 # This is functionally the same as position but for clarity...
@@ -809,7 +809,7 @@ class ConvolutionBox(HeaderParameter, MultiParameter):
         self.y      = self._value[1]
 
 
-# In[ ]:
+# In[15]:
 
 
 ntPlateScale = namedtuple("ntPlateScale", "dx dy")
@@ -866,14 +866,14 @@ class PlateScale(HeaderParameter, MultiParameter):
 #         self.y1 = new_val
 
 
-# In[ ]:
+# In[16]:
 
 
 # if __name__ == "__main__":
 #     from RegTest.RegTest import *
 
 
-# In[ ]:
+# In[17]:
 
 
 if __name__ == "__main__":
@@ -902,7 +902,7 @@ if __name__ == "__main__":
     print(repr(crop_region))
 
 
-# In[ ]:
+# In[18]:
 
 
 if __name__ == "__main__":
@@ -930,7 +930,7 @@ if __name__ == "__main__":
     print()
 
 
-# In[ ]:
+# In[19]:
 
 
 if __name__ == "__main__":
@@ -945,7 +945,7 @@ if __name__ == "__main__":
     print(sky_line)
 
 
-# In[ ]:
+# In[20]:
 
 
 if __name__ == "__main__":
@@ -970,7 +970,7 @@ if __name__ == "__main__":
     print(repr(position))
 
 
-# In[ ]:
+# In[21]:
 
 
 if __name__ == "__main__":
@@ -990,7 +990,7 @@ if __name__ == "__main__":
     print(magnitude)
 
 
-# In[ ]:
+# In[22]:
 
 
 if __name__ == "__main__":
@@ -1004,7 +1004,7 @@ if __name__ == "__main__":
     print(skip)
 
 
-# In[ ]:
+# In[23]:
 
 
 if __name__ == "__main__":
@@ -1031,7 +1031,7 @@ if __name__ == "__main__":
     print(fourier1)
 
 
-# In[ ]:
+# In[24]:
 
 
 if __name__ == "__main__":
@@ -1055,7 +1055,7 @@ if __name__ == "__main__":
     print(bending3)
 
 
-# In[ ]:
+# In[25]:
 
 
 # Parameters with defaults for Sersic profile
@@ -1125,7 +1125,7 @@ def load_default_sersic_parameters(component_number = None):
     return loc
 
 
-# In[ ]:
+# In[26]:
 
 
 def load_default_power_parameters(component_number = None):
@@ -1201,21 +1201,21 @@ def load_default_power_parameters(component_number = None):
     return loc
 
 
-# In[ ]:
+# In[27]:
 
 
 def load_default_fourier_parameters(component_number = None):
     
     param_prefix = "F"
     
-    fourier1 = FourierMode(
+    F1 = FourierMode(
         mode = 1,
         amplitude = 0.05,
         phase_angle = 45,
         component_number = component_number
     )
     
-    fourier3 = FourierMode(
+    F3 = FourierMode(
         mode = 3,
         amplitude = 0.01,
         phase_angle = 25,
@@ -1235,7 +1235,7 @@ def load_default_fourier_parameters(component_number = None):
     return loc
 
 
-# In[ ]:
+# In[28]:
 
 
 # Parameters with defaults for Sky profile
@@ -1263,7 +1263,7 @@ def load_default_sky_parameters(component_number = None):
     dsky_dy = NumParameter(
         0,
         name = "dsky/dy",
-        parameter_number = 2,
+        parameter_number = 3,
         comment = "dsky/dy (sky gradient in y)     [ADUs/pix]",
         component_name = "Sky",
         component_number = component_number
@@ -1275,14 +1275,14 @@ def load_default_sky_parameters(component_number = None):
     return loc
 
 
-# In[ ]:
+# In[29]:
 
 
 # Parameters with defaults for Sky profile
-def load_default_header_parameters():
+def load_default_header_parameters(galaxy_name = ""):
     
     input_image = HeaderParameter(
-        "in.fits",
+        f"{galaxy_name}.fits",
         name = "input image",
         parameter_number = "A",
         comment = "Input data image (FITS file)",
@@ -1290,7 +1290,7 @@ def load_default_header_parameters():
     )
     
     output_image = HeaderParameter(
-        "out.fits",
+        f"{galaxy_name}_galfit_out.fits",
         name = "output image",
         parameter_number = "B",
         comment = "Output data image block",
@@ -1306,7 +1306,7 @@ def load_default_header_parameters():
     )
     
     psf = HeaderParameter(
-        "psf.fits",
+        f"{galaxy_name}_psf.fits",
         name = "PSF",
         parameter_number = "D",
         comment = "Input PSF image and (optional) diffusion kernel",
@@ -1322,7 +1322,7 @@ def load_default_header_parameters():
     )
     
     pixel_mask = HeaderParameter(
-        "none",
+        f"{galaxy_name}_star-rm.fits",
         name = "pixel mask",
         parameter_number = "F",
         comment = "Bad pixel mask (FITS image or ASCII coord list)",
@@ -1337,9 +1337,9 @@ def load_default_header_parameters():
         component_name = "Header"
     )
     
-    crop_region = ImageRegionToFit()
+    region_to_fit = ImageRegionToFit()
     
-    conv_box    = ConvolutionBox()
+    convolution_box    = ConvolutionBox()
     
     mag_photo_zeropoint = HeaderParameter(
         24.8,
@@ -1368,11 +1368,12 @@ def load_default_header_parameters():
     )
     
     loc = deepcopy(locals())
+    loc.pop("galaxy_name")
     
     return loc
 
 
-# In[ ]:
+# In[30]:
 
 
 def load_default_parameters():
@@ -1386,7 +1387,7 @@ def load_default_parameters():
     }
 
 
-# In[ ]:
+# In[31]:
 
 
 if __name__ == "__main__":
@@ -1401,7 +1402,7 @@ if __name__ == "__main__":
     _ = [print(type(v.value), v) for v in load_default_sky_parameters().values()]
 
 
-# In[ ]:
+# In[32]:
 
 
 if __name__ == "__main__":
@@ -1411,7 +1412,7 @@ if __name__ == "__main__":
     ]
 
 
-# In[ ]:
+# In[33]:
 
 
 if __name__ == "__main__":
