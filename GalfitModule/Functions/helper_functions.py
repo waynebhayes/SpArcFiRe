@@ -150,7 +150,7 @@ def exists(filename):
 # In[9]:
 
 
-def generate_get_set(input_dict, exclude = []):
+def generate_get_set(input_dict): #, exclude = []):
     exec_str = ""
     for key,v in input_dict.items():
         exec_str += f"""@property
@@ -234,7 +234,7 @@ if __name__ == "__main__":
     print(y._x1)
 
 
-# In[ ]:
+# In[15]:
 
 
 if __name__ == "__main__":
