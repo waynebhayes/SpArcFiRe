@@ -145,7 +145,7 @@ class HeaderParameter(BaseParameter, str):
         self.fix_value = ""
 
 
-# In[33]:
+# In[7]:
 
 
 class NumParameter(BaseParameter, float):
@@ -517,7 +517,7 @@ class MultiParameter(BaseParameter):
         return f"{pre_comment:<23} # {self.comment}"
 
 
-# In[10]:
+# In[ ]:
 
 
 # Use NamedTuples so we can access this like a dictionary
@@ -573,7 +573,7 @@ class Position(MultiParameter):
 #         self._fix_y = new_val
 
 
-# In[11]:
+# In[ ]:
 
 
 ntFourier = namedtuple("ntFourier", "amplitude phase_angle")
@@ -687,7 +687,7 @@ class FourierMode(MultiParameter):
 #         self.fix_y = new_val
 
 
-# In[12]:
+# In[ ]:
 
 
 #class BendingModes(BaseParameter, float):
@@ -731,7 +731,7 @@ class BendingMode(NumParameter):
 #         self._mode = new_val
 
 
-# In[13]:
+# In[ ]:
 
 
 ntImageRegionToFit = namedtuple("ntImageRegionToFit", "x1 x2 y1 y2")
@@ -772,7 +772,7 @@ class CropRegion(ImageRegionToFit):
         ImageRegionToFit.__init__(self, *values, **kwargs)
 
 
-# In[14]:
+# In[ ]:
 
 
 # This is functionally the same as position but for clarity...
@@ -809,7 +809,7 @@ class ConvolutionBox(HeaderParameter, MultiParameter):
         self.y      = self._value[1]
 
 
-# In[15]:
+# In[ ]:
 
 
 ntPlateScale = namedtuple("ntPlateScale", "dx dy")
@@ -866,14 +866,14 @@ class PlateScale(HeaderParameter, MultiParameter):
 #         self.y1 = new_val
 
 
-# In[16]:
+# In[ ]:
 
 
 # if __name__ == "__main__":
 #     from RegTest.RegTest import *
 
 
-# In[17]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -902,7 +902,7 @@ if __name__ == "__main__":
     print(repr(crop_region))
 
 
-# In[18]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -930,7 +930,7 @@ if __name__ == "__main__":
     print()
 
 
-# In[19]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -945,7 +945,7 @@ if __name__ == "__main__":
     print(sky_line)
 
 
-# In[20]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -970,7 +970,7 @@ if __name__ == "__main__":
     print(repr(position))
 
 
-# In[21]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -990,7 +990,7 @@ if __name__ == "__main__":
     print(magnitude)
 
 
-# In[22]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1004,7 +1004,7 @@ if __name__ == "__main__":
     print(skip)
 
 
-# In[23]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1031,7 +1031,7 @@ if __name__ == "__main__":
     print(fourier1)
 
 
-# In[24]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1055,7 +1055,7 @@ if __name__ == "__main__":
     print(bending3)
 
 
-# In[25]:
+# In[ ]:
 
 
 # Parameters with defaults for Sersic profile
@@ -1125,7 +1125,7 @@ def load_default_sersic_parameters(component_number = None):
     return loc
 
 
-# In[26]:
+# In[ ]:
 
 
 def load_default_power_parameters(component_number = None):
@@ -1201,7 +1201,7 @@ def load_default_power_parameters(component_number = None):
     return loc
 
 
-# In[27]:
+# In[ ]:
 
 
 def load_default_fourier_parameters(component_number = None):
@@ -1235,7 +1235,7 @@ def load_default_fourier_parameters(component_number = None):
     return loc
 
 
-# In[28]:
+# In[ ]:
 
 
 # Parameters with defaults for Sky profile
@@ -1275,7 +1275,7 @@ def load_default_sky_parameters(component_number = None):
     return loc
 
 
-# In[29]:
+# In[ ]:
 
 
 # Parameters with defaults for Sky profile
@@ -1372,22 +1372,21 @@ def load_default_header_parameters():
     return loc
 
 
-# In[30]:
+# In[ ]:
 
 
-if __name__ == "__main__":
-    _ = [print(v) for v in load_default_header_parameters().values()]
-    print()
-    _ = [print(v) for v in load_default_sersic_parameters().values()]
-    print()
-    _ = [print(v) for v in load_default_power_parameters().values()]
-    print()
-    _ = [print(v) for v in load_default_fourier_parameters().values()]
-    print()
-    _ = [print(v) for v in load_default_sky_parameters().values()]
+def load_default_parameters():
+    return {
+        "header"  : load_default_header_parameters(),
+        "sersic"  : load_default_sersic_parameters(),
+        "power"   : load_default_power_parameters(),
+        "fourier" : load_default_fourier_parameters(),
+        "sky"     : load_default_sky_parameters()
+        #"bending"
+    }
 
 
-# In[31]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1402,7 +1401,17 @@ if __name__ == "__main__":
     _ = [print(type(v.value), v) for v in load_default_sky_parameters().values()]
 
 
-# In[32]:
+# In[ ]:
+
+
+if __name__ == "__main__":
+    _ = [
+        print(*[parameter for parameter in component_dict.values()], sep = "\n", end = "\n\n")
+        for component_dict in load_default_parameters().values()
+    ]
+
+
+# In[ ]:
 
 
 if __name__ == "__main__":
