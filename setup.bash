@@ -11,12 +11,13 @@ directory.
 Note: the 'source' command assumes you're using bash as your shell; if not, you'll need
 to figure out how to set the environment variable SPARCFIRE_HOME yourself.
 "
-fail() { echo "$@" >&2; return 1
-}
+fail() { echo "$@" >&2; return 1 ;}
 
 [ "$SPARCFIRE_HOME" != "" ] && return
 
+# if SETUP_USAGE have set, exit
 if [ "`echo $0 | sed 's,.*/,,'`" = setup.sh ]; then
+    echo "SETUP_USAGE have set"
     fail "$SETUP_USAGE
     SETUP ERROR: You've run this script; source it instead by typing:
     source $0"
@@ -33,10 +34,10 @@ case $# in
 esac
 if [ "$SPARCFIRE_HOME" = . ]; then SPARCFIRE_HOME=`/bin/pwd`; fi
 
-PIP_NEED='numpy|Pillow|scipy|astropy'
+PIP_NEED='numpy|Pillow|scipy|astropy|tsv'
 
 echo "Checking you have Python 2.7 or 3 installed."
-# I think 2.7.5 is necessary, only need to check if it is satisfied python 2.7
+# I think 2.7.5 is unnecessary, only need to check if it is satisfied python 2.7
 if python --version 2>&1 | grep -q '2\.7'; then
     PYTHON=python
     PYTHON_SUFFIX=".py2"
@@ -70,7 +71,7 @@ export PYTHON_SUFFIX="$PYTHON_SUFFIX"
 #if python3 --version 2>&1 | grep -q '3\.[1,7-9]\?[0-9]\.[0-9]\?[0-9]'; then
 echo ""
 echo "Now checking for python3(.7 or greater) for GalfitModule."
-PIP_NEED3='numpy|Pillow|scipy|astropy|pandas|IPython'
+PIP_NEED3='numpy|Pillow|scipy|astropy|pandas|IPython|scikit-image|matplotlib|pickle-mixin|joblib'
 if python3 -c 'import sys; assert sys.version_info >= (3,7), "Python3.7 or newer needed."'; then
     export PYTHON3=python3
     PIP_HAVE3=`(pip3 list; $PYTHON -m pip list) 2>/dev/null | awk '{print $1}' | sort -u | egrep "$PIP_NEED3"`
