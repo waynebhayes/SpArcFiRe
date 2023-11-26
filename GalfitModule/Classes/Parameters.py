@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[ ]:
 
 
 import os
@@ -19,7 +19,7 @@ import pandas as pd
 import numpy as np
 
 
-# In[2]:
+# In[ ]:
 
 
 # For debugging purposes
@@ -33,7 +33,7 @@ def in_notebook():
         return False
 
 
-# In[3]:
+# In[ ]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -59,7 +59,7 @@ sys.path.append(_MODULE_DIR)
 from Functions.helper_functions import *
 
 
-# In[4]:
+# In[ ]:
 
 
 class BaseParameter():
@@ -73,22 +73,12 @@ class BaseParameter():
         
         self.name              = kwargs.get("name", "")
         self.parameter_number  = kwargs.get("parameter_number", "#")
+        self.parameter_prefix  = kwargs.get("parameter_prefix", " ")
         self.comment           = kwargs.get("comment", "")
         
         # Not sure if I'll need these but keeping them in for now
         self.component_name    = kwargs.get("component_name", "")
         self.component_number  = kwargs.get("component_number", "")
-        
-# ==========================================================================================================
-
-    # Formerly __str__
-    # def __repr__(self):
-    #     return f"{self.value}"
-
-    # Formerly __repr__
-    def __str__(self):
-        pre_comment = f"{self.parameter_number:>2}) {self.value:<11} {self.fix_value}"
-        return f"{pre_comment:<23} # {self.comment}"
           
 # ==========================================================================================================
 
@@ -101,16 +91,19 @@ class BaseParameter():
         )
     )
     
-#     @property
-#     def fix_value(self):
-#         return self._fix_value
-    
-#     @fix_value.setter
-#     def fix_value(self, new_val):
-#         self._fix_value = new_val
+# ==========================================================================================================
+
+    def __repr__(self):
+        return repr(self.value)
+
+    # Formerly __repr__
+    def __str__(self):
+        pre_fix = f"{self.parameter_prefix}{self.parameter_number}) {self.value:<10}"
+        pre_comment = f"{pre_fix:<16}{self.fix_value}"
+        return f"{pre_comment:<23} # {self.comment}"
 
 
-# In[5]:
+# In[ ]:
 
 
 class ComponentType(BaseParameter, str):
@@ -119,12 +112,19 @@ class ComponentType(BaseParameter, str):
     
     def __init__(self, name, **kwargs):
         
-        BaseParameter.__init__(self, name, **kwargs)
-        self.fix_value = ""
-        self.parameter_number = kwargs.get("parameter_number", 0)
+        BaseParameter.__init__(
+            self, 
+            name,
+            fix_value = "",
+            parameter_number = 0,
+            comment = "Component type",
+            **kwargs
+        )
+        
+        #self.parameter_number = kwargs.get("parameter_number", 0)
         
         # self.value            = value
-        self.comment          = "Component type"
+        #self.comment          = "Component type"
         # self.component_number = kwargs.get("component_number", 0)
         
     # def __str__(self):
@@ -132,7 +132,7 @@ class ComponentType(BaseParameter, str):
     #     return f"{self.parameter_number:>2}) {self.name:<11} {empty_str:<10} #  {self.comment}"
 
 
-# In[6]:
+# In[ ]:
 
 
 class HeaderParameter(BaseParameter, str):
@@ -140,12 +140,16 @@ class HeaderParameter(BaseParameter, str):
         return super(HeaderParameter, cls).__new__(cls, value)
     
     def __init__(self, value, **kwargs):
-        BaseParameter.__init__(self, value, **kwargs)
-    
-        self.fix_value = ""
+        BaseParameter.__init__(
+            self, 
+            value, 
+            fix_value = "",
+            parameter_prefix = "",
+            **kwargs
+        )
 
 
-# In[7]:
+# In[ ]:
 
 
 class NumParameter(BaseParameter, float):
@@ -154,9 +158,13 @@ class NumParameter(BaseParameter, float):
     
     def __init__(self, value, **kwargs):
         
-        BaseParameter.__init__(self, value, **kwargs)
+        BaseParameter.__init__(
+            self, 
+            float(round(value, 4)), 
+            **kwargs
+        )
         
-        self.value = float(round(self._value, 4))
+        #self.value = float(round(self.value, 4))
         
 #         self.fix_value        = kwargs.get("fix_value", 0)
 #         self.name             = kwargs.get("name", "")
@@ -188,7 +196,7 @@ class NumParameter(BaseParameter, float):
 # ==========================================================================================================
 
 
-# In[8]:
+# In[ ]:
 
 
 class Skip(BaseParameter, int):
@@ -247,7 +255,7 @@ class Skip(BaseParameter, int):
         pass
 
 
-# In[9]:
+# In[ ]:
 
 
 class MultiParameter(BaseParameter):
@@ -513,11 +521,11 @@ class MultiParameter(BaseParameter):
         else:
             raise Exception(f"Something went wrong! Value in multiparameter is {self.value}")
             
-        pre_comment = f"{self.parameter_number:>2}) {value_str:<11} {self.fix_value}"
+        pre_comment = f"{self.parameter_prefix}{self.parameter_number}) {value_str:<11} {self.fix_value}"
         return f"{pre_comment:<23} # {self.comment}"
 
 
-# In[10]:
+# In[ ]:
 
 
 # Use NamedTuples so we can access this like a dictionary
@@ -573,7 +581,7 @@ class Position(MultiParameter):
 #         self._fix_y = new_val
 
 
-# In[11]:
+# In[ ]:
 
 
 ntFourier = namedtuple("ntFourier", "amplitude phase_angle")
@@ -588,7 +596,7 @@ class FourierMode(MultiParameter):
         
         if isinstance(amplitude, (list, tuple)):
             phase_angle = amplitude[1]
-            amplitude = amplitude[0]
+            amplitude   = amplitude[0]
             
         # Override these properties later
         #self.amplitude   = self._amplitude
@@ -596,18 +604,22 @@ class FourierMode(MultiParameter):
         
         #self.value_str  = f"{self.amplitude} {self.phase_angle}"
         
-        MultiParameter.__init__(self, (amplitude, phase_angle), **kwargs)
+        MultiParameter.__init__(
+            self, 
+            (amplitude, phase_angle),
+            name = "fourier mode",
+            parameter_number = f"{self.mode}",
+            parameter_prefix = "F",
+            comment = f"Azim. Fourier mode {self.mode}, amplitude, & phase angle",
+            **kwargs
+        )
         
-        self.value = ntFourier(*self.value)
+        self.value     = ntFourier(*self.value)
         
-        self.name             = "position"
-        self.parameter_number = f"F{self.mode}"
-        self.comment         = f"Azim. Fourier mode {self.mode}, amplitude, & phase angle"
+        self.fix_value = kwargs.get("fix_value", "1 1")
         
-        self.fix_value       = kwargs.get("fix_value", "1 1")
-        
-        self.fix_x = kwargs.get("fix_amplitude", self.fix_value[0])
-        self.fix_y = kwargs.get("fix_phase_angle", self.fix_value[-1])
+        self.fix_x     = kwargs.get("fix_amplitude", self.fix_value[0])
+        self.fix_y     = kwargs.get("fix_phase_angle", self.fix_value[-1])
 
         
 # ==========================================================================================================
@@ -687,7 +699,7 @@ class FourierMode(MultiParameter):
 #         self.fix_y = new_val
 
 
-# In[12]:
+# In[ ]:
 
 
 #class BendingModes(BaseParameter, float):
@@ -697,12 +709,15 @@ class BendingMode(NumParameter):
         self._mode        = mode
         # self._amplitude   = amplitude
         
-        NumParameter.__init__(self, amplitude, **kwargs)
+        NumParameter.__init__(
+            self, 
+            amplitude,
+            name = "bending mode",
+            parameter_number = f"{self.mode}",
+            parameter_prefix = "B",
+            comment = f"Bending mode {self.mode} amplitude",
+            **kwargs)
     
-        self.name             = "bending mode"
-        self.parameter_number = f"B{self.mode}"
-        self.comment         = f"Bending mode {self.mode} amplitude"
-        
 # ==========================================================================================================
     
     exec(
@@ -731,7 +746,7 @@ class BendingMode(NumParameter):
 #         self._mode = new_val
 
 
-# In[13]:
+# In[ ]:
 
 
 ntImageRegionToFit = namedtuple("ntImageRegionToFit", "x1 x2 y1 y2")
@@ -740,19 +755,20 @@ class ImageRegionToFit(HeaderParameter, MultiParameter):
     def __init__(self, value = (0, 256, 0, 256), **kwargs):
         
         # Header Parameter first so that we don't overwrite
-        # multiparameter fix value
+        # multiparameter fix value property setting
         HeaderParameter.__init__(self, value, **kwargs)
         MultiParameter.__init__(self, value, **kwargs)
         
         self.value = ntImageRegionToFit(*self.value)
         
         self.fix_value = ""
+        self.parameter_prefix = ""
         self.parameter_number = "H"
         self.comment = "Image region to fit (xmin xmax ymin ymax)"
         
     @property
     def value(self):
-        self._value = ntImageRegionToFit(self.x1, self.y1, self.x2, self.y2)
+        self._value = ntImageRegionToFit(self.x1, self.x2, self.y1, self.y2)
         return self._value
     
     @value.setter
@@ -762,8 +778,8 @@ class ImageRegionToFit(HeaderParameter, MultiParameter):
         new_tuple = (int(i) for i in new_tuple)
         self._value = ntImageRegionToFit(*new_tuple)
         self.x1     = self._value[0]
-        self.y1     = self._value[1]
-        self.x2     = self._value[2]
+        self.x2     = self._value[1]
+        self.y1     = self._value[2]
         self.y2     = self._value[3]
         
 # Redundant because I may use different naming conventions elsewhere
@@ -772,7 +788,7 @@ class CropRegion(ImageRegionToFit):
         ImageRegionToFit.__init__(self, *values, **kwargs)
 
 
-# In[14]:
+# In[ ]:
 
 
 # This is functionally the same as position but for clarity...
@@ -788,6 +804,7 @@ class ConvolutionBox(HeaderParameter, MultiParameter):
         self.value     = ntConvolutionBox(*self.value)
         
         self.fix_value = ""
+        self.parameter_prefix = ""
         self.parameter_number = "I"
         self.comment = "Size of the convolution box (x y)"
         
@@ -809,7 +826,7 @@ class ConvolutionBox(HeaderParameter, MultiParameter):
         self.y      = self._value[1]
 
 
-# In[15]:
+# In[ ]:
 
 
 ntPlateScale = namedtuple("ntPlateScale", "dx dy")
@@ -824,6 +841,7 @@ class PlateScale(HeaderParameter, MultiParameter):
         self.value = ntPlateScale(*self.value)
         
         self.fix_value = ""
+        self.parameter_prefix = ""
         self.parameter_number = "K"
         self.comment = "Plate scale (dx dy)   [arcsec per pixel]"
         
@@ -866,14 +884,14 @@ class PlateScale(HeaderParameter, MultiParameter):
 #         self.y1 = new_val
 
 
-# In[16]:
+# In[ ]:
 
 
 # if __name__ == "__main__":
 #     from RegTest.RegTest import *
 
 
-# In[17]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -902,7 +920,7 @@ if __name__ == "__main__":
     print(repr(crop_region))
 
 
-# In[18]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -930,14 +948,14 @@ if __name__ == "__main__":
     print()
 
 
-# In[19]:
+# In[ ]:
 
 
 if __name__ == "__main__":
     bulge_line = ComponentType("sersic", component_number = 1)
     disk_line  = ComponentType("sersic", component_number = 2)
-    arms_line  = ComponentType("power", parameter_number = "R0")
-    sky_line   = ComponentType("sky", component_number = 3)
+    arms_line  = ComponentType("power" , parameter_prefix = "R")
+    sky_line   = ComponentType("sky"   , component_number = 3)
 
     print(bulge_line)
     print(disk_line)
@@ -945,7 +963,7 @@ if __name__ == "__main__":
     print(sky_line)
 
 
-# In[20]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -970,7 +988,7 @@ if __name__ == "__main__":
     print(repr(position))
 
 
-# In[21]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -990,7 +1008,7 @@ if __name__ == "__main__":
     print(magnitude)
 
 
-# In[22]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1004,7 +1022,7 @@ if __name__ == "__main__":
     print(skip)
 
 
-# In[23]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1031,7 +1049,7 @@ if __name__ == "__main__":
     print(fourier1)
 
 
-# In[24]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1055,7 +1073,7 @@ if __name__ == "__main__":
     print(bending3)
 
 
-# In[25]:
+# In[ ]:
 
 
 # Parameters with defaults for Sersic profile
@@ -1125,19 +1143,24 @@ def load_default_sersic_parameters(component_number = None):
     return loc
 
 
-# In[26]:
+# In[ ]:
 
 
 def load_default_power_parameters(component_number = None):
     
     param_prefix = "R"
     
-    _power = ComponentType("power", parameter_number = f"{param_prefix}0", component_number = component_number)
+    _power = ComponentType(
+        "power", 
+        parameter_prefix = param_prefix,
+        component_number = component_number
+    )
     
     inner_rad = NumParameter(
         0,
         name = "inner radius",
-        parameter_number = f"{param_prefix}1",
+        parameter_number = "1",
+        parameter_prefix = param_prefix,
         comment = "Spiral inner radius [pixels]",
         component_name = "Power",
         component_number = component_number
@@ -1146,7 +1169,8 @@ def load_default_power_parameters(component_number = None):
     outer_rad = NumParameter(
         10,
         name = "outer radius",
-        parameter_number = f"{param_prefix}2",
+        parameter_number = "2",
+        parameter_prefix = param_prefix,
         comment = "Spiral outer radius [pixels]",
         component_name = "Power",
         component_number = component_number
@@ -1155,7 +1179,8 @@ def load_default_power_parameters(component_number = None):
     cumul_rot = NumParameter(
         90,
         name = "cumulative rotation out",
-        parameter_number = f"{param_prefix}3",
+        parameter_number = "3",
+        parameter_prefix = param_prefix,
         comment = "Cumul. rotation out to outer radius [degrees]",
         component_name = "Power",
         component_number = component_number
@@ -1164,7 +1189,8 @@ def load_default_power_parameters(component_number = None):
     powerlaw_index = NumParameter(
         0.5,
         name = "powerlaw index",
-        parameter_number = f"{param_prefix}1",
+        parameter_number = "4",
+        parameter_prefix = param_prefix,
         comment = "Asymptotic spiral powerlaw",
         component_name = "Power",
         component_number = component_number
@@ -1173,7 +1199,8 @@ def load_default_power_parameters(component_number = None):
     inclination = NumParameter(
         0,
         name = "inclination",
-        parameter_number = f"{param_prefix}9",
+        parameter_number = "9",
+        parameter_prefix = param_prefix,
         comment = "Inclination to L.o.S. [degrees]",
         component_name = "Power",
         component_number = component_number
@@ -1182,7 +1209,8 @@ def load_default_power_parameters(component_number = None):
     sky_position_angle = NumParameter(
         90,
         name = "sky_position_angle",
-        parameter_number = f"{param_prefix}10",
+        parameter_number = "10",
+        parameter_prefix = param_prefix,
         comment = "Sky position angle",
         component_name = "Power",
         component_number = component_number
@@ -1201,12 +1229,10 @@ def load_default_power_parameters(component_number = None):
     return loc
 
 
-# In[27]:
+# In[ ]:
 
 
 def load_default_fourier_parameters(component_number = None):
-    
-    param_prefix = "F"
     
     F1 = FourierMode(
         mode = 1,
@@ -1230,12 +1256,11 @@ def load_default_fourier_parameters(component_number = None):
     
     loc = deepcopy(locals())
     loc.pop("component_number")
-    loc.pop("param_prefix")
     
     return loc
 
 
-# In[28]:
+# In[ ]:
 
 
 # Parameters with defaults for Sky profile
@@ -1269,13 +1294,19 @@ def load_default_sky_parameters(component_number = None):
         component_number = component_number
     )
     
+    skip = Skip(
+        0,
+        component_name = "Sky",
+        component_number = component_number
+    )
+    
     loc = deepcopy(locals())
     loc.pop("component_number")
     
     return loc
 
 
-# In[29]:
+# In[ ]:
 
 
 # Parameters with defaults for Sky profile
@@ -1373,7 +1404,7 @@ def load_default_header_parameters(galaxy_name = ""):
     return loc
 
 
-# In[30]:
+# In[ ]:
 
 
 def load_default_parameters():
@@ -1387,7 +1418,7 @@ def load_default_parameters():
     }
 
 
-# In[31]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1402,7 +1433,7 @@ if __name__ == "__main__":
     _ = [print(type(v.value), v) for v in load_default_sky_parameters().values()]
 
 
-# In[32]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1412,7 +1443,7 @@ if __name__ == "__main__":
     ]
 
 
-# In[33]:
+# In[ ]:
 
 
 if __name__ == "__main__":
