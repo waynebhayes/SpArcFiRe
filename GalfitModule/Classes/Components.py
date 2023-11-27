@@ -59,7 +59,7 @@ from Functions.helper_functions import *
 from Classes.Parameters import *
 
 
-# In[37]:
+# In[20]:
 
 
 # TODO: MAKE ITERABLE via generator
@@ -95,14 +95,6 @@ class GalfitComponent:
         self.component_name   = component_name
         self.component_number = component_number
         self.param_prefix     = param_prefix       
-        
-        #key = "Component type"
-        #self.param_desc = {key : key}
-        
-        # tuple in value for printing
-        #self.param_numbers = {0 : key}
-        #self.param_values = {key : component_type} #(component_type, "")}
-        #self.param_fix = {key : ""}
         
         # For reading from file
         self.start_dict = f"COMP_{self.component_number}"
@@ -212,42 +204,10 @@ class GalfitComponent:
                 self.parameters[pname].value = pval
                     
         return func_wrapper
+          
 # ==========================================================================================================
 
-#     def update_param_values(self):
-#         # Values are the only thing that will change via instance.param_name
-#         # We need to update the dictionary that holds all of them since I use
-#         # a deepcopy to save myself some lines of code/typing (cheeky)
-        
-#         # TODO: Catch values which I use param fix to cheat on 
-#         self.param_values.update({k:v for k,v in self.__dict__.items() if k in self.param_values})
-#         if self.component_type == "header":
-#             self.param_fix["region_to_fit"] = f'{self.__dict__["region_to_fit"][2]} {self.__dict__["region_to_fit"][3]}'
-        
-# ==========================================================================================================
-
-#     def check_lengths(self):
-        
-#         if not all(len(ec) == len(self.param_numbers) for ec in (self.param_numbers, self.param_values, self.param_desc, self.param_fix)):
-#             print("Length of array containing parameter numbers, values, and descriptions must be the same!")
-            
-#             print("param_numbers:", end = " ")
-#             print(*self.param_numbers.keys(), sep = "\n")
-            
-#             print("param_values:", end = " ")
-#             print(*self.param_values.keys(), sep = "\n")
-            
-#             print("param_fix:", end = " ")
-#             print(*self.param_fix.keys(), sep = "\n")
-            
-#             print("param_desc:", end = " ")
-#             print(*self.param_desc.keys(), sep = "\n")
-            
-#             raise(Exception())
-            
-# ==========================================================================================================
-
-    # TODO: Add comparison function via subtract
+    # TODO: Add comparison function via subtract(?)
     def __sub__(self):
         pass
     
@@ -333,21 +293,11 @@ class GalfitComponent:
             dtype = np.float32
         )
         
-        # Move skip to end
+        # Move skip to end for reasons
         skip_col = f"skip_{name}"
         if skip_col in all_data.columns:
             all_data.insert(len(all_data.columns) - 1, skip_col, all_data.pop(skip_col))
-        
-#         param_names  = [f"{i}_{name}" for i in parameter_dict.keys()]
-#         param_values = np.array(list(parameter_dict.values()))
-#         param_values = param_values.reshape(1, len(param_values))
-        
-#         # Redundancy in index name and column names is intentional!
-#         all_data = pd.DataFrame(param_values, 
-#                                 index = [name], 
-#                                 columns = param_names,
-#                                 dtype = np.float32)
-        
+                
         return all_data
 # ==========================================================================================================
 
@@ -365,22 +315,16 @@ class GalfitComponent:
             if k.startswith("_"):
                 continue
             
-            #mid_idx = len(v)//2
-            
-            # value     = v[:mid_idx]
-            # fix_value = v[mid_idx:]
-            
             if issubclass(type(self.parameters[k]), MultiParameter):
                 value     = v[:2]
                 fix_value = v[2:]
-                # value     = v[:mid_idx][0]
-                # fix_value = v[mid_idx:][0]
+                
             else:
                 value     = v[0]
                 fix_value = v[1]
             
-            self.parameters[k].value     = value
-            self.parameters[k].fix_value = fix_value
+            self.parameters[k].value = value
+            self.parameters[k].fix   = fix_value
             
 # ==========================================================================================================    
 
@@ -459,27 +403,11 @@ class GalfitComponent:
             if str(num) in p_numbers
         }
         
-        # This is for setting fix_value later
+        # This is for setting the fix value later
         if "skip" in file_dict:
             file_dict["skip"].append(None)
                                     
         self.update_parameters_file_helper(file_dict)
-        
-#         for k,v in file_dict.items():
-#             if k.startswith("_"):
-#                 continue
-            
-#             mid_idx = len(v)//2
-            
-#             value     = v[:mid_idx]
-#             fix_value = v[mid_idx:]
-            
-#             if not isinstance(self.parameters[k], MultiParameter):
-#                 value     = v[:mid_idx][0]
-#                 fix_value = v[mid_idx:][0]
-            
-#             self.parameters[k].value = value
-#             self.parameters[k].fix_value = fix_value
 
 # ==========================================================================================================
     
@@ -528,17 +456,7 @@ class GalfitComponent:
                 # Mix check with value (component type) and end key because that's usually known
                 # Comp type should be handled now that we include the beginning
                 feed_in  = {key : value for idx, (key, value) in enumerate(input_in.items()) 
-                            if keys.index(component_start) <= idx <= keys.index(component_end)}
-                
-                # print(ve)
-                # for k,v in input_in.items():
-                #     print(k,v)
-                
-                # 
-                # 
-                # # Usually of form #_param
-                # component_end   = f"{component_start[0]}{self.end_dict[1:]}" 
-                # print(component_start, component_end)               
+                            if keys.index(component_start) <= idx <= keys.index(component_end)}   
             
             input_file.close()
             return feed_in
@@ -622,43 +540,16 @@ class GalfitComponent:
             
         except OSError as ose:
             print(f"Something went wrong! {ose}")
-    
-    
-    # Either 
-    # instance.param_name = #
-    # instance.update_param_values()
-    # or
-    # instance.param_values["param_name"] = #
-    # works
             
-    # #https://stackoverflow.com/a/35282351
-    # def __iter__(self):
-    #     return self.__dict__.iteritems()
 
 
-# In[38]:
+# In[21]:
 
 
 class Sersic(GalfitComponent):
     def __init__(self, component_number, **kwargs):
         
-        # SersicParameters
-        #sersic_parameters = load_default_sersic_parameters(component_number = component_number)
-        
-        # Use mutability to our advantage and use the full name where clarity may be desired
-        #SP = SersicParameters
-        
-        # for pname, pval in kwargs.keys():
-        #     if pname in SP:
-        #         SP[pname].value = pval
-        
-        # self.position         = SP["position"].value  #.value(kwargs.get("position", (0.0000, 0.0000)))
-        # self.magnitude        = SP["magnitude"].value #float(kwargs.get("magnitude", 13))
-        # self.effective_radius = SP["effective_radius"].value #float(kwargs.get("effective_radius", 10))
-        # self.sersic_index     = SP["sersic_index"].value #float(kwargs.get("sersic_index", 4))
-        # self.axis_ratio       = SP["axis_ratio"].value #float(kwargs.get("axis_ratio", 0.6))
-        # self.position_angle   = SP["position_angle"].value #float(kwargs.get("position_angle", 0))
-                
+        # SersicParameters               
         GalfitComponent.__init__(self, 
                                  load_default_sersic_parameters(component_number = component_number), 
                                  component_type = "sersic", 
@@ -678,141 +569,9 @@ class Sersic(GalfitComponent):
     # to implement new components and it should be safer
     exec(GalfitComponent.component_get_set(load_default_sersic_parameters()))
     
-    # def __str__(self):
-    #     return f"# Component number {self.component_number}\n" + GalfitComponent.__str__(self)
-    
-#     @property
-#     def position(self):
-#         return self.parameters["position"].value
-    
-#     @position.setter
-#     def position(self, new_tup):
-#         self.parameters["position"].value = new_tup
-        
-#     @property
-#     def magnitude(self):
-#         return self.parameters["magnitude"].value
-    
-#     @position.setter
-#     def magnitude(self, new_val):
-#         self.parameters["magnitude"].value = new_val
-        
-#     @property
-#     def effective_radius(self):
-#         return self.parameters["effective_radius"].value
-    
-#     @position.setter
-#     def effective_radius(self, new_val):
-#         self.parameters["effective_radius"].value = new_val
-        
-#     @property
-#     def sersic_index(self):
-#         return self.parameters["sersic_index"].value
-    
-#     @position.setter
-#     def sersic_index(self, new_val):
-#         self.parameters["sersic_index"].value = new_val
-        
-#     @property
-#     def axis_ratio(self):
-#         return self.parameters["axis_ratio"].value
-    
-#     @position.setter
-#     def axis_ratio(self, new_val):
-#         self.parameters["axis_ratio"].value = new_val
-        
-#     @property
-#     def position_angle(self):
-#         return self.parameters["position_angle"].value
-    
-#     @position.setter
-#     def position_angle(self, new_val):
-#         self.parameters["position_angle"].value = new_val
-
-# ==========================================================================================================
-        
-#     def from_file_helper(self, file_in):
-#         # Feed in just the chunk from the main 'from_file' caller
-#         # This requires determining param_begin/end in that caller
-#         # This can handle component type but it is unnecessary 
-        
-#         # to be abundantly safe
-#         file_in = deepcopy(file_in)
-        
-#         # Excludes 0
-#         #p_numbers = list(self.param_numbers.keys())[1:]
-#         p_numbers = [str(v.parameter_number) for k, v in self.parameters.items() if not k.startswith("_")]
-        
-#         # File dict is only for fits       
-#         if isinstance(file_in, dict):
-            
-#             list_vals = list(file_in.values())
-                        
-#             #file_in   = {k:v for k,v in file_in.items() if not k.endswith("_YC") and not k.endswith("_XC")}
-            
-#             file_dict = {k: (v.strip("[]").split()[0], 0 if ("[" in v) and ("]" in v) else 1)
-#                          for k,v in zip(load_default_sersic_parameters().keys(), file_in.values())
-#                         }
-                       
-#             file_dict["position"] = [i.strip("[]") for i in list_vals[:2]] + \
-#             [0 if ("[" in i) and ("]" in i) else 1 for i in list_vals[:2]]
-                        
-#         elif isinstance(file_in, list):
-#             file_list = file_in
-#             file_dict = {
-#                 line[:line.index(")")].strip() : line[line.index(")") + 1 : line.index("#")].strip()
-#                 for line in file_list 
-#                 if line.strip()[0] not in ("#", "6", "7", "8")
-#             } #, "Z")}
-            
-#             file_dict = {k: " ".join(v.split()).split() 
-#                          for k,v in zip(load_default_sersic_parameters().keys(), file_dict.values())
-#                         }
-            
-#             file_dict["skip"].append(None)
-                            
-#         else:
-#             print(f"Could not grab {self.component_type} components, no file list/dict specified.")
-#             return 
-        
-#         for k,v in file_dict.items():
-#             if k.startswith("_"):
-#                 continue
-            
-#             mid_idx = len(v)//2
-            
-#             value     = v[:mid_idx]
-#             fix_value = v[mid_idx:]
-            
-#             if not isinstance(self.parameters[k], MultiParameter):
-#                 value     = v[:mid_idx][0]
-#                 fix_value = v[mid_idx:][0]
-            
-#             self.parameters[k].value = value
-#             self.parameters[k].fix_value = fix_value
-        
-# ==========================================================================================================
-
-#     @GalfitComponent.update_parameter_dict_with_list
-#     def update_from_log(self, in_line):
-        
-#         # example
-#         # sersic    : (  [62.90],  [62.90])  14.11     13.75    0.30    0.63    60.82
-        
-#         # Add extra empty slot for the component name
-#         return [self.component_name] + [i.strip("[*,]()") for i in in_line.split() 
-#                                         if any(map(str.isdigit, i))
-#                                        ]
-        
-        # self.position.value         = (float(params[0]), float(params[1]))
-        # self.magnitude.value        = float(params[2])
-        # self.effective_radius.value = float(params[3])
-        # self.sersic_index.value     = float(params[4])
-        # self.axis_ratio.value       = float(params[5])
-        # self.position_angle.value   = float(params[6])
 
 
-# In[39]:
+# In[6]:
 
 
 class Power(GalfitComponent):
@@ -820,20 +579,6 @@ class Power(GalfitComponent):
         #self.component_type = "power"
         #power_parameters = load_default_power_parameters(component_number = component_number)
         
-        # Use mutability to our advantage and use the full name where clarity may be desired
-        #SP = SersicParameters
-        
-        # for pname, pval in kwargs.keys():
-        #     if pname in SP:
-        #         SP[pname].value = pval
-        
-        # self.position         = SP["position"].value  #.value(kwargs.get("position", (0.0000, 0.0000)))
-        # self.magnitude        = SP["magnitude"].value #float(kwargs.get("magnitude", 13))
-        # self.effective_radius = SP["effective_radius"].value #float(kwargs.get("effective_radius", 10))
-        # self.sersic_index     = SP["sersic_index"].value #float(kwargs.get("sersic_index", 4))
-        # self.axis_ratio       = SP["axis_ratio"].value #float(kwargs.get("axis_ratio", 0.6))
-        # self.position_angle   = SP["position_angle"].value #float(kwargs.get("position_angle", 0))
-                
         GalfitComponent.__init__(self, 
                                  load_default_power_parameters(component_number = component_number),
                                  component_type = "power", 
@@ -857,86 +602,13 @@ class Power(GalfitComponent):
     # "position" : parameters["position"]
     exec(GalfitComponent.component_get_set(load_default_power_parameters()))  
     
+    # Since this one does not have a component number, it gets special treatment
     def __str__(self):
         return "\n".join(GalfitComponent.__str__(self).split("\n")[1:])
-        
-        
-#     def from_file_helper(self, file_in):
-#         # Feed in just the chunk from the main 'from_file' caller
-#         # This requires determining param_begin/end in that caller
-#         # This can handle component type but it is unnecessary 
-        
-#         # to be abundantly safe
-#         file_in = deepcopy(file_in)
-        
-#         # Excludes 0
-#         p_numbers = list(self.param_numbers.keys())[1:]                 
-            
-#         # File dict is only for fits
-#         if isinstance(file_in, dict):
-#             file_dict = {}
-#             file_in = {k:v for k,v in file_in.items() if v.lower() != "power"}
-            
-#             for num, v in zip(p_numbers, file_in.values()): # file_dict.keys()
-#                 if "+/-" in v:
-#                     v = v.split("+/-")[0]
-                    
-#                 file_dict[num] = [float(v.strip("[* ]"))]
-                
-#                 # For param_fix
-#                 if "[" in v and "]" in v:
-#                     file_dict[num].append(0)
-
-#                 else:
-#                     file_dict[num].append(1)
-            
-#         elif isinstance(file_in, list):
-#             file_list = file_in
-#             file_dict = {int(line[:line.index(")")].strip(f"{self.param_prefix} ")) : line[line.index(")") + 1 : line.index("#")].strip()
-#                          for line in file_list if line.strip()[0] not in ("#", "Z")}
-            
-#             file_dict = {k: " ".join(v.split()).split() for k,v in file_dict.items()}
-            
-#             if file_list[-1].strip().startswith("Z"):
-#                 self.add_skip()
-                            
-#         else:
-#             print(f"Could not grab {self.component_type} components, no file list/dict specified.")
-#             return
-                
-#         self.inner_rad          = float(file_dict[1][0])
-#         self.outer_rad          = float(file_dict[2][0])
-#         self.cumul_rot          = float(file_dict[3][0])
-#         self.powerlaw           = float(file_dict[4][0])
-#         self.inclination        = float(file_dict[9][0])
-#         self.sky_position_angle = float(file_dict[10][0])
-
-#         self.param_fix.update({self.param_numbers[k] : int(file_dict[k][1]) for k in p_numbers if k not in [1, "Z"]})
-        
-#         self.update_param_values()
-#         return
-        
-#     def update_from_log(self, in_line):
-#         # example
-#         # power   :     [0.00]   [23.51]  219.64     -0.16     ---  -44.95   -15.65
-        
-#         #params = in_line.split("]")[2] 
-#         #params = " ".join(params.split())
-#         params = [i.strip("[*]") for i in in_line.split() 
-#                   if any(map(str.isdigit, i))
-#                  ]
-        
-#         self.inner_rad          = float(params[0])
-#         self.outer_rad          = float(params[1])
-#         self.cumul_rot          = float(params[2])
-#         self.powerlaw           = float(params[3])
-#         self.inclination        = float(params[4])
-#         self.sky_position_angle = float(params[5])
-#         self.update_param_values()
-#         return
+    
 
 
-# In[40]:
+# In[7]:
 
 
 class Fourier(GalfitComponent):
@@ -1087,66 +759,6 @@ class Fourier(GalfitComponent):
                 
             self.parameters[k].value = new_param_dict[k]
 
-#     def from_file_helper(self, file_in):
-#         # Feed in just the chunk from the main 'from_file' caller
-#         # This requires determining param_begin/end in that caller
-        
-#         # to be abundantly safe
-#         file_in = deepcopy(file_in)
-        
-#         p_numbers = list(self.param_numbers.keys())
-        
-#         # File dict is only for fits
-#         if isinstance(file_in, dict):
-#             n_dict = {}
-            
-#             for k,v in file_in.items():
-                
-#                 if "+/-" in v:
-#                     v = v.split("+/-")[0]
-                    
-#                 #ex: 1_F1 -> 1
-#                 # 1_F3PA -> 3
-#                 k_num = int(k.split("_")[1][1])
-#                 if k_num not in n_dict:
-#                     n_dict[k_num] = [float(v.strip("[* ] "))]
-#                 else:
-#                     n_dict[k_num] += [float(v.strip("[* ] "))]
-                
-#                 # For param_fix
-#                 if "[" in v and "]" in v:
-#                     self.param_fix[f"{self.param_prefix}{k_num}"] = "0 0"
-                        
-#                 else:
-#                     self.param_fix[f"{self.param_prefix}{k_num}"] = "1 1"
-                
-#         elif isinstance(file_in, list):
-#             file_list = file_in
-#             file_dict = {int(line[:line.index(")")].strip(f"{self.param_prefix} ")) : line[line.index(")") + 1 : line.index("#")].strip()
-#                          for line in file_list if line.strip()[0] not in ("#", "Z")}
-            
-#             n_dict = {}
-#             for k,v in file_dict.items():
-#                 value = " ".join(v.split()).split()
-#                 n_dict[k] = (float(value[0]), float(value[1]))
-            
-#             if file_list[-1].strip().startswith("Z"):
-#                 self.add_skip()
-                            
-#         else:
-#             print(f"Could not grab {self.component_type} components, no file list/dict specified.")
-#             return
-        
-#         self.include_fn(n_dict)
-        
-#         # TODO: do I need these? Do I need to update param_fix? Fourier is different
-
-#         # self.param_fix.update({self.param_numbers[k] : int(file_dict[k][1]) for k in p_numbers if k not in [1, "Z"]})
-#         # self.param_fix["position"] = position_fix
-        
-#         self.update_param_values()
-#         return
-
 # ==========================================================================================================
 
     def update_from_log(self, in_line):
@@ -1161,7 +773,7 @@ class Fourier(GalfitComponent):
                 self.parameters[pname].value = eval(f"({params[i].split(':')[1].replace('*', '')})")
 
 
-# In[41]:
+# In[22]:
 
 
 class Sky(GalfitComponent):
@@ -1186,91 +798,19 @@ class Sky(GalfitComponent):
     exec(GalfitComponent.component_get_set(load_default_sky_parameters()))
     
 # ==========================================================================================================
-    
-    # def __str__(self):
-    #     return f"# Component number {self.component_number}\n" + GalfitComponent.__str__(self)
-    
-# ==========================================================================================================
-        
-#     def from_file_helper_dict(self, file_in):
-        
-#         file_dict = {}
-#         file_in = {k:v for k,v in file_in.items() if v.lower() != "sky" and k.split("_")[1] not in ["XC", "YC"]}
-
-#         for num, v in zip(p_numbers, file_in.values()): # file_dict.keys()
-#             if "+/-" in v:
-#                 v = v.split("+/-")[0]
-
-#             file_dict[num] = [float(v.strip("[* ]"))]
-
-#             # For param_fix
-#             if "[" in v and "]" in v:
-#                 file_dict[num].append(0)
-
-#             else:
-#                 file_dict[num].append(1)
-                
-#         # Feed in just the chunk from the main 'from_file' caller
-#         # This requires determining param_begin/end in that caller
-#         # This can handle component type but it is unnecessary 
-        
-#         # to be abundantly safe
-#         file_in = deepcopy(file_in)
-        
-#         # Excludes 0
-#         p_numbers = list(self.param_numbers.keys())[1:]                 
-            
-#         # File dict is only for fits
-#         if isinstance(file_in, dict):
-#             
-            
-#         elif isinstance(file_in, list):
-#             file_list = file_in
-#             file_dict = {int(line[:line.index(")")].strip(f"{self.param_prefix} ")) : line[line.index(")") + 1 : line.index("#")].strip()
-#                          for line in file_list if line.strip()[0] not in ("#", "Z")}
-            
-#             file_dict = {k: " ".join(v.split()).split() for k,v in file_dict.items()}
-            
-#             if file_list[-1].strip().startswith("Z"):
-#                 self.add_skip()
-                            
-#         else:
-#             print(f"Could not grab {self.component_type} components, no file list/dict specified.")
-#             return
-                
-#         self.sky_background = float(file_dict[1][0])
-#         self.dsky_dx        = float(file_dict[2][0])
-#         self.dsky_dy        = float(file_dict[3][0])
-        
-#         self.param_fix.update({self.param_numbers[k] : int(file_dict[k][1]) for k in p_numbers if k not in [1, "Z"]})
-        
-#         self.update_param_values()
-#         return
-# ==========================================================================================================
 
     @GalfitComponent.update_parameter_dict_with_list
     def update_from_log(self, in_line):
 #         # example
 #         #sky       : [ 63.00,  63.00]  1130.51  -4.92e-02  1.00e-02
-        
-#         # params = in_line.split("]")[1]
-#         # params = " ".join(params.split())
-#         # params = params.split()
-#         # params = [i.strip("*") for i in params]
 
+        # Ignore position
         return [i.strip("[*,]") for i in in_line.split() 
                   if any(map(str.isdigit, i))
                ][2:]
-        
-#         # params[0] and [1] are position
-#         self.sky_background = float(params[2])
-#         self.dsky_dx = float(params[3])
-#         self.dsky_dy = float(params[4])
-#         self.update_param_values()
-#         return
 
 
-# In[42]:
+# In[9]:
 
 
 class GalfitHeader(GalfitComponent):
@@ -1373,67 +913,15 @@ class GalfitHeader(GalfitComponent):
         
         return file_dict
 
-        # # Everything else...
-        # self.input_image.value         = kwargs.get("input_image", self.input_image.value)
-        # self.output_image.value        = kwargs.get("output_image", self.output_image.value)
-        # # Should this be a float?
-        # self.psf_fine_sampling.value = int(kwargs.get("fine_sampling", self.psf_fine_sampling.value))
-        # self.pixel_mask.value        = kwargs.get("pixel_mask", self.pixel_mask.value)
-        # self.plate_scale.value       = kwargs.get("plate_scale", self.plate_scale.value)
-        # self.display_type.value      = kwargs.get("display_type", self.display_type.value)
-        # self.optimize.value          = kwargs.get("optimize", self.optimize.value)
-        
-        #p_numbers = list(self.param_numbers.keys())
-            
-            
-#         elif isinstance(file_in, list):
-#             #print(file_in)
-#             file_list = file_in
-#             file_dict = {line[:line.index(")")].strip(f"{self.param_prefix} ") : line[line.index(")") + 1 : line.index("#")].strip()
-#                          for line in file_list if line.strip()[0] not in ("#")} #, "Z")}
-            
-#             file_dict = {k: " ".join(v.split()).split() for k,v in file_dict.items()}
-#             #print(file_dict)
-#             # if file_list[-1].strip().startswith("Z"):
-#             #     self.add_skip()
-                            
-#         else:
-#             print(f"Could not grab {self.component_type} components, no file list/dict specified.")
-#             return
-        
-#         self.input_image     = file_dict["A"][0]
-#         self.output_image    = file_dict["B"][0]
-#         self.sigma_image     = file_dict["C"][0]
-#         self.psf             = file_dict["D"][0]
-#         self.fine_sampling   = int(file_dict["E"][0])
-#         self.pixel_mask      = file_dict["F"][0]
-#         self.constraints     = file_dict["G"][0]
-#         self.region_to_fit   = (int(file_dict["H"][0]), 
-#                                 int(file_dict["H"][1]), 
-#                                 int(file_dict["H"][2]), 
-#                                 int(file_dict["H"][3]))
-#         #self.param_fix["region_to_fit"] = f"{int(file_dict['H'][2])} {int(file_dict['H'][3])}"
-        
-#         self.convolution_box = (int(file_dict["I"][0]), 
-#                                 int(file_dict["I"][1]))
-#         self.mag_zeropoint   = float(file_dict["J"][0])
-#         self.plate_scale     = (float(file_dict["K"][0]),
-#                                 float(file_dict["K"][0]))
-#         self.display_type    = file_dict["O"][0]
-#         self.optimize        = int(file_dict["P"][0])
-        
-#         self.update_param_values()
-#         return
 
-
-# In[43]:
+# In[10]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[44]:
+# In[11]:
 
 
 # Unit Test for GalfitComponent
@@ -1444,7 +932,7 @@ if __name__ == "__main__":
         print(k,v)
 
 
-# In[45]:
+# In[12]:
 
 
 if __name__ == "__main__":
@@ -1484,7 +972,7 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps""".
     print(header)
 
 
-# In[46]:
+# In[13]:
 
 
 if __name__ == "__main__":
@@ -1532,7 +1020,7 @@ if __name__ == "__main__":
     print(bulge)
 
 
-# In[47]:
+# In[14]:
 
 
 # #Will use this once I diff check everything
@@ -1589,7 +1077,7 @@ if __name__ == "__main__":
 #     print("From log line--\n", bulge)
 
 
-# In[48]:
+# In[15]:
 
 
 if __name__ == "__main__":
@@ -1634,7 +1122,7 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
     print(arms)
 
 
-# In[49]:
+# In[16]:
 
 
 if __name__ == "__main__":
@@ -1675,7 +1163,7 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
     print(fourier)
 
 
-# In[50]:
+# In[17]:
 
 
 # if __name__ == "__main__":
@@ -1691,7 +1179,7 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
 #     bulge.to_file(f"{base_out}_PowerFourierSkip.txt", arms, fourier)
 
 
-# In[51]:
+# In[18]:
 
 
 if __name__ == "__main__":
@@ -1733,7 +1221,7 @@ if __name__ == "__main__":
     print(sky)
 
 
-# In[ ]:
+# In[19]:
 
 
 if __name__ == "__main__":
