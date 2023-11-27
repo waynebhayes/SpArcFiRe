@@ -329,8 +329,8 @@ class MultiParameter(BaseParameter):
     def check_type(self, iterable_in):
         assert isinstance(iterable_in, (list, tuple)), "The new value for this attribute must be a list/tuple!"
         
-    def check_len(self, iterable_in):
-        assert len(iterable_in) == 2, "The length of this iterable is not 2, MultiParameter cannot correctly update."
+    def check_len(self, iterable_in, len_to_check = 2):
+        assert len(iterable_in) == len_to_check, "The length of this iterable is not 2, MultiParameter cannot correctly update."
 # ==========================================================================================================
 
     exec(
@@ -528,12 +528,12 @@ class FourierMode(MultiParameter):
         #self._value = ntFourier(self.amplitude, self.phase_angle)
         return ntFourier(self.amplitude, self.phase_angle)
     
-#     @value.setter
-#     def value(self, new_tuple):
-#         self.check_type(new_tuple)
+    @value.setter
+    def value(self, new_tuple):
+        self.check_type(new_tuple)
         
-#         self.amplitude   = float(new_tuple[0])
-#         self.phase_angle = float(new_tuple[1])
+        self.amplitude   = float(new_tuple[0])
+        self.phase_angle = float(new_tuple[1])
 
 
 # In[ ]:
@@ -541,14 +541,17 @@ class FourierMode(MultiParameter):
 
 ntImageRegionToFit = namedtuple("ntImageRegionToFit", "x1 x2 y1 y2")
 
-class ImageRegionToFit(HeaderParameter): #, MultiParameter):
+class ImageRegionToFit(MultiParameter, HeaderParameter):
     def __init__(self, value = (0, 256, 0, 256), **kwargs):
         
+        # Declare MultiParameter even though we're pretty much
+        # overriding everything but the explicit notion that it is 
+        # multi valued comes in handy
         HeaderParameter.__init__(self, value, **kwargs)
-        #MultiParameter.__init__(self, value, **kwargs)
+        MultiParameter.__init__(self, value, **kwargs)
         
-        self.value = ntImageRegionToFit(*value)
-        
+        #self.value = ntImageRegionToFit(*value)
+        self.parameter_prefix = ""
         self.parameter_number = "H"
         self.comment          = "Image region to fit (xmin xmax ymin ymax)"
         
@@ -556,15 +559,14 @@ class ImageRegionToFit(HeaderParameter): #, MultiParameter):
         self._x2 = int(kwargs.get("xmax", value[1]))
         self._y1 = int(kwargs.get("ymin", value[2]))
         self._y2 = int(kwargs.get("ymax", value[3]))
-            
         
-        self._value = (self._x1, self._x2, self._y1, self._y2)
+        # self._value = (self._x1, self._x2, self._y1, self._y2)
         
-    def check_type(self, iterable_in):
-        assert isinstance(iterable_in, (list, tuple)), "The new value for this attribute must be a list/tuple!"
+    # def check_type(self, iterable_in):
+    #     assert isinstance(iterable_in, (list, tuple)), "The new value for this attribute must be a list/tuple!"
         
-    def check_len(self, iterable_in):
-        assert len(iterable_in) == 4, "The length of this iterable is not 4, ImageRegionToFit cannot correctly update."
+    # def check_len(self, iterable_in):
+    #     assert len(iterable_in) == 4, "The length of this iterable is not 4, ImageRegionToFit cannot correctly update."
 
     exec(
         generate_get_set(
@@ -595,17 +597,17 @@ class ImageRegionToFit(HeaderParameter): #, MultiParameter):
     @value.setter
     def value(self, new_tuple):
         self.check_type(new_tuple)
-        self.check_len(new_tuple)
+        self.check_len(new_tuple, 4)
             
-        self.x1     = int(self._value[0])
-        self.x2     = int(self._value[1])
-        self.y1     = int(self._value[2])
-        self.y2     = int(self._value[3])
+        self.x1     = int(new_tuple[0])
+        self.x2     = int(new_tuple[1])
+        self.y1     = int(new_tuple[2])
+        self.y2     = int(new_tuple[3])
     
     def __str__(self):
-        value_str = f"{self.x1}    {self.x2}    {self.y1}    {self.y2}"
+        value_str = f"{self.x1:<5}{self.x2:<5}{self.y1:<5}{self.y2:<5}"
         
-        pre_comment = f"{self.parameter_prefix}{self.parameter_number}) {value_str}{self.fix}"
+        pre_comment = f"{self.parameter_prefix}{self.parameter_number}) {value_str}" #{self.fix}"
         return f"{pre_comment:<23} # {self.comment}"
         
 # Redundant because I may use different naming conventions elsewhere
@@ -629,6 +631,7 @@ class ConvolutionBox(HeaderParameter, MultiParameter):
         
         self.value            = ntConvolutionBox(*self.value)
         
+        self.parameter_prefix = ""
         self.parameter_number = "I"
         self.comment          = "Size of the convolution box (x y)"
         
@@ -645,6 +648,14 @@ class ConvolutionBox(HeaderParameter, MultiParameter):
             
         self.x = int(new_tuple[0])
         self.y = int(new_tuple[1])
+        
+# ==========================================================================================================
+
+    def __str__(self):
+        value_str = f"{self.x:<7}{self.y}"
+        
+        pre_comment = f"{self.parameter_prefix}{self.parameter_number}) {value_str}" #{self.fix}"
+        return f"{pre_comment:<23} # {self.comment}"
 
 
 # In[ ]:
@@ -660,7 +671,7 @@ class PlateScale(HeaderParameter, MultiParameter):
         #self._dx = self._x
         #self._dy = self._y
         #self.value = ntPlateScale(*self.value)
-        
+        self.parameter_prefix = ""
         self.parameter_number = "K"
         self.comment = "Plate scale (dx dy)   [arcsec per pixel]"
         
@@ -684,22 +695,14 @@ class PlateScale(HeaderParameter, MultiParameter):
             
         self.dx     = float(new_tuple[0])
         self.dy     = float(new_tuple[1])
+        
+# ==========================================================================================================
 
-#     @property
-#     def dx(self):
-#         return self.x1
-    
-#     @dx.setter
-#     def dx(self, new_val):
-#         self.x1 = new_val
-    
-#     @property
-#     def dy(self):
-#         return self.y1
-    
-#     @dy.setter
-#     def dy(self, new_val):
-#         self.y1 = new_val
+    def __str__(self):
+        value_str = f"{self.x:<7}{self.y}"
+        
+        pre_comment = f"{self.parameter_prefix}{self.parameter_number}) {value_str}" #{self.fix}"
+        return f"{pre_comment:<23} # {self.comment}"
 
 
 # In[ ]:
