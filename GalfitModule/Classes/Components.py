@@ -217,6 +217,11 @@ class GalfitComponent:
         return f"# Component number: {self.component_number}\n" + \
                 "\n".join([str(v) for v in self.parameters.values()]) + \
                 "\n"
+    
+    def __repr__(self):
+        return f"# Component number: {self.component_number}\n" + \
+                "\n".join([repr(v) for v in self.parameters.values()]) + \
+                "\n"
 
 # ==========================================================================================================
     
@@ -571,7 +576,7 @@ class Sersic(GalfitComponent):
     
 
 
-# In[6]:
+# In[22]:
 
 
 class Power(GalfitComponent):
@@ -606,9 +611,12 @@ class Power(GalfitComponent):
     def __str__(self):
         return "\n".join(GalfitComponent.__str__(self).split("\n")[1:])
     
+    def __repr__(self):
+        return "\n".join(GalfitComponent.__repr__(self).split("\n")[1:])
+    
 
 
-# In[7]:
+# In[23]:
 
 
 class Fourier(GalfitComponent):
@@ -666,6 +674,9 @@ class Fourier(GalfitComponent):
 
     def __str__(self):
         return "\n".join(GalfitComponent.__str__(self).split("\n")[1:])
+    
+    def __repr__(self):
+        return "\n".join(GalfitComponent.__repr__(self).split("\n")[1:])
     
 # ==========================================================================================================
 
@@ -773,7 +784,7 @@ class Fourier(GalfitComponent):
                 self.parameters[pname].value = eval(f"({params[i].split(':')[1].replace('*', '')})")
 
 
-# In[22]:
+# In[24]:
 
 
 class Sky(GalfitComponent):
@@ -810,7 +821,7 @@ class Sky(GalfitComponent):
                ][2:]
 
 
-# In[9]:
+# In[25]:
 
 
 class GalfitHeader(GalfitComponent):
@@ -874,6 +885,14 @@ class GalfitHeader(GalfitComponent):
                self._section_sep      + "\n"   + \
                "# IMAGE and GALFIT CONTROL PARAMETERS\n" + \
                "\n".join(GalfitComponent.__str__(self).split("\n")[1:]) + \
+               self.post_header
+    
+    def __repr__(self):
+        return self.input_menu_file   + "\n\n" + \
+               self.extra_header_info + "\n\n" + \
+               self._section_sep      + "\n"   + \
+               "# IMAGE and GALFIT CONTROL PARAMETERS\n" + \
+               "\n".join(GalfitComponent.__repr__(self).split("\n")[1:]) + \
                self.post_header
     
 # ==========================================================================================================
