@@ -58,9 +58,10 @@ else:
 
 sys.path.append(_MODULE_DIR)
 
-from Functions.helper_functions import *
-from Classes.Components import *
+#from Classes.Parameters import *
+#from Classes.Components import *
 from Classes.Containers import *
+from Functions.helper_functions import *
 
 
 # In[4]:
@@ -128,19 +129,20 @@ class FitsFile:
         # FITS starts the index at 0 but GALFIT outputs the observation image at 1
         # Also converting the header to a dict to save some trouble
         try:
-            self.header = dict(file_in[1].header)
-            self.data   = file_in[1].data
+            self.header   = dict(file_in[1].header)
+            self.data     = file_in[1].data
             self.num_imgs = len(file_in) - 1
+            
         except IndexError:
-            self.header = dict(file_in[0].header)
-            self.data   = file_in[0].data
+            self.header   = dict(file_in[0].header)
+            self.data     = file_in[0].data
             self.num_imgs = 1       
         
         hdu = HDU(name = name, header = self.header, data = self.data)
-        self.observation = hdu
         
         self.all_hdu  = {name : hdu}
-        self.file = file_in
+        #self.observation = hdu
+        self.file     = file_in
         
         # Wait is for continuing to use the file in some other capacity
         # i.e. for outputfits below to grab more info
@@ -149,6 +151,39 @@ class FitsFile:
         
         #print("Did it close?", file_in.closed)
         # assert hdu_num == 4, "File being passed into FitsHandler has too few output HDUs."
+# ==========================================================================================================
+
+    def check_hdu_type(self, hdu):
+        assert isinstance(hdu, HDU), "Input HDU is not an HDU class!"
+        
+# ==========================================================================================================
+    @property
+    def observation(self):
+        return self.all_hdu.get("observation", None)
+    
+    @observation.setter
+    def observation(self, new_hdu):
+        self.check_hdu_type(new_hdu)
+        self.all_hdu["observation"] = new_hdu
+        
+    @property
+    def model(self):
+        return self.all_hdu.get("model", None)
+    
+    @model.setter
+    def model(self, new_hdu):
+        self.check_hdu_type(new_hdu)
+        self.all_hdu["model"] = new_hdu
+        
+    @property
+    def residual(self):
+        return self.all_hdu.get("residual", None)
+    
+    @residual.setter
+    def residual(self, new_hdu):
+        self.check_hdu_type(new_hdu)
+        self.all_hdu["residual"] = new_hdu
+
 # ==========================================================================================================
 
     #def close(self):
@@ -274,12 +309,12 @@ class FitsFile:
         
 # ==========================================================================================================
 
-    def update_params(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+#     def update_params(self, **kwargs):
+#         for key, value in kwargs.items():
+#             setattr(self, key, value)
 
 
-# In[6]:
+# In[17]:
 
 
 class OutputFits(FitsFile):
@@ -302,14 +337,13 @@ class OutputFits(FitsFile):
             self.all_hdu[name] = hdu
             
         # For convenience, we usually use the model here
-            
-        self.update_params(**self.all_hdu) 
+        #self.update_params(**self.all_hdu) 
         
         # Dict is very redundant here but just for funsies
         self.header = dict(self.model.header)
         _header = GalfitHeader()
         # Can call the helper directly since we're just using the header dict
-        _header.from_file_helper(self.header)
+        _header.from_file_helper_dict(self.header)
         self.feedme = FeedmeContainer(path_to_feedme = filepath, header = _header)
         self.feedme.from_file(self.header)
         
@@ -327,6 +361,7 @@ class OutputFits(FitsFile):
         
         # Thanks Azra!
         bulge_mask = np.ones(np.shape(self.model.data))
+        
         try:
             info = pd.read_csv(sparcfire_csv, dtype = str).dropna()
         except FileNotFoundError as fe:
@@ -353,12 +388,12 @@ class OutputFits(FitsFile):
         major_rad = int(bulge_rad * len(self.model.data[0]) // input_size) + 1
         minor_rad = int(major_rad/axis_ratio)
 
-        crop_box = self.feedme.header.region_to_fit
+        crop_box = self.feedme.header.region_to_fit.value
         # To adjust for python indexing
         xbox_min, ybox_min = crop_box[0] - 1, crop_box[2] - 1
         
         # Shifting everything to origin
-        center_x, center_y = np.array(self.feedme.bulge.position, dtype = int) - 1 -\
+        center_x, center_y = np.array(self.feedme.bulge.position.value, dtype = int) - 1 -\
                              np.array((xbox_min, ybox_min), dtype = int)
         
         # center_x2, bulge_y2 = np.array(self.feedme.bulge.position, dtype = int) - \
@@ -392,7 +427,7 @@ class OutputFits(FitsFile):
 
         small_number = 1e-8
         
-        crop_box = self.feedme.header.region_to_fit
+        crop_box = self.feedme.header.region_to_fit.value
         # To adjust for python indexing
         # Also, reminder, non-inclusive of end
         xbox_min, xbox_max, ybox_min, ybox_max = crop_box[0] - 1, crop_box[1], crop_box[2] - 1, crop_box[3]
@@ -406,11 +441,11 @@ class OutputFits(FitsFile):
             feedme_dir, feedme_file = os.path.split(self.feedme.path_to_feedme)
             
             if exists(pj(feedme_dir, f"{self.gname}.csv")):
-                crop_mask *= self.generate_bulge_mask(pj(feedme_dir, f"{self.gname}.csv"))
+                crop_mask = self.generate_bulge_mask(pj(feedme_dir, f"{self.gname}.csv")) * crop_mask
             else:
                 # REQUIRES GENERATE_BULGE_MASK TO BE RUN SEPARATE WITH CSV FILE SPECIFIED 
                 try:
-                    crop_mask *= self.bulge_mask
+                    crop_mask = self.bulge_mask * crop_mask
                 except AttributeError:
                     print(f"Could not generate bulge mask for {self.gname}. Check location of csv or run generate_bulge_mask with a specified csv file.")
                 except ValueError:
@@ -476,14 +511,14 @@ class OutputFits(FitsFile):
         return self.masked_residual_normalized
 
 
-# In[7]:
+# In[18]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[8]:
+# In[19]:
 
 
 # Testing from_file
@@ -524,7 +559,7 @@ if __name__ == "__main__":
     print(np.shape(test_model.observation.data))
     print(np.shape(test_model.data))
     print(np.shape(test_model.residual.data))
-    crop_box = test_model.feedme.header.region_to_fit
+    crop_box = test_model.feedme.header.region_to_fit.value
     # + 1 to account for python indexing
     crop_rad = crop_box[1] - crop_box[0] + 1
     print(f"({crop_rad}, {crop_rad})")
@@ -532,7 +567,7 @@ if __name__ == "__main__":
     print(np.shape(test_obs.observation.data))
 
 
-# In[9]:
+# In[20]:
 
 
 # Unit test to check value of masked residual
@@ -561,7 +596,7 @@ if __name__ == "__main__":
     #print(np.min(test_model.observation.data))
 
 
-# In[14]:
+# In[21]:
 
 
 if __name__ == "__main__":
@@ -578,7 +613,8 @@ if __name__ == "__main__":
     print("Does the updated FITS file contain NMR and KStest keys?")
     keys_to_check = ("NMR", "KS_P", "KS_STAT")
     
-    print("Before...", all(k in test_model.header for k in keys_to_check))
+    # TODO: replace fits file with one without those header options
+    print("Before... (expect False)", all(k in test_model.header for k in keys_to_check))
     
     _ = test_model.generate_masked_residual(test_mask)
     test_model = OutputFits(model_to_update)
@@ -586,7 +622,7 @@ if __name__ == "__main__":
     print("After...", all(k in test_model.header for k in keys_to_check))
 
 
-# In[11]:
+# In[ ]:
 
 
 if __name__ == "__main__":
