@@ -54,6 +54,7 @@ else:
 
 sys.path.append(_MODULE_DIR)
 
+#from Classes.Parameters import *
 from Classes.Components import *
 # Relies on relative file hierarchy
 from Functions.helper_functions import *
@@ -64,90 +65,161 @@ from Functions.helper_functions import *
 
 class ComponentContainer:
     def __init__(self, **kwargs):
+        # TODO: When split from SpArcFiRe, default to just a single Sersic
         self.bulge   = kwargs.get("bulge", Sersic(1))
         self.disk    = kwargs.get("disk", Sersic(2))
         self.arms    = kwargs.get("arms", Power(2))
         self.fourier = kwargs.get("fourier", Fourier(2))
         self.sky     = kwargs.get("sky", Sky(3))
         
-    def to_dict(self):
-        # Order matters
-        return {"bulge"   : self.bulge,
-                "disk"    : self.disk,
-                "arms"    : self.arms,
-                "fourier" : self.fourier,
-                "sky"     : self.sky}
+        # Dict
+        # Mutability strikes again
+        self._components = deepcopy(vars(self))        
+        self._components.update(kwargs)
+        
+# ==========================================================================================================
+
+    @property
+    def components(self):
+        return self._components
+    
+    @components.setter
+    def components(self, new_dict):
+        self.check_component_types(new_dict)
+        self._components = deepcopy(new_dict)
+        
+# ==========================================================================================================
+
+    def check_component_types(self):
+        for k, comp in self.components.items():
+            assert isinstance(comp, GalfitComponent), f"The component fed into the ComponentContainer, {k}, is not a valid type."
+        
+# ==========================================================================================================
     
     def to_tuple(self):
         #self.header,
-        return (self.bulge,
-                self.disk,
-                self.arms,
-                self.fourier,
-                self.sky
-               )
+        # return (self.bulge,
+        #         self.disk,
+        #         self.arms,
+        #         self.fourier,
+        #         self.sky
+        #        )
+        return tuple(self.components.values())
     
     def to_list(self):
         #self.header,
-        return [self.bulge,
-                self.disk,
-                self.arms,
-                self.fourier,
-                self.sky
-               ]
+        # return [self.bulge,
+        #         self.disk,
+        #         self.arms,
+        #         self.fourier,
+        #         self.sky
+        #        ]
+        return list(self.components.values())
+    
+# ==========================================================================================================
     
     def to_pandas(self):
-        return pd.concat([comp.to_pandas().reset_index() 
-                          for comp in ComponentContainer.to_list(self)
-                         ], axis = 1).drop(columns = ["index"])
         
+        return pd.concat(
+            [
+                comp.to_pandas().reset_index() 
+                for comp in self.to_list()
+                if comp.component_type != "header"
+            ], 
+            axis = 1).drop(columns = ["index"])
+    
+    
+    #TODO
     def from_pandas(self, input_df):
         pass
     
-    def update_components(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+# ==========================================================================================================
+
+    # def update_components(self, **kwargs):
+    #     for key, value in kwargs.items():
+    #         setattr(self, key, value)
        
     # This is more for the daughter classes
-    def extract_components(self):
-        return ComponentContainer(**vars(self))
-    
+    #def extract_components(self):
+    #    return self.components
+
+# ==========================================================================================================
+
     def __str__(self):
         # Skipping the output of power and fourier if 'skipped'
         # i.e. don't exist in this current implementation
         out_str = "\n".join(
-            str(comp) for comp in ComponentContainer.to_list(self)
-             if comp.param_values.get("skip", 0) != 1 or
-                comp.component_type not in ("power", "fourier")
+            str(comp) for comp in self.to_list()
+             # if comp.param_values.get("skip", 0) != 1 or
+             #    comp.component_type not in ("power", "fourier")
+            )
+        return out_str
+    
+    def __repr__(self):
+        # Skipping the output of power and fourier if 'skipped'
+        # i.e. don't exist in this current implementation
+        out_str = "\n".join(
+            repr(comp) for comp in self.to_list()
+             # if comp.param_values.get("skip", 0) != 1 or
+             #    comp.component_type not in ("power", "fourier")
             )
         return out_str
 
 
-# In[50]:
+# In[5]:
 
 
 class FeedmeContainer(ComponentContainer):
     def __init__(self, **kwargs):
-        ComponentContainer.__init__(self, **kwargs)
-        # The path to the feedme that *generated* the components
-        self.header  = kwargs.get("header", GalfitHeader())
-        self.path_to_feedme = kwargs.get("path_to_feedme", "")
-    
-    def to_dict(self):
-        return vars(self)
-    
-    def to_list(self):
-        return [self.header] + ComponentContainer.to_list(self)
-    
-    def __str__(self):
-        out_str = f"{str(self.header)}\n" + \
-                    "\n".join(
-                        str(comp) for comp in ComponentContainer.to_list(self)
-                        if comp.param_values.get("skip", 0) != 1 or
-                           comp.component_type not in ("power", "fourier")
-                    )
-        return out_str
         
+        # Use vars to our advantage and declare this first
+        # If it is then specified in kwargs, it will overwrite this one
+        self.header = GalfitHeader()
+        path_to_feedme = kwargs.pop("path_to_feedme","")
+        
+        # The path to the feedme that *generated* the components
+        ComponentContainer.__init__(self, **kwargs)
+        
+        self.path_to_feedme = path_to_feedme
+
+# ==========================================================================================================
+
+    # def to_dict(self):
+    #     return self.components.update({"header" : self.header})
+    
+    # def to_list(self):
+    #     return [self.header] + self.components
+    
+# ==========================================================================================================
+    
+#     def __str__(self):
+#         out_str = f"{str(self.header)}\n" + \
+#                     "\n".join(
+#                         str(comp) for comp in ComponentContainer.to_list(self)
+#                         # if comp.param_values.get("skip", 0) != 1 or
+#                         #    comp.component_type not in ("power", "fourier")
+#                     )
+#         return out_str
+    
+#     def __repr__(self):
+#         out_str = f"{str(self.header)}\n" + \
+#                     "\n".join(
+#                         repr(comp) for comp in ComponentContainer.to_list(self)
+#                         # if comp.param_values.get("skip", 0) != 1 or
+#                         #    comp.component_type not in ("power", "fourier")
+#                     )
+#         return out_str
+    
+# ==========================================================================================================
+    
+    # def to_pandas(self):
+    #     return pd.concat([comp.to_pandas().reset_index() 
+    #                       for comp in ComponentContainer.to_list(self)
+    #                       if not isinstance(comp, GalfitHeader)
+    #                      ], axis = 1).drop(columns = ["index"])
+
+# ==========================================================================================================
+
     def to_file(self, *args, filename = ""):
         if not filename:
             filename = self.path_to_feedme
@@ -155,8 +227,10 @@ class FeedmeContainer(ComponentContainer):
         if args:
             self.header.to_file(filename, *args)
         else:
-            self.header.to_file(filename, *ComponentContainer.to_list(self))
+            self.header.to_file(filename, *self.to_list())
             
+# ==========================================================================================================
+
     def from_file(self, obj_in):
         # This function handles grabbing and storing the values from galfit files (input and output???)
         # It's written to generally handle both and stores everything in the respective component objects
@@ -198,7 +272,7 @@ class FeedmeContainer(ComponentContainer):
                 
             header_dict = {k:v for k,v in input_dict.items() if k in header_keys}
             
-            component_list[0].from_file_helper(header_dict)
+            component_list[0].from_file_helper_dict(header_dict)
             
             component_list_num = 1
             
@@ -225,117 +299,44 @@ class FeedmeContainer(ComponentContainer):
                 count = 0
                 while component.component_type != component_name or count == 100:
                     #print(component.component_type)
-                    component.add_skip(skip_val = 1)
+                    # For when default components are used
+                    # TODO: when generalized, take this out
+                    if "skip" in component.parameters.keys():
+                        component.skip.value = 1 #add_skip(skip_val = 1)
+                        
                     component_list_num += 1
-                    component = component_list[component_list_num]
-                    count += 1
+                    component           = component_list[component_list_num]
+                    count              += 1
                 
                 component_list_num += 1
                 
                 # Also assume only a single rotation function per component... which I think is fair
                 if not rotation_func:
                     send_to_helper = dict(input_list[i_begin : i_end])
-                    component.from_file_helper(send_to_helper)
+                    component.from_file_helper_dict(send_to_helper)
                     
                 else:
                     r_start = rotation_func[0]
                     send_to_helper = dict(chunk[:r_start])
-                    component.from_file_helper(send_to_helper)
+                    component.from_file_helper_dict(send_to_helper)
                     
                     component = component_list[component_list_num] #[c for c in component_list if c.component_type == component_name][0]
                     component_list_num += 1
                     
                     if not fourier_modes:
                         send_to_helper = dict(chunk[r_start:])
-                        component.from_file_helper(send_to_helper)
+                        component.from_file_helper_dict(send_to_helper)
                         
                     else:
                         f_start = fourier_modes[0]
                         send_to_helper = dict(chunk[r_start : f_start])
-                        component.from_file_helper(send_to_helper)
+                        component.from_file_helper_dict(send_to_helper)
 
                         component = component_list[component_list_num] #[c for c in component_list if c.component_type == "fourier"][0]
                         component_list_num += 1
                         
                         send_to_helper = dict(chunk[f_start:])
-                        component.from_file_helper(send_to_helper)
-                    
-            
-# DEPRECATED
-# New implementation flips the logic, instead of starting from bulge + disk + spiral
-# we start from what's actually in the file and go from there (working around my defaults that is)
-
-            #components_to_pop = []
-#             for idx, (key, value) in enumerate(input_dict.items()):
-                
-#                 if component_list_num == len(component_list): break
-                
-#                 component = component_list[component_list_num]
-#                 name = component.component_type
-#                 #print(name, component_list_num, component_dict_num)
-#                 # For skipping Power and Fourier if already specified (save some iterations)
-#                 #if component.param_values.get("skip", 0) == 1 and component.component_type in ("power", "fourier"):
-#                     #continue
-                    
-#                 try:
-#                     component_idx_start = input_keys.index(component.start_dict)
-#                     component_idx_end   = input_keys.index(component.end_dict)
-                    
-#                 except ValueError as ve:
-#                     # TODO: Don't default to spiral implementation! This is a hotfix for when no disk/spiral/etc.
-#                     # i.e. in base container class, allow for an n component fit
-                    
-#                     # Sky defaults to component 3, this is why it fails for bulge only fits
-#                     # or outputs the wrong component number
-#                     if name == "sky":
-#                         self.sky = Sky(2)
-#                         component_list = self.to_list()
-#                         send_to_helper = {}
-#                         continue
-                        
-#                     elif "is not in list" in str(ve):
-#                         component.add_skip(skip_val = 1)
-#                         #components_to_pop.append(component.component_type)
-                        
-#                         #Any bending modes/rotations/etc. go here
-#                         component_list_num += 1
-                        
-#                         # Assume if it fails it fails for the whole component
-#                         send_to_helper = {}
-#                         continue
-
-#                     # End will *always* (header excluded) be #_param                
-#                     component_end = [k for k in input_keys if k.endswith(component.end_dict[2:])][0]
-#                     component_num = component_end[0]
-
-#                     if component_num.isnumeric():
-#                         # For COMP_#
-#                         if component.start_dict[:-2] == "COMP":
-#                             component_idx_start = input_keys.index(f"{component.start_dict[:-2]}_{component_end[0]}")
-#                         else:
-#                             component_idx_start = input_keys.index(f"{component_num}_{component.start_dict[2:]}")
-                            
-#                         component_idx_end   = input_keys.index(component_end)
-
-#                     else:
-#                         print(f"Can't find start/end of {component.component_type} segment.")
-#                         print(f"Check the filename or start/end_dict variables.")
-#                         print(f"Filename: {filename}")
-#                         print(f"Start/End: {component.start_dict}/{component.end_dict}")
-#                         raise ValueError(ve)
-
-#                 if component_idx_start <= idx <= component_idx_end:
-#                     send_to_helper[key] = value
-                
-#                 if idx == component_idx_end:
-#                     print(send_to_helper)
-#                     component.from_file_helper(send_to_helper)
-                    
-#                     send_to_helper = {}
-#                     component_list_num += 1
-#                     component_dict_num += 1
-                    
-            return #components_to_pop
+                        component.from_file_helper_dict(send_to_helper)
         
         def from_text(self, input_file_obj):
             
@@ -350,7 +351,7 @@ class FeedmeContainer(ComponentContainer):
                                     or line.startswith("P)")
                                    ]
             
-            component_list[0].from_file_helper(
+            component_list[0].from_file_helper_list(
                 input_file[header_begin_end_idx[0]:header_begin_end_idx[1]]
             )
             
@@ -387,7 +388,6 @@ class FeedmeContainer(ComponentContainer):
                 # Aligning ourselves correctly
                 count = 0
                 while component.component_type != component_name or count == 100:
-                    component.add_skip(skip_val = 1)
                     component_list_num += 1
                     component = component_list[component_list_num]
                     count += 1
@@ -396,26 +396,26 @@ class FeedmeContainer(ComponentContainer):
                 
                  # Also assume only a single rotation function per component... which I think is fair
                 if not rotation_func:
-                    component.from_file_helper(chunk)
+                    component.from_file_helper_list(chunk)
                     
                 else:
                     r_start = rotation_func[0]
-                    component.from_file_helper(chunk[:r_start - 1])
+                    component.from_file_helper_list(chunk[:r_start - 1])
                     
                     component = component_list[component_list_num] #[c for c in component_list if c.component_type == component_name][0]
                     component_list_num += 1
                     
                     if not fourier_modes:
-                        component.from_file_helper(chunk[r_start:])
+                        component.from_file_helper_list(chunk[r_start:])
                         
                     else:
                         f_start = fourier_modes[0]
-                        component.from_file_helper(chunk[r_start : f_start])
+                        component.from_file_helper_list(chunk[r_start : f_start])
 
                         component = component_list[component_list_num] #[c for c in component_list if c.component_type == "fourier"][0]
                         component_list_num += 1
                         
-                        component.from_file_helper(chunk[f_start:])
+                        component.from_file_helper_list(chunk[f_start:])
 
 # DEPRECATED
 #             for line in input_file:
@@ -443,7 +443,6 @@ class FeedmeContainer(ComponentContainer):
                     
                 # Basically if the if conditions are never met (which they should be)
                 # if not component_exists:
-                #     component.add_skip(skip_val = 1)
                 #     continue
                     
                 #components_to_pop.append(component.component_type)
@@ -470,11 +469,13 @@ class FeedmeContainer(ComponentContainer):
         #_ = [c.update_param_values() for c in self.to_list()]
 
 
-# In[51]:
+# In[6]:
 
 
 class OutputContainer(FeedmeContainer):
     def __init__(self, galfit_out_obj = subprocess.CompletedProcess("", 0), **kwargs):
+        
+        store_text = kwargs.pop("store_text", False)
         
         FeedmeContainer.__init__(self, **kwargs)
         
@@ -519,9 +520,11 @@ class OutputContainer(FeedmeContainer):
                     if kwargs.get("sersic_order"):
                         comp = eval("self." + kwargs.get("sersic_order")[s_count])
                         s_count += 1
+                        
                     elif s_count == 0:
                         comp = self.bulge
                         s_count += 1 
+                        
                     elif s_count == 1:
                         comp = self.disk               
 
@@ -547,7 +550,7 @@ class OutputContainer(FeedmeContainer):
         if self.success:
             update_components(self, galfit_out_text, **kwargs)
             
-        if kwargs.get("store_text", False):
+        if store_text:
             self.galfit_out_text = galfit_out_text
             self.galfit_err_text = galfit_err_text
         else:
@@ -561,14 +564,23 @@ class OutputContainer(FeedmeContainer):
     def __str__(self, galfit_out_text = "") -> str:
         if galfit_out_text:
             return(galfit_out_text)
+        
         elif self.galfit_out_text:
             return self.galfit_out_text
+        
         # Shouldn't happen but just in case.
         else:
             return ""
 
 
-# In[52]:
+# In[7]:
+
+
+if __name__ == "__main__":
+    from RegTest.RegTest import *
+
+
+# In[8]:
 
 
 if __name__ == "__main__":
@@ -581,14 +593,7 @@ if __name__ == "__main__":
     print(container_df)
 
 
-# In[53]:
-
-
-if __name__ == "__main__":
-    from RegTest.RegTest import *
-
-
-# In[54]:
+# In[9]:
 
 
 # Testing FeedmeContainer kwargs and to_file
@@ -603,11 +608,11 @@ if __name__ == "__main__":
         sky   = Sky(3)
 
         container = FeedmeContainer(**{"header"  : header,
-                                          "bulge"   : bulge,
-                                          "disk"    : disk,
-                                          "arms"    : arms,
-                                          "fourier" : fourier,
-                                          "sky"     : sky}
+                                       "bulge"   : bulge,
+                                       "disk"    : disk,
+                                       "arms"    : arms,
+                                       "fourier" : fourier,
+                                       "sky"     : sky}
                                     )
         return container
 
@@ -622,7 +627,7 @@ if __name__ == "__main__":
     container.to_file()
 
 
-# In[55]:
+# In[10]:
 
 
 # Testing FeedmeContainer from_file
@@ -632,7 +637,7 @@ if __name__ == "__main__":
 
     example_feedme = pj(TEST_DATA_DIR, "test-out", "1237667911674691747", "1237667911674691747.in")
     example_fits   = pj(TEST_DATA_DIR, "test-out", "1237667911674691747", "1237667911674691747_galfit_out.fits")
-    
+        
     print("These are feedme -> output")
     print("ignoring filepaths for reg tests...\n")
     
@@ -647,7 +652,7 @@ if __name__ == "__main__":
     print(iff(str(container)))
 
 
-# In[57]:
+# In[11]:
 
 
 # Testing FeedmeContainer from_file with just bulge
@@ -713,10 +718,10 @@ if __name__ == "__main__":
                                      sky            = container.sky
                                     )
     
-    feedme_components = example_feedme.extract_components()
+    #feedme_components = example_feedme.components
     #print(feedme_components.to_list())
     #print()
-    _ = [print("Key:", k) for k in example_feedme.to_dict().keys()]
+    _ = [print("Key:", k) for k in example_feedme.components.keys()]
     print()
     print(iff(str(example_feedme)))
 
@@ -826,7 +831,7 @@ if __name__ == "__main__":
     print("*"*80)
     print("*"*80)
     print("Testing extraction into ComponentContainer...")
-    _ = [print(str(comp)) for comp in good_output.extract_components().to_list()]
+    _ = [print(str(comp)) for comp in good_output.to_list()]
     
     output_filename = pj(TEST_OUTPUT_DIR, f"{base_out}_OutputContainer.in")
     good_output.to_file(filename = output_filename)
