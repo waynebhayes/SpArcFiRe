@@ -59,7 +59,7 @@ from Functions.helper_functions import *
 from Classes.Parameters import *
 
 
-# In[20]:
+# In[4]:
 
 
 # TODO: MAKE ITERABLE via generator
@@ -84,7 +84,7 @@ class GalfitComponent:
                    f"Parameters in dictionary fed into {type(self).__name__} must be a parameter class.\n" \
                    f"We recommend feeding those in as key word arguments to the instantiation instead."
 
-            for k,v in kwargs:
+            for k,v in kwargs.items():
                 if k in parameters:
                     parameters[k].value = v
                 
@@ -359,13 +359,13 @@ class GalfitComponent:
         count = 0
         for k, v in file_in.items():
             if not k.endswith("_YC") and not k.endswith("_XC"):
-                file_dict[p_names[count]] = v.strip("[]").split()[0], 0 if ("[" in v) and ("]" in v) else 1
+                file_dict[p_names[count]] = v.split()[0].strip("[]*"), 0 if ("[" in v) and ("]" in v) else 1
                 
                 count += 1
 
         if "position" in load_default_parameters()[self.component_type].keys():
             # Assume position is always the first and second index after the component
-            file_dict["position"] = [i.strip("[]") for i in list_vals[:2]] + \
+            file_dict["position"] = [i.strip("[]*") for i in list_vals[:2]] + \
                                     [0 if ("[" in i) and ("]" in i) else 1 for i in list_vals[:2]]
         
         self.update_parameters_file_helper(file_dict)
@@ -548,7 +548,7 @@ class GalfitComponent:
             
 
 
-# In[21]:
+# In[5]:
 
 
 class Sersic(GalfitComponent):
@@ -576,7 +576,7 @@ class Sersic(GalfitComponent):
     
 
 
-# In[22]:
+# In[6]:
 
 
 class Power(GalfitComponent):
@@ -616,7 +616,7 @@ class Power(GalfitComponent):
     
 
 
-# In[23]:
+# In[7]:
 
 
 class Fourier(GalfitComponent):
@@ -659,7 +659,7 @@ class Fourier(GalfitComponent):
         self.start_text = f"F{p_numbers[0]}"
         self.end_text   = f"{self.param_prefix}{p_numbers[-1]}"
         
-    exec(GalfitComponent.component_get_set(load_default_power_parameters()))
+    exec(GalfitComponent.component_get_set(load_default_fourier_parameters()))
     
     exec(
         generate_get_set(
@@ -784,7 +784,7 @@ class Fourier(GalfitComponent):
                 self.parameters[pname].value = eval(f"({params[i].split(':')[1].replace('*', '')})")
 
 
-# In[24]:
+# In[8]:
 
 
 class Sky(GalfitComponent):
@@ -821,7 +821,7 @@ class Sky(GalfitComponent):
                ][2:]
 
 
-# In[25]:
+# In[9]:
 
 
 class GalfitHeader(GalfitComponent):
@@ -894,6 +894,38 @@ class GalfitHeader(GalfitComponent):
                "# IMAGE and GALFIT CONTROL PARAMETERS\n" + \
                "\n".join(GalfitComponent.__repr__(self).split("\n")[1:]) + \
                self.post_header
+    
+# ==========================================================================================================
+
+#     def to_pandas(self):
+#         name = f"{self.component_type}_{self.component_number}"
+#         parameter_dict = deepcopy(self.parameters)
+                
+#         for pname, pval in self.parameters.items():
+#             if pname.startswith("_"):
+#                 parameter_dict.pop(pname)
+#                 continue
+            
+#             # Split multivalued parameters like position
+#             # briefly convert to NumParameter to coincide with others
+#             if isinstance(pval, MultiParameter):
+#                 old_keys = pval.value._asdict()
+#                 parameter_dict.pop(pname)
+#                 parameter_dict.update({f"{pname}_{k}" : NumParameter(v) for k, v in old_keys.items()})
+        
+#         parameter_dict = {f"{k}_{name}" : v.value for k, v in parameter_dict.items()}
+        
+#         all_data = pd.DataFrame(
+#             parameter_dict, 
+#             index = [name]
+#         )
+        
+#         # Move skip to end for reasons
+#         skip_col = f"skip_{name}"
+#         if skip_col in all_data.columns:
+#             all_data.insert(len(all_data.columns) - 1, skip_col, all_data.pop(skip_col))
+                
+#         return all_data
     
 # ==========================================================================================================
 
@@ -1012,7 +1044,7 @@ if __name__ == "__main__":
      '1_MAG': '13.1936 +/- 0.0257',
      '1_RE': '15.5266 +/- 0.1029',
      '1_N': '0.3433 +/- 0.0064',
-     '1_AR': '0.6214 +/- 0.0039',
+     '1_AR': '*0.6214* +/- 0.0039',
      '1_PA': '-19.1534 +/- 0.5867'}""")
 
     bulge = Sersic(1)
