@@ -186,7 +186,7 @@ class ComponentContainer:
         return out_str
 
 
-# In[5]:
+# In[121]:
 
 
 class FeedmeContainer(ComponentContainer):
@@ -280,16 +280,19 @@ class FeedmeContainer(ComponentContainer):
                 chunk, 
                 leftover_dict, 
                 from_dict,
-                find_c_type = True
+                find_c_type = True,
+                find_c_num  = True
             ):
         
                 defaults = load_default_components()
             
+                c_num = None
                 # EX: ("1_XC","###")
-                if from_dict:
-                    c_num  = int(chunk[1][0].strip()[0])
-                else:
-                    c_num  = int(chunk[0].strip()[-1])
+                if find_c_num:
+                    if from_dict:
+                        c_num  = int(chunk[1][0].strip()[0])
+                    else:
+                        c_num  = int(chunk[0].strip()[-1])
                 
                 # EX: ("COMP_1","sersic")
                 if find_c_type:
@@ -314,7 +317,7 @@ class FeedmeContainer(ComponentContainer):
                 # and in the same order (still check to confirm)
                 matches = [
                     name for name, comp in leftover_dict.items() 
-                    if comp.component_number == c_num and 
+                    if ((comp.component_number == c_num) or not find_c_num) and 
                        comp.component_type   == c_type
                 ]
 
@@ -470,13 +473,13 @@ class FeedmeContainer(ComponentContainer):
                 if idx + 1 < len(component_idx_nums):
                     component_end = component_idx_nums[idx + 1][0] - 2
                 
-                chunk = input_file[component_begin : component_end]
+                chunk = [line for line in input_file[component_begin : component_end] if line]
                 
                 rotation_func  = [i for i, k in enumerate(chunk) if k.startswith("R0")]
                 # Assume at least F1
-                fourier_modes  = [i for i, k in enumerate(chunk) if k.startswith("F1")]
+                fourier_modes  = [i for i, k in enumerate(chunk) if k.startswith("F")]
                 
-                component = check_matches(self, input_file[component_begin : component_end], leftover_dict, from_dict = False)
+                component = check_matches(self, chunk, leftover_dict, from_dict = False)
                 
                  # Also assume only a single rotation function per component... which I think is fair
                 if not rotation_func:
@@ -492,10 +495,10 @@ class FeedmeContainer(ComponentContainer):
                         
                     else:
                         f_start = fourier_modes[0]
-                        component = check_matches(self, chunk[r_start : f_start], leftover_dict, from_dict = False)
+                        component = check_matches(self, chunk[r_start : f_start], leftover_dict, from_dict = False, find_c_num = False, find_c_type = False)
                         component.from_file_helper_list(chunk[r_start : f_start])
                         
-                        component = check_matches(self, chunk[f_start :], leftover_dict, from_dict = False, find_c_type = False)
+                        component = check_matches(self, chunk[f_start :], leftover_dict, from_dict = False, find_c_num = False, find_c_type = False)
                         component.from_file_helper_list(chunk[f_start:])
         
             if len(leftover_dict):
@@ -528,7 +531,7 @@ class FeedmeContainer(ComponentContainer):
         
 
 
-# In[18]:
+# In[122]:
 
 
 class OutputContainer(FeedmeContainer):
@@ -632,14 +635,14 @@ class OutputContainer(FeedmeContainer):
             return ""
 
 
-# In[19]:
+# In[123]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[20]:
+# In[124]:
 
 
 if __name__ == "__main__":
@@ -652,7 +655,7 @@ if __name__ == "__main__":
     print(container_df)
 
 
-# In[21]:
+# In[125]:
 
 
 # Testing FeedmeContainer kwargs and to_file
@@ -685,16 +688,8 @@ if __name__ == "__main__":
     
     container.to_file()
 
-R0) power               # PA rotation func. (power, log, none)
-R1) 0.0000      0       # Spiral inner radius [pixels]
-R2) 2.4184      0       # Spiral outer radius [pixels]
-R3) -133.1071   1       # Cumul. rotation out to outer radius [degrees]
-R4) 0.7587      1       # Asymptotic spiral powerlaw
-R9) -28.5901    1       # Inclination to L.o.S. [degrees]
-R10) 34.5243     1      # Sky position angle
-F1) 0.0500  45.0000 1 1 # Azim. Fourier mode 1, amplitude, & phase angle
-F3) 0.0500  25.0000 1 1 # Azim. Fourier mode 3, amplitude, & phase angle
-# In[22]:
+
+# In[126]:
 
 
 # Testing FeedmeContainer from_file
@@ -702,8 +697,8 @@ if __name__ == "__main__":
     
     container = new_container()
 
-    #example_feedme = pj(TEST_DATA_DIR, "test-out", "1237667911674691747", "1237667911674691747.in")
-    example_feedme = "1237667911674691747.in"
+    example_feedme = pj(TEST_DATA_DIR, "test-out", "1237667911674691747", "1237667911674691747.in")
+    #example_feedme = "1237667911674691747.in"
     example_fits   = pj(TEST_DATA_DIR, "test-out", "1237667911674691747", "1237667911674691747_galfit_out.fits")
         
     print("These are feedme -> output")
@@ -720,7 +715,7 @@ if __name__ == "__main__":
     print(iff(str(container)))
 
 
-# In[23]:
+# In[128]:
 
 
 # Testing FeedmeContainer from_file with just bulge
@@ -746,7 +741,7 @@ if __name__ == "__main__":
     print(iff(str(container)))
 
 
-# In[12]:
+# In[129]:
 
 
 # Testing FeedmeContainer from_file with no arms
@@ -771,7 +766,7 @@ if __name__ == "__main__":
     print(iff(str(container)))
 
 
-# In[13]:
+# In[ ]:
 
 
 # Testing extraction into FeedmeContainer attributes
@@ -794,7 +789,7 @@ if __name__ == "__main__":
     print(iff(str(example_feedme)))
 
 
-# In[31]:
+# In[ ]:
 
 
 # Testing OutputContainer
@@ -907,7 +902,7 @@ if __name__ == "__main__":
     #good_output.header.to_file(output_filename, good_output.bulge, good_output.disk, good_output.arms, good_output.fourier, good_output.sky)
 
 
-# In[15]:
+# In[ ]:
 
 
 if __name__ == "__main__":
