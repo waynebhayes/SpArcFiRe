@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[ ]:
 
 
 import os
@@ -18,7 +18,7 @@ import pandas as pd
 import numpy as np
 
 
-# In[2]:
+# In[ ]:
 
 
 # For debugging purposes
@@ -32,7 +32,7 @@ def in_notebook():
         return False
 
 
-# In[3]:
+# In[ ]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -59,7 +59,7 @@ from Functions.helper_functions import *
 from Classes.Parameters import *
 
 
-# In[4]:
+# In[ ]:
 
 
 # TODO: MAKE ITERABLE via generator
@@ -548,7 +548,7 @@ class GalfitComponent:
             
 
 
-# In[5]:
+# In[ ]:
 
 
 class Sersic(GalfitComponent):
@@ -576,7 +576,7 @@ class Sersic(GalfitComponent):
     
 
 
-# In[6]:
+# In[ ]:
 
 
 class Power(GalfitComponent):
@@ -616,7 +616,7 @@ class Power(GalfitComponent):
     
 
 
-# In[7]:
+# In[ ]:
 
 
 class Fourier(GalfitComponent):
@@ -784,7 +784,7 @@ class Fourier(GalfitComponent):
                 self.parameters[pname].value = eval(f"({params[i].split(':')[1].replace('*', '')})")
 
 
-# In[8]:
+# In[ ]:
 
 
 class Sky(GalfitComponent):
@@ -821,7 +821,7 @@ class Sky(GalfitComponent):
                ][2:]
 
 
-# In[9]:
+# In[ ]:
 
 
 class GalfitHeader(GalfitComponent):
@@ -965,14 +965,32 @@ class GalfitHeader(GalfitComponent):
         return file_dict
 
 
-# In[10]:
+# In[ ]:
+
+
+def load_default_components(with_header = True):
+    default_components = {}
+    
+    if with_header:
+        default_components["header"] = GalfitHeader()
+        
+    default_components["bulge"]   = Sersic(1)
+    default_components["disk"]    = Sersic(2)
+    default_components["arms"]    = Power(2)
+    default_components["fourier"] = Fourier(2)
+    default_components["sky"]     = Sky(3)
+    
+    return default_components
+
+
+# In[ ]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[11]:
+# In[ ]:
 
 
 # Unit Test for GalfitComponent
@@ -983,7 +1001,7 @@ if __name__ == "__main__":
         print(k,v)
 
 
-# In[12]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1023,7 +1041,7 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps""".
     print(header)
 
 
-# In[13]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1071,7 +1089,7 @@ if __name__ == "__main__":
     print(bulge)
 
 
-# In[14]:
+# In[ ]:
 
 
 # #Will use this once I diff check everything
@@ -1128,7 +1146,7 @@ if __name__ == "__main__":
 #     print("From log line--\n", bulge)
 
 
-# In[15]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1173,7 +1191,7 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
     print(arms)
 
 
-# In[16]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1214,7 +1232,7 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
     print(fourier)
 
 
-# In[17]:
+# In[ ]:
 
 
 # if __name__ == "__main__":
@@ -1230,7 +1248,7 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
 #     bulge.to_file(f"{base_out}_PowerFourierSkip.txt", arms, fourier)
 
 
-# In[18]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1272,7 +1290,16 @@ if __name__ == "__main__":
     print(sky)
 
 
-# In[19]:
+# In[ ]:
+
+
+if __name__ == "__main__":
+    for component_name, component in load_default_components().items():
+        print(component_name)
+        print(component)
+
+
+# In[ ]:
 
 
 if __name__ == "__main__":
