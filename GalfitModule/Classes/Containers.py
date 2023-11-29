@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[ ]:
 
 
 import os
@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 
 
-# In[2]:
+# In[ ]:
 
 
 # For debugging purposes
@@ -31,7 +31,7 @@ def in_notebook():
         return False
 
 
-# In[3]:
+# In[ ]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -60,7 +60,7 @@ from Classes.Components import *
 from Functions.helper_functions import *
 
 
-# In[4]:
+# In[ ]:
 
 
 class ComponentContainer:
@@ -69,9 +69,9 @@ class ComponentContainer:
         # TODO: When split from SpArcFiRe, default to just a single Sersic
         if kwargs:
             self.check_component_types(kwargs)
-            self.components = deepcopy(kwargs)
+            self._components = deepcopy(kwargs)
         else:
-            self.components = load_default_components(with_header = False)
+            self._components = load_all_components(with_header = False)
    
         # Generically handles the components fed in
         for name, component in self.components.items():
@@ -80,14 +80,24 @@ class ComponentContainer:
         
 # ==========================================================================================================
 
-#     @property
-#     def components(self):
-#         return self._components
+    @property
+    def components(self):
+        # Generically handles the components fed in
+        for name, component in self._components.items():
+            setattr(self, name, component)
+            getattr(self, name, component)
+            
+        return self._components
     
-#     @components.setter
-#     def components(self, new_dict):
-#         self.check_component_types(new_dict)
-#         self._components = deepcopy(new_dict)
+    @components.setter
+    def components(self, new_dict):
+        self.check_component_types(new_dict)
+        self._components = deepcopy(new_dict)
+        
+        # Generically handles the components fed in
+        for name, component in self._components.items():
+            setattr(self, name, component)
+            getattr(self, name, component)
 
 # ==========================================================================================================
 
@@ -98,7 +108,7 @@ class ComponentContainer:
             
         for k, comp in input_dict.items():
             assert isinstance(comp, GalfitComponent), f"The component fed into the ComponentContainer, {k}, is not a valid type."
-        
+            
 # ==========================================================================================================
     
     def to_tuple(self):
@@ -186,7 +196,7 @@ class ComponentContainer:
         return out_str
 
 
-# In[121]:
+# In[ ]:
 
 
 class FeedmeContainer(ComponentContainer):
@@ -201,6 +211,17 @@ class FeedmeContainer(ComponentContainer):
         
         self.path_to_feedme = path_to_feedme
 
+# ==========================================================================================================
+
+    def load_default(self):
+        
+        self.components["header"]  = GalfitHeader()
+
+        self.components["bulge"]   = Sersic(1)
+        self.components["disk"]    = Sersic(2)
+        self.components["power"]   = Power(2)
+        self.components["fourier"] = Fourier(2)
+        self.components["sky"]     = Sky(3)
 # ==========================================================================================================
 
     # def to_dict(self):
@@ -284,7 +305,7 @@ class FeedmeContainer(ComponentContainer):
                 find_c_num  = True
             ):
         
-                defaults = load_default_components()
+                defaults = load_all_components()
             
                 c_num = None
                 # EX: ("1_XC","###")
@@ -531,7 +552,7 @@ class FeedmeContainer(ComponentContainer):
         
 
 
-# In[122]:
+# In[ ]:
 
 
 class OutputContainer(FeedmeContainer):
@@ -635,14 +656,14 @@ class OutputContainer(FeedmeContainer):
             return ""
 
 
-# In[123]:
+# In[ ]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[124]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -655,7 +676,7 @@ if __name__ == "__main__":
     print(container_df)
 
 
-# In[125]:
+# In[ ]:
 
 
 # Testing FeedmeContainer kwargs and to_file
@@ -689,7 +710,7 @@ if __name__ == "__main__":
     container.to_file()
 
 
-# In[126]:
+# In[ ]:
 
 
 # Testing FeedmeContainer from_file
@@ -715,7 +736,7 @@ if __name__ == "__main__":
     print(iff(str(container)))
 
 
-# In[128]:
+# In[ ]:
 
 
 # Testing FeedmeContainer from_file with just bulge
@@ -741,7 +762,7 @@ if __name__ == "__main__":
     print(iff(str(container)))
 
 
-# In[129]:
+# In[ ]:
 
 
 # Testing FeedmeContainer from_file with no arms
