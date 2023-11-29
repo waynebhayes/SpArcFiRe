@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[1]:
 
 
 import os
@@ -19,7 +19,7 @@ import pandas as pd
 import numpy as np
 
 
-# In[ ]:
+# In[2]:
 
 
 # For debugging purposes
@@ -33,7 +33,7 @@ def in_notebook():
         return False
 
 
-# In[ ]:
+# In[3]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -59,7 +59,7 @@ sys.path.append(_MODULE_DIR)
 from Functions.helper_functions import *
 
 
-# In[ ]:
+# In[4]:
 
 
 class BaseParameter():
@@ -103,7 +103,7 @@ class BaseParameter():
         return f"{pre_comment:<23} # {self.comment}"
 
 
-# In[ ]:
+# In[5]:
 
 
 class ComponentType(BaseParameter, str):
@@ -132,7 +132,7 @@ class ComponentType(BaseParameter, str):
     #     return f"{self.parameter_number:>2}) {self.name:<11} {empty_str:<10} #  {self.comment}"
 
 
-# In[ ]:
+# In[6]:
 
 
 class HeaderParameter(BaseParameter, str):
@@ -149,7 +149,7 @@ class HeaderParameter(BaseParameter, str):
         )
 
 
-# In[ ]:
+# In[7]:
 
 
 class NumParameter(BaseParameter, float):
@@ -196,7 +196,7 @@ class NumParameter(BaseParameter, float):
 # ==========================================================================================================
 
 
-# In[ ]:
+# In[8]:
 
 
 class Skip(BaseParameter, int):
@@ -255,7 +255,7 @@ class Skip(BaseParameter, int):
         pass
 
 
-# In[ ]:
+# In[9]:
 
 
 #class BendingModes(BaseParameter, float):
@@ -302,7 +302,7 @@ class BendingMode(NumParameter):
 #         self._mode = new_val
 
 
-# In[ ]:
+# In[10]:
 
 
 # Use NamedTuples so we can access this like a dictionary
@@ -425,7 +425,7 @@ class MultiParameter(BaseParameter):
         return f"{pre_comment:<23} # {self.comment}"
 
 
-# In[ ]:
+# In[11]:
 
 
 #ntPosition    = namedtuple("ntPosition", "x y")
@@ -443,25 +443,9 @@ class Position(MultiParameter):
         
         self.fix              = kwargs.get("fix", (0, 0))
         
-# ==========================================================================================================
-
-#     @property
-#     def value(self):
-#         self._value = ntPosition(self.x, self.y)
-#         return self._value
-    
-#     @value.setter
-#     def value(self, new_tuple):
-#         self.check_type(new_tuple)
-#         self.check_len(new_tuple)
-        
-#         new_tuple = (float(i) for i in new_tuple)
-#         self._value = ntPosition(*new_tuple)
-#         self.x      = self._value[0]
-#         self.y      = self._value[1]
 
 
-# In[ ]:
+# In[12]:
 
 
 ntFourier = namedtuple("ntFourier", "amplitude phase_angle")
@@ -536,7 +520,7 @@ class FourierMode(MultiParameter):
         self.phase_angle = float(new_tuple[1])
 
 
-# In[ ]:
+# In[13]:
 
 
 ntImageRegionToFit = namedtuple("ntImageRegionToFit", "x1 x2 y1 y2")
@@ -616,7 +600,7 @@ class CropRegion(ImageRegionToFit):
         ImageRegionToFit.__init__(self, *values, **kwargs)
 
 
-# In[ ]:
+# In[14]:
 
 
 # This is functionally the same as position but for clarity...
@@ -658,7 +642,7 @@ class ConvolutionBox(HeaderParameter, MultiParameter):
         return f"{pre_comment:<23} # {self.comment}"
 
 
-# In[ ]:
+# In[15]:
 
 
 ntPlateScale = namedtuple("ntPlateScale", "dx dy")
@@ -705,14 +689,14 @@ class PlateScale(HeaderParameter, MultiParameter):
         return f"{pre_comment:<23} # {self.comment}"
 
 
-# In[ ]:
+# In[16]:
 
 
 # if __name__ == "__main__":
 #     from RegTest.RegTest import *
 
 
-# In[ ]:
+# In[17]:
 
 
 if __name__ == "__main__":
@@ -741,7 +725,7 @@ if __name__ == "__main__":
     print(repr(crop_region))
 
 
-# In[ ]:
+# In[18]:
 
 
 if __name__ == "__main__":
@@ -769,7 +753,7 @@ if __name__ == "__main__":
     print()
 
 
-# In[ ]:
+# In[19]:
 
 
 if __name__ == "__main__":
@@ -784,7 +768,7 @@ if __name__ == "__main__":
     print(sky_line)
 
 
-# In[ ]:
+# In[20]:
 
 
 if __name__ == "__main__":
@@ -809,7 +793,7 @@ if __name__ == "__main__":
     print(repr(position))
 
 
-# In[ ]:
+# In[21]:
 
 
 if __name__ == "__main__":
@@ -829,7 +813,7 @@ if __name__ == "__main__":
     print(magnitude)
 
 
-# In[ ]:
+# In[22]:
 
 
 if __name__ == "__main__":
@@ -843,7 +827,7 @@ if __name__ == "__main__":
     print(skip)
 
 
-# In[ ]:
+# In[23]:
 
 
 if __name__ == "__main__":
