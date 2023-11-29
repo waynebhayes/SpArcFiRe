@@ -314,12 +314,12 @@ class FitsFile:
 #             setattr(self, key, value)
 
 
-# In[17]:
+# In[12]:
 
 
 class OutputFits(FitsFile):
 
-    def __init__(self, filepath, names = []):
+    def __init__(self, filepath, names = [], load_default = True):
         
         FitsFile.__init__(self, filepath = filepath, wait = True)
         
@@ -345,6 +345,9 @@ class OutputFits(FitsFile):
         # Can call the helper directly since we're just using the header dict
         _header.from_file_helper_dict(self.header)
         self.feedme = FeedmeContainer(path_to_feedme = filepath, header = _header)
+        if load_default:
+            self.feedme.load_default()
+            
         self.feedme.from_file(self.header)
         
         self.data = self.model.data
@@ -511,14 +514,14 @@ class OutputFits(FitsFile):
         return self.masked_residual_normalized
 
 
-# In[18]:
+# In[13]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[19]:
+# In[14]:
 
 
 # Testing from_file
@@ -567,7 +570,7 @@ if __name__ == "__main__":
     print(np.shape(test_obs.observation.data))
 
 
-# In[20]:
+# In[18]:
 
 
 # Unit test to check value of masked residual
@@ -596,7 +599,7 @@ if __name__ == "__main__":
     #print(np.min(test_model.observation.data))
 
 
-# In[21]:
+# In[ ]:
 
 
 if __name__ == "__main__":
