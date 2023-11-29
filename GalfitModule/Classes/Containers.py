@@ -64,34 +64,39 @@ from Functions.helper_functions import *
 
 
 class ComponentContainer:
+            
     def __init__(self, **kwargs):
         # TODO: When split from SpArcFiRe, default to just a single Sersic
-        self.bulge   = kwargs.get("bulge", Sersic(1))
-        self.disk    = kwargs.get("disk", Sersic(2))
-        self.arms    = kwargs.get("arms", Power(2))
-        self.fourier = kwargs.get("fourier", Fourier(2))
-        self.sky     = kwargs.get("sky", Sky(3))
-        
-        # Dict
-        # Mutability strikes again
-        self._components = deepcopy(vars(self))        
-        self._components.update(kwargs)
+        if kwargs:
+            self.check_component_types(kwargs)
+            self.components = deepcopy(kwargs)
+        else:
+            self.components = load_default_components(with_header = False)
+   
+        # Generically handles the components fed in
+        for name, component in self.components.items():
+            setattr(self, name, component)
+            getattr(self, name, component)
         
 # ==========================================================================================================
 
-    @property
-    def components(self):
-        return self._components
+#     @property
+#     def components(self):
+#         return self._components
     
-    @components.setter
-    def components(self, new_dict):
-        self.check_component_types(new_dict)
-        self._components = deepcopy(new_dict)
-        
+#     @components.setter
+#     def components(self, new_dict):
+#         self.check_component_types(new_dict)
+#         self._components = deepcopy(new_dict)
+
 # ==========================================================================================================
 
-    def check_component_types(self):
-        for k, comp in self.components.items():
+    def check_component_types(self, input_dict = {}):
+        
+        if not input_dict:
+            input_dict = self.components
+            
+        for k, comp in input_dict.items():
             assert isinstance(comp, GalfitComponent), f"The component fed into the ComponentContainer, {k}, is not a valid type."
         
 # ==========================================================================================================
@@ -116,6 +121,21 @@ class ComponentContainer:
         #        ]
         return list(self.components.values())
     
+# ==========================================================================================================
+
+    def reset_component_numbers(self):
+        count = 1
+        for comp in self.to_list():
+            if comp.component_type == "header":
+                continue
+                
+            elif comp.component_type not in ("power", "fourier", "bending"):
+                comp.component_number = count
+                count += 1
+                
+            else:
+                comp.component_number = count - 1
+        
 # ==========================================================================================================
     
     def to_pandas(self):
@@ -172,7 +192,6 @@ class ComponentContainer:
 class FeedmeContainer(ComponentContainer):
     def __init__(self, **kwargs):
         
-        # Use vars to our advantage and declare this first
         # If it is then specified in kwargs, it will overwrite this one
         self.header = GalfitHeader()
         path_to_feedme = kwargs.pop("path_to_feedme","")
@@ -236,6 +255,8 @@ class FeedmeContainer(ComponentContainer):
         # It's written to generally handle both and stores everything in the respective component objects
         # obj_in could be a filename or a dict (per fitshandler)
         
+# =======================================================
+
         def open_file(self, open_type, filename = obj_in):
             try: 
                 # Grabbing the filename
@@ -252,8 +273,85 @@ class FeedmeContainer(ComponentContainer):
             
             return input_file
 
-        def from_fits(self, input_dict = obj_in):
+# =======================================================
+
+        def check_matches(
+                self, 
+                chunk, 
+                leftover_dict, 
+                from_dict,
+                find_c_type = True
+            ):
+        
+                defaults = load_default_components()
             
+                # EX: ("1_XC","###")
+                if from_dict:
+                    c_num  = int(chunk[1][0].strip()[0])
+                else:
+                    c_num  = int(chunk[0].strip()[-1])
+                
+                # EX: ("COMP_1","sersic")
+                if find_c_type:
+                    if from_dict:
+                        c_type = chunk[0][1].strip()
+                    else:
+                        c_type = chunk[1].lstrip(" 0) ").split()[0].strip()
+                else:
+                    c_type = None
+                    # Grabbing param_prefix
+                    if from_dict:
+                        param_prefix = chunk[0][0].split("_")[1][0]
+                    else:
+                        param_prefix = chunk[0][0]
+                        
+                    for comp in defaults.values():
+                        if comp.param_prefix == param_prefix:
+                            c_type = comp.component_type
+                            break
+
+                # Assume the class object has been properly initialized with the component in question
+                # and in the same order (still check to confirm)
+                matches = [
+                    name for name, comp in leftover_dict.items() 
+                    if comp.component_number == c_num and 
+                       comp.component_type   == c_type
+                ]
+
+                if len(matches) == 0:
+                    print(f"No matches found to {c_type} with component #{c_num} in component container. Proceeding...")
+                    
+                    component                  = defaults[c_type]
+                    component.component_number = len(self.components) + 1
+                    if c_type in self.components:
+                        c_type += "_"
+                        
+                    self.components[c_type]    = component
+                    name = c_type
+                    #print("It is likely you declared your component container incorrectly.")
+                    #print(self.components)
+                    #raise Exception()
+
+                elif len(matches) > 1:
+                    print(f"Found {len(matches)} matches for {c_type} with component #{c_num} in file.")
+                    print("It is likely you declared your component container incorrectly.")
+                    print(self.components)
+                    raise Exception()
+                    
+                else:
+                    name      = matches[0]
+                    component = self.components[name]
+                    
+                # Take advantage of mutability here
+                leftover_dict.pop(name, None)
+
+                return component
+
+# =======================================================
+
+        # These could probably be meaningfully combined but for now it's convenient
+        def from_fits(self, input_dict = obj_in):
+
             input_keys = list(input_dict.keys())
             input_list = list(input_dict.items())
             
@@ -262,9 +360,7 @@ class FeedmeContainer(ComponentContainer):
                 final_idx  = input_keys.index("FLAGS")
             except ValueError:
                 final_idx  = -1
-            
-            component_list = self.to_list()
-            
+                        
             # Header does not fit the COMP paradigm used below so we explicitly account for it here
             # Reinclude magzpt since it the end is exclusive
             header_keys = input_keys[input_keys.index("INITFILE"):input_keys.index("MAGZPT")] + \
@@ -272,13 +368,17 @@ class FeedmeContainer(ComponentContainer):
                 
             header_dict = {k:v for k,v in input_dict.items() if k in header_keys}
             
-            component_list[0].from_file_helper_dict(header_dict)
-            
-            component_list_num = 1
+            try:
+                self.components.header.from_file_helper_dict(header_dict)
+            except:
+                pass
             
             send_to_helper = {}
             
             component_nums = [(i, k) for i, k in enumerate(input_keys) if k.startswith("COMP")]
+            
+            leftover_dict = deepcopy(self.components)
+            leftover_dict.pop("header")
             
             for idx_component_nums, (i_begin, component_key) in enumerate(component_nums):
                 i_end = final_idx
@@ -286,64 +386,59 @@ class FeedmeContainer(ComponentContainer):
                 if idx_component_nums + 1 < len(component_nums):
                     i_end = component_nums[idx_component_nums + 1][0]
                         
-                chunk = input_list[i_begin:i_end]
+                chunk = input_list[i_begin : i_end]
                 
                 rotation_func  = [i for i, k in enumerate(chunk) if k[0].endswith("ROTF")]
                 # Assume at least F1
                 fourier_modes  = [i for i, k in enumerate(chunk) if k[0].endswith("F1")]
-
-                component_name = input_dict[component_key.strip()].strip()
-                component = component_list[component_list_num] #[c for c in component_list if c.component_type == component_name][0]
                 
-                # Aligning ourselves correctly
-                count = 0
-                while component.component_type != component_name or count == 100:
-                    #print(component.component_type)
-                    # For when default components are used
-                    # TODO: when generalized, take this out
-                    if "skip" in component.parameters.keys():
-                        component.skip.value = 1 #add_skip(skip_val = 1)
-                        
-                    component_list_num += 1
-                    component           = component_list[component_list_num]
-                    count              += 1
-                
-                component_list_num += 1
+                component = check_matches(self, chunk, leftover_dict, from_dict = True)
                 
                 # Also assume only a single rotation function per component... which I think is fair
                 if not rotation_func:
-                    send_to_helper = dict(input_list[i_begin : i_end])
+                    send_to_helper = dict(chunk)
                     component.from_file_helper_dict(send_to_helper)
                     
                 else:
-                    r_start = rotation_func[0]
+                    r_start        = rotation_func[0]
                     send_to_helper = dict(chunk[:r_start])
                     component.from_file_helper_dict(send_to_helper)
                     
-                    component = component_list[component_list_num] #[c for c in component_list if c.component_type == component_name][0]
-                    component_list_num += 1
+                    # component = component_list[component_list_num] #[c for c in component_list if c.component_type == component_name][0]
+                    # component_list_num += 1
                     
                     if not fourier_modes:
                         send_to_helper = dict(chunk[r_start:])
+                        component      = check_matches(self, chunk[r_start:], leftover_dict, from_dict = True)
                         component.from_file_helper_dict(send_to_helper)
                         
                     else:
-                        f_start = fourier_modes[0]
+                        # Power/rotation
+                        f_start        = fourier_modes[0]
                         send_to_helper = dict(chunk[r_start : f_start])
+                        component      = check_matches(self, chunk[r_start : f_start], leftover_dict, from_dict = True)
                         component.from_file_helper_dict(send_to_helper)
-
-                        component = component_list[component_list_num] #[c for c in component_list if c.component_type == "fourier"][0]
-                        component_list_num += 1
                         
+                        # Fourier modes
                         send_to_helper = dict(chunk[f_start:])
+                        component      = check_matches(self, chunk[f_start:], leftover_dict, from_dict = True, find_c_type = False)
                         component.from_file_helper_dict(send_to_helper)
-        
+                        
+            if len(leftover_dict):
+                print("Extra components found in container. Removing them.")
+                for name in leftover_dict.keys():
+                    print(f"Removing {name}...")
+                    self.components.pop(name)
+                    
+            # return
+# =======================================================
+
         def from_text(self, input_file_obj):
             
             input_file = [line.rstrip("\n") for line in input_file_obj.readlines()]
             
             # Header is guaranteed to come first***
-            component_list = self.to_list()
+            #component_list = self.to_list()
             
             header_begin_end_idx = [i + 1 
                                     for i, line in enumerate(input_file) 
@@ -351,20 +446,19 @@ class FeedmeContainer(ComponentContainer):
                                     or line.startswith("P)")
                                    ]
             
-            component_list[0].from_file_helper_list(
+            self.header.from_file_helper_list(
                 input_file[header_begin_end_idx[0]:header_begin_end_idx[1]]
             )
             
-            component_list_num = 1
-            #send_to_helper = []
-            #store = False
-            #component_exists = False
             
-            component_idx_nums = [(i + 1, line[-1]) 
+            component_idx_nums = [(i, line[-1]) #[(i + 1, line[-1]) 
                                   for i, line in enumerate(input_file) 
                                   if line.startswith("# Component number")
                                   #or line.startswith("# IMAGE and GALFIT CONTROL PARAMETERS")
                                  ]
+            
+            leftover_dict = deepcopy(self.components)
+            leftover_dict.pop("header")
             
             for idx, (component_begin, component_num) in enumerate(component_idx_nums):
                 # White space *before* component number or end of file
@@ -382,17 +476,7 @@ class FeedmeContainer(ComponentContainer):
                 # Assume at least F1
                 fourier_modes  = [i for i, k in enumerate(chunk) if k.startswith("F1")]
                 
-                component_name = input_file[component_begin].replace(" ", "").lstrip("0)").split("#")[0]
-                component = component_list[component_list_num]
-                
-                # Aligning ourselves correctly
-                count = 0
-                while component.component_type != component_name or count == 100:
-                    component_list_num += 1
-                    component = component_list[component_list_num]
-                    count += 1
-                    
-                component_list_num += 1
+                component = check_matches(self, input_file[component_begin : component_end], leftover_dict, from_dict = False)
                 
                  # Also assume only a single rotation function per component... which I think is fair
                 if not rotation_func:
@@ -400,55 +484,30 @@ class FeedmeContainer(ComponentContainer):
                     
                 else:
                     r_start = rotation_func[0]
-                    component.from_file_helper_list(chunk[:r_start - 1])
-                    
-                    component = component_list[component_list_num] #[c for c in component_list if c.component_type == component_name][0]
-                    component_list_num += 1
+                    component.from_file_helper_list(chunk[:r_start])
                     
                     if not fourier_modes:
+                        component = check_matches(self, chunk[r_start:], leftover_dict, from_dict = False)
                         component.from_file_helper_list(chunk[r_start:])
                         
                     else:
                         f_start = fourier_modes[0]
+                        component = check_matches(self, chunk[r_start : f_start], leftover_dict, from_dict = False)
                         component.from_file_helper_list(chunk[r_start : f_start])
-
-                        component = component_list[component_list_num] #[c for c in component_list if c.component_type == "fourier"][0]
-                        component_list_num += 1
                         
+                        component = check_matches(self, chunk[f_start :], leftover_dict, from_dict = False, find_c_type = False)
                         component.from_file_helper_list(chunk[f_start:])
+        
+            if len(leftover_dict):
+                print("Extra components found in container. Removing them.")
+                for name in leftover_dict.keys():
+                    print(f"Removing {name}...")
+                    self.components.pop(name)
+                    
+            #return
+        
+# =======================================================
 
-# DEPRECATED
-#             for line in input_file:
-#                 component = component_list[component_num]
-                
-#                 if line.strip().startswith(component.start_text):
-#                     store = True
-#                     #component_exists = True
-                    
-#                 if store:
-#                     send_to_helper.append(line)
-#                     #component_exists = True
-                    
-#                 if line.strip().startswith(component.end_text):
-#                     #component_exists = True
-#                     store = False
-#                     component.from_file_helper(send_to_helper)
-#                     send_to_helper = []
-#                     component_num += 1
-                    
-#                     if component_num == len(component_list): break
-                    
-                    #component_exists = False
-                    #continue
-                    
-                # Basically if the if conditions are never met (which they should be)
-                # if not component_exists:
-                #     continue
-                    
-                #components_to_pop.append(component.component_type)
-        
-            return #components_to_pop
-        
         # 
         if isinstance(obj_in, dict):
             from_fits(self)
@@ -463,13 +522,13 @@ class FeedmeContainer(ComponentContainer):
             input_file = open_file(self, open)
             from_text(self, input_file)
             input_file.close()
+            
+        # Reset component numbers in case we had to backfill
+        self.reset_component_numbers()
         
-        # This is not needed now that we update
-        # param_values in the file helpers
-        #_ = [c.update_param_values() for c in self.to_list()]
 
 
-# In[6]:
+# In[18]:
 
 
 class OutputContainer(FeedmeContainer):
@@ -500,7 +559,7 @@ class OutputContainer(FeedmeContainer):
             # per subprocess documentation
             # A negative value -N indicates that the child was terminated by signal N (POSIX only).
             print(f"GALFIT was terminated by signal {galfit_return_code}")
-            print(f"{galfit_err_text}")
+            print(f"Error text is: {galfit_err_text}")
         
         # else:
         #     print(f"GALFIT failed!")
@@ -573,14 +632,14 @@ class OutputContainer(FeedmeContainer):
             return ""
 
 
-# In[7]:
+# In[19]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[8]:
+# In[20]:
 
 
 if __name__ == "__main__":
@@ -593,7 +652,7 @@ if __name__ == "__main__":
     print(container_df)
 
 
-# In[9]:
+# In[21]:
 
 
 # Testing FeedmeContainer kwargs and to_file
@@ -626,8 +685,16 @@ if __name__ == "__main__":
     
     container.to_file()
 
-
-# In[10]:
+R0) power               # PA rotation func. (power, log, none)
+R1) 0.0000      0       # Spiral inner radius [pixels]
+R2) 2.4184      0       # Spiral outer radius [pixels]
+R3) -133.1071   1       # Cumul. rotation out to outer radius [degrees]
+R4) 0.7587      1       # Asymptotic spiral powerlaw
+R9) -28.5901    1       # Inclination to L.o.S. [degrees]
+R10) 34.5243     1      # Sky position angle
+F1) 0.0500  45.0000 1 1 # Azim. Fourier mode 1, amplitude, & phase angle
+F3) 0.0500  25.0000 1 1 # Azim. Fourier mode 3, amplitude, & phase angle
+# In[22]:
 
 
 # Testing FeedmeContainer from_file
@@ -635,7 +702,8 @@ if __name__ == "__main__":
     
     container = new_container()
 
-    example_feedme = pj(TEST_DATA_DIR, "test-out", "1237667911674691747", "1237667911674691747.in")
+    #example_feedme = pj(TEST_DATA_DIR, "test-out", "1237667911674691747", "1237667911674691747.in")
+    example_feedme = "1237667911674691747.in"
     example_fits   = pj(TEST_DATA_DIR, "test-out", "1237667911674691747", "1237667911674691747_galfit_out.fits")
         
     print("These are feedme -> output")
@@ -652,7 +720,7 @@ if __name__ == "__main__":
     print(iff(str(container)))
 
 
-# In[11]:
+# In[23]:
 
 
 # Testing FeedmeContainer from_file with just bulge
@@ -726,7 +794,7 @@ if __name__ == "__main__":
     print(iff(str(example_feedme)))
 
 
-# In[14]:
+# In[31]:
 
 
 # Testing OutputContainer
@@ -795,7 +863,7 @@ if __name__ == "__main__":
 
     bad_example = "\n".join(good_example.split("\n")[:-3] + ["...now exiting to system...\n"])
     
-    dummy_obj = subprocess.CompletedProcess("", 0)
+    dummy_obj = subprocess.CompletedProcess("", -1, stderr = "this is a badddddd result")
     dummy_obj.stdout = bad_example
     
     print("Checking the bad example")
@@ -812,6 +880,7 @@ if __name__ == "__main__":
     print("*"*80)
     
     print("And now checking the 'good' example (these should all be updated from the default values)\n")
+    dummy_obj = subprocess.CompletedProcess("", 0)
     dummy_obj.stdout = good_example
     print("(this should produce failure text since we didn't store text)")
     good_output = OutputContainer(dummy_obj)
