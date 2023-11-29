@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[1]:
 
 
 import os
@@ -18,7 +18,7 @@ import pandas as pd
 import numpy as np
 
 
-# In[ ]:
+# In[2]:
 
 
 # For debugging purposes
@@ -32,7 +32,7 @@ def in_notebook():
         return False
 
 
-# In[ ]:
+# In[3]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -59,7 +59,7 @@ from Functions.helper_functions import *
 from Classes.Parameters import *
 
 
-# In[ ]:
+# In[4]:
 
 
 # TODO: MAKE ITERABLE via generator
@@ -548,7 +548,7 @@ class GalfitComponent:
             
 
 
-# In[ ]:
+# In[5]:
 
 
 class Sersic(GalfitComponent):
@@ -576,7 +576,7 @@ class Sersic(GalfitComponent):
     
 
 
-# In[ ]:
+# In[6]:
 
 
 class Power(GalfitComponent):
@@ -616,7 +616,7 @@ class Power(GalfitComponent):
     
 
 
-# In[ ]:
+# In[7]:
 
 
 class Fourier(GalfitComponent):
@@ -784,7 +784,7 @@ class Fourier(GalfitComponent):
                 self.parameters[pname].value = eval(f"({params[i].split(':')[1].replace('*', '')})")
 
 
-# In[ ]:
+# In[8]:
 
 
 class Sky(GalfitComponent):
@@ -821,7 +821,7 @@ class Sky(GalfitComponent):
                ][2:]
 
 
-# In[ ]:
+# In[9]:
 
 
 class GalfitHeader(GalfitComponent):
@@ -887,13 +887,13 @@ class GalfitHeader(GalfitComponent):
                "\n".join(GalfitComponent.__str__(self).split("\n")[1:]) + \
                self.post_header
     
-    def __repr__(self):
-        return self.input_menu_file   + "\n\n" + \
-               self.extra_header_info + "\n\n" + \
-               self._section_sep      + "\n"   + \
-               "# IMAGE and GALFIT CONTROL PARAMETERS\n" + \
-               "\n".join(GalfitComponent.__repr__(self).split("\n")[1:]) + \
-               self.post_header
+    # def __repr__(self):
+    #     return self.input_menu_file   + "\n\n" + \
+    #            self.extra_header_info + "\n\n" + \
+    #            self._section_sep      + "\n"   + \
+    #            "# IMAGE and GALFIT CONTROL PARAMETERS\n" + \
+    #            "\n".join(GalfitComponent.__repr__(self).split("\n")[1:]) + \
+    #            self.post_header
     
 # ==========================================================================================================
 
@@ -965,32 +965,38 @@ class GalfitHeader(GalfitComponent):
         return file_dict
 
 
-# In[ ]:
+# In[10]:
 
 
-def load_default_components(with_header = True):
-    default_components = {}
+def load_all_components(with_header = True):
+    all_components = {}
     
     if with_header:
-        default_components["header"] = GalfitHeader()
+        all_components["header"] = GalfitHeader()
         
-    default_components["bulge"]   = Sersic(1)
-    default_components["disk"]    = Sersic(2)
-    default_components["arms"]    = Power(2)
-    default_components["fourier"] = Fourier(2)
-    default_components["sky"]     = Sky(3)
+    all_components["sersic"]     = Sersic(1)
+    # Alias for convenience
+    all_components["bulge"]      = all_components["sersic"]
+    all_components["disk"]       = Sersic(2)
     
-    return default_components
+    all_components["power"]      = Power(2)
+    # Alias for convenience
+    all_components["arms"]       = all_components["power"]
+    
+    all_components["fourier"]    = Fourier(2)
+    all_components["sky"]        = Sky(3)
+    
+    return all_components
 
 
-# In[ ]:
+# In[11]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[ ]:
+# In[12]:
 
 
 # Unit Test for GalfitComponent
@@ -1001,7 +1007,7 @@ if __name__ == "__main__":
         print(k,v)
 
 
-# In[ ]:
+# In[13]:
 
 
 if __name__ == "__main__":
@@ -1041,11 +1047,12 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps""".
     print(header)
 
 
-# In[ ]:
+# In[14]:
 
 
 if __name__ == "__main__":
-    bogus_list = """ 0) sersic                 #  Component type
+    bogus_list = """# Component number: 1 
+ 0) sersic                 #  Component type
  1) 76.7000  76.5000  0 0  #  Position x, y
  3) 12.9567     1          #  Integrated magnitude
  4) 18.5147     1          #  R_e (effective radius)   [pix]
@@ -1089,7 +1096,7 @@ if __name__ == "__main__":
     print(bulge)
 
 
-# In[ ]:
+# In[15]:
 
 
 # #Will use this once I diff check everything
@@ -1146,7 +1153,7 @@ if __name__ == "__main__":
 #     print("From log line--\n", bulge)
 
 
-# In[ ]:
+# In[16]:
 
 
 if __name__ == "__main__":
@@ -1191,7 +1198,7 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
     print(arms)
 
 
-# In[ ]:
+# In[17]:
 
 
 if __name__ == "__main__":
@@ -1232,7 +1239,7 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
     print(fourier)
 
 
-# In[ ]:
+# In[18]:
 
 
 # if __name__ == "__main__":
@@ -1248,7 +1255,7 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
 #     bulge.to_file(f"{base_out}_PowerFourierSkip.txt", arms, fourier)
 
 
-# In[ ]:
+# In[19]:
 
 
 if __name__ == "__main__":
@@ -1290,16 +1297,16 @@ if __name__ == "__main__":
     print(sky)
 
 
-# In[ ]:
+# In[20]:
 
 
 if __name__ == "__main__":
-    for component_name, component in load_default_components().items():
+    for component_name, component in load_all_components().items():
         print(component_name)
         print(component)
 
 
-# In[ ]:
+# In[21]:
 
 
 if __name__ == "__main__":
