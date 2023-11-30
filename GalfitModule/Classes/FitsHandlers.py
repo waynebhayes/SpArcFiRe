@@ -211,29 +211,29 @@ class FitsFile:
 
     def to_png(self, cleanup = True, **kwargs): #tmp_fits_path = "", tmp_png_path = "", out_filename = ""):
         
-        gname         = kwargs.get("gname", self.gname)
+        gname          = kwargs.get("gname", self.gname)
         
         # TODO: BAD ASSUMPTION MOVING FORWARD
         #tmp_fits_path = kwargs.get("tmp_fits_path", self.filepath)
-        fits_path = kwargs.get("fits_path", self.filepath)
+        fits_path      = kwargs.get("fits_path", self.filepath)
         # .../galfits -> galfit_png
         #tmp_png_dir   = os.path.split(tmp_fits_path)[0].rstrip("s") + "_png"
-        tmp_png_dir   = kwargs.get("tmp_png_dir", "./")
-        tmp_png_path  = pj(tmp_png_dir, gname)
-        tmp_png_path  = kwargs.get("tmp_png_path", tmp_png_path)
+        tmp_png_dir    = kwargs.get("tmp_png_dir", "./")
+        tmp_png_path   = pj(tmp_png_dir, gname)
+        tmp_png_path   = kwargs.get("tmp_png_path", tmp_png_path)
         
-        out_png_dir   = kwargs.get("out_png_dir", "./")
+        out_png_dir    = kwargs.get("out_png_dir", "./")
         
         capture_output = bool(kwargs.get("silent", False))
         
-        fitspng_param = "0.25,1" #1,150"
+        fitspng_param  = "0.25,1" #1,150"
         
         # run_fitspng from helper_functions, string path to fitspng program
-        fitspng_cmd1 = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}.png {fits_path}[1]"
+        fitspng_cmd1   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}.png {fits_path}[1]"
         
-        fitspng_cmd2 = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}_out.png {fits_path}[2]"
+        fitspng_cmd2   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}_out.png {fits_path}[2]"
         
-        fitspng_cmd3 = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}_residual.png {fits_path}[3]"
+        fitspng_cmd3   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}_residual.png {fits_path}[3]"
         
         cmds = [fitspng_cmd1, fitspng_cmd2, fitspng_cmd3]
         
@@ -314,7 +314,7 @@ class FitsFile:
 #             setattr(self, key, value)
 
 
-# In[12]:
+# In[6]:
 
 
 class OutputFits(FitsFile):
@@ -340,14 +340,11 @@ class OutputFits(FitsFile):
         #self.update_params(**self.all_hdu) 
         
         # Dict is very redundant here but just for funsies
+        # FITS header not Feedme header
         self.header = dict(self.model.header)
-        _header = GalfitHeader()
         # Can call the helper directly since we're just using the header dict
-        _header.from_file_helper_dict(self.header)
-        self.feedme = FeedmeContainer(path_to_feedme = filepath, header = _header)
-        if load_default:
-            self.feedme.load_default()
-            
+        #_header.from_file_helper_dict(self.header)
+        self.feedme = FeedmeContainer(path_to_feedme = filepath, header = GalfitHeader(), load_default = load_default)
         self.feedme.from_file(self.header)
         
         self.data = self.model.data
@@ -514,14 +511,14 @@ class OutputFits(FitsFile):
         return self.masked_residual_normalized
 
 
-# In[13]:
+# In[7]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[14]:
+# In[8]:
 
 
 # Testing from_file
@@ -570,7 +567,7 @@ if __name__ == "__main__":
     print(np.shape(test_obs.observation.data))
 
 
-# In[18]:
+# In[9]:
 
 
 # Unit test to check value of masked residual
@@ -599,7 +596,7 @@ if __name__ == "__main__":
     #print(np.min(test_model.observation.data))
 
 
-# In[ ]:
+# In[10]:
 
 
 if __name__ == "__main__":
@@ -625,7 +622,7 @@ if __name__ == "__main__":
     print("After...", all(k in test_model.header for k in keys_to_check))
 
 
-# In[ ]:
+# In[11]:
 
 
 if __name__ == "__main__":
