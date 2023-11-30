@@ -17,30 +17,15 @@ except KeyError:
     
 sys.path.append(_MODULE_DIR)
     
-from Classes.Components import *
-from Classes.Containers import *
+#from Classes.Components import *
+#from Classes.Containers import *
+# FitsHandlers imports all of the above
+from sparc_to_galfit_feedme_gen import *
 from Classes.FitsHandlers import *
 from Functions.helper_functions import *
-from sparc_to_galfit_feedme_gen import *
 from Utilities.parallel_residual_calc import fill_objects #, parallel_wrapper
 
 import star_removal.no_log_remove_stars_with_sextractor as remove_stars_with_sextractor
-
-# This is in helper_functions
-# def check_programs():
-
-#     # This seems to work in Python directly so I'm leaving it as-is
-#     # Checking galfit
-#     run_galfit = shutil.which("galfit")
-#     #run_galfit = response.stdout.strip()
-
-#     # Checking fitspng
-#     run_fitspng   = shutil.which("fitspng")
-
-#     # Checking exact python3 call
-#     run_python = shutil.which("python3")
-
-#     return run_galfit, run_fitspng, run_python
 
 def rerun_galfit(galfit_output, base_galfit_cmd, *args):
     
@@ -239,7 +224,7 @@ def main(**kwargs):
                 print(f"There is no spirality keyword in the header for {gname}.")
         
         # This doesn't change
-        header  = feedme_info[gname].header
+        header      = feedme_info[gname].header
         feedme_path = feedme_info[gname].path_to_feedme
         # feedme_info[gname] is a FeedmeContainer object
         
@@ -247,7 +232,7 @@ def main(**kwargs):
         # Reminder, these are references to the originals so changes here will
         # change the values in the dictionary (as demo'd in num_steps 1 below)
         # This is also to clean up the code and make it easier to understand
-        initial_components = feedme_info[gname].extract_components()
+        initial_components = feedme_info[gname] #.extract_components()
                
         # Note to self, OutputContainer is *just* for handling output
         # It does not retain the input state fed into Galfit
@@ -259,27 +244,28 @@ def main(**kwargs):
         if num_steps == 1:
             run_galfit_cmd = f"{base_galfit_cmd} {feedme_path}"
             
-            initial_components.disk.axis_ratio = disk_axis_ratio
-            initial_components.disk.update_param_values()
+            initial_components.disk.axis_ratio.value = disk_axis_ratio
             feedme_info[gname].to_file()
             
-            final_galfit_output = OutputContainer(sp(run_galfit_cmd), **feedme_info[gname].to_dict())
+            final_galfit_output = OutputContainer(sp(run_galfit_cmd), path_to_feedme = feedme_path, **feedme_info[gname].components)
             
         elif num_steps >= 2:
             # This ends up being more like a disk fit
             # Top is disk first, bottom is bulge first, choose your own adventure
-            disk_in = pj(out_dir, gname, f"{gname}_disk.in")
-            #bulge_in = pj(out_dir, gname, f"{gname}_bulge.in")
+            #disk_in = pj(out_dir, gname, f"{gname}_disk.in")
+            bulge_in = pj(out_dir, gname, f"{gname}_bulge.in")
             
-            header.to_file(disk_in, initial_components.disk, initial_components.sky)
-            #header.to_file(bulge_in, initial_components.bulge, initial_components.sky)
+            #header.to_file(disk_in, initial_components.disk, initial_components.sky)
+            header.to_file(bulge_in, initial_components.bulge, initial_components.sky)
             
-            run_galfit_cmd = f"{base_galfit_cmd} {disk_in}"
-            #run_galfit_cmd = f"{base_galfit_cmd} {bulge_in}"
+            #run_galfit_cmd = f"{base_galfit_cmd} {disk_in}"
+            run_galfit_cmd = f"{base_galfit_cmd} {bulge_in}"
             
-            print("Disk")
-            #print("Bulge")
-            galfit_output = OutputContainer(sp(run_galfit_cmd), sersic_order = ["disk"], **feedme_info[gname].to_dict())
+            #print("Disk")
+            print("Bulge")
+            
+            #galfit_output = OutputContainer(sp(run_galfit_cmd), sersic_order = ["disk"], path_to_feedme = feedme_path, **feedme_info[gname].to_dict())
+            galfit_output = OutputContainer(sp(run_galfit_cmd), sersic_order = ["bulge"], path_to_feedme = feedme_path, **feedme_info[gname].components)
             
             # Only fix sky if first step is successful
             # if galfit_output.success:
@@ -328,7 +314,7 @@ def main(**kwargs):
                 
                 run_galfit_cmd = f"{base_galfit_cmd} {bulge_in} {bulge_disk_in}"
                 print("Bulge + Disk")
-                galfit_output = OutputContainer(sp(run_galfit_cmd), **galfit_output.to_dict())
+                galfit_output = OutputContainer(sp(run_galfit_cmd), path_to_feedme = feedme_path, **galfit_output.components)
                 
 #                 if rerun:
 #                     galfit_output = rerun_galfit(galfit_output,
@@ -338,19 +324,33 @@ def main(**kwargs):
     
             # Overwrite original... for now 
             # Also good thing dicts retain order, this frequently comes up
-            if galfit_output.arms.param_values.get("skip", 0):
-                # By default includes the header
-                print("Skipping Arms")
-                galfit_output.to_file(galfit_output.bulge, galfit_output.disk, galfit_output.sky)
-            else:
-                galfit_output.disk.axis_ratio = disk_axis_ratio
-                galfit_output.disk.update_param_values()
+            # if galfit_output.arms.param_values.get("skip", 0):
+            #     # By default includes the header
+            #     print("Skipping Arms")
+            #     galfit_output.to_file(galfit_output.bulge, galfit_output.disk, galfit_output.sky)
+            # else:
+            galfit_output.disk.axis_ratio.value = disk_axis_ratio
+                
+                # After determining sky and initial component(s) with extended background,
+                # shrink fitting region closer to the galaxy itself
+                # xcenter, ycenter = galfit_output.bulge.position
+                # old_region = galfit_output.header.region_to_fit
+                # crop_mult = 2
+                # crop_rad = 1.5*(xcenter - old_region[0])/crop_mult
+                # galfit_output.header.region_to_fit = (
+                #                               max(round(xcenter - crop_rad), 0), # Just in case
+                #                               round(xcenter + crop_rad), 
+                #                               max(round(ycenter - crop_rad), 0), 
+                #                               round(ycenter + crop_rad)
+                #                              )
+                # galfit_output.header.update_param_values()
+                
                 #galfit_output.arms.param_fix["outer_rad"] = 1
-                galfit_output.to_file()
+            galfit_output.to_file()
                 
             run_galfit_cmd = f"{base_galfit_cmd} {feedme_path}"
             print("Bulge + Disk + Arms (if applicable)")
-            final_galfit_output = OutputContainer(sp(run_galfit_cmd), **galfit_output.to_dict(), store_text = True)
+            final_galfit_output = OutputContainer(sp(run_galfit_cmd), path_to_feedme = feedme_path, **galfit_output.components, store_text = True)
             
         # TODO: GET THIS WORKING... so many issues
         # Dropping this here for final simultaneous fitting following all num_steps
@@ -430,7 +430,14 @@ def main(**kwargs):
         # out_png_dir   = kwargs.get("out_png_dir", "./")
         #capture_output = bool(kwargs.get("silent", False))
         if sp(f"hostname").stdout.split(".")[0] == "bayonet-09":
-            tmp_fits_obj = OutputFits(tmp_fits_path_gname)
+            # Whether or not to load default components
+            # If arms are not used, we select False and let the code
+            # figure it out on reading in (this avoids some output/extra processing)
+            #load_default = True
+            #if len(initial_components.components) == 4:
+            #    load_default = False
+                
+            tmp_fits_obj = OutputFits(tmp_fits_path_gname, load_default = False)
             tmp_fits_obj.to_png(tmp_fits_path = tmp_fits_path_gname,
                                 tmp_png_path  = tmp_png_path,
                                 out_png_dir   = out_png_dir
