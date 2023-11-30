@@ -963,6 +963,7 @@ def load_default_power_parameters(component_number = None):
     inner_rad = NumParameter(
         0,
         name = "inner radius",
+        fix  = 0,
         parameter_number = "1",
         parameter_prefix = param_prefix,
         comment = "Spiral inner radius [pixels]",
@@ -973,6 +974,7 @@ def load_default_power_parameters(component_number = None):
     outer_rad = NumParameter(
         10,
         name = "outer radius",
+        fix  = 0,
         parameter_number = "2",
         parameter_prefix = param_prefix,
         comment = "Spiral outer radius [pixels]",
