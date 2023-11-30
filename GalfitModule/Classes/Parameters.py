@@ -183,7 +183,7 @@ class NumParameter(BaseParameter, float):
     
     @value.setter
     def value(self, new_val):
-        self._value = float(new_val)
+        self._value = round(float(new_val), 4)
 
     # Formerly __str__
     # def __str__(self):
@@ -607,7 +607,7 @@ class CropRegion(ImageRegionToFit):
 ntConvolutionBox = namedtuple("ntConvolutionBox", "x y")
 
 class ConvolutionBox(HeaderParameter, MultiParameter):
-    def __init__(self, value = (50, 50), **kwargs):
+    def __init__(self, value = (52, 52), **kwargs):
         
         
         HeaderParameter.__init__(self, value, **kwargs)
@@ -704,7 +704,6 @@ if __name__ == "__main__":
         (0, 100, 0, 100)
     )
     
-    print(crop_region)
     print(repr(crop_region))
     print()
     
@@ -854,7 +853,7 @@ if __name__ == "__main__":
     print(fourier1)
 
 
-# In[ ]:
+# In[24]:
 
 
 if __name__ == "__main__":
@@ -878,7 +877,7 @@ if __name__ == "__main__":
     print(bending3)
 
 
-# In[ ]:
+# In[25]:
 
 
 # Parameters with defaults for Sersic profile
@@ -948,7 +947,7 @@ def load_default_sersic_parameters(component_number = None):
     return loc
 
 
-# In[ ]:
+# In[26]:
 
 
 def load_default_power_parameters(component_number = None):
@@ -1034,7 +1033,7 @@ def load_default_power_parameters(component_number = None):
     return loc
 
 
-# In[ ]:
+# In[27]:
 
 
 def load_default_fourier_parameters(component_number = None):
@@ -1065,7 +1064,7 @@ def load_default_fourier_parameters(component_number = None):
     return loc
 
 
-# In[ ]:
+# In[28]:
 
 
 # Parameters with defaults for Sky profile
@@ -1111,7 +1110,7 @@ def load_default_sky_parameters(component_number = None):
     return loc
 
 
-# In[ ]:
+# In[29]:
 
 
 # Parameters with defaults for Sky profile
@@ -1209,7 +1208,7 @@ def load_default_header_parameters(galaxy_name = ""):
     return loc
 
 
-# In[ ]:
+# In[30]:
 
 
 def load_default_parameters():
@@ -1223,7 +1222,7 @@ def load_default_parameters():
     }
 
 
-# In[ ]:
+# In[31]:
 
 
 if __name__ == "__main__":
@@ -1238,7 +1237,7 @@ if __name__ == "__main__":
     _ = [print(type(v.value), v) for v in load_default_sky_parameters().values()]
 
 
-# In[ ]:
+# In[32]:
 
 
 if __name__ == "__main__":
@@ -1248,7 +1247,7 @@ if __name__ == "__main__":
     ]
 
 
-# In[ ]:
+# In[33]:
 
 
 if __name__ == "__main__":
