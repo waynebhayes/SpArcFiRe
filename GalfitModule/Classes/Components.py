@@ -68,33 +68,44 @@ from Classes.Parameters import *
     #     yield data[index]
 class GalfitComponent:
     def __init__(self,
-                 parameters       = {}, #load_default_parameters(),
-                 component_type   = "",
+                 #parameters       = {}, #load_default_parameters(),
+                 component_type,
                  component_name   = "",
                  component_number = 0,
                  param_prefix     = " ",
                  **kwargs
                 ):
         
-        if parameters:
-            # This should ONLY occur here since the other classes will
-            # give a default to use in case parameters is a dict of 
-            # keys and values
-            assert all(isinstance(parameter, BaseParameter) for parameter in parameters.values()),\
-                   f"Parameters in dictionary fed into {type(self).__name__} must be a parameter class.\n" \
-                   f"We recommend feeding those in as key word arguments to the instantiation instead."
-
-            for k,v in kwargs.items():
-                if k in parameters:
-                    parameters[k].value = v
-                
-        self.parameters       = parameters
         self.component_type   = component_type
         # If you decide to name your component *besides and/or including* the
         # variable itself
         self.component_name   = component_name
         self.component_number = component_number
-        self.param_prefix     = param_prefix       
+        self.param_prefix     = param_prefix  
+        
+        default = load_default_parameters().get(self.component_type, {})
+        assert default, f"Component type {self.component_type} improperly specified or not in defaults."
+        
+        # Assume if an argument is given called 'parameters' they mean to pass
+        # all the parameters for their component in at once. kwargs however take precedence
+        # since we sometimes use parameters for the default.
+        parameters = kwargs.pop("parameters", default)
+        
+        for k, v in kwargs.items():
+            # Only overwrite if the arguments are given correctly
+            # Look in sub dictionary
+            if k in default.keys():
+                #try:
+                parameters.get(k, default[k]).value = v
+                # except KeyError:
+                #     print(f"{self.component_type} instantiation not properly specified. Continuing...")
+        
+        self._parameters       = parameters
+        
+        # Generically handles the parameters fed in
+        for name, parameter in self._parameters.items():
+            setattr(self, name, parameter)
+            getattr(self, name, parameter)             
         
         # For reading from file
         self.start_dict = f"COMP_{self.component_number}"
@@ -115,39 +126,70 @@ class GalfitComponent:
         
 # ==========================================================================================================
 
-    @staticmethod
-    def component_get_set(component_dict = None, component_type = ""):
-        
-        exec_dict = {}
-        
-        # TODO: Set up logging
-        if not component_dict:
-            exec_dict = load_default_parameters()
+    def check_parameters_types(self, input_dict):
+        if not input_dict:
+            input_dict = self.parameters
             
-            warnings.warn(f"Component type: {component_type} not properly specified " \
-                      f"upon initializing {GalfitComponent.__name__}.\n" \
-                      f"Will initalize all component types currently set in 'load_default_parameters()' " \
-                      f"from 'Parameters' module." \
-                      "\n".join(exec_dict.keys())
-                     )
-        else:
-            # Give it an empty key so that the following loop works
-            exec_dict[""] = component_dict
-        
-        full_str = ""
+        for k, parameter in input_dict.items():
+            assert isinstance(parameter, BaseParameter), f"The parameter fed into the GalfitComponent, {k}, is not a valid type."
+
+# ==========================================================================================================
+
+    @property
+    def parameters(self):
+        # Generically handles the parameters fed in
+        for name, parameter in self._parameters.items():
+            setattr(self, name, parameter)
+            getattr(self, name, parameter)
             
-        return "\n".join(
-            [
-                generate_get_set(
-                    # inner dict looks like this: 
-                    # "position" : parameters["position"]
-                    {k : f"parameters[\"{k}\"]" 
-                     for k in e_dict.keys()
-                    }
-                )
-                for e_dict in exec_dict.values()
-            ]
-        )        
+        return self._parameters
+    
+    @parameters.setter
+    def parameters(self, new_dict):
+        self.check_parameters_types(new_dict)
+        self._parameters = deepcopy(new_dict)
+        
+        # Generically handles the parameters fed in
+        for name, parameter in self._parameters.items():
+            setattr(self, name, parameter)
+            getattr(self, name, parameter)
+
+        
+# ==========================================================================================================
+
+#     @staticmethod
+#     def component_get_set(component_dict = None, component_type = ""):
+        
+#         exec_dict = {}
+        
+#         # TODO: Set up logging
+#         if not component_dict:
+#             exec_dict = load_default_parameters()
+            
+#             warnings.warn(f"Component type: {component_type} not properly specified " \
+#                       f"upon initializing {GalfitComponent.__name__}.\n" \
+#                       f"Will initalize all component types currently set in 'load_default_parameters()' " \
+#                       f"from 'Parameters' module." \
+#                       "\n".join(exec_dict.keys())
+#                      )
+#         else:
+#             # Give it an empty key so that the following loop works
+#             exec_dict[""] = component_dict
+        
+#         full_str = ""
+            
+#         return "\n".join(
+#             [
+#                 generate_get_set(
+#                     # inner dict looks like this: 
+#                     # "position" : parameters["position"]
+#                     {k : f"parameters[\"{k}\"]" 
+#                      for k in e_dict.keys()
+#                     }
+#                 )
+#                 for e_dict in exec_dict.values()
+#             ]
+#         )        
         
 # ==========================================================================================================
 
@@ -556,9 +598,9 @@ class Sersic(GalfitComponent):
         
         # SersicParameters               
         GalfitComponent.__init__(self, 
-                                 load_default_sersic_parameters(component_number = component_number), 
                                  component_type = "sersic", 
                                  component_number = component_number,
+                                 parameters = load_default_sersic_parameters(component_number = component_number),
                                  **kwargs
                                 )
         
@@ -572,7 +614,7 @@ class Sersic(GalfitComponent):
     
     # Maybe it's silly to do it this way but in the future, it should be easier
     # to implement new components and it should be safer
-    exec(GalfitComponent.component_get_set(load_default_sersic_parameters()))
+    #exec(GalfitComponent.component_get_set(load_default_sersic_parameters()))
     
 
 
@@ -585,10 +627,10 @@ class Power(GalfitComponent):
         #power_parameters = load_default_power_parameters(component_number = component_number)
         
         GalfitComponent.__init__(self, 
-                                 load_default_power_parameters(component_number = component_number),
                                  component_type = "power", 
                                  component_number = component_number,
                                  param_prefix = "R",
+                                 parameters = load_default_power_parameters(component_number = component_number),
                                  **kwargs
                                 )
         
@@ -605,7 +647,7 @@ class Power(GalfitComponent):
     
     # dict for get set looks like this: 
     # "position" : parameters["position"]
-    exec(GalfitComponent.component_get_set(load_default_power_parameters()))  
+    #exec(GalfitComponent.component_get_set(load_default_power_parameters()))  
     
     # Since this one does not have a component number, it gets special treatment
     def __str__(self):
@@ -622,7 +664,9 @@ class Power(GalfitComponent):
 class Fourier(GalfitComponent):
     # kwargs is a placeholder
     def __init__(self, component_number, n = {1 : (0.05, 45), 3 : (0.05, 25)}, **kwargs):
+        
         parameters = load_default_fourier_parameters(component_number = component_number)
+        
         if n:
             for fnum, (amplitude, phase_angle) in n.items():
                 parameters[f"F{fnum}"] = FourierMode(
@@ -633,10 +677,10 @@ class Fourier(GalfitComponent):
                 )
          
         GalfitComponent.__init__(self, 
-                                 parameters,
                                  component_type = "fourier",
                                  param_prefix = "F",
                                  component_number = component_number,
+                                 parameters = parameters,
                                  **kwargs
                                 )
         
@@ -659,7 +703,7 @@ class Fourier(GalfitComponent):
         self.start_text = f"F{p_numbers[0]}"
         self.end_text   = f"{self.param_prefix}{p_numbers[-1]}"
         
-    exec(GalfitComponent.component_get_set(load_default_fourier_parameters()))
+    #exec(GalfitComponent.component_get_set(load_default_fourier_parameters()))
     
     exec(
         generate_get_set(
@@ -791,9 +835,9 @@ class Sky(GalfitComponent):
     def __init__(self, component_number, **kwargs):
         
         GalfitComponent.__init__(self, 
-                                 load_default_sky_parameters(component_number = component_number),
                                  component_type = "sky", 
                                  component_number = component_number,
+                                 parameters = load_default_sky_parameters(component_number = component_number),
                                  **kwargs
                                 )
         
@@ -806,7 +850,7 @@ class Sky(GalfitComponent):
         
     # dict for get set looks like this: 
     # "position" : parameters["position"]
-    exec(GalfitComponent.component_get_set(load_default_sky_parameters()))
+    #exec(GalfitComponent.component_get_set(load_default_sky_parameters()))
     
 # ==========================================================================================================
 
@@ -830,15 +874,13 @@ class GalfitHeader(GalfitComponent):
         
         # normal rules don't apply here
         # Still use inheritance for the other functions
-        if not parameters:
-            parameters = load_default_header_parameters(galaxy_name = galaxy_name)
         
         # If not fully specified, will use galaxy_name as default so it's good to use
         # it as an argument even if I am specifying each individually
         GalfitComponent.__init__(self, 
-                                 parameters = parameters,
                                  component_type = "header",
                                  param_prefix   = "",
+                                 parameters = load_default_header_parameters(galaxy_name = galaxy_name),
                                  **kwargs
                                 )
         
@@ -875,7 +917,7 @@ class GalfitHeader(GalfitComponent):
 
     # dict for get set looks like this: 
     # "position" : parameters["position"]
-    exec(GalfitComponent.component_get_set(load_default_header_parameters()))
+    #exec(GalfitComponent.component_get_set(load_default_header_parameters()))
     
 # ==========================================================================================================
 
@@ -976,15 +1018,15 @@ def load_all_components(with_header = True):
         
     all_components["sersic"]     = Sersic(1)
     # Alias for convenience
-    all_components["bulge"]      = all_components["sersic"]
-    all_components["disk"]       = Sersic(2)
+    #all_components["bulge"]      = all_components["sersic"]
+    #all_components["disk"]       = Sersic(2)
     
-    all_components["power"]      = Power(2)
+    all_components["power"]      = Power(1)
     # Alias for convenience
-    all_components["arms"]       = all_components["power"]
+    #all_components["arms"]       = all_components["power"]
     
-    all_components["fourier"]    = Fourier(2)
-    all_components["sky"]        = Sky(3)
+    all_components["fourier"]    = Fourier(1)
+    all_components["sky"]        = Sky(2)
     
     return all_components
 
@@ -1001,7 +1043,7 @@ if __name__ == "__main__":
 
 # Unit Test for GalfitComponent
 if __name__ == "__main__":
-    component = GalfitComponent()
+    component = GalfitComponent("header")
     print("Testing default values of base class GalfitComponent...")
     for k,v in component.__dict__.items():
         print(k,v)
@@ -1047,7 +1089,25 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps""".
     print(header)
 
 
-# In[14]:
+# In[24]:
+
+
+if __name__ == "__main__":
+    bulge = Sersic(
+            component_number = 1, 
+            position         = (25,25),
+            magnitude        = 15,
+            # Sometimes sparcfire messes this up
+            effective_radius = 10.010101001,
+            # According to other paper GALFIT usually doesn't have a problem with the index
+            sersic_index     = 4.52,
+            axis_ratio       = 0.6,
+            position_angle   = 90.01
+        )
+    print(bulge)
+
+
+# In[25]:
 
 
 if __name__ == "__main__":
@@ -1096,7 +1156,7 @@ if __name__ == "__main__":
     print(bulge)
 
 
-# In[15]:
+# In[16]:
 
 
 # #Will use this once I diff check everything
@@ -1153,7 +1213,7 @@ if __name__ == "__main__":
 #     print("From log line--\n", bulge)
 
 
-# In[16]:
+# In[17]:
 
 
 if __name__ == "__main__":
@@ -1198,7 +1258,7 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
     print(arms)
 
 
-# In[17]:
+# In[18]:
 
 
 if __name__ == "__main__":
@@ -1239,7 +1299,7 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
     print(fourier)
 
 
-# In[18]:
+# In[19]:
 
 
 # if __name__ == "__main__":
@@ -1255,7 +1315,7 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
 #     bulge.to_file(f"{base_out}_PowerFourierSkip.txt", arms, fourier)
 
 
-# In[19]:
+# In[20]:
 
 
 if __name__ == "__main__":
@@ -1297,7 +1357,7 @@ if __name__ == "__main__":
     print(sky)
 
 
-# In[20]:
+# In[21]:
 
 
 if __name__ == "__main__":
@@ -1306,7 +1366,7 @@ if __name__ == "__main__":
         print(component)
 
 
-# In[21]:
+# In[23]:
 
 
 if __name__ == "__main__":
