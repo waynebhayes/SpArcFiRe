@@ -13,7 +13,7 @@
 # 
 # TO RUN: `python3 sparc_to_galfit_feedme_gen.py`
 
-# In[1]:
+# In[ ]:
 
 
 import numpy as np
@@ -28,7 +28,7 @@ from copy import deepcopy
 from astropy.io import fits
 
 
-# In[2]:
+# In[ ]:
 
 
 # For debugging purposes
@@ -42,7 +42,7 @@ def in_notebook():
         return False
 
 
-# In[3]:
+# In[ ]:
 
 
 import sys
@@ -74,92 +74,16 @@ from Classes.Containers import FeedmeContainer
 from Functions.helper_functions import *
 
 
-# # To convert autocrop image to fits
-# import subprocess
-# 
-# try: 
-#     autocrop_img_filename = glob.glob('*_autoCrop.png')[0]
-#     #convert_command = ["convert ", autocrop_img_filename,"input.fits"]
-#     convert_command = "convert " + autocrop_img_filename + " input.fits"
-# 
-# except:
-#     print("Cannot find ", autocrop_img_filename, " to convert to fits.")
-#     print("Check Sparcfire output or directories. Cannot proceed. Quitting.")
-#     raise SystemExit("Quitting.")
-#     
-# else:
-#     try: 
-#         subprocess.run(convert_command, shell=True)
-#     
-#     except:
-#         print("Cannot convert to FITS:", autocrop_img_filename)
-#         print("Check Sparcfire output or directories. Cannot proceed.")
-#         raise SystemExit("Quitting.")
-
-# In[ ]:
-
-
-# # Grabbing filepath from command line
-# def command_line(top_dir = os.getcwd(), **kwargs): # = True):
-    
-#     in_dir_out  = kwargs.get("in_dir", pj(top_dir, "sparcfire-in"))
-#     tmp_dir_out = kwargs.get("tmp_dir", pj(top_dir, "sparcfire-tmp"))
-#     out_dir_out = kwargs.get("out_dir", pj(top_dir, "sparcfire-out"))
-        
-#     #if not run_as_script:
-#     #    return in_dir_out, tmp_dir_out, out_dir_out
-    
-#     try:
-#         if len(sys.argv) != 4: # including name of python script
-#             print(f"Using: \n{in_dir_out}\n{tmp_dir_out}\n{out_dir_out}\nto generate feedme.")
-
-#         else:
-#             in_dir_out = argv[1]
-#             tmp_dir_out = argv[2]
-#             out_dir_out = argv[3]
-#             print(f"Using: \n{in_dir_out}\n{tmp_dir_out}\n{out_dir_out}\nto generate feedme.")
-#     except:
-#         pass
-
-#     return absp(in_dir_out), absp(tmp_dir_out), absp(out_dir_out)
-
-
 # In[ ]:
 
 
 def get_galaxy_names_list(in_dir, tmp_dir, out_dir, galaxy_names = []):
 
     gnames_out = galaxy_names
-#     try:
-#         #filenames_read = find_files(in_dir, "*.fits", "f")
-    
-#     #except:
-#         # Feel free to hardcode this 
-#         #print("Please input the full path to the input directory for the SpArcFiRe run and include the trailing /")
-#         #print("e.g. /home/usr/sparcfire-in/")
-#         #in_dir = input()
-    
-#         #try:
-#             #filenames_in = glob.glob(in_dir + "*.fits")
 
-#         #except:
-#             #print("See instructions above or check your directory path. Could not glob.")
-#             #raise SystemExit("Exitting.")
-    
-#     except:
-#         print("Please copy me into the directory which contains the folders for your")
-#         print("input, temporary, and output files for SpArcFiRe denoted:")
-#         print("sparcfire-in, sparcfire-tmp, and sparcfire-out.")
-#         raise SystemExit("Exitting.")
-        
-#     else:
     if not gnames_out:
         print("No galaxy names fed in. Finding them to generate feedmes.")
-    #     print("Something went wrong! No galaxies fed into feedme generator.")
-    #     print("Please copy me into the directory which contains the folders for your")
-    #     print("input, temporary, and output files for SpArcFiRe denoted:")
-    #     print("sparcfire-in, sparcfire-tmp, and sparcfire-out.")
-    #     raise SystemExit("Exitting.")
+
         gnames_out  = [os.path.basename(s).replace(".fits", "")
                        for s in find_files(in_dir, "*.fits", "f")
                        if exists(pj(out_dir, os.path.basename(s).replace(".fits", "")))
@@ -176,12 +100,6 @@ def get_galaxy_names_list(in_dir, tmp_dir, out_dir, galaxy_names = []):
 def path_join(path='.', name='', file_ext=''):
     
     file_path = pj(path, name + file_ext)
-
-    # deprecated
-    # "./" + path + '/' + name + file_ext
-    # print(file_path)
-    # print(glob.glob(file_path))
-    # file_name = glob.glob(file_path)[0]
     
     return file_path
 
@@ -582,28 +500,11 @@ def write_starmask_ascii(starmask_filepath):
 
     return starmask_ascii_name
 
-def write_to_feedme(path, list_in, feedme_name = "autogen_feedme_galfit.in"):
-    
-    file_path = os.path.join(".", path, feedme_name)
-#    file_path = "/".join([".", path, ""]) + 'autogen_feedme_galfit.in'
-    with open(file_path, 'w') as g:
-        #for value in list_in:
-        _ = [g.write(f"{value}\n") for value in list_in]
-        
-    return file_path
+
 # In[ ]:
 
 
 def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name = "", **kwargs):
-    
-    # if top_dir:
-    #     in_dir, tmp_dir, out_dir = command_line(top_dir)
-    # else:
-    #     in_dir, tmp_dir, out_dir = command_line()
-    # cwd = os.getcwd()
-    # in_dir = kwargs.get("in_dir", pj(cwd, "sparcfire-in"))
-    # tmp_dir = kwargs.get("tmp_dir", pj(cwd, "sparcfire-tmp"))
-    # out_dir = kwargs.get("out_dir", pj(cwd, "sparcfire-out"))
     
     galaxy_names, gfolders = get_galaxy_names_list(in_dir, tmp_dir, out_dir, galaxy_names = kwargs.get("galaxy_names", []))
     
@@ -616,14 +517,6 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
     #bulge_axis_ratios = kwargs.get("bulge_axis_ratios", [])
     
     for i, gfolder in enumerate(gfolders):
-    
-        # if single_galaxy_name:
-        #     gname = single_galaxy_name
-        #     #gfolder = pj(out_dir, gname)
-        #     # Alternatively
-        #     # galaxy = folders_out[galaxy_names.index(gname)]
-        # else:
-        #     gname = galaxy_names[count]
             
         gname = os.path.basename(gfolder)
         if not exists(gfolder):
@@ -643,13 +536,13 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
         # scale = (float(x2crop)-float(x1crop))/256 - from old implementation
         # ************
         
-        galaxy_dict = galaxy_information(gname, gfolder)
+        galaxy_dict    = galaxy_information(gname, gfolder)
         scale_fact_std = galaxy_dict["scale_fact_std"]
         
         center_pos_x = float(galaxy_dict["center_pos_x"])
         center_pos_y = float(galaxy_dict["center_pos_y"])
-        crop_rad = float(galaxy_dict["crop_rad"])
-        input_size = int(galaxy_dict["input_size"])
+        crop_rad     = float(galaxy_dict["crop_rad"])
+        input_size   = int(galaxy_dict["input_size"])
         
         # Guarantee lowest bound doesn't go below 0
         # GALFIT can handle it but still
@@ -708,56 +601,61 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
             except KeyError:
                 print(f"There is something wrong with the header for {gname}.")
         
-        bulge = Sersic(component_number = 1, 
-                       position = (center_pos_x, center_pos_y),
-                       magnitude = float(petromag) - 2,
-                       # Sometimes sparcfire messes this up
-                       effective_radius = min(max(galaxy_dict["bulge_maj_axs_len"], 2), 0.2*crop_rad),
-                       # According to other paper GALFIT usually doesn't have a problem with the index
-                       sersic_index = 4,
-                       axis_ratio = bulge_axis_ratio,
-                       position_angle = galaxy_dict["bulge_rot_angle"]
-                      )
+        bulge = Sersic(
+            component_number = 1, 
+            position         = (center_pos_x, center_pos_y),
+            magnitude        = float(petromag) - 2,
+            # Sometimes sparcfire messes this up
+            effective_radius = min(max(galaxy_dict["bulge_maj_axs_len"], 2), 0.2*crop_rad),
+            # According to other paper GALFIT usually doesn't have a problem with the index
+            sersic_index     = 4,
+            axis_ratio       = bulge_axis_ratio,
+            position_angle   = galaxy_dict["bulge_rot_angle"]
+        )
         
-        disk  = Sersic(component_number = 2, 
-                       position = (center_pos_x, center_pos_y),
-                       magnitude = float(petromag) - 2,
-                       effective_radius = galaxy_dict["disk_maj_axs_len"],
-                       # According to comparison tests, this usually ends up much higher than classical probably due to the spiral.
-                       sersic_index = 1,
-                       axis_ratio = galaxy_dict["disk_axis_ratio"],
-                       position_angle = galaxy_dict["disk_rot_angle"]
-                      )
+        disk  = Sersic(
+            component_number = 2, 
+            position         = (center_pos_x, center_pos_y),
+            magnitude        = float(petromag) - 2,
+            effective_radius = galaxy_dict["disk_maj_axs_len"],
+            # According to comparison tests, this usually ends up much higher than classical probably due to the spiral.
+            sersic_index     = 1,
+            axis_ratio       = galaxy_dict["disk_axis_ratio"],
+            position_angle   = galaxy_dict["disk_rot_angle"]
+        )
             
-        arms  = Power(component_number = 2,
-                      inner_rad = in_rad, # Chosen based on where *detection* of arms usually start
-                      outer_rad = arc_dict["outer_rad"],
-                      cumul_rot = float(f"{galaxy_dict['spin_parity']}{arc_dict['cumul_rot']}"),
-                      powerlaw = galaxy_dict["alpha"],
-                      inclination = galaxy_dict["inclination"],
-                      sky_position_angle = (galaxy_dict["pos_angle_power"] - galaxy_dict["disk_rot_angle"]) % 180 #90 
-                     )
+        arms  = Power(
+            component_number   = 2,
+            inner_rad          = in_rad, # Chosen based on where *detection* of arms usually start
+            outer_rad          = arc_dict["outer_rad"],
+            cumul_rot          = float(f"{galaxy_dict['spin_parity']}{arc_dict['cumul_rot']}"),
+            powerlaw_index     = galaxy_dict["alpha"],
+            inclination        = galaxy_dict["inclination"],
+            sky_position_angle = (galaxy_dict["pos_angle_power"] - galaxy_dict["disk_rot_angle"]) % 180 #90 
+        )
+        
+        fourier = Fourier(component_number = 2)    
+        sky     = Sky(component_number = 3)
         
         # Take 90 pixels (in the 256x256 image) to be the cutoff for an arm
         # Use a simple cut off for now
         # Looking at the first two arms may be too unreliable
         #print("Max arc length in 256 img", scale_var(max_arc, 0.5*256/crop_rad))
+        container_to_feed = {
+            "header"  : header,
+            "bulge"   : bulge,
+            "disk"    : disk,
+            "arms"    : arms,
+            "fourier" : fourier,
+            "sky"     : sky
+        }
+        
         if scale_var(galaxy_dict["max_arc_length"], 1/scale_fact_std) < 75:
             print("Skipping Arms, max arc len is", galaxy_dict["max_arc_length"]/scale_fact_std)
-            arms.add_skip(skip_val = 1)
-            
-        # May not do the fixing since we run the disk first
-        # may however overwrite the output from the disk for this parameter
-        # to help the arms in go_go_galfit
-        #else:
-            # Fixing this to 0.6 to give the arms the best chance to form
-        #    disk.axis_ratio = 0.6
-        #    disk.param_values["axis_ratio"] = 0.6
+            container_to_feed.pop("arms")
+            container_to_feed.pop("fourier")
+            #arms.skip.value = 1
 
-        fourier = Fourier(component_number = 2)
-            
-        sky   = Sky(component_number = 3)
-        
         # Previously used for Fourier modes
         
 #         f1 = 0.05
@@ -783,19 +681,14 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
         # count += 1
         
         container = FeedmeContainer(path_to_feedme = pj(gfolder, f"{gname}.in"),
-                                    header         = header,
-                                    bulge          = bulge, 
-                                    disk           = disk,
-                                    arms           = arms,
-                                    fourier        = fourier,
-                                    sky            = sky)
-        
-        if arms.param_values.get("skip", False):
-            # By default includes the header
-            container.to_file(bulge, disk, sky)
-        else:
-            container.to_file()
-        
+                                    load_default = False, **container_to_feed
+                                   )
+        container.to_file()
+        # skip = 1
+        # if arms.parameters.skip.value:
+        #     # By default includes the header
+        #     container.to_file(bulge, disk, sky)
+        # else:
         feedme_info_out[gname] = container
         
     return feedme_info_out
@@ -806,34 +699,26 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
 
 if __name__ == "__main__":
     
-    # FOR NOW (aka TODO) force >python 3.7 for f string and subprocess compatibility
-    # out_str = """\t Python3.7 or greater required! Exitting without generating feedmes... 
-    #             if feedmes have already been generated, galfit will run with those.\n"""
-    # assert sys.version_info >= (3, 7), out_str
-    
-    
-    # if in_notebook():
-    #     cwd = cwd.replace("ics-home", username)
-    #cwd = os.getcwd()
-    if len(sys.argv) == 4:
-        in_dir = sys.argv[1]
-        tmp_dir = sys.argv[2]
-        out_dir = sys.argv[3]
-    else:
-        cwd = os.getcwd()
-        in_dir = pj(cwd, "sparcfire-in")
-        tmp_dir = pj(cwd, "sparcfire-tmp")
-        out_dir = pj(cwd, "sparcfire-out")
-    
-    print(f"Using: \n{in_dir}\n{tmp_dir}\n{out_dir}\nto generate feedme.")
-    write_to_feedmes(
-                     in_dir = in_dir, 
-                     tmp_dir = tmp_dir, 
-                     out_dir = out_dir
-                    )
+    if not in_notebook():
+        if len(sys.argv) == 4:
+            in_dir = sys.argv[1]
+            tmp_dir = sys.argv[2]
+            out_dir = sys.argv[3]
+        else:
+            cwd = os.getcwd()
+            in_dir = pj(cwd, "sparcfire-in")
+            tmp_dir = pj(cwd, "sparcfire-tmp")
+            out_dir = pj(cwd, "sparcfire-out")
+
+        print(f"Using: \n{in_dir}\n{tmp_dir}\n{out_dir}\nto generate feedme.")
+        _ = write_to_feedmes(
+            in_dir  = in_dir, 
+            tmp_dir = tmp_dir, 
+            out_dir = out_dir
+                        )
 
 
-# In[4]:
+# In[ ]:
 
 
 if __name__ == "__main__":
