@@ -1,7 +1,7 @@
 
 #  Input menu file: /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-out/1237668589728366770/1237668589728366770.in
 
-#  Chi^2/nu = 1.116,  Chi^2 = 5923.179,  Ndof = 5308
+#  Chi^2/nu = 1.108,  Chi^2 = 5878.998,  Ndof = 5308
 
 ================================================================================
 # IMAGE and GALFIT CONTROL PARAMETERS
@@ -38,45 +38,45 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 
 # Component number: 1
  0) sersic                 #  Component type
- 1) 43.4409  43.8034  0 0  #  Position x, y
- 3) 15.7372     1          #  Integrated magnitude 
- 4) 2.3043      1          #  R_e (effective radius)   [pix]
- 5) 0.7937      1          #  Sersic index n (de Vaucouleurs n=4) 
+ 1) 43.4400  43.8000  0 0  #  Position x, y
+ 3) 13.8482     1          #  Integrated magnitude 
+ 4) 9.0729      1          #  R_e (effective radius)   [pix]
+ 5) 0.3176      1          #  Sersic index n (de Vaucouleurs n=4) 
  6) 0.0000      0          #     ----- 
  7) 0.0000      0          #     ----- 
  8) 0.0000      0          #     ----- 
- 9) 0.5962      1          #  Axis ratio (b/a)  
-10) -51.0420    1          #  Position angle (PA) [deg: Up=0, Left=90]
+ 9) 0.7727      1          #  Axis ratio (b/a)  
+10) 77.0197     1          #  Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 # Component number: 2
  0) sersic                 #  Component type
- 1) 43.4400  43.8000  0 0  #  Position x, y
- 3) 13.1393     1          #  Integrated magnitude 
- 4) 9.5027      1          #  R_e (effective radius)   [pix]
- 5) 0.5848      1          #  Sersic index n (de Vaucouleurs n=4) 
+ 1) 43.4409  43.8034  0 0  #  Position x, y
+ 3) 13.7025     1          #  Integrated magnitude 
+ 4) 7.7546      1          #  R_e (effective radius)   [pix]
+ 5) 1.3768      1          #  Sersic index n (de Vaucouleurs n=4) 
  6) 0.0000      0          #     ----- 
  7) 0.0000      0          #     ----- 
  8) 0.0000      0          #     ----- 
- 9) 0.7859      1          #  Axis ratio (b/a)  
-10) -11.2164    1          #  Position angle (PA) [deg: Up=0, Left=90]
+ 9) 0.5952      1          #  Axis ratio (b/a)  
+10) 23.9881     1          #  Position angle (PA) [deg: Up=0, Left=90]
 
 R0) power                  #  PA rotation func. (power, log, none)
 R1) 0.0000      0          #  Spiral inner radius [pixels]
 R2) 3.9079      0          #  Spiral outer radius [pixels]
-R3) -394.8103    1          #  Cumul. rotation out to outer radius [degrees]
-R4) 0.2978      1          #  Asymptotic spiral powerlaw 
-R9) -43.1780    1          #  Inclination to L.o.S. [degrees]
-R10) 170.2729   1          #  Sky position angle
-F1) 0.0640   140.5367 1 1  #  Azim. Fourier mode 1, amplitude, & phase angle
-F3) 0.0466   20.5166  1 1  #  Azim. Fourier mode 3, amplitude, & phase angle
+R3) -66.1111    1          #  Cumul. rotation out to outer radius [degrees]
+R4) 1.1993      1          #  Asymptotic spiral powerlaw 
+R9) -32.5870    1          #  Inclination to L.o.S. [degrees]
+R10) 163.3326   1          #  Sky position angle
+F1) -0.1000  -60.9908 1 1  #  Azim. Fourier mode 1, amplitude, & phase angle
+F3) 0.0638   6.0245   1 1  #  Azim. Fourier mode 3, amplitude, & phase angle
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 # Component number: 3
  0) sky                    #  Component type
- 1) 1146.3428    1          #  Sky background at center of fitting region [ADUs]
- 2) 1.027e-02      1       #  dsky/dx (sky gradient in x)     [ADUs/pix]
- 3) -3.998e-03     1       #  dsky/dy (sky gradient in y)     [ADUs/pix]
+ 1) 1146.1487    1          #  Sky background at center of fitting region [ADUs]
+ 2) 3.923e-03      1       #  dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) -7.982e-03     1       #  dsky/dy (sky gradient in y)     [ADUs/pix]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 ================================================================================

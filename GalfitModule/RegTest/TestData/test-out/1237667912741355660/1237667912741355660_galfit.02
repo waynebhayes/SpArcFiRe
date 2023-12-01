@@ -1,7 +1,7 @@
 
 #  Input menu file: /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-out/1237667912741355660/1237667912741355660.in
 
-#  Chi^2/nu = 1.179,  Chi^2 = 4952.008,  Ndof = 4200
+#  Chi^2/nu = 1.179,  Chi^2 = 4952.438,  Ndof = 4200
 
 ================================================================================
 # IMAGE and GALFIT CONTROL PARAMETERS
@@ -38,35 +38,35 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 
 # Component number: 1
  0) sersic                 #  Component type
- 1) 48.9445  49.6255  0 0  #  Position x, y
- 3) 16.0004     1          #  Integrated magnitude 
- 4) 2.7602      1          #  R_e (effective radius)   [pix]
- 5) 0.6979      1          #  Sersic index n (de Vaucouleurs n=4) 
+ 1) 48.9400  49.6300  0 0  #  Position x, y
+ 3) 16.3244     1          #  Integrated magnitude 
+ 4) 2.7493      1          #  R_e (effective radius)   [pix]
+ 5) 0.6543      1          #  Sersic index n (de Vaucouleurs n=4) 
  6) 0.0000      0          #     ----- 
  7) 0.0000      0          #     ----- 
  8) 0.0000      0          #     ----- 
- 9) 0.8314      1          #  Axis ratio (b/a)  
-10) 79.4237     1          #  Position angle (PA) [deg: Up=0, Left=90]
+ 9) 0.7610      1          #  Axis ratio (b/a)  
+10) 74.8468     1          #  Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 # Component number: 2
  0) sersic                 #  Component type
- 1) 48.9400  49.6300  0 0  #  Position x, y
- 3) 14.0612     1          #  Integrated magnitude 
- 4) 9.6966      1          #  R_e (effective radius)   [pix]
- 5) 0.8365      1          #  Sersic index n (de Vaucouleurs n=4) 
+ 1) 48.9445  49.6255  0 0  #  Position x, y
+ 3) 13.9822     1          #  Integrated magnitude 
+ 4) 9.5293      1          #  R_e (effective radius)   [pix]
+ 5) 0.9860      1          #  Sersic index n (de Vaucouleurs n=4) 
  6) 0.0000      0          #     ----- 
  7) 0.0000      0          #     ----- 
  8) 0.0000      0          #     ----- 
- 9) 0.7612      1          #  Axis ratio (b/a)  
-10) -43.8476    1          #  Position angle (PA) [deg: Up=0, Left=90]
+ 9) 0.7685      1          #  Axis ratio (b/a)  
+10) -43.3902    1          #  Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 # Component number: 3
  0) sky                    #  Component type
- 1) 1108.7705    1          #  Sky background at center of fitting region [ADUs]
- 2) 1.634e-02      1       #  dsky/dx (sky gradient in x)     [ADUs/pix]
- 3) -2.784e-03     1       #  dsky/dy (sky gradient in y)     [ADUs/pix]
+ 1) 1108.6387    1          #  Sky background at center of fitting region [ADUs]
+ 2) 1.629e-02      1       #  dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) -2.659e-03     1       #  dsky/dy (sky gradient in y)     [ADUs/pix]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 ================================================================================

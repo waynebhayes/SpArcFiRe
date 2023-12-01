@@ -38,22 +38,22 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 
 # Component number: 1
  0) sersic              # Component type
- 1) 87.8550 87.3900 0  0 # Position x, y
- 3) 14.0        1       # Integrated magnitude
- 4) 2.6831      1       # R_e (effective radius)   [pix]
- 5) 4.0         1       # Sersic index n (de Vaucouleurs n=4)
- 9) 0.871       1       # Axis ratio (b/a)
- 10) 137.7716   1       # Position angle (PA) [deg: Up=0, Left=90]
- Z) 0                   # Skip this model in output image?  (yes=1, no=0)
-
-# Component number: 2
- 0) sersic              # Component type
  1) 87.8600 87.3900 0  0 # Position x, y
  3) 13.06       1       # Integrated magnitude
  4) 15.65       1       # R_e (effective radius)   [pix]
  5) 1.31        1       # Sersic index n (de Vaucouleurs n=4)
- 9) 0.6         1       # Axis ratio (b/a)
+ 9) 0.9         1       # Axis ratio (b/a)
  10) 64.66      1       # Position angle (PA) [deg: Up=0, Left=90]
+ Z) 0                   # Skip this model in output image?  (yes=1, no=0)
+
+# Component number: 2
+ 0) sersic              # Component type
+ 1) 87.8550 87.3900 0  0 # Position x, y
+ 3) 14.0        1       # Integrated magnitude
+ 4) 15.4369     1       # R_e (effective radius)   [pix]
+ 5) 1.0         1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.6         1       # Axis ratio (b/a)
+ 10) 53.2108    1       # Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
 R0) power               # Component type

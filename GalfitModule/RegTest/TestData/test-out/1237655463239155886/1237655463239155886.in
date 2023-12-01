@@ -39,28 +39,28 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 # Component number: 1
  0) sersic              # Component type
  1) 30 30       0  0    # Position x, y
- 3) 14.0        1       # Integrated magnitude
- 4) 0.2         1       # R_e (effective radius)   [pix]
- 5) 4.0         1       # Sersic index n (de Vaucouleurs n=4)
- 9) 0.5         1       # Axis ratio (b/a)
- 10) 30.0       1       # Position angle (PA) [deg: Up=0, Left=90]
+ 3) 14.99       1       # Integrated magnitude
+ 4) 0.39        1       # R_e (effective radius)   [pix]
+ 5) 19.95       1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.6         1       # Axis ratio (b/a)
+ 10) -36.72     1       # Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
 # Component number: 2
  0) sersic              # Component type
  1) 30 30       0  0    # Position x, y
- 3) 13.74       1       # Integrated magnitude
- 4) 19.76       1       # R_e (effective radius)   [pix]
- 5) 0.11        1       # Sersic index n (de Vaucouleurs n=4)
+ 3) 14.0        1       # Integrated magnitude
+ 4) 30.0        1       # R_e (effective radius)   [pix]
+ 5) 1.0         1       # Sersic index n (de Vaucouleurs n=4)
  9) 0.6         1       # Axis ratio (b/a)
- 10) -89.72     1       # Position angle (PA) [deg: Up=0, Left=90]
+ 10) 30.0       1       # Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
 # Component number: 3
  0) sky                 # Component type
- 1) 996.03      1       # Sky background at center of fitting region [ADUs]
- 2) 0.62        1       # dsky/dx (sky gradient in x)     [ADUs/pix]
- 3) -0.54       1       # dsky/dy (sky gradient in y)     [ADUs/pix]
+ 1) 931.13      1       # Sky background at center of fitting region [ADUs]
+ 2) 0.617       1       # dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) -0.537      1       # dsky/dy (sky gradient in y)     [ADUs/pix]
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
 ================================================================================

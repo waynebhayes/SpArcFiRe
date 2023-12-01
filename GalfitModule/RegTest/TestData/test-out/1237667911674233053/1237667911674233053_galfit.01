@@ -1,5 +1,5 @@
 
-#  Input menu file: /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-out/1237667911674233053/1237667911674233053_disk.in
+#  Input menu file: /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-out/1237667911674233053/1237667911674233053_bulge.in
 
 #  Chi^2/nu = 1.051,  Chi^2 = 7555.392,  Ndof = 7189
 
@@ -46,14 +46,14 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
  7) 0.0000      0          #     ----- 
  8) 0.0000      0          #     ----- 
  9) 0.8044      1          #  Axis ratio (b/a)  
-10) 51.2182     1          #  Position angle (PA) [deg: Up=0, Left=90]
+10) 51.2189     1          #  Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 # Component number: 2
  0) sky                    #  Component type
  1) 1102.7870    1          #  Sky background at center of fitting region [ADUs]
- 2) 4.307e-03      1       #  dsky/dx (sky gradient in x)     [ADUs/pix]
- 3) -2.288e-03     1       #  dsky/dy (sky gradient in y)     [ADUs/pix]
+ 2) 4.308e-03      1       #  dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) -2.289e-03     1       #  dsky/dy (sky gradient in y)     [ADUs/pix]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 ================================================================================
