@@ -98,7 +98,8 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", 
         mask_fits_file = None #np.zeros((500,500))
     
     # If skip is enabled then arms are not fit so bulge masking doesn't make sense
-    if out_dir and not fits_file.feedme.arms.param_values.get("skip", 0):
+    c_types = [comp.component_type for comp in fits_file.feedme.components.values()]
+    if out_dir and "power" in c_types:
         _ = fits_file.generate_bulge_mask(pj(out_dir, gname, f"{gname}.csv"))
         use_bulge_mask = True
         
