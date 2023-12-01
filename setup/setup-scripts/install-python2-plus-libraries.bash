@@ -8,3 +8,4 @@ python2.7 -m pip install numpy
 python2.7 -m pip install astropy
 python2.7 -m pip install scipy
 python2.7 -m pip install Pillow
+python2.7 -m pip install tsv
