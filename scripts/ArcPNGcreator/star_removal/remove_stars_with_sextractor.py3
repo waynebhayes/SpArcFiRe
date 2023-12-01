@@ -17,7 +17,8 @@ import scipy.ndimage as ndimage
 import scipy.stats as stats
 # This and astropy likely need to be pip installed
 # Along with csv2tsv for regression tests
-import imageio.v3 as iio
+#import imageio.v3 as iio
+from PIL import Image
 import shutil
 import subprocess
 import sys
@@ -496,8 +497,10 @@ if __name__ == '__main__':
                 logger.info("removed segmentation image")
             if seg_img is None:
                 continue
+                
             (star_mask, star_mask_aggressive, isobj) = create_star_mask(
                 seg_img, ctr_r, ctr_c)
+            
             mask_levels = np.zeros(star_mask.shape)
             galfit_mask_levels = np.zeros(star_mask.shape)
             
@@ -507,9 +510,12 @@ if __name__ == '__main__':
             # old aggressive masking left only the galaxy, new actually masks individual sources
             # ... as is the intention for when it's used in sparcfire. This is good for calculating
             # the residuals and I bet for providing a better fit.
-            mask_levels[isobj] = 1
-            mask_levels[star_mask] = 2
-            mask_levels[star_mask_aggressive] = 3
+            
+            # Matthew 11/15/23
+            # Adjusted the levels to work with new image save implementation
+            mask_levels[isobj] = 85
+            mask_levels[star_mask] = 170
+            mask_levels[star_mask_aggressive] = 255
             
             galfit_mask_levels[isobj] = 1
             galfit_mask_levels[star_mask_aggressive] = 0
@@ -533,7 +539,9 @@ if __name__ == '__main__':
             # Sparcfire produces an error when there's no star_mask values and does not proceed
             # I believe that is an error but for now, take this as a temporary fix
             if np.any(star_mask):
-                iio.imwrite(os.path.join(out_dirpath, in_imgname + '_starmask.png'), mask_levels, mode = "LA")
+                #iio.imwrite(os.path.join(out_dirpath, in_imgname + '_starmask.png'), mask_levels, mode = "L")
+                image = Image.fromarray(np.uint8(mask_levels), mode = "L")
+                image.save(os.path.join(out_dirpath, in_imgname + '_starmask.png'))
                 
             # if np.any(star_mask_aggressive):
             #     iio.imwrite(os.path.join(out_dirpath, in_imgname + '_starmask_aggressive.png'), mask_levels, mode = "LA")

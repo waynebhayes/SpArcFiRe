@@ -561,7 +561,11 @@ def main(in_dirpath, out_dirpath, galaxy_names = []):
                 logger.info("wrote {0}".format(out_filepath))
              
             # For GalfitModule, this is uneccessary. 
-            #imageio.imwrite(os.path.join(out_dirpath, in_imgname + '_starmask.png'), mask_levels, mode = "L")
+#             mask_levels[isobj] = 85
+#             mask_levels[star_mask] = 170
+#             mask_levels[star_mask_aggressive] = 255
+            
+            #imageio.imwrite(os.path.join(out_dirpath, in_imgname + '_starmask.png'), np.uint8(mask_levels), mode = "L")
             
         except Exception as e:
             logger.warning("could not create starmask for " + in_imgname)
