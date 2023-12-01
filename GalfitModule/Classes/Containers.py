@@ -31,7 +31,7 @@ def in_notebook():
         return False
 
 
-# In[3]:
+# In[ ]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -60,7 +60,7 @@ from Classes.Components import *
 from Functions.helper_functions import *
 
 
-# In[4]:
+# In[ ]:
 
 
 class ComponentContainer:
@@ -230,7 +230,7 @@ class ComponentContainer:
         return out_str
 
 
-# In[5]:
+# In[ ]:
 
 
 class FeedmeContainer(ComponentContainer):
@@ -624,7 +624,7 @@ class FeedmeContainer(ComponentContainer):
         
 
 
-# In[6]:
+# In[ ]:
 
 
 class OutputContainer(FeedmeContainer):
@@ -766,14 +766,14 @@ class OutputContainer(FeedmeContainer):
             return ""
 
 
-# In[7]:
+# In[ ]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[8]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -786,13 +786,13 @@ if __name__ == "__main__":
     print(container_df)
 
 
-# In[9]:
+# In[ ]:
 
 
 # Testing FeedmeContainer kwargs and to_file
 if __name__ == "__main__":
     
-    def new_container():
+    def new_container(): #load_default = True):
         header = GalfitHeader(galaxy_name = "tester")
         bulge = Sersic(1, position = (25,25))
         disk  = Sersic(2, position = (25,25))
@@ -805,7 +805,8 @@ if __name__ == "__main__":
                                        "disk"    : disk,
                                        "arms"    : arms,
                                        "fourier" : fourier,
-                                       "sky"     : sky}
+                                       "sky"     : sky}#,
+                                    #load_default = load_default
                                     )
         return container
 
@@ -821,7 +822,7 @@ if __name__ == "__main__":
     container.to_file()
 
 
-# In[10]:
+# In[ ]:
 
 
 # Testing FeedmeContainer from_file
@@ -847,7 +848,7 @@ if __name__ == "__main__":
     print(iff(str(container)))
 
 
-# In[11]:
+# In[ ]:
 
 
 # Testing FeedmeContainer from_file with just bulge
@@ -860,6 +861,7 @@ if __name__ == "__main__":
     example_fits   = pj(TEST_DATA_DIR, "test-out", "1237668589728366770", "1237668589728366770_galfit_out.fits")
     
     print("These are feedme -> output")
+    #print("We purposefully keep the load_default option set to true to show what happens when not being strict.")
     print("ignoring filepaths for reg tests...\n")
     
     container.from_file(example_feedme)
@@ -872,21 +874,23 @@ if __name__ == "__main__":
     container = new_container()
     container.from_file(example_fits)
     print(iff(str(container)))
+    print(container.components.keys())
 
 
-# In[12]:
+# In[ ]:
 
 
 # Testing FeedmeContainer from_file with no arms
 if __name__ == "__main__":
     
-    container = new_container()
+    container = new_container()#load_default = False)
     
     # This galaxy does not use the Power or Fourier functions
     example_feedme = pj(TEST_DATA_DIR, "test-out", "1237667912741355660", "1237667912741355660.in")
     example_fits   = pj(TEST_DATA_DIR, "test-out", "1237667912741355660", "1237667912741355660_galfit_out.fits")
     
     print("These are feedme -> output")
+    #print("With another galaxy, load_default = False")
     print("ignoring filepaths for reg tests...\n")
     
     container.from_file(example_feedme)
@@ -899,7 +903,7 @@ if __name__ == "__main__":
     print(iff(str(container)))
 
 
-# In[13]:
+# In[ ]:
 
 
 # Testing extraction into FeedmeContainer attributes
@@ -922,7 +926,7 @@ if __name__ == "__main__":
     print(iff(str(example_feedme)))
 
 
-# In[14]:
+# In[ ]:
 
 
 # Testing OutputContainer
@@ -1038,7 +1042,7 @@ if __name__ == "__main__":
     #good_output.header.to_file(output_filename, good_output.bulge, good_output.disk, good_output.arms, good_output.fourier, good_output.sky)
 
 
-# In[15]:
+# In[ ]:
 
 
 if __name__ == "__main__":
