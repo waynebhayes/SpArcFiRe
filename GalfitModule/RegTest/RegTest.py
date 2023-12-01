@@ -217,7 +217,7 @@ if __name__ == "__main__":
     
     # Starting with unit test output
     # Validate these are the same length
-    unit_test_data = sorted(glob(pj(TEST_DATA_DIR, "*.txt")) + glob(pj(TEST_DATA_DIR, "*.in")))
+    unit_test_data = sorted(glob(pj(TEST_DATA_DIR, "*.txt"))   + glob(pj(TEST_DATA_DIR, "*.in")))
     unit_test_out  = sorted(glob(pj(TEST_OUTPUT_DIR, "*.txt")) + glob(pj(TEST_OUTPUT_DIR, "*.in")))
     
     unit_test_data = [i for i in unit_test_data if os.path.basename(i) != "OutputError.txt"]
@@ -261,7 +261,7 @@ if __name__ == "__main__":
     # Output may vary depending on compute differences b/t clusters (GALFIT issue)
     print("Performing diff check for Galfit input.")
     gnames = [os.path.basename(i).rstrip(".fits") for i in glob(pj(in_dir, "*.fits"))]
-    things_to_check = [".in", "_disk.in"]
+    things_to_check = [".in", "_disk.in", "_galfit.01", "_galfit.02"] #"_bulge.in",
     
     for gname in gnames:
         data    = pj(TEST_DATA_DIR, "test-out", gname, gname)
