@@ -16,7 +16,8 @@ def x(self, new_val):
 bye
 hi
 ================================================================================================================================================================Classes
-Testing default values of base class GalfitComponent...
+Testing default values of base class GalfitComponent--
+
 component_type header
 component_name 
 component_number 0
@@ -40,6 +41,48 @@ end_dict COMP_1
 start_text # Component number: 0
 end_text 10
 _section_sep ================================================================================
+Initializing header--
+
+#  Input menu file: .in
+
+#  
+
+================================================================================
+# IMAGE and GALFIT CONTROL PARAMETERS
+A) .fits                # Input data image (FITS file)
+B) _galfit_out.fits     # Output data image block
+C) none                 # Sigma image name (made from data if blank or 'none')
+D) _psf.fits            # Input PSF image and (optional) diffusion kernel
+E) 1                    # PSF fine sampling factor relative to data
+F) _star-rm.fits        # Bad pixel mask (FITS image or ASCII coord list)
+G) none                 # File with parameter constraints (ASCII file)
+H) 0    256  0    256   # Image region to fit (xmin xmax ymin ymax)
+I) 52     52            # Size of the convolution box (x y)
+J) 24.8                 # Magnitude photometric zeropoint
+K) 0.396  0.396         # Plate scale (dx dy)   [arcsec per pixel]
+O) regular              # Display type (regular, curses, both)
+P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
+
+# INITIAL FITTING PARAMETERS
+#
+#   For component type, the allowed functions are: 
+#       sersic, expdisk, edgedisk, devauc, king, nuker, psf, 
+#       gaussian, moffat, ferrer, and sky. 
+#  
+#   Hidden parameters will only appear when they're specified:
+#       Bn (n=integer, Bending Modes).
+#       C0 (diskyness/boxyness), 
+#       Fn (n=integer, Azimuthal Fourier Modes).
+#       R0-R10 (coordinate rotation, for creating spiral structures).
+#       To, Ti, T0-T10 (truncation function).
+# 
+# ------------------------------------------------------------------------------
+#   par)    par value(s)    fit toggle(s)    # parameter description 
+# ------------------------------------------------------------------------------
+
+
+Reading header from file via list--
+
 #  Input menu file: .in
 
 #  
@@ -78,6 +121,11 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 # ------------------------------------------------------------------------------
 
 
+Printing header to file /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/UnitTest_header.txt--
+
+
+Reading header from file via dict --
+
 #  Input menu file: .in
 
 #  
@@ -115,7 +163,9 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 #   par)    par value(s)    fit toggle(s)    # parameter description 
 # ------------------------------------------------------------------------------
 
-# Component number: 1
+
+Updating Sersic (as an example GalfitComponent) from kwargs--
+ # Component number: 1
  0) sersic              # Component type
  1) 25 25       0  0    # Position x, y
  3) 15.0        1       # Integrated magnitude
@@ -125,7 +175,22 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
  10) 90.01      1       # Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
-# Component number: 1
+Defaults--
+ {'_sersic': 'sersic', 'position': ntMultiParameter(x=100.0, y=100.0), 'magnitude': 16.0, 'effective_radius': 10.0, 'sersic_index': 1.0, 'axis_ratio': 0.5, 'position_angle': 90.0, 'skip': 0}
+
+Modifying magnitude directly--
+ # Component number: 1
+ 0) sersic              # Component type
+ 1) 100 100     0  0    # Position x, y
+ 3) 555555.0    1       # Integrated magnitude
+ 4) 10.0        1       # R_e (effective radius)   [pix]
+ 5) 1.0         1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.5         1       # Axis ratio (b/a)
+ 10) 90.0       1       # Position angle (PA) [deg: Up=0, Left=90]
+ Z) 0                   # Skip this model in output image?  (yes=1, no=0)
+
+From file helper, list--
+ # Component number: 1
  0) sersic              # Component type
  1) 76.7000 76.5000     # Position x, y
  3) 12.9567     1       # Integrated magnitude
@@ -135,7 +200,19 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
  10) -48.3372   1       # Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
-# Component number: 1
+Sending to file--
+ # Component number: 1
+ 0) sersic              # Component type
+ 1) 76.7000 76.5000     # Position x, y
+ 3) 12.9567     1       # Integrated magnitude
+ 4) 18.5147     1       # R_e (effective radius)   [pix]
+ 5) 0.6121      1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.3943      1       # Axis ratio (b/a)
+ 10) -48.3372   1       # Position angle (PA) [deg: Up=0, Left=90]
+ Z) 0                   # Skip this model in output image?  (yes=1, no=0)
+
+From file helper, dict--
+ # Component number: 1
  0) sersic              # Component type
  1) 67.3796 67.7662 0  0 # Position x, y
  3) 13.1936     1       # Integrated magnitude
@@ -145,12 +222,14 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
  10) -19.1534   1       # Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
-          magnitude_sersic_1  ...  skip_sersic_1
+To pandas--
+           magnitude_sersic_1  ...  skip_sersic_1
 sersic_1             13.1936  ...            0.0
 
 [1 rows x 8 columns]
 
-# Component number: 1
+From pandas, modified parameters--
+ # Component number: 1
  0) sersic              # Component type
  1) 67.3796 67.7662 0  0 # Position x, y
  3) 111.0       1       # Integrated magnitude
@@ -160,7 +239,8 @@ sersic_1             13.1936  ...            0.0
  10) -19.1534   1       # Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
-# Component number: 1
+From log line--
+ # Component number: 1
  0) sersic              # Component type
  1) 62.9000 62.9000 0  0 # Position x, y
  3) 14.11       1       # Integrated magnitude
@@ -170,7 +250,20 @@ sersic_1             13.1936  ...            0.0
  10) 60.82      1       # Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
-R0) power               # Component type
+Defaults--
+ {'_power': 'power', 'inner_rad': 0.0, 'outer_rad': 10.0, 'cumul_rot': 90.0, 'powerlaw_index': 0.5, 'inclination': 0.0, 'sky_position_angle': 90.0}
+
+Modifying powerlaw_index directly--
+ R0) power               # Component type
+R1) 0.0         0       # Spiral inner radius [pixels]
+R2) 10.0        0       # Spiral outer radius [pixels]
+R3) 90.0        1       # Cumul. rotation out to outer radius [degrees]
+R4) 555555.0    1       # Asymptotic spiral powerlaw
+R9) 0.0         1       # Inclination to L.o.S. [degrees]
+R10) 90.0       1       # Sky position angle
+
+From file helper, list--
+ R0) power               # Component type
 R1) 0.0         0       # Spiral inner radius [pixels]
 R2) 42.02       0       # Spiral outer radius [pixels]
 R3) 595.0912    1       # Cumul. rotation out to outer radius [degrees]
@@ -178,7 +271,17 @@ R4) -0.1961     1       # Asymptotic spiral powerlaw
 R9) 49.1328     1       # Inclination to L.o.S. [degrees]
 R10) 72.0972    1       # Sky position angle
 
-R0) power               # Component type
+Sending to file--
+ R0) power               # Component type
+R1) 0.0         0       # Spiral inner radius [pixels]
+R2) 42.02       0       # Spiral outer radius [pixels]
+R3) 595.0912    1       # Cumul. rotation out to outer radius [degrees]
+R4) -0.1961     1       # Asymptotic spiral powerlaw
+R9) 49.1328     1       # Inclination to L.o.S. [degrees]
+R10) 72.0972    1       # Sky position angle
+
+From file helper, dict--
+ R0) power               # Component type
 R1) 0.0         0       # Spiral inner radius [pixels]
 R2) 22.011      0       # Spiral outer radius [pixels]
 R3) 79.0069     1       # Cumul. rotation out to outer radius [degrees]
@@ -186,12 +289,14 @@ R4) -2.3697     1       # Asymptotic spiral powerlaw
 R9) 40.8043     1       # Inclination to L.o.S. [degrees]
 R10) 24.301     1       # Sky position angle
 
-         inner_rad_power_2  ...  sky_position_angle_power_2
+To pandas--
+          inner_rad_power_2  ...  sky_position_angle_power_2
 power_2                0.0  ...                   24.301001
 
 [1 rows x 6 columns]
 
-R0) power               # Component type
+From pandas, modified parameters--
+ R0) power               # Component type
 R1) 111.0       0       # Spiral inner radius [pixels]
 R2) 112.0       0       # Spiral outer radius [pixels]
 R3) 113.0       1       # Cumul. rotation out to outer radius [degrees]
@@ -199,7 +304,8 @@ R4) -2.3697     1       # Asymptotic spiral powerlaw
 R9) 40.8043     1       # Inclination to L.o.S. [degrees]
 R10) 24.301     1       # Sky position angle
 
-R0) power               # Component type
+From log line--
+ R0) power               # Component type
 R1) 0.0         0       # Spiral inner radius [pixels]
 R2) 23.51       0       # Spiral outer radius [pixels]
 R3) 219.64      1       # Cumul. rotation out to outer radius [degrees]
@@ -207,61 +313,101 @@ R4) -0.16       1       # Asymptotic spiral powerlaw
 R9) -44.95      1       # Inclination to L.o.S. [degrees]
 R10) -15.65     1       # Sky position angle
 
-F1) 0.2721 -56.9126     # Azim. Fourier mode 1, amplitude, & phase angle
+Defaults--
+ {'F1': ntFourier(amplitude=0.05, phase_angle=45.0), 'F3': ntFourier(amplitude=0.05, phase_angle=25.0), 'skip': 0}
+
+Modifying F1 directly--
+ F1) 555 555     1  1    # Azim. Fourier mode 1, amplitude, & phase angle
+F3) 0.0500 25   1  1    # Azim. Fourier mode 3, amplitude, & phase angle
+ Z) 0                   # Skip this model in output image?  (yes=1, no=0)
+
+From file helper, list--
+ F1) 0.2721 -56.9126     # Azim. Fourier mode 1, amplitude, & phase angle
 F3) -0.0690 -31.8175    # Azim. Fourier mode 3, amplitude, & phase angle
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
-F1) 0.1449 44.3015 1  1 # Azim. Fourier mode 1, amplitude, & phase angle
+Sending to file--
+ F1) 0.2721 -56.9126     # Azim. Fourier mode 1, amplitude, & phase angle
+F3) -0.0690 -31.8175    # Azim. Fourier mode 3, amplitude, & phase angle
+ Z) 0                   # Skip this model in output image?  (yes=1, no=0)
+
+From file helper, dict--
+ F1) 0.1449 44.3015 1  1 # Azim. Fourier mode 1, amplitude, & phase angle
 F3) 0.0979 -35.1366 1  1 # Azim. Fourier mode 3, amplitude, & phase angle
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
-
-{'F1': ntFourier(amplitude=0.1449, phase_angle=44.3015), 'F3': ntFourier(amplitude=0.0979, phase_angle=-35.1366), 'skip': 0}
-
-           F1_amplitude_fourier_2  ...  skip_fourier_2
+To pandas--
+            F1_amplitude_fourier_2  ...  skip_fourier_2
 fourier_2                  0.1449  ...             0.0
 
 [1 rows x 5 columns]
 
-F1) 111 112     1  1    # Azim. Fourier mode 1, amplitude, & phase angle
+From pandas, modified parameters--
+ F1) 111 112     1  1    # Azim. Fourier mode 1, amplitude, & phase angle
 F3) 113 -35.1366 1  1   # Azim. Fourier mode 3, amplitude, & phase angle
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
-
-F1) 0.0600 -6.6700 1  1 # Azim. Fourier mode 1, amplitude, & phase angle
+From log line--
+ F1) 0.0600 -6.6700 1  1 # Azim. Fourier mode 1, amplitude, & phase angle
 F3) 0.0500 0.1800 1  1  # Azim. Fourier mode 3, amplitude, & phase angle
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
-# Component number: 3
+Defaults--
+ {'_sky': 'sky', 'sky_background': 1000.0, 'dsky_dx': 0.0, 'dsky_dy': 0.0, 'skip': 0}
+
+Modifying sky_background directly--
+ # Component number: 3
+ 0) sky                 # Component type
+ 1) 555555.0    1       # Sky background at center of fitting region [ADUs]
+ 2) 0.0         1       # dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) 0.0         1       # dsky/dy (sky gradient in y)     [ADUs/pix]
+ Z) 0                   # Skip this model in output image?  (yes=1, no=0)
+
+From file helper, list--
+ # Component number: 3
  0) sky                 # Component type
  1) 1112.1005   1       # Sky background at center of fitting region [ADUs]
  2) 0.0126      1       # dsky/dx (sky gradient in x)     [ADUs/pix]
  3) 0.0181      1       # dsky/dy (sky gradient in y)     [ADUs/pix]
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
-# Component number: 3
+Sending to file--
+ # Component number: 3
+ 0) sky                 # Component type
+ 1) 1112.1005   1       # Sky background at center of fitting region [ADUs]
+ 2) 0.0126      1       # dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) 0.0181      1       # dsky/dy (sky gradient in y)     [ADUs/pix]
+ Z) 0                   # Skip this model in output image?  (yes=1, no=0)
+
+From file helper, dict--
+ # Component number: 3
  0) sky                 # Component type
  1) 1133.4166   1       # Sky background at center of fitting region [ADUs]
  2) 0.0119      1       # dsky/dx (sky gradient in x)     [ADUs/pix]
  3) -0.0131     1       # dsky/dy (sky gradient in y)     [ADUs/pix]
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
-       sky_background_sky_3  dsky_dx_sky_3  dsky_dy_sky_3  skip_sky_3
+To pandas--
+        sky_background_sky_3  dsky_dx_sky_3  dsky_dy_sky_3  skip_sky_3
 sky_3           1133.416626         0.0119        -0.0131         0.0
 
-# Component number: 3
+From pandas, modified parameters--
+ # Component number: 3
  0) sky                 # Component type
  1) 111.0       1       # Sky background at center of fitting region [ADUs]
  2) 112.0       1       # dsky/dx (sky gradient in x)     [ADUs/pix]
  3) 113.0       1       # dsky/dy (sky gradient in y)     [ADUs/pix]
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
-# Component number: 3
+From log line--
+ # Component number: 3
  0) sky                 # Component type
  1) 1130.51     1       # Sky background at center of fitting region [ADUs]
  2) -0.0492     1       # dsky/dx (sky gradient in x)     [ADUs/pix]
  3) 0.01        1       # dsky/dy (sky gradient in y)     [ADUs/pix]
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
+
+Checking load_all_components() function--
 
 header
 #  Input menu file: .in
@@ -488,6 +634,18 @@ F3) 0.0500 25   1  1    # Azim. Fourier mode 3, amplitude, & phase angle
 These are feedme -> output
 ignoring filepaths for reg tests...
 
+#  Input menu file: .in
+
+#  
+
+================================================================================
+# IMAGE and GALFIT CONTROL PARAMETERS
+A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237667911674691747.fits # Input data image (FITS file)
+B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237667911674691747_galfit_out.fits # Output data image block
+C) none                 # Sigma image name (made from data if blank or 'none')
+D) ./test-out/1237667911674691747/1237667911674691747_psf.fits # Input PSF image and (optional) diffusion kernel
+E) 1                    # PSF fine sampling factor relative to data
+F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237667911674691747_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 7    59   7    59    # Image region to fit (xmin xmax ymin ymax)
 I) 52     52            # Size of the convolution box (x y)
@@ -553,6 +711,18 @@ F3) 0.0500 25           # Azim. Fourier mode 3, amplitude, & phase angle
 
 ********************************************************************************
 ********************************************************************************
+#  Input menu file: .in
+
+#  
+
+================================================================================
+# IMAGE and GALFIT CONTROL PARAMETERS
+A) tester.fits          # Input data image (FITS file)
+B) tester_galfit_out.fits # Output data image block
+C) none                 # Sigma image name (made from data if blank or 'none')
+D) ./test-out/1237667911674691747/1237667911674691747_psf.fits # Input PSF image and (optional) diffusion kernel
+E) 1                    # PSF fine sampling factor relative to data
+F) tester_star-rm.fits  # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 7    59   7    59    # Image region to fit (xmin xmax ymin ymax)
 I) 52     52            # Size of the convolution box (x y)
@@ -620,6 +790,18 @@ These are feedme -> output
 ignoring filepaths for reg tests...
 
 From text: Extra components found in container. Removing them.
+#  Input menu file: .in
+
+#  
+
+================================================================================
+# IMAGE and GALFIT CONTROL PARAMETERS
+A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237668589728366770.fits # Input data image (FITS file)
+B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237668589728366770_galfit_out.fits # Output data image block
+C) none                 # Sigma image name (made from data if blank or 'none')
+D) ./test-out/1237668589728366770/1237668589728366770_psf.fits # Input PSF image and (optional) diffusion kernel
+E) 1                    # PSF fine sampling factor relative to data
+F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237668589728366770_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 7    79   8    80    # Image region to fit (xmin xmax ymin ymax)
 I) 52     52            # Size of the convolution box (x y)
@@ -665,6 +847,20 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 dict_keys(['header', 'bulge', 'sky'])
 ********************************************************************************
 ********************************************************************************
+Reading in from file, WITHOUT initializing a new container.
+From FITS: Extra components found in container. Removing them.
+#  Input menu file: .in
+
+#  
+
+================================================================================
+# IMAGE and GALFIT CONTROL PARAMETERS
+A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237668589728366770.fits # Input data image (FITS file)
+B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237668589728366770_galfit_out.fits # Output data image block
+C) none                 # Sigma image name (made from data if blank or 'none')
+D) ./test-out/1237668589728366770/1237668589728366770_psf.fits # Input PSF image and (optional) diffusion kernel
+E) 1                    # PSF fine sampling factor relative to data
+F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237668589728366770_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 7    79   8    80    # Image region to fit (xmin xmax ymin ymax)
 I) 52     52            # Size of the convolution box (x y)
@@ -728,11 +924,28 @@ F3) 0.0466 20.5166 1  1 # Azim. Fourier mode 3, amplitude, & phase angle
  3) -0.004      1       # dsky/dy (sky gradient in y)     [ADUs/pix]
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
+Expect new components keys to *not* have disk or arms since they are not in the first file.
+dict_keys(['header', 'bulge', 'sersic', 'power', 'fourier', 'sky'])
+
+Reading in from file, after initializing a new container and checking the keys (expect disk, arms).
 dict_keys(['header', 'bulge', 'disk', 'arms', 'fourier', 'sky'])
+
 These are feedme -> output
 ignoring filepaths for reg tests...
 
 From text: Extra components found in container. Removing them.
+#  Input menu file: .in
+
+#  
+
+================================================================================
+# IMAGE and GALFIT CONTROL PARAMETERS
+A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237667912741355660.fits # Input data image (FITS file)
+B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237667912741355660_galfit_out.fits # Output data image block
+C) none                 # Sigma image name (made from data if blank or 'none')
+D) ./test-out/1237667912741355660/1237667912741355660_psf.fits # Input PSF image and (optional) diffusion kernel
+E) 1                    # PSF fine sampling factor relative to data
+F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237667912741355660_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 17   81   18   82    # Image region to fit (xmin xmax ymin ymax)
 I) 52     52            # Size of the convolution box (x y)
@@ -787,6 +1000,18 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 
 ********************************************************************************
 ********************************************************************************
+#  Input menu file: .in
+
+#  
+
+================================================================================
+# IMAGE and GALFIT CONTROL PARAMETERS
+A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237667912741355660.fits # Input data image (FITS file)
+B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237667912741355660_galfit_out.fits # Output data image block
+C) none                 # Sigma image name (made from data if blank or 'none')
+D) ./test-out/1237667912741355660/1237667912741355660_psf.fits # Input PSF image and (optional) diffusion kernel
+E) 1                    # PSF fine sampling factor relative to data
+F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237667912741355660_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 17   81   18   82    # Image region to fit (xmin xmax ymin ymax)
 I) 52     52            # Size of the convolution box (x y)
@@ -846,6 +1071,18 @@ Key: arms
 Key: fourier
 Key: sky
 
+#  Input menu file: .in
+
+#  
+
+================================================================================
+# IMAGE and GALFIT CONTROL PARAMETERS
+A) tester.fits          # Input data image (FITS file)
+B) tester_galfit_out.fits # Output data image block
+C) none                 # Sigma image name (made from data if blank or 'none')
+D) tester_psf.fits      # Input PSF image and (optional) diffusion kernel
+E) 1                    # PSF fine sampling factor relative to data
+F) tester_star-rm.fits  # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 0    256  0    256   # Image region to fit (xmin xmax ymin ymax)
 I) 52     52            # Size of the convolution box (x y)
@@ -1374,9 +1611,6 @@ NFREE = 21
 NFIX = 6
 CHI2NU = 0.9432979
 LOGFILE = galfit.02
-NMR = 0.0042
-KS_P = 0.0005
-KS_STAT = 0.0263
 Img size: (109, 109)
 
 These should all be the same .
@@ -1395,14 +1629,14 @@ kstest p value: 0.0005
 kstest statistic: 0.0263
 
 Now with bulge mask
-Norm of the observation: 116982.2549
-Norm of the model: 116980.8655
-Norm of the residual: 480.2443
-Norm of the masked residual: 0.0041
-kstest p value: 0.0002
-kstest statistic: 0.0286
+Norm of the observation: 118341.5481
+Norm of the model: 118339.6776
+Norm of the residual: 495.2399
+Norm of the masked residual: 0.0042
+kstest p value: 0.0005
+kstest statistic: 0.0263
 Checking FITS header update with NMR
 Does the updated FITS file contain NMR and KStest keys?
-Before... (expect False) True
+Before... (expect False) False
 After... True
 ================================================================================================================================================================
