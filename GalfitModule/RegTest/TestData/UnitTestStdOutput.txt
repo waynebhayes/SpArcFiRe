@@ -634,18 +634,6 @@ F3) 0.0500 25   1  1    # Azim. Fourier mode 3, amplitude, & phase angle
 These are feedme -> output
 ignoring filepaths for reg tests...
 
-#  Input menu file: .in
-
-#  
-
-================================================================================
-# IMAGE and GALFIT CONTROL PARAMETERS
-A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237667911674691747.fits # Input data image (FITS file)
-B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237667911674691747_galfit_out.fits # Output data image block
-C) none                 # Sigma image name (made from data if blank or 'none')
-D) ./test-out/1237667911674691747/1237667911674691747_psf.fits # Input PSF image and (optional) diffusion kernel
-E) 1                    # PSF fine sampling factor relative to data
-F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237667911674691747_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 7    59   7    59    # Image region to fit (xmin xmax ymin ymax)
 I) 52     52            # Size of the convolution box (x y)
@@ -711,18 +699,6 @@ F3) 0.0500 25           # Azim. Fourier mode 3, amplitude, & phase angle
 
 ********************************************************************************
 ********************************************************************************
-#  Input menu file: .in
-
-#  
-
-================================================================================
-# IMAGE and GALFIT CONTROL PARAMETERS
-A) tester.fits          # Input data image (FITS file)
-B) tester_galfit_out.fits # Output data image block
-C) none                 # Sigma image name (made from data if blank or 'none')
-D) ./test-out/1237667911674691747/1237667911674691747_psf.fits # Input PSF image and (optional) diffusion kernel
-E) 1                    # PSF fine sampling factor relative to data
-F) tester_star-rm.fits  # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 7    59   7    59    # Image region to fit (xmin xmax ymin ymax)
 I) 52     52            # Size of the convolution box (x y)
@@ -790,18 +766,6 @@ These are feedme -> output
 ignoring filepaths for reg tests...
 
 From text: Extra components found in container. Removing them.
-#  Input menu file: .in
-
-#  
-
-================================================================================
-# IMAGE and GALFIT CONTROL PARAMETERS
-A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237668589728366770.fits # Input data image (FITS file)
-B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237668589728366770_galfit_out.fits # Output data image block
-C) none                 # Sigma image name (made from data if blank or 'none')
-D) ./test-out/1237668589728366770/1237668589728366770_psf.fits # Input PSF image and (optional) diffusion kernel
-E) 1                    # PSF fine sampling factor relative to data
-F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237668589728366770_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 7    79   8    80    # Image region to fit (xmin xmax ymin ymax)
 I) 52     52            # Size of the convolution box (x y)
@@ -849,18 +813,6 @@ dict_keys(['header', 'bulge', 'sky'])
 ********************************************************************************
 Reading in from file, WITHOUT initializing a new container.
 From FITS: Extra components found in container. Removing them.
-#  Input menu file: .in
-
-#  
-
-================================================================================
-# IMAGE and GALFIT CONTROL PARAMETERS
-A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237668589728366770.fits # Input data image (FITS file)
-B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237668589728366770_galfit_out.fits # Output data image block
-C) none                 # Sigma image name (made from data if blank or 'none')
-D) ./test-out/1237668589728366770/1237668589728366770_psf.fits # Input PSF image and (optional) diffusion kernel
-E) 1                    # PSF fine sampling factor relative to data
-F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237668589728366770_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 7    79   8    80    # Image region to fit (xmin xmax ymin ymax)
 I) 52     52            # Size of the convolution box (x y)
@@ -934,18 +886,6 @@ These are feedme -> output
 ignoring filepaths for reg tests...
 
 From text: Extra components found in container. Removing them.
-#  Input menu file: .in
-
-#  
-
-================================================================================
-# IMAGE and GALFIT CONTROL PARAMETERS
-A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237667912741355660.fits # Input data image (FITS file)
-B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237667912741355660_galfit_out.fits # Output data image block
-C) none                 # Sigma image name (made from data if blank or 'none')
-D) ./test-out/1237667912741355660/1237667912741355660_psf.fits # Input PSF image and (optional) diffusion kernel
-E) 1                    # PSF fine sampling factor relative to data
-F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237667912741355660_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 17   81   18   82    # Image region to fit (xmin xmax ymin ymax)
 I) 52     52            # Size of the convolution box (x y)
@@ -1000,18 +940,6 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 
 ********************************************************************************
 ********************************************************************************
-#  Input menu file: .in
-
-#  
-
-================================================================================
-# IMAGE and GALFIT CONTROL PARAMETERS
-A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237667912741355660.fits # Input data image (FITS file)
-B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237667912741355660_galfit_out.fits # Output data image block
-C) none                 # Sigma image name (made from data if blank or 'none')
-D) ./test-out/1237667912741355660/1237667912741355660_psf.fits # Input PSF image and (optional) diffusion kernel
-E) 1                    # PSF fine sampling factor relative to data
-F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237667912741355660_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 17   81   18   82    # Image region to fit (xmin xmax ymin ymax)
 I) 52     52            # Size of the convolution box (x y)
@@ -1071,18 +999,6 @@ Key: arms
 Key: fourier
 Key: sky
 
-#  Input menu file: .in
-
-#  
-
-================================================================================
-# IMAGE and GALFIT CONTROL PARAMETERS
-A) tester.fits          # Input data image (FITS file)
-B) tester_galfit_out.fits # Output data image block
-C) none                 # Sigma image name (made from data if blank or 'none')
-D) tester_psf.fits      # Input PSF image and (optional) diffusion kernel
-E) 1                    # PSF fine sampling factor relative to data
-F) tester_star-rm.fits  # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
 H) 0    256  0    256   # Image region to fit (xmin xmax ymin ymax)
 I) 52     52            # Size of the convolution box (x y)
