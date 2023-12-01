@@ -262,32 +262,32 @@ def main(**kwargs):
         elif num_steps >= 2:
             # This ends up being more like a disk fit
             # Top is disk first, bottom is bulge first, choose your own adventure
-            disk_in = pj(out_dir, gname, f"{gname}_disk.in")
-            #bulge_in = pj(out_dir, gname, f"{gname}_bulge.in")
+            #disk_in = pj(out_dir, gname, f"{gname}_disk.in")
+            bulge_in = pj(out_dir, gname, f"{gname}_bulge.in")
             
-            header.to_file(disk_in, initial_components.disk, initial_components.sky)
-            #header.to_file(bulge_in, initial_components.bulge, initial_components.sky)
+            #header.to_file(disk_in, initial_components.disk, initial_components.sky)
+            header.to_file(bulge_in, initial_components.bulge, initial_components.sky)
             
-            run_galfit_cmd = f"{base_galfit_cmd} {disk_in}"
-            #run_galfit_cmd = f"{base_galfit_cmd} {bulge_in}"
+            #run_galfit_cmd = f"{base_galfit_cmd} {disk_in}"
+            run_galfit_cmd = f"{base_galfit_cmd} {bulge_in}"
             
-            print("Disk")
-            #print("Bulge")
+            #print("Disk")
+            print("Bulge")
             
+            # galfit_output = OutputContainer(
+            #     sp(run_galfit_cmd), 
+            #     sersic_order   = ["disk"], 
+            #     path_to_feedme = feedme_path,
+            #     load_default   = load_default,
+            #     **feedme_info[gname].components
+            # )
             galfit_output = OutputContainer(
-                sp(run_galfit_cmd), 
-                sersic_order   = ["disk"], 
-                path_to_feedme = feedme_path,
-                load_default   = load_default,
-                **feedme_info[gname].components
+            sp(run_galfit_cmd), 
+            sersic_order = ["bulge"], 
+            path_to_feedme = feedme_path,
+            load_default   = load_default,
+            **feedme_info[gname].components
             )
-            #galfit_output = OutputContainer(
-            #sp(run_galfit_cmd), 
-            #sersic_order = ["bulge"], 
-            #path_to_feedme = feedme_path,
-            #load_default   = load_default,
-            #**feedme_info[gname].components
-            #)
             
             # Only fix sky if first step is successful
             # if galfit_output.success:
