@@ -849,7 +849,7 @@ if __name__ == "__main__":
     print(container)
 
 
-# In[19]:
+# In[11]:
 
 
 # Testing FeedmeContainer from_file with just bulge
@@ -867,8 +867,7 @@ if __name__ == "__main__":
     print("ignoring filepaths for reg tests...\n")
     
     container.from_file(example_feedme)
-    #print(iff(str(container)))
-    print(container)
+    print(iff(str(container)))
     print(container.components.keys())
     
     print("*"*80)
@@ -877,8 +876,8 @@ if __name__ == "__main__":
     #container = new_container()
     print("Reading in from file, WITHOUT initializing a new container.")
     container.from_file(example_fits)
-    #print(iff(str(container)))
-    print(container)
+    print(iff(str(container)))
+    
     print("Expect new components keys to *not* have disk or arms since they are not in the first file.")
     print(container.components.keys())
     print()
