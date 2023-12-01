@@ -781,6 +781,7 @@ if __name__ == "__main__":
     
     container = ComponentContainer()#load_all = True)
     print(container)
+    # TODO: test joining multiple containers of different component numbers
     container_df = container.to_pandas()
     print()
     print(container_df)
@@ -837,16 +838,15 @@ if __name__ == "__main__":
     print("ignoring filepaths for reg tests...\n")
     
     container.from_file(example_feedme)
-    #print(iff(str(container)))
-    print(container)
+    print(iff(str(container)))
     
     print("*"*80)
     print("*"*80)
     
     container = new_container()
     container.from_file(example_fits)
-    #print(iff(str(container)))
-    print(container)
+    print(iff(str(container)))
+    
 
 
 # In[11]:
@@ -906,15 +906,14 @@ if __name__ == "__main__":
     print("ignoring filepaths for reg tests...\n")
     
     container.from_file(example_feedme)
-    #print(iff(str(container)))
-    print(container)
+    print(iff(str(container)))
     
     print("*"*80)
     print("*"*80)
     
     container.from_file(example_fits)
-    #print(iff(str(container)))
-    print(container)
+    print(iff(str(container)))
+    
 
 
 # In[13]:
@@ -932,13 +931,10 @@ if __name__ == "__main__":
                                      sky            = container.sky
                                     )
     
-    #feedme_components = example_feedme.components
-    #print(feedme_components.to_list())
-    #print()
     _ = [print("Key:", k) for k in example_feedme.components.keys()]
     print()
-    #print(iff(str(example_feedme)))
-    print(example_feedme)
+    print(iff(str(example_feedme)))
+    
 
 
 # In[14]:
