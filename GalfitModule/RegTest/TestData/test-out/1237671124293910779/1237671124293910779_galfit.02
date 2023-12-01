@@ -8,12 +8,12 @@
 A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237671124293910779.fits      # Input data image (FITS file)
 B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237671124293910779_galfit_out.fits      # Output data image block
 C) none                # Sigma image name (made from data if blank or "none") 
-D) 1237671124293910779_psf.fits          # Input PSF image and (optional) diffusion kernel
+D) ./test-out/1237671124293910779/1237671124293910779_psf.fits          # Input PSF image and (optional) diffusion kernel
 E) 1                   # PSF fine sampling factor relative to data 
 F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237671124293910779_star-rm.fits      # Bad pixel mask (FITS image or ASCII coord list)
 G) none                # File with parameter constraints (ASCII file) 
 H) 11   107  11   107  # Image region to fit (xmin xmax ymin ymax)
-I) 50     50           # Size of the convolution box (x y)
+I) 52     52           # Size of the convolution box (x y)
 J) 24.8000             # Magnitude photometric zeropoint 
 K) 0.3960  0.3960      # Plate scale (dx dy)   [arcsec per pixel]
 O) regular             # Display type (regular, curses, both)
