@@ -1031,25 +1031,63 @@ def load_all_components(with_header = True):
     return all_components
 
 
-# In[11]:
+# In[62]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
+    end_str = "--\n"
 
 
-# In[12]:
+# In[63]:
+
+
+def unit_tests(component, parameter, bogus_list, bogus_dict, log_line, pvalue = 555555, end_str = "--\n"):
+    
+    component_copy = deepcopy(component)
+    
+    print(f"Defaults{end_str}", component.parameters)
+    print()
+    
+    component.parameters[parameter].value = pvalue
+    print(f"Modifying {parameter} directly{end_str}", component)
+    
+    component.from_file_helper_list(bogus_list)
+    print(f"From file helper, list{end_str}", component)
+    
+    print(f"Sending to file{end_str}", component)
+    component.to_file(f"{base_out}_{component.component_type.upper()}.txt")
+
+    component = deepcopy(component_copy)
+    component.from_file_helper_dict(bogus_dict)
+    print(f"From file helper, dict{end_str}", component)
+    
+    component_df = component.to_pandas()
+    print(f"To pandas{end_str}", component_df)
+    print()
+    
+    component_df.iloc[0,0] = 111
+    component_df.iloc[0,1] = 112
+    component_df.iloc[0,2] = 113
+    component.from_pandas(component_df)
+    print(f"From pandas, modified parameters{end_str}", component)
+    
+    component.update_from_log(log_line)
+    print(f"From log line{end_str}", component)
+
+
+# In[67]:
 
 
 # Unit Test for GalfitComponent
 if __name__ == "__main__":
     component = GalfitComponent("header")
-    print("Testing default values of base class GalfitComponent...")
+    print(f"Testing default values of base class GalfitComponent{end_str}")
     for k,v in component.__dict__.items():
         print(k,v)
 
 
-# In[13]:
+# In[68]:
 
 
 if __name__ == "__main__":
@@ -1089,7 +1127,7 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps""".
     print(header)
 
 
-# In[24]:
+# In[69]:
 
 
 if __name__ == "__main__":
@@ -1104,15 +1142,13 @@ if __name__ == "__main__":
             axis_ratio       = 0.6,
             position_angle   = 90.01
         )
-    print(bulge)
+    print(f"Updating Sersic (as an example GalfitComponent) from kwargs{end_str}", bulge)
 
 
-# In[25]:
+# In[55]:
 
 
-if __name__ == "__main__":
-    bogus_list = """# Component number: 1 
- 0) sersic                 #  Component type
+bogus_list = """ 0) sersic                 #  Component type
  1) 76.7000  76.5000  0 0  #  Position x, y
  3) 12.9567     1          #  Integrated magnitude
  4) 18.5147     1          #  R_e (effective radius)   [pix]
@@ -1124,96 +1160,21 @@ if __name__ == "__main__":
  10) -48.3372    1          #  Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)""".split("\n")
 
-    bogus_dict = eval("""{'1_XC': '[67.3796]',
-     '1_YC': '[67.7662]',
-     '1_MAG': '13.1936 +/- 0.0257',
-     '1_RE': '15.5266 +/- 0.1029',
-     '1_N': '0.3433 +/- 0.0064',
-     '1_AR': '*0.6214* +/- 0.0039',
-     '1_PA': '-19.1534 +/- 0.5867'}""")
+bogus_dict = eval("""{'1_XC': '[67.3796]',
+ '1_YC': '[67.7662]',
+ '1_MAG': '13.1936 +/- 0.0257',
+ '1_RE': '15.5266 +/- 0.1029',
+ '1_N': '0.3433 +/- 0.0064',
+ '1_AR': '0.6214 +/- 0.0039',
+ '1_PA': '-19.1534 +/- 0.5867'}""")
 
-    bulge = Sersic(1)
-    bulge.from_file_helper_list(bogus_list)
-    
-    print(bulge)
-    bulge.to_file(f"{base_out}_Sersic.txt")
+log_line = "sersic    : (  [62.90],  [62.90])  14.11*     13.75    0.30    0.63    60.82"
 
-    bulge.from_file_helper_dict(bogus_dict)
-    print(bulge)
-    
-    bulge_df = bulge.to_pandas()
-    print(bulge_df)
-    print()
-    bulge_df.iloc[0,0] = 111
-    bulge_df.iloc[0,1] = 112
-    bulge_df.iloc[0,2] = 113
-    bulge.from_pandas(bulge_df)
-    print(bulge)
-    
-    log_line = "sersic    : (  [62.90],  [62.90])  14.11*     13.75    0.30    0.63    60.82"
-    
-    bulge.update_from_log(log_line)
-    print(bulge)
+bulge = Sersic(1)
+unit_tests(bulge, "magnitude", bogus_list, bogus_dict, log_line)
 
 
-# In[16]:
-
-
-# #Will use this once I diff check everything
-# if __name__ == "__main__":
-#     bogus_list = """ 0) sersic                 #  Component type
-#  1) 76.7000  76.5000  0 0  #  Position x, y
-#  3) 12.9567     1          #  Integrated magnitude
-#  4) 18.5147     1          #  R_e (effective radius)   [pix]
-#  5) 0.6121      1          #  Sersic index n (de Vaucouleurs n=4)
-#  6) 0.0000      0          #     -----
-#  7) 0.0000      0          #     -----
-#  8) 0.0000      0          #     -----
-#  9) 0.3943      1          #  Axis ratio (b/a)
-#  10) -48.3372    1          #  Position angle (PA) [deg: Up=0, Left=90]
-#  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)""".split("\n")
-
-#     bogus_dict = eval("""{'1_XC': '[67.3796]',
-#      '1_YC': '[67.7662]',
-#      '1_MAG': '13.1936 +/- 0.0257',
-#      '1_RE': '15.5266 +/- 0.1029',
-#      '1_N': '0.3433 +/- 0.0064',
-#      '1_AR': '0.6214 +/- 0.0039',
-#      '1_PA': '-19.1534 +/- 0.5867'}""")
-
-#     bulge = Sersic(1)
-#     print("Defaults--\n", bulge.parameters)
-#     print()
-    
-#     bulge.magnitude.value = 5
-#     print("Modifying magnitude directly--\n", bulge)
-    
-#     bulge.from_file_helper_list(bogus_list)
-#     print("From file helper, list--\n", bulge)
-    
-#     print("Sending to file--\n", bulge)
-#     bulge.to_file(f"{base_out}_Sersic.txt")
-
-#     bulge = Sersic(1)
-#     bulge.from_file_helper_dict(bogus_dict)
-#     print("From file helper, dict--\n", bulge)
-    
-#     bulge_df = bulge.to_pandas()
-#     print("To pandas--\n", bulge_df)
-#     print()
-    
-#     bulge_df.iloc[0,0] = 111
-#     bulge_df.iloc[0,1] = 112
-#     bulge_df.iloc[0,2] = 113
-#     bulge.from_pandas(bulge_df)
-#     print("From pandas, modified parameters--\n", bulge)
-    
-#     log_line = "sersic    : (  [62.90],  [62.90])  14.11*     13.75    0.30    0.63    60.82"
-#     bulge.update_from_log(log_line)
-#     print("From log line--\n", bulge)
-
-
-# In[17]:
+# In[56]:
 
 
 if __name__ == "__main__":
@@ -1232,33 +1193,15 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
  '2_ALPHA': '-2.3697 +/- 0.0691',
  '2_INCL': '40.8043 +/- 2.7380',
  '2_SPA': '24.3010 +/- 4.5444'}""")
-
-    arms = Power(2)
-    arms.from_file_helper_list(bogus_list)
-    #arms.update_param_values()
-    arms.to_file(f"{base_out}_Power.txt")
-    print(arms)
-
-    arms.from_file_helper_dict(bogus_dict)
-    #arms.update_param_values()
-    print(arms)
-    
-    arms_df = arms.to_pandas()
-    print(arms_df)
-    print()
-    arms_df.iloc[0,0] = 111
-    arms_df.iloc[0,1] = 112
-    arms_df.iloc[0,2] = 113
-    arms.from_pandas(arms_df)
-    print(arms)
     
     log_line = "power   :     [0.00]   23.51  219.64     -0.16*     ---  -44.95   -15.65"
+
+    arms = Power(2)
+    unit_tests(arms, "powerlaw_index", bogus_list, bogus_dict, log_line)
     
-    arms.update_from_log(log_line)
-    print(arms)
 
 
-# In[18]:
+# In[59]:
 
 
 if __name__ == "__main__":
@@ -1269,53 +1212,15 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
  '2_F1PA': '44.3015 +/- 7.1154',
  '2_F3': '0.0979 +/- 0.0104',
  '2_F3PA': '-35.1366 +/- 4.4060'}""")
-
-    fourier = Fourier(2)
-    fourier.from_file_helper_list(bogus_list)
-    #fourier.update_param_values()
-    fourier.to_file(f"{base_out}_Fourier.txt")
-    print(fourier)
-
-    fourier.from_file_helper_dict(bogus_dict)
-    #fourier.update_param_values()
-    print(fourier)
-    print()
-    
-    print(fourier.parameters)
-    print()
-    fourier_df = fourier.to_pandas()
-    print(fourier_df)
-    print()
-    fourier_df.iloc[0,0] = 111
-    fourier_df.iloc[0,1] = 112
-    fourier_df.iloc[0,2] = 113
-    fourier.from_pandas(fourier_df)
-    print(fourier)
-    print()
     
     log_line = "fourier : (1:  0.06,   -6.67)   (3:  0.05,    0.18)"
+
+    fourier = Fourier(2)
+    unit_tests(fourier, "F1", bogus_list, bogus_dict, log_line, pvalue = (555, 555))
     
-    fourier.update_from_log(log_line)
-    print(fourier)
 
 
-# In[19]:
-
-
-# if __name__ == "__main__":
-#     arms.add_skip(skip_val = 1)
-#     fourier.add_skip(skip_val = 1)
-    
-#     # We should see an RZ, FZ which is nonsensical but when we write to file
-#     # the power and fourier functions simply won't show
-
-#     print(arms)
-#     print(fourier)
-    
-#     bulge.to_file(f"{base_out}_PowerFourierSkip.txt", arms, fourier)
-
-
-# In[20]:
+# In[61]:
 
 
 if __name__ == "__main__":
@@ -1324,12 +1229,6 @@ if __name__ == "__main__":
  2) 1.264e-02      1       #  dsky/dx (sky gradient in x)     [ADUs/pix]
  3) 1.813e-02      1       #  dsky/dy (sky gradient in y)     [ADUs/pix]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)""".split("\n")
-
-    sky = Sky(3)
-    sky.from_file_helper_list(bogus_list)
-    #sky.update_param_values()
-    sky.to_file(f"{base_out}_Sky.txt")
-    print(sky)
     
     bogus_dict = eval("""{'COMP_3': 'sky',
  '3_XC': '[67.0000]',
@@ -1337,36 +1236,24 @@ if __name__ == "__main__":
  '3_SKY': '1133.4166 +/- 0.1595',
  '3_DSDX': '0.0119 +/- 0.0048',
  '3_DSDY': '-0.0131 +/- 0.0047'}""")
-
-    sky.from_file_helper_dict(bogus_dict)
-    #sky.update_param_values()
-    print(sky)
-    
-    sky_df = sky.to_pandas()
-    print(sky_df)
-    print()
-    sky_df.iloc[0,0] = 111
-    sky_df.iloc[0,1] = 112
-    sky_df.iloc[0,2] = 113
-    sky.from_pandas(sky_df)
-    print(sky)
     
     log_line = "sky       : [ 63.00,  63.00]  1130.51  -4.92e-02  1.00e-02"
     
-    sky.update_from_log(log_line)
-    print(sky)
+    unit_tests(sky, "sky_background", bogus_list, bogus_dict, log_line)
+    
 
 
 # In[21]:
 
 
 if __name__ == "__main__":
+    print(f"Checking load_all_components() function{end_str}")
     for component_name, component in load_all_components().items():
         print(component_name)
         print(component)
 
 
-# In[23]:
+# In[22]:
 
 
 if __name__ == "__main__":
