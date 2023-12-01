@@ -553,8 +553,8 @@ class GalfitComponent:
 
     def to_file(self, filename, *args):
         # For skipped power and fourier
-        if self.parameters.get("skip", 0) == 1 and self.component_type in ("power", "fourier"):
-            return None
+        # if self.parameters.get("skip", 0) == 1 and self.component_type in ("power", "fourier"):
+        #     return None
         
         try:
             with open(filename, "w") as f:
@@ -1039,7 +1039,7 @@ if __name__ == "__main__":
     end_str = "--\n"
 
 
-# In[22]:
+# In[12]:
 
 
 if __name__ == "__main__":
