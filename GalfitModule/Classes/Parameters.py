@@ -255,7 +255,7 @@ class Skip(BaseParameter, int):
         pass
 
 
-# In[9]:
+# In[154]:
 
 
 #class BendingModes(BaseParameter, float):
@@ -269,10 +269,13 @@ class BendingMode(NumParameter):
             self, 
             amplitude,
             name = "bending mode",
-            parameter_number = f"{self.mode}",
+            #parameter_number = f"{self.mode}",
             parameter_prefix = "B",
-            comment = f"Bending mode {self.mode} amplitude",
+            #comment = f"Bending mode {self.mode} amplitude",
             **kwargs)
+        
+        # self._parameter_number = f"{self.mode}"
+        # self._comment          = f"Bending mode {self.mode} amplitude"
     
 # ==========================================================================================================
     
@@ -285,24 +288,24 @@ class BendingMode(NumParameter):
         )
     )
     
-#     @property
-#     def amplitude(self):
-#         return self.value
+    @property
+    def parameter_number(self):
+        return f"{self.mode}"
     
-#     @amplitude.setter
-#     def amplitude(self, new_val):
-#         self.value = new_val
+    @parameter_number.setter
+    def parameter_number(self, _):
+        pass
         
-#     @property
-#     def mode(self):
-#         return self._mode
+    @property
+    def comment(self):
+        return f"Bending mode {self.mode} amplitude"
     
-#     @mode.setter
-#     def mode(self, new_val):
-#         self._mode = new_val
+    @comment.setter
+    def comment(self, _):
+        pass
 
 
-# In[10]:
+# In[155]:
 
 
 # Use NamedTuples so we can access this like a dictionary
@@ -425,7 +428,7 @@ class MultiParameter(BaseParameter):
         return f"{pre_comment:<23} # {self.comment}"
 
 
-# In[11]:
+# In[156]:
 
 
 #ntPosition    = namedtuple("ntPosition", "x y")
@@ -445,7 +448,7 @@ class Position(MultiParameter):
         
 
 
-# In[12]:
+# In[157]:
 
 
 ntFourier = namedtuple("ntFourier", "amplitude phase_angle")
@@ -520,7 +523,7 @@ class FourierMode(MultiParameter):
         self.phase_angle = float(new_tuple[1])
 
 
-# In[13]:
+# In[158]:
 
 
 ntImageRegionToFit = namedtuple("ntImageRegionToFit", "x1 x2 y1 y2")
@@ -535,6 +538,7 @@ class ImageRegionToFit(MultiParameter, HeaderParameter):
         MultiParameter.__init__(self, value, **kwargs)
         
         #self.value = ntImageRegionToFit(*value)
+        self.name             = "region to fit"
         self.parameter_prefix = ""
         self.parameter_number = "H"
         self.comment          = "Image region to fit (xmin xmax ymin ymax)"
@@ -600,7 +604,7 @@ class CropRegion(ImageRegionToFit):
         ImageRegionToFit.__init__(self, *values, **kwargs)
 
 
-# In[14]:
+# In[159]:
 
 
 # This is functionally the same as position but for clarity...
@@ -615,6 +619,7 @@ class ConvolutionBox(HeaderParameter, MultiParameter):
         
         self.value            = ntConvolutionBox(*self.value)
         
+        self.name             = "convolution box"
         self.parameter_prefix = ""
         self.parameter_number = "I"
         self.comment          = "Size of the convolution box (x y)"
@@ -642,7 +647,7 @@ class ConvolutionBox(HeaderParameter, MultiParameter):
         return f"{pre_comment:<23} # {self.comment}"
 
 
-# In[15]:
+# In[160]:
 
 
 ntPlateScale = namedtuple("ntPlateScale", "dx dy")
@@ -655,9 +660,10 @@ class PlateScale(HeaderParameter, MultiParameter):
         #self._dx = self._x
         #self._dy = self._y
         #self.value = ntPlateScale(*self.value)
+        self.name             = "plate scale"
         self.parameter_prefix = ""
         self.parameter_number = "K"
-        self.comment = "Plate scale (dx dy)   [arcsec per pixel]"
+        self.comment          = "Plate scale (dx dy)   [arcsec per pixel]"
         
     exec(
         generate_get_set(
@@ -689,42 +695,80 @@ class PlateScale(HeaderParameter, MultiParameter):
         return f"{pre_comment:<23} # {self.comment}"
 
 
-# In[16]:
+# In[161]:
 
 
 # if __name__ == "__main__":
 #     from RegTest.RegTest import *
 
 
-# In[17]:
+# In[162]:
+
+
+def check_multi(parameter_tuple, fields = [], values = [],  parameter_kwargs = None):
+    print("="*40)
+    print()
+    
+    end_str = "--"    
+    print(f"Printing initalized-by-tuple {parameter_tuple.name} and Python repr{end_str}")
+    print(parameter_tuple)
+    print(repr(parameter_tuple))
+    print()
+    
+    if isinstance(parameter_kwargs, MultiParameter):
+        print(f"Printing initalized-by-kwargs {parameter_kwargs.name} and Python repr{end_str}")
+        print(parameter_kwargs)
+        print(repr(parameter_kwargs))
+        print()
+    
+    parameter_copy = deepcopy(parameter_tuple)
+    
+    if fields:
+        print(f"Setting value via attributes, reprinting {parameter_copy.name} and Python repr{end_str}")
+        for f,v in zip(fields, values):
+            exec(f"parameter_copy.{f} = {v}")
+
+        print(parameter_copy)
+        print(repr(parameter_copy))
+        print()
+        
+        print(f"Setting value via tuple/list, reprinting {parameter_tuple.name} and Python repr{end_str}")
+        parameter_tuple.value = values
+        
+        print(parameter_tuple)
+        print(repr(parameter_tuple))
+        print()
+        
+    print("="*40)
+
+
+# In[163]:
 
 
 if __name__ == "__main__":
+    end_str = "--"
+    
     crop_region = ImageRegionToFit(
         (0, 100, 0, 100)
     )
     
-    print(repr(crop_region))
-    print()
+    check_multi(crop_region)
     
     crop_region = CropRegion(
         (45, 145, 45, 145)
     )
     
-    print(crop_region)
-    print(repr(crop_region))
-    print()
+    crop_region2 = ImageRegionToFit(
+        xmin = 50,
+        xmax = 150,
+        ymin = 500,
+        ymax = 1500
+    )
     
-    crop_region.xmin = 1
-    crop_region.xmax = 155
-    crop_region.ymin = 1
-    crop_region.ymax = 155
-    
-    print(crop_region)
-    print(repr(crop_region))
+    check_multi(crop_region, ["xmin", "xmax", "ymin", "ymax"], [1, 155, 1, 155], crop_region2)
 
 
-# In[18]:
+# In[164]:
 
 
 if __name__ == "__main__":
@@ -732,27 +776,22 @@ if __name__ == "__main__":
         (100, 100)
     )
     
-    print(conv_box)
-    print(repr(conv_box))
-    print()
+    check_multi(conv_box, ["x", "y"], [1000, 1000])
     
-    plate_scale = PlateScale(
+    
+    plate_scale2 = PlateScale(
         (0.396, 0.396)
     )
     
-    print(plate_scale)
-    print(repr(plate_scale))
-    print()
+    plate_scale = PlateScale(
+        x = 0.5,
+        y = 0.5
+    )
     
-    plate_scale.x = 0.4
-    plate_scale.y = 0.4
-    
-    print(plate_scale)
-    print(repr(plate_scale))
-    print()
+    check_multi(plate_scale, ["x", "y"], [0.4, 0.4], plate_scale2)
 
 
-# In[19]:
+# In[165]:
 
 
 if __name__ == "__main__":
@@ -761,13 +800,15 @@ if __name__ == "__main__":
     arms_line  = ComponentType("power" , parameter_prefix = "R")
     sky_line   = ComponentType("sky"   , component_number = 3)
 
+    print(f"Printing initial component lines{end_str}")
     print(bulge_line)
     print(disk_line)
     print(arms_line)
     print(sky_line)
+    print()
 
 
-# In[20]:
+# In[166]:
 
 
 if __name__ == "__main__":
@@ -777,22 +818,10 @@ if __name__ == "__main__":
         component_number = 1
     )
     
-    print(position)
-    print(repr(position))
-    print()
-    
-    position.x = 101
-    position.y = 101
-    print(position)
-    print(repr(position))
-    print()
-    
-    position.value = (102, 102)
-    print(position)
-    print(repr(position))
+    check_multi(position, ["x", "y"], [101, 101])
 
 
-# In[21]:
+# In[167]:
 
 
 if __name__ == "__main__":
@@ -805,14 +834,20 @@ if __name__ == "__main__":
         component_number = 1
     )
     
+    print(f"Testing magnitude as NumParameter{end_str}")
     print(magnitude)
-    print("sum of magnitudes", magnitude + magnitude)
+    print()
     
+    print(f"Setting NumParameter value to a number{end_str}")
     magnitude.value = 5
     print(magnitude)
+    print()
+    
+    # TODO: This isn't working right
+    #print("And an example of summing NumParameter + NumParameter = \n", magnitude + magnitude)
 
 
-# In[22]:
+# In[168]:
 
 
 if __name__ == "__main__":
@@ -821,39 +856,35 @@ if __name__ == "__main__":
         component_number = 1
     )
     
+    print(f"Testing default Skip parameter{end_str}")
     print(skip)
+    print()
+    
+    print(f"Setting to 1{end_str}")
     skip.value = 1
     print(skip)
+    print()
 
 
-# In[23]:
+# In[169]:
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":    
     fourier1 = FourierMode(
-        mode = 1,
-        amplitude = 0.001, 
-        phase_angle = 45,
-        component_name = "Fourier"
+        1,
+        (0.001, 45)
     )
-    
-    print(fourier1)
     
     fourier3 = FourierMode(
-        3,
-        (0.002, 46),
-        component_name = "Fourier"
+        mode = 3,
+        amplitude = 0.002, 
+        phase_angle = 46
     )
     
-    print(fourier3)
-    
-    fourier1.amplitude   = 0.003
-    fourier1.phase_angle = 47
-    
-    print(fourier1)
+    check_multi(fourier1, ["amplitude", "phase_angle"], [0.003, 47], fourier3)
 
 
-# In[24]:
+# In[172]:
 
 
 if __name__ == "__main__":
@@ -861,20 +892,28 @@ if __name__ == "__main__":
         mode = 2,
         amplitude = 1.002
     )
-    
+
+    # Bending is special
+    print(f"Initializing bending mode via kwargs and printing with repr{end_str}")
     print(bending2)
+    print("repr", repr(bending2))
+    print()
     
+    print(f"Initializing different mode via kwargs and printing{end_str}")
     bending3 = BendingMode(
         mode = 3,
         amplitude = 1.003
     )
     
     print(bending3)
+    print()
     
+    print(f"Updating bending mode via attributes and printing{end_str}")
     bending3.mode = 4
     bending3.amplitude = 1.004
     
     print(bending3)
+    print()
 
 
 # In[25]:
@@ -1224,10 +1263,11 @@ def load_default_parameters():
     }
 
 
-# In[31]:
+# In[101]:
 
 
 if __name__ == "__main__":
+    print(f"Printing types and str for all values in default functions (header, sersic, power, fourier, sky){end_str}")
     _ = [print(type(v.value), v) for v in load_default_header_parameters().values()]
     print()
     _ = [print(type(v.value), v) for v in load_default_sersic_parameters().values()]
@@ -1239,10 +1279,11 @@ if __name__ == "__main__":
     _ = [print(type(v.value), v) for v in load_default_sky_parameters().values()]
 
 
-# In[32]:
+# In[102]:
 
 
 if __name__ == "__main__":
+    print(f"Printing str for all parameters in default functions (header, sersic, power, fourier, sky){end_str}")
     _ = [
         print(*[parameter for parameter in component_dict.values()], sep = "\n", end = "\n\n")
         for component_dict in load_default_parameters().values()
