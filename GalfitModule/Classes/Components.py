@@ -1031,7 +1031,7 @@ def load_all_components(with_header = True):
     return all_components
 
 
-# In[62]:
+# In[11]:
 
 
 if __name__ == "__main__":
@@ -1039,44 +1039,45 @@ if __name__ == "__main__":
     end_str = "--\n"
 
 
-# In[63]:
+# In[22]:
 
 
-def unit_tests(component, parameter, bogus_list, bogus_dict, log_line, pvalue = 555555, end_str = "--\n"):
+if __name__ == "__main__":
+    def unit_tests(component, parameter, bogus_list, bogus_dict, log_line, pvalue = 555555, end_str = "--\n", base_out = ""):
     
-    component_copy = deepcopy(component)
-    
-    print(f"Defaults{end_str}", component.parameters)
-    print()
-    
-    component.parameters[parameter].value = pvalue
-    print(f"Modifying {parameter} directly{end_str}", component)
-    
-    component.from_file_helper_list(bogus_list)
-    print(f"From file helper, list{end_str}", component)
-    
-    print(f"Sending to file{end_str}", component)
-    component.to_file(f"{base_out}_{component.component_type.upper()}.txt")
+        component_copy = deepcopy(component)
 
-    component = deepcopy(component_copy)
-    component.from_file_helper_dict(bogus_dict)
-    print(f"From file helper, dict{end_str}", component)
-    
-    component_df = component.to_pandas()
-    print(f"To pandas{end_str}", component_df)
-    print()
-    
-    component_df.iloc[0,0] = 111
-    component_df.iloc[0,1] = 112
-    component_df.iloc[0,2] = 113
-    component.from_pandas(component_df)
-    print(f"From pandas, modified parameters{end_str}", component)
-    
-    component.update_from_log(log_line)
-    print(f"From log line{end_str}", component)
+        print(f"Defaults{end_str}", component.parameters)
+        print()
+
+        component.parameters[parameter].value = pvalue
+        print(f"Modifying {parameter} directly{end_str}", component)
+
+        component.from_file_helper_list(bogus_list)
+        print(f"From file helper, list{end_str}", component)
+
+        print(f"Sending to file{end_str}", component)
+        component.to_file(f"{base_out}_{component.component_type.capitalize()}.txt")
+
+        component = deepcopy(component_copy)
+        component.from_file_helper_dict(bogus_dict)
+        print(f"From file helper, dict{end_str}", component)
+
+        component_df = component.to_pandas()
+        print(f"To pandas{end_str}", component_df)
+        print()
+
+        component_df.iloc[0,0] = 111
+        component_df.iloc[0,1] = 112
+        component_df.iloc[0,2] = 113
+        component.from_pandas(component_df)
+        print(f"From pandas, modified parameters{end_str}", component)
+
+        component.update_from_log(log_line)
+        print(f"From log line{end_str}", component)
 
 
-# In[67]:
+# In[13]:
 
 
 # Unit Test for GalfitComponent
@@ -1087,7 +1088,7 @@ if __name__ == "__main__":
         print(k,v)
 
 
-# In[68]:
+# In[14]:
 
 
 if __name__ == "__main__":
@@ -1115,19 +1116,29 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps""".
  'CONVBOX': '51, 50',
  'MAGZPT': 24.8}""")
 
+    print(f"Initializing header{end_str}")
     header = GalfitHeader()
+    print(header)
+    print()
+    
+    print(f"Reading header from file via list{end_str}")
     header.from_file_helper_list(bogus_list)
     #header.update_param_values()
     print(header)
+    print()
+    
+    print(f"Printing header to file {base_out}_header.txt{end_str}")
     header.to_file(f"{base_out}_header.txt")
     print()
-
+    
+    print(f"Reading header from file via dict {end_str}")
     header.from_file_helper_dict(bogus_dict)
     #header.update_param_values()
     print(header)
+    print()
 
 
-# In[69]:
+# In[15]:
 
 
 if __name__ == "__main__":
@@ -1145,10 +1156,11 @@ if __name__ == "__main__":
     print(f"Updating Sersic (as an example GalfitComponent) from kwargs{end_str}", bulge)
 
 
-# In[55]:
+# In[16]:
 
 
-bogus_list = """ 0) sersic                 #  Component type
+if __name__ == "__main__":
+    bogus_list = """ 0) sersic                 #  Component type
  1) 76.7000  76.5000  0 0  #  Position x, y
  3) 12.9567     1          #  Integrated magnitude
  4) 18.5147     1          #  R_e (effective radius)   [pix]
@@ -1160,21 +1172,21 @@ bogus_list = """ 0) sersic                 #  Component type
  10) -48.3372    1          #  Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)""".split("\n")
 
-bogus_dict = eval("""{'1_XC': '[67.3796]',
- '1_YC': '[67.7662]',
- '1_MAG': '13.1936 +/- 0.0257',
- '1_RE': '15.5266 +/- 0.1029',
- '1_N': '0.3433 +/- 0.0064',
- '1_AR': '0.6214 +/- 0.0039',
- '1_PA': '-19.1534 +/- 0.5867'}""")
+    bogus_dict = eval("""{'1_XC': '[67.3796]',
+     '1_YC': '[67.7662]',
+     '1_MAG': '13.1936 +/- 0.0257',
+     '1_RE': '15.5266 +/- 0.1029',
+     '1_N': '0.3433 +/- 0.0064',
+     '1_AR': '0.6214 +/- 0.0039',
+     '1_PA': '-19.1534 +/- 0.5867'}""")
+    
+    log_line = "sersic    : (  [62.90],  [62.90])  14.11*     13.75    0.30    0.63    60.82"
+    
+    bulge = Sersic(1)
+    unit_tests(bulge, "magnitude", bogus_list, bogus_dict, log_line, base_out = base_out)
 
-log_line = "sersic    : (  [62.90],  [62.90])  14.11*     13.75    0.30    0.63    60.82"
 
-bulge = Sersic(1)
-unit_tests(bulge, "magnitude", bogus_list, bogus_dict, log_line)
-
-
-# In[56]:
+# In[17]:
 
 
 if __name__ == "__main__":
@@ -1197,11 +1209,11 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
     log_line = "power   :     [0.00]   23.51  219.64     -0.16*     ---  -44.95   -15.65"
 
     arms = Power(2)
-    unit_tests(arms, "powerlaw_index", bogus_list, bogus_dict, log_line)
+    unit_tests(arms, "powerlaw_index", bogus_list, bogus_dict, log_line, base_out = base_out)
     
 
 
-# In[59]:
+# In[18]:
 
 
 if __name__ == "__main__":
@@ -1216,11 +1228,11 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
     log_line = "fourier : (1:  0.06,   -6.67)   (3:  0.05,    0.18)"
 
     fourier = Fourier(2)
-    unit_tests(fourier, "F1", bogus_list, bogus_dict, log_line, pvalue = (555, 555))
+    unit_tests(fourier, "F1", bogus_list, bogus_dict, log_line, pvalue = (555, 555), base_out = base_out)
     
 
 
-# In[61]:
+# In[19]:
 
 
 if __name__ == "__main__":
@@ -1239,11 +1251,12 @@ if __name__ == "__main__":
     
     log_line = "sky       : [ 63.00,  63.00]  1130.51  -4.92e-02  1.00e-02"
     
-    unit_tests(sky, "sky_background", bogus_list, bogus_dict, log_line)
+    sky = Sky(3)
+    unit_tests(sky, "sky_background", bogus_list, bogus_dict, log_line, base_out = base_out)
     
 
 
-# In[21]:
+# In[20]:
 
 
 if __name__ == "__main__":
@@ -1253,7 +1266,7 @@ if __name__ == "__main__":
         print(component)
 
 
-# In[22]:
+# In[21]:
 
 
 if __name__ == "__main__":
