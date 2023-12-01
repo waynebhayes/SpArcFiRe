@@ -233,6 +233,12 @@ def main(**kwargs):
         # change the values in the dictionary (as demo'd in num_steps 1 below)
         # This is also to clean up the code and make it easier to understand
         initial_components = feedme_info[gname] #.extract_components()
+        # Whether or not to load default components
+        # If arms are not used, we select False and let the code
+        # figure it out on reading in (this avoids some output/extra processing)
+        load_default = True
+        if len(initial_components.components) <= 4:
+            load_default = False
                
         # Note to self, OutputContainer is *just* for handling output
         # It does not retain the input state fed into Galfit
@@ -247,7 +253,11 @@ def main(**kwargs):
             initial_components.disk.axis_ratio.value = disk_axis_ratio
             feedme_info[gname].to_file()
             
-            final_galfit_output = OutputContainer(sp(run_galfit_cmd), path_to_feedme = feedme_path, **feedme_info[gname].components)
+            final_galfit_output = OutputContainer(
+                sp(run_galfit_cmd), 
+                path_to_feedme = feedme_path, 
+                **feedme_info[gname].components
+            )
             
         elif num_steps >= 2:
             # This ends up being more like a disk fit
@@ -264,8 +274,20 @@ def main(**kwargs):
             print("Disk")
             #print("Bulge")
             
-            galfit_output = OutputContainer(sp(run_galfit_cmd), sersic_order = ["disk"], path_to_feedme = feedme_path, **feedme_info[gname].components)
-            #galfit_output = OutputContainer(sp(run_galfit_cmd), sersic_order = ["bulge"], path_to_feedme = feedme_path, **feedme_info[gname].components)
+            galfit_output = OutputContainer(
+                sp(run_galfit_cmd), 
+                sersic_order   = ["disk"], 
+                path_to_feedme = feedme_path,
+                load_default   = load_default,
+                **feedme_info[gname].components
+            )
+            #galfit_output = OutputContainer(
+            #sp(run_galfit_cmd), 
+            #sersic_order = ["bulge"], 
+            #path_to_feedme = feedme_path,
+            #load_default   = load_default,
+            #**feedme_info[gname].components
+            #)
             
             # Only fix sky if first step is successful
             # if galfit_output.success:
@@ -314,7 +336,12 @@ def main(**kwargs):
                 
                 run_galfit_cmd = f"{base_galfit_cmd} {bulge_in} {bulge_disk_in}"
                 print("Bulge + Disk")
-                galfit_output = OutputContainer(sp(run_galfit_cmd), path_to_feedme = feedme_path, **galfit_output.components)
+                galfit_output = OutputContainer(
+                    sp(run_galfit_cmd), 
+                    path_to_feedme = feedme_path,
+                    load_default   = load_default,
+                    **galfit_output.components
+                )
                 
 #                 if rerun:
 #                     galfit_output = rerun_galfit(galfit_output,
@@ -350,7 +377,12 @@ def main(**kwargs):
                 
             run_galfit_cmd = f"{base_galfit_cmd} {feedme_path}"
             print("Bulge + Disk + Arms (if applicable)")
-            final_galfit_output = OutputContainer(sp(run_galfit_cmd), path_to_feedme = feedme_path, **galfit_output.components, store_text = True)
+            final_galfit_output = OutputContainer(
+                sp(run_galfit_cmd), 
+                path_to_feedme  = feedme_path,
+                load_default    = load_default,
+                **galfit_output.components, 
+                store_text = True)
             
         # TODO: GET THIS WORKING... so many issues
         # Dropping this here for final simultaneous fitting following all num_steps
@@ -430,12 +462,6 @@ def main(**kwargs):
         # out_png_dir   = kwargs.get("out_png_dir", "./")
         #capture_output = bool(kwargs.get("silent", False))
         if sp(f"hostname").stdout.split(".")[0] == "bayonet-09":
-            # Whether or not to load default components
-            # If arms are not used, we select False and let the code
-            # figure it out on reading in (this avoids some output/extra processing)
-            #load_default = True
-            #if len(initial_components.components) == 4:
-            #    load_default = False
                 
             tmp_fits_obj = OutputFits(tmp_fits_path_gname, load_default = False)
             tmp_fits_obj.to_png(tmp_fits_path = tmp_fits_path_gname,
@@ -491,7 +517,6 @@ def main(**kwargs):
             _ = sp(f"rm -f {' '.join(replacement_sf_masks)}", capture_output = capture_output)
         else:
             _ = fill_objects(gname, 1, tmp_fits_dir, tmp_masks_dir)
-            
 
         # This is now done via FitsHandler
         #_, gname_nmr, gname_pvalue, gname_statistic = fill_objects(gname, 1, tmp_fits_dir, tmp_masks_dir)
