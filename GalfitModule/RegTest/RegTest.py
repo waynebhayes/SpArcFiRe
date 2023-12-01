@@ -42,6 +42,7 @@ sys.path.append(_MODULE_DIR)
 REG_TEST_DIR    = pj(_MODULE_DIR, "RegTest")
 TEST_OUTPUT_DIR = pj(REG_TEST_DIR, "TestOutput")
 TEST_DATA_DIR   = pj(REG_TEST_DIR, "TestData")
+SAMPLE_DIR      = pj(TEST_DATA_DIR, "sample-files")
 
 base_out = pj(TEST_OUTPUT_DIR, "UnitTest")
 

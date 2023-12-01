@@ -822,7 +822,7 @@ if __name__ == "__main__":
     container.to_file()
 
 
-# In[16]:
+# In[10]:
 
 
 # Testing FeedmeContainer from_file
@@ -830,9 +830,8 @@ if __name__ == "__main__":
     
     container = new_container()
 
-    example_feedme = pj(TEST_DATA_DIR, "test-out", "1237667911674691747", "1237667911674691747.in")
-    #example_feedme = "1237667911674691747.in"
-    example_fits   = pj(TEST_DATA_DIR, "test-out", "1237667911674691747", "1237667911674691747_galfit_out.fits")
+    example_feedme = pj(SAMPLE_DIR, "1237667911674691747.in")
+    example_fits   = pj(SAMPLE_DIR, "1237667911674691747_galfit_out.fits")
         
     print("These are feedme -> output")
     print("ignoring filepaths for reg tests...\n")
@@ -848,7 +847,7 @@ if __name__ == "__main__":
     print(iff(str(container)))
 
 
-# In[18]:
+# In[14]:
 
 
 # Testing FeedmeContainer from_file with just bulge
@@ -857,28 +856,30 @@ if __name__ == "__main__":
     container = new_container()
 
     # The galfit.01 file should not have second Sersic or arms/fourier
-    example_feedme = pj(TEST_DATA_DIR, "test-out", "1237668589728366770", "1237668589728366770_galfit.01")
+    example_feedme = pj(SAMPLE_DIR, "1237668589728366770_galfit.01")
     # The final output should
-    example_fits   = pj(TEST_DATA_DIR, "test-out", "1237668589728366770", "1237668589728366770_galfit_out.fits")
+    example_fits   = pj(SAMPLE_DIR, "1237668589728366770_galfit_out.fits")
     
     print("These are feedme -> output")
     #print("We purposefully keep the load_default option set to true to show what happens when not being strict.")
     print("ignoring filepaths for reg tests...\n")
     
     container.from_file(example_feedme)
-    print(iff(str(container)))
+    #print(iff(str(container)))
+    print(container)
     print(container.components.keys())
     
     print("*"*80)
     print("*"*80)
     
-    container = new_container()
+    #container = new_container()
     container.from_file(example_fits)
-    print(iff(str(container)))
+    #print(iff(str(container)))
+    print(container)
     print(container.components.keys())
 
 
-# In[12]:
+# In[13]:
 
 
 # Testing FeedmeContainer from_file with no arms
@@ -887,21 +888,23 @@ if __name__ == "__main__":
     container = new_container()#load_default = False)
     
     # This galaxy does not use the Power or Fourier functions
-    example_feedme = pj(TEST_DATA_DIR, "test-out", "1237667912741355660", "1237667912741355660.in")
-    example_fits   = pj(TEST_DATA_DIR, "test-out", "1237667912741355660", "1237667912741355660_galfit_out.fits")
+    example_feedme = pj(SAMPLE_DIR, "1237667912741355660.in")
+    example_fits   = pj(SAMPLE_DIR, "1237667912741355660_galfit_out.fits")
     
     print("These are feedme -> output")
     #print("With another galaxy, load_default = False")
     print("ignoring filepaths for reg tests...\n")
     
     container.from_file(example_feedme)
-    print(iff(str(container)))
+    #print(iff(str(container)))
+    print(container)
     
     print("*"*80)
     print("*"*80)
     
     container.from_file(example_fits)
-    print(iff(str(container)))
+    #print(iff(str(container)))
+    print(container)
 
 
 # In[13]:
@@ -924,7 +927,8 @@ if __name__ == "__main__":
     #print()
     _ = [print("Key:", k) for k in example_feedme.components.keys()]
     print()
-    print(iff(str(example_feedme)))
+    #print(iff(str(example_feedme)))
+    print
 
 
 # In[14]:

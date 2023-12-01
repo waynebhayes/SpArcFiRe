@@ -525,9 +525,9 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     
     gname = "1237671124296532233"
-    obs   = pj(TEST_DATA_DIR, "test-in", f"{gname}.fits")
-    model = pj(TEST_DATA_DIR, "test-out", gname, f"{gname}_galfit_out.fits")
-    mask  = pj(TEST_DATA_DIR, "test-out", gname, f"{gname}_star-rm.fits")
+    obs   = pj(SAMPLE_DIR, f"{gname}.fits")
+    model = pj(SAMPLE_DIR, f"{gname}_galfit_out.fits")
+    mask  = pj(SAMPLE_DIR, f"{gname}_star-rm.fits")
     
     test_obs   = FitsFile(obs)
     test_model = OutputFits(model)
@@ -600,6 +600,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
+    model           = pj(SAMPLE_DIR, f"sample_model_galfit_out.fits")
     model_to_update = pj(TEST_OUTPUT_DIR, f"temp_galfit_out.fits")
     
     if exists(model_to_update):
