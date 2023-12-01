@@ -31,7 +31,7 @@ def in_notebook():
         return False
 
 
-# In[ ]:
+# In[3]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -60,7 +60,7 @@ from Classes.Components import *
 from Functions.helper_functions import *
 
 
-# In[ ]:
+# In[4]:
 
 
 class ComponentContainer:
@@ -230,7 +230,7 @@ class ComponentContainer:
         return out_str
 
 
-# In[ ]:
+# In[5]:
 
 
 class FeedmeContainer(ComponentContainer):
@@ -624,7 +624,7 @@ class FeedmeContainer(ComponentContainer):
         
 
 
-# In[ ]:
+# In[6]:
 
 
 class OutputContainer(FeedmeContainer):
@@ -766,14 +766,14 @@ class OutputContainer(FeedmeContainer):
             return ""
 
 
-# In[ ]:
+# In[7]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[ ]:
+# In[8]:
 
 
 if __name__ == "__main__":
@@ -786,7 +786,7 @@ if __name__ == "__main__":
     print(container_df)
 
 
-# In[ ]:
+# In[9]:
 
 
 # Testing FeedmeContainer kwargs and to_file
@@ -822,7 +822,7 @@ if __name__ == "__main__":
     container.to_file()
 
 
-# In[ ]:
+# In[16]:
 
 
 # Testing FeedmeContainer from_file
@@ -848,7 +848,7 @@ if __name__ == "__main__":
     print(iff(str(container)))
 
 
-# In[ ]:
+# In[18]:
 
 
 # Testing FeedmeContainer from_file with just bulge
@@ -856,8 +856,9 @@ if __name__ == "__main__":
     
     container = new_container()
 
-    # This galaxy does not use the Power or Fourier functions
+    # The galfit.01 file should not have second Sersic or arms/fourier
     example_feedme = pj(TEST_DATA_DIR, "test-out", "1237668589728366770", "1237668589728366770_galfit.01")
+    # The final output should
     example_fits   = pj(TEST_DATA_DIR, "test-out", "1237668589728366770", "1237668589728366770_galfit_out.fits")
     
     print("These are feedme -> output")
@@ -877,7 +878,7 @@ if __name__ == "__main__":
     print(container.components.keys())
 
 
-# In[ ]:
+# In[12]:
 
 
 # Testing FeedmeContainer from_file with no arms
@@ -903,7 +904,7 @@ if __name__ == "__main__":
     print(iff(str(container)))
 
 
-# In[ ]:
+# In[13]:
 
 
 # Testing extraction into FeedmeContainer attributes
@@ -926,7 +927,7 @@ if __name__ == "__main__":
     print(iff(str(example_feedme)))
 
 
-# In[ ]:
+# In[14]:
 
 
 # Testing OutputContainer
@@ -1042,7 +1043,7 @@ if __name__ == "__main__":
     #good_output.header.to_file(output_filename, good_output.bulge, good_output.disk, good_output.arms, good_output.fourier, good_output.sky)
 
 
-# In[ ]:
+# In[15]:
 
 
 if __name__ == "__main__":
