@@ -536,7 +536,6 @@ if __name__ == '__main__':
                 
                 logger.info("wrote {0}".format(out_filepath))
             
-            
             # Now that levels are properly working, produce a png
             # regardless of star mask.
             #if np.any(star_mask):

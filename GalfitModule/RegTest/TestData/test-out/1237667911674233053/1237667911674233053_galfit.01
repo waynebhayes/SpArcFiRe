@@ -1,5 +1,5 @@
 
-#  Input menu file: /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-out/1237667911674233053/1237667911674233053_disk.in
+#  Input menu file: /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-out/1237667911674233053/1237667911674233053_bulge.in
 
 #  Chi^2/nu = 1.051,  Chi^2 = 7555.392,  Ndof = 7189
 
@@ -8,12 +8,12 @@
 A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237667911674233053.fits      # Input data image (FITS file)
 B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237667911674233053_galfit_out.fits      # Output data image block
 C) none                # Sigma image name (made from data if blank or "none") 
-D) 1237667911674233053_psf.fits          # Input PSF image and (optional) diffusion kernel
+D) ./test-out/1237667911674233053/1237667911674233053_psf.fits          # Input PSF image and (optional) diffusion kernel
 E) 1                   # PSF fine sampling factor relative to data 
 F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237667911674233053_star-rm.fits      # Bad pixel mask (FITS image or ASCII coord list)
 G) none                # File with parameter constraints (ASCII file) 
 H) 14   98   14   98   # Image region to fit (xmin xmax ymin ymax)
-I) 50     50           # Size of the convolution box (x y)
+I) 52     52           # Size of the convolution box (x y)
 J) 24.8000             # Magnitude photometric zeropoint 
 K) 0.3960  0.3960      # Plate scale (dx dy)   [arcsec per pixel]
 O) regular             # Display type (regular, curses, both)
@@ -46,14 +46,14 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
  7) 0.0000      0          #     ----- 
  8) 0.0000      0          #     ----- 
  9) 0.8044      1          #  Axis ratio (b/a)  
-10) 51.2182     1          #  Position angle (PA) [deg: Up=0, Left=90]
+10) 51.2189     1          #  Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 # Component number: 2
  0) sky                    #  Component type
  1) 1102.7870    1          #  Sky background at center of fitting region [ADUs]
- 2) 4.307e-03      1       #  dsky/dx (sky gradient in x)     [ADUs/pix]
- 3) -2.288e-03     1       #  dsky/dy (sky gradient in y)     [ADUs/pix]
+ 2) 4.308e-03      1       #  dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) -2.289e-03     1       #  dsky/dy (sky gradient in y)     [ADUs/pix]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 ================================================================================
