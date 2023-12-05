@@ -531,7 +531,7 @@ async def wrapper(
     disk_axis_ratio,
     **kwargs
 ):
-    fitted_galaxies = await asyncio.gather(*(parameter_search_fit(
+    fitted_galaxies = await asyncio.gather(*(async_parameter_search_fit(
         bulge_magnitude,
         disk_magnitude,
         gname,
@@ -708,16 +708,16 @@ def main(**kwargs):
         # Non-inclusive of end
         b_d_magnitudes = [(b, d) for b in range(12, 19) for d in range(11, 16)]
                 
-        if parallel in (2, 999):
-            fitted_galaxies = asyncio.run(wrapper(
-                b_d_magnitudes,
-                gname,
-                feedme_info[gname], 
-                base_galfit_cmd,
-                disk_axis_ratio,
-                use_async = True,
-                **kwargs
-            ))
+        #if parallel in (2, 999):
+        fitted_galaxies = asyncio.run(wrapper(
+            b_d_magnitudes,
+            gname,
+            feedme_info[gname], 
+            base_galfit_cmd,
+            disk_axis_ratio,
+            use_async = True,
+            **kwargs
+        ))
             # Subprocess and Loky backend don't play well together
             # fitted_galaxies = Parallel(n_jobs = -2, backend = "multiprocessing")(
             #            delayed(multi_step_fit)(
@@ -731,19 +731,19 @@ def main(**kwargs):
             #             )
             #            for (bulge_magnitude, disk_magnitude) in b_d_magnitudes
             #                             )
-        else:
-            fitted_galaxies = [
-                parameter_search_fit(
-                bulge_magnitude,
-                disk_magnitude,
-                gname,
-                feedme_info[gname],
-                base_galfit_cmd,
-                disk_axis_ratio,
-                **kwargs
-                ) 
-                for (bulge_magnitude, disk_magnitude) in b_d_magnitudes
-            ]
+        # else:
+        #     fitted_galaxies = [
+        #         parameter_search_fit(
+        #         bulge_magnitude,
+        #         disk_magnitude,
+        #         gname,
+        #         feedme_info[gname],
+        #         base_galfit_cmd,
+        #         disk_axis_ratio,
+        #         **kwargs
+        #         ) 
+        #         for (bulge_magnitude, disk_magnitude) in b_d_magnitudes
+        #     ]
                 
                 # TODO: GET THIS WORKING... so many issues
                 # Dropping this here for final simultaneous fitting following all num_steps
