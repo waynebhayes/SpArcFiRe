@@ -75,7 +75,7 @@ def check_success(in_fits, previous_state = False):
     
     return (previous_state or False)
 
-def multi_step_fit(
+def parameter_search_fit(
     bulge_magnitude, # loop variables
     disk_magnitude,  # loop variables
     gname,
@@ -306,7 +306,7 @@ async def async_sp(*args, **kwargs):
     
     return subprocess.CompletedProcess("", 0, stdout = stdout.decode('utf8'), stderr = stderr.decode('utf8'))
 
-async def async_multi_step_fit(
+async def async_parameter_search_fit(
     bulge_magnitude, # loop variables
     disk_magnitude,  # loop variables
     gname,
@@ -531,7 +531,7 @@ async def wrapper(
     disk_axis_ratio,
     **kwargs
 ):
-    fitted_galaxies = await asyncio.gather(*(multi_step_fit(
+    fitted_galaxies = await asyncio.gather(*(parameter_search_fit(
         bulge_magnitude,
         disk_magnitude,
         gname,
@@ -733,7 +733,7 @@ def main(**kwargs):
             #                             )
         else:
             fitted_galaxies = [
-                multi_step_fit(
+                parameter_search_fit(
                 bulge_magnitude,
                 disk_magnitude,
                 gname,
