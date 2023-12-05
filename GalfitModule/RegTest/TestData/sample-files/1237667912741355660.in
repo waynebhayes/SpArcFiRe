@@ -1,18 +1,18 @@
 
-#  Input menu file: 1237668589728366770.in
+#  Input menu file: 1237667912741355660.in
 
 #  
 
 ================================================================================
 # IMAGE and GALFIT CONTROL PARAMETERS
-A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237668589728366770.fits # Input data image (FITS file)
-B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237668589728366770_galfit_out.fits # Output data image block
+A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237667912741355660.fits # Input data image (FITS file)
+B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237667912741355660_galfit_out.fits # Output data image block
 C) none                 # Sigma image name (made from data if blank or 'none')
-D) ./test-out/1237668589728366770/1237668589728366770_psf.fits # Input PSF image and (optional) diffusion kernel
+D) ./test-out/1237667912741355660/1237667912741355660_psf.fits # Input PSF image and (optional) diffusion kernel
 E) 1                    # PSF fine sampling factor relative to data
-F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237668589728366770_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
+F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237667912741355660_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
-H) 7    79   8    80    # Image region to fit (xmin xmax ymin ymax)
+H) 17   81   18   82    # Image region to fit (xmin xmax ymin ymax)
 I) 52     52            # Size of the convolution box (x y)
 J) 24.8                 # Magnitude photometric zeropoint
 K) 0.396  0.396         # Plate scale (dx dy)   [arcsec per pixel]
@@ -36,21 +36,31 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 #   par)    par value(s)    fit toggle(s)    # parameter description 
 # ------------------------------------------------------------------------------
 
+# Component number: 1
+ 0) sersic              # Component type
+ 1) 48.9445 49.6255 0  0 # Position x, y
+ 3) 14.0        1       # Integrated magnitude
+ 4) 2.7439      1       # R_e (effective radius)   [pix]
+ 5) 4.0         1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.9409      1       # Axis ratio (b/a)
+ 10) 161.0977   1       # Position angle (PA) [deg: Up=0, Left=90]
+ Z) 0                   # Skip this model in output image?  (yes=1, no=0)
+
 # Component number: 2
  0) sersic              # Component type
- 1) 43.4409 43.8034 0  0 # Position x, y
- 3) 14.0        1       # Integrated magnitude
- 4) 15.0288     1       # R_e (effective radius)   [pix]
- 5) 1.0         1       # Sersic index n (de Vaucouleurs n=4)
- 9) 0.7343      1       # Axis ratio (b/a)
- 10) 78.7219    1       # Position angle (PA) [deg: Up=0, Left=90]
+ 1) 48.9400 49.6300 0  0 # Position x, y
+ 3) 13.82       1       # Integrated magnitude
+ 4) 8.47        1       # R_e (effective radius)   [pix]
+ 5) 1.38        1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.6         1       # Axis ratio (b/a)
+ 10) -49.1      1       # Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
 # Component number: 3
  0) sky                 # Component type
- 1) 1000.0      1       # Sky background at center of fitting region [ADUs]
- 2) 0.0         1       # dsky/dx (sky gradient in x)     [ADUs/pix]
- 3) 0.0         1       # dsky/dy (sky gradient in y)     [ADUs/pix]
+ 1) 1108.49     1       # Sky background at center of fitting region [ADUs]
+ 2) 0.0163      1       # dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) -0.0026     1       # dsky/dy (sky gradient in y)     [ADUs/pix]
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
 ================================================================================

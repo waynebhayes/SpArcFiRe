@@ -1,5 +1,5 @@
 
-#  Input menu file: /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-out/1237668310013640891/1237668310013640891_disk.in
+#  Input menu file: /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-out/1237668310013640891/1237668310013640891_bulge.in
 
 #  Chi^2/nu = 1.025,  Chi^2 = 13999.450,  Ndof = 13654
 
@@ -8,12 +8,12 @@
 A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237668310013640891.fits      # Input data image (FITS file)
 B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237668310013640891_galfit_out.fits      # Output data image block
 C) none                # Sigma image name (made from data if blank or "none") 
-D) 1237668310013640891_psf.fits          # Input PSF image and (optional) diffusion kernel
+D) ./test-out/1237668310013640891/1237668310013640891_psf.fits          # Input PSF image and (optional) diffusion kernel
 E) 1                   # PSF fine sampling factor relative to data 
 F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237668310013640891_star-rm.fits      # Bad pixel mask (FITS image or ASCII coord list)
 G) none                # File with parameter constraints (ASCII file) 
 H) 20   136  19   135  # Image region to fit (xmin xmax ymin ymax)
-I) 50     50           # Size of the convolution box (x y)
+I) 52     52           # Size of the convolution box (x y)
 J) 24.8000             # Magnitude photometric zeropoint 
 K) 0.3960  0.3960      # Plate scale (dx dy)   [arcsec per pixel]
 O) regular             # Display type (regular, curses, both)
@@ -40,13 +40,13 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
  0) sersic                 #  Component type
  1) 77.6977  77.1488  0 0  #  Position x, y
  3) 13.1141     1          #  Integrated magnitude 
- 4) 15.1068     1          #  R_e (effective radius)   [pix]
- 5) 0.9360      1          #  Sersic index n (de Vaucouleurs n=4) 
+ 4) 15.1069     1          #  R_e (effective radius)   [pix]
+ 5) 0.9361      1          #  Sersic index n (de Vaucouleurs n=4) 
  6) 0.0000      0          #     ----- 
  7) 0.0000      0          #     ----- 
  8) 0.0000      0          #     ----- 
  9) 0.7362      1          #  Axis ratio (b/a)  
-10) -23.8828    1          #  Position angle (PA) [deg: Up=0, Left=90]
+10) -23.8829    1          #  Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 # Component number: 2

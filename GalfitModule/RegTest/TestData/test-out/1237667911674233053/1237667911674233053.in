@@ -12,10 +12,10 @@ D) ./test-out/1237667911674233053/1237667911674233053_psf.fits # Input PSF image
 E) 1                    # PSF fine sampling factor relative to data
 F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237667911674233053_star-rm.fits # Bad pixel mask (FITS image or ASCII coord list)
 G) none                 # File with parameter constraints (ASCII file)
-H) 14      98   14   98 # Image region to fit (xmin xmax ymin ymax)
-I) 52      52           # Size of the convolution box (x y)
+H) 14   98   14   98    # Image region to fit (xmin xmax ymin ymax)
+I) 52     52            # Size of the convolution box (x y)
 J) 24.8                 # Magnitude photometric zeropoint
-K) 0.396   0.396        # Plate scale (dx dy)   [arcsec per pixel]
+K) 0.396  0.396         # Plate scale (dx dy)   [arcsec per pixel]
 O) regular              # Display type (regular, curses, both)
 P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 
@@ -38,36 +38,40 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 
 # Component number: 1
  0) sersic              # Component type
- 1) 55.9116 55.7516 0 0 # Position x, y
- 3) 14.0000     1       # Integrated magnitude
- 4) 3.3212      1       # R_e (effective radius)   [pix]
- 5) 4.0000      1       # Sersic index n (de Vaucouleurs n=4)
- 9) 0.8419      1       # Axis ratio (b/a)
-10) 3.2161      1       # Position angle (PA) [deg: Up=0, Left=90]
+ 1) 55.9100 55.7500 0  0 # Position x, y
+ 3) 13.22       1       # Integrated magnitude
+ 4) 10.5        1       # R_e (effective radius)   [pix]
+ 5) 0.93        1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.8         1       # Axis ratio (b/a)
+ 10) 51.22      1       # Position angle (PA) [deg: Up=0, Left=90]
+ Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
 # Component number: 2
  0) sersic              # Component type
- 1) 55.9100 55.7500 0 0 # Position x, y
- 3) 13.2200     1       # Integrated magnitude
- 4) 10.5000     1       # R_e (effective radius)   [pix]
- 5) 0.9300      1       # Sersic index n (de Vaucouleurs n=4)
- 9) 0.6000      1       # Axis ratio (b/a)
-10) 51.2200     1       # Position angle (PA) [deg: Up=0, Left=90]
+ 1) 55.9116 55.7516 0  0 # Position x, y
+ 3) 14.0        1       # Integrated magnitude
+ 4) 15.2479     1       # R_e (effective radius)   [pix]
+ 5) 1.0         1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.6         1       # Axis ratio (b/a)
+ 10) 53.8788    1       # Position angle (PA) [deg: Up=0, Left=90]
+ Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
-R0) power               # PA rotation func. (power, log, none)
-R1) 0.0000      0       # Spiral inner radius [pixels]
+R0) power               # Component type
+R1) 0.0         0       # Spiral inner radius [pixels]
 R2) 5.9512      0       # Spiral outer radius [pixels]
 R3) -63.8107    1       # Cumul. rotation out to outer radius [degrees]
 R4) 0.8383      1       # Asymptotic spiral powerlaw
 R9) -32.9803    1       # Inclination to L.o.S. [degrees]
-R10) 162.2423    1      # Sky position angle
-F1) 0.0500  45.0000 1 1 # Azim. Fourier mode 1, amplitude, & phase angle
-F3) 0.0500  25.0000 1 1 # Azim. Fourier mode 3, amplitude, & phase angle
+R10) 162.2423   1       # Sky position angle
+F1) 0.0500 45   1  1    # Azim. Fourier mode 1, amplitude, & phase angle
+F3) 0.0500 25   1  1    # Azim. Fourier mode 3, amplitude, & phase angle
+ Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
 # Component number: 3
  0) sky                 # Component type
- 1) 1102.7900   1       # Sky background at center of fitting region [ADUs]
+ 1) 1102.79     1       # Sky background at center of fitting region [ADUs]
  2) 0.0043      1       # dsky/dx (sky gradient in x)     [ADUs/pix]
  3) -0.0023     1       # dsky/dy (sky gradient in y)     [ADUs/pix]
+ Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
 ================================================================================

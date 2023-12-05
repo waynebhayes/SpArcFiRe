@@ -1,5 +1,6 @@
 
-F1) 0.2721  -56.9126 1 1 # Azim. Fourier mode 1, amplitude, & phase angle
-F3) -0.0690 -31.8175 1 1 # Azim. Fourier mode 3, amplitude, & phase angle
+F1) 0.2721 -56.9126     # Azim. Fourier mode 1, amplitude, & phase angle
+F3) -0.0690 -31.8175    # Azim. Fourier mode 3, amplitude, & phase angle
+ Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
 ================================================================================
