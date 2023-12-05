@@ -46,7 +46,16 @@ from Functions.helper_functions import *
     
 # ==================================================================================================================
 
-def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", to_png = True, parallel = True):
+def fill_objects(
+    gname, 
+    count, 
+    galfit_tmp_path, 
+    galfit_mask_path, 
+    out_dir = "", 
+    to_png = True, 
+    parallel = True,
+    use_bulge_mask = True
+):
     
     use_bulge_mask = False
     output_df = pd.DataFrame()
@@ -59,8 +68,13 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", 
         print(count, gname)
     
     try:
-        fits_filename = f"{gname}_galfit_out.fits"
-        fits_file = OutputFits(pj(galfit_tmp_path, fits_filename))
+        if os.path.isdir(galfit_tmp_path):
+            fits_filepath = pj(galfit_tmp_path, f"{gname}_galfit_out.fits")
+        else:
+            fits_filepath = gname
+            
+        fits_file = OutputFits(fits_filepath)
+        
     except Exception as e:
         print(f"There was an issue opening galaxy {gname}. Continuing...")
         print(e)
@@ -70,7 +84,10 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", 
     #last_feedme_file = pj(out_dir, gname, f"{gname}.in")
     #if not exists(last_feedme_file):
     #feedme_files = glob.glob(pj(out_dir, gname, f"*.in"))
-    mask_fits_name = pj(galfit_mask_path, f"{gname}_star-rm.fits")
+    if galfit_mask_path.endswith(".fits"):
+        mask_fits_name = galfit_mask_path
+    else:
+        mask_fits_name = pj(galfit_mask_path, f"{gname}_star-rm.fits")
     
     # For simultaneous fitting
 #     if feedme_files: 
@@ -99,10 +116,14 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", 
     
     # If skip is enabled then arms are not fit so bulge masking doesn't make sense
     c_types = [comp.component_type for comp in fits_file.feedme.components.values()]
-    if out_dir and "power" in c_types:
+    if use_bulge_mask and out_dir and ("power" in c_types):
+    #if out_dir and "power" in c_types:
         _ = fits_file.generate_bulge_mask(pj(out_dir, gname, f"{gname}.csv"))
-        use_bulge_mask = True
+        #use_bulge_mask = True
+    else:
+        use_bulge_mask = False
         
+    #masked_residual_normalized = fits_file.generate_masked_residual(mask_fits_file, use_bulge_mask = use_bulge_mask)
     masked_residual_normalized = fits_file.generate_masked_residual(mask_fits_file, use_bulge_mask = use_bulge_mask)
     if masked_residual_normalized is None:
         print(f"Could not calculate nmr for galaxy {gname}. Continuing...")
@@ -119,12 +140,14 @@ def fill_objects(gname, count, galfit_tmp_path, galfit_mask_path, out_dir = "", 
             fits_file.to_png(out_png_dir = pj(out_dir, "galfit_png"))
     
     #return gname, fits_file.nmr, fits_file.kstest.pvalue, fits_file.kstest.statistic#, fits_file.nmrr
-    reloaded  = OutputFits(pj(galfit_tmp_path, fits_filename))
+    reloaded  = OutputFits(fits_filepath)
     output_df = reloaded.feedme.to_pandas()
     output_df["gname"]   = gname
     output_df["NMR"]     = reloaded.model.header.get("NMR", None) 
     output_df["KS_P"]    = reloaded.model.header.get("KS_P", None)
     output_df["KS_STAT"] = reloaded.model.header.get("KS_STAT", None)
+    
+    output_df["nmr_x_1-p"] = (1 - output_df["KS_P"])*output_df["NMR"]
     
     return output_df
     
