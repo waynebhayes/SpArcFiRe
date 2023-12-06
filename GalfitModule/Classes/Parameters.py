@@ -25,6 +25,9 @@ import numpy as np
 # For debugging purposes
 from IPython import get_ipython
 def in_notebook():
+    """
+    Check if in a Jupyter Notebook environment for deubbing and export to py script.
+    """
     ip = get_ipython()
     
     if ip:
@@ -32,6 +35,8 @@ def in_notebook():
     else:
         return False
 
+
+# ## Loading Class Modules
 
 # In[3]:
 
@@ -59,6 +64,9 @@ sys.path.append(_MODULE_DIR)
 from Functions.helper_functions import *
 
 
+# ## BaseParameter Class
+# `BaseParameter` generically defines the parameters in each **GALFIT** component. In **GALFIT**, every component parameter has a `name`, a `value`, a `fix` value (whether or not to optimize on that parameter), a `parameter_number`, and a `comment` which details what the parameter does. Furthermore, every parameter is a member of a component so for convenience, we also store component-related attributes such as `component_name`, `component_number`, and `parameter_prefix`, which is defined by the component.
+
 # In[4]:
 
 
@@ -82,6 +90,29 @@ class BaseParameter():
           
 # ==========================================================================================================
 
+# The exec statement below is equivalent to:
+#
+#     @property
+#     def value(self):
+#         return self._value
+#    
+#     @value.setter
+#     def value(self, new_val):
+#         self._value = new_val
+#
+#     @property
+#     def fix(self):
+#         return self._fix
+#    
+#     @fix.setter
+#     def fix(self, new_val):
+#         self._fix = new_val
+#
+# These statements allow us to use the non-underscored variables
+# as proxies for the underscored internal variables and thus
+# update the internal variables and anything associated with them
+# (str() for example) dynamically
+        
     exec(
         generate_get_set(
             {
@@ -94,24 +125,39 @@ class BaseParameter():
 # ==========================================================================================================
 
     def __repr__(self):
+        """
+        Used for debugging, usually we just want the value itself.
+        """
         return repr(self.value)
 
     # Formerly __repr__
     def __str__(self):
+        """
+        Setting the formatting per GALFIT convention. 
+        Ex:
+        3) 12.7664     1          #  Integrated magnitude
+        """
         pre_fix = f"{self.parameter_prefix}{self.parameter_number}) {self.value:<10}"
         pre_comment = f"{pre_fix:<16}{self.fix}"
         return f"{pre_comment:<23} # {self.comment}"
 
 
+# ## ComponentType Class
+# `ComponentType` inherits the `BaseParameter` class and `str`. This is to emphasize/force the attribute `value` to be a string since the `value` in this case merely represents the first line of a component which specifies which component type is being used, i.e. *Sersic*, *Power*, *Sky*, etc.
+# 
+# This and the several below mostly function to set some defaults but are otherwise slight variations on the `BaseParameter` class.
+
 # In[5]:
 
 
 class ComponentType(BaseParameter, str):
-    def __new__(cls, name, **kwargs):    
+    def __new__(cls, name, **kwargs):
+        # I can't fully remember why but this is necessary to 
+        # use the str built-in as the basis for the class, i.e.
+        # feed the component name *as* the value
         return super(ComponentType, cls).__new__(cls, name)
     
     def __init__(self, name, **kwargs):
-        
         BaseParameter.__init__(
             self, 
             name,
@@ -121,16 +167,10 @@ class ComponentType(BaseParameter, str):
             **kwargs
         )
         
-        #self.parameter_number = kwargs.get("parameter_number", 0)
-        
-        # self.value            = value
-        #self.comment          = "Component type"
-        # self.component_number = kwargs.get("component_number", 0)
-        
-    # def __str__(self):
-    #     empty_str = ""
-    #     return f"{self.parameter_number:>2}) {self.name:<11} {empty_str:<10} #  {self.comment}"
 
+
+# ## HeaderParameter Class
+# `HeaderParameter` inherits the `BaseParameter` class and `str`. Like `ComponentType`, most of the header parameters are strings.
 
 # In[6]:
 
@@ -149,6 +189,9 @@ class HeaderParameter(BaseParameter, str):
         )
 
 
+# ## NumParameter Class
+# `NumParameter` inherits the `BaseParameter` class and `float`. The `NumParameter` generically holds valued parameters, like those found in the **GALFIT** components, but defaults to rounding to four decimal places as is convention in **GALFIT**.
+
 # In[7]:
 
 
@@ -163,17 +206,6 @@ class NumParameter(BaseParameter, float):
             float(round(value, 4)), 
             **kwargs
         )
-        
-        #self.value = float(round(self.value, 4))
-        
-#         self.fix        = kwargs.get("fix", 0)
-#         self.name             = kwargs.get("name", "")
-#         self.parameter_number = kwargs.get("parameter_number", "#")
-#         self.comment          = kwargs.get("comment", "")
-        
-#         # Not sure if I'll need these but keeping them in for now
-#         self.component_name   = kwargs.get("component_name", "")
-#         self.component_number = kwargs.get("component_number", "")
         
 # ==========================================================================================================
 
@@ -195,6 +227,9 @@ class NumParameter(BaseParameter, float):
     
 # ==========================================================================================================
 
+
+# ## Skip Class
+# `Skip` inherits the `BaseParameter` class and int. `Skip` is a special case of parameter in that it does not have a `fix` value and can only be 0 or 1.
 
 # In[8]:
 
@@ -218,6 +253,7 @@ class Skip(BaseParameter, int):
                     print("For Skip class:", ve2)
                     print("Resorting to default.")
         
+        self.check_value(value)
         name             = "skip"
         parameter_number = f"Z"
         comment          = f"Skip this model in output image?  (yes=1, no=0)"
@@ -231,6 +267,9 @@ class Skip(BaseParameter, int):
             comment          = comment,
             fix              = fix
         )
+        
+    def check_value(self, new_val):
+        assert new_val in (0, 1), "Value given to Skip must be either a 0 or a 1."
         
     @property
     def value(self):
@@ -246,6 +285,8 @@ class Skip(BaseParameter, int):
             except ValueError as ve:
                 raise Exception("Value given to Skip must be convertible to an int or a float.")
                 
+        self.check_value(self._value)
+                
     @property
     def fix(self):
         return ""
@@ -255,7 +296,10 @@ class Skip(BaseParameter, int):
         pass
 
 
-# In[154]:
+# ## BendingMode Class
+# `BendingMode` inherits the NumParameter class. BendingMode is special because it uses modes, which is equivalent to the parameter number, and amplitudes which is the same as the value. We alias `amplitude` to `value` for this reason.
+
+# In[9]:
 
 
 #class BendingModes(BaseParameter, float):
@@ -305,13 +349,20 @@ class BendingMode(NumParameter):
         pass
 
 
-# In[155]:
+# ## MultiParameter
+
+# ## MultiParameter Class
+# The `MultiParameter` class forms the basis of several of the special format parameters in GALFIT, namely the position and fourier modes, as well as several header parameters. We generically assign `x` and `y` to the multiparameters and alias any attribute that is useful to reference by name (such as `min`, `max`, `amplitude`, `phase_angle`, etc.)
+# 
+# The basis of the multiparameter value and fix is a `namedtuple`. This allows us to treat the values of the... `value` in the same way that we treat class attributes so that it's possible to call a parameter as `position.value.x` in order to retreive the individual value while keeping with the indexing capabilities.
+
+# In[10]:
 
 
 # Use NamedTuples so we can access this like a dictionary
 # while also using the indexing of a tuple where necessary
 
-ntMultiParameter   = namedtuple("ntMultiParameter", "x y")
+ntMultiParameter    = namedtuple("ntMultiParameter", "x y")
 ntMultiParameterFix = namedtuple("ntMultiParameterFix", "fix_x fix_y")
 
 class MultiParameter(BaseParameter):
@@ -349,11 +400,17 @@ class MultiParameter(BaseParameter):
 
     @property
     def value(self):
+        """
+        Value is actually the ntMultiParameter named tuple wrapped around x and y
+        """
         #self.check_len(self._value)
         return ntMultiParameter(self.x, self.y)
     
     @value.setter
     def value(self, new_tuple):
+        """
+        Value is actually set by x and y
+        """
         self.check_type(new_tuple)
         self.check_len(new_tuple)
           
@@ -379,6 +436,10 @@ class MultiParameter(BaseParameter):
     
     @fix.setter
     def fix(self, new_val):
+        """
+        Set fix by string or tuple for convenience when reading
+        in from file and generic use.
+        """
         if isinstance(new_val, str):
             if len(new_val):
                 self.fix_x = int(new_val[0])
@@ -405,7 +466,11 @@ class MultiParameter(BaseParameter):
 
     # Override BaseParameter
     def __str__(self):
-
+        """
+        Return string representation of MultiParameter per GALFIT convention.
+        Ex:
+        1) 80.3068  80.3465  0 0  #  Position x, y
+        """
         x_str = f"{self.x:.4f}"
         y_str = f"{self.y:.4f}"
 
@@ -428,7 +493,10 @@ class MultiParameter(BaseParameter):
         return f"{pre_comment:<23} # {self.comment}"
 
 
-# In[156]:
+# ## Position Class
+# The `Position` class is the quintessential `MultiParameter` subclass. It uses `x` and `y` and does not need its own special `namedtuple`. We merely create it here for convenience and for setting the `fix` value and other things auatomatically.
+
+# In[11]:
 
 
 #ntPosition    = namedtuple("ntPosition", "x y")
@@ -445,10 +513,14 @@ class Position(MultiParameter):
         self.comment          = "Position x, y"
         
         self.fix              = kwargs.get("fix", (0, 0))
-        
 
 
-# In[157]:
+# ## FourierMode Class
+# The `FourierMode` class inherits the `MultiParameter` class. Much like `Position`, it functions similarly to the base `MultiParameter` with the exception that it has differing naming conventions for which we use aliases to set our base `x` and `y` attributes. It gets its own `namedtuple` because of this.
+# 
+# Fourier modes in **GALFIT** is special for other reasons which are elaborated in the other parts of this module.
+
+# In[12]:
 
 
 ntFourier = namedtuple("ntFourier", "amplitude phase_angle")
@@ -523,7 +595,12 @@ class FourierMode(MultiParameter):
         self.phase_angle = float(new_tuple[1])
 
 
-# In[158]:
+# ## ImageRegionToFit or CropRegion Class
+# The `ImageRegionToFit` or `CropRegion` class also inherits the `MultiParameter` class along with the `HeaderParameter`, with the essential difference that this class has four base `value` attributes rather than two. It uses `x1`, `x2`, `y1`, `y2` and uses its own special `namedtuple`. Aliasing to *min/max* abounds as does its overriding `str` method.
+# 
+# `CropRegion` is identical but is simply another way to refer to this parameter.
+
+# In[13]:
 
 
 ntImageRegionToFit = namedtuple("ntImageRegionToFit", "x1 x2 y1 y2")
@@ -604,7 +681,12 @@ class CropRegion(ImageRegionToFit):
         ImageRegionToFit.__init__(self, *values, **kwargs)
 
 
-# In[159]:
+# ## ConvolutionBox Class
+# The `ConvolutionBox` class inherits the `HeaderParameter` and `MultiParameter` class. Much like `Position`, it functions similarly to the base `MultiParameter` with the exception that it is also a `HeaderParameter` which is more a categorical choice than a choice by necessity. This choice may be/is necessary for I/O in other parts of the module.
+# 
+# `ConvolutionBox` also has it's own `str` output to align with **GALFIT** convention (even if its functionally no different if we were to not override `MultiParameter`'s `str` object funciton).
+
+# In[14]:
 
 
 # This is functionally the same as position but for clarity...
@@ -647,7 +729,12 @@ class ConvolutionBox(HeaderParameter, MultiParameter):
         return f"{pre_comment:<23} # {self.comment}"
 
 
-# In[160]:
+# ## PlateScale Class
+# The `PlateScale` class inherits the `HeaderParameter` and `MultiParameter` class. Much like `ConvolutionBox`, it functions similarly to the base `MultiParameter` with the categorical inclusion of the  `HeaderParameter` class. It again has a different naming convention (dx, dy) which we thus create a `namedtuple` for and alias.
+# 
+# Also like `ConvolutionBox`, `PlateScale` also has it's own `str` output to align with **GALFIT** convention.
+
+# In[15]:
 
 
 ntPlateScale = namedtuple("ntPlateScale", "dx dy")
@@ -695,17 +782,22 @@ class PlateScale(HeaderParameter, MultiParameter):
         return f"{pre_comment:<23} # {self.comment}"
 
 
-# In[161]:
+# In[16]:
 
 
 # if __name__ == "__main__":
 #     from RegTest.RegTest import *
 
 
-# In[162]:
+# In[17]:
 
 
 def check_multi(parameter_tuple, fields = [], values = [],  parameter_kwargs = None):
+    """
+    check_multi is a unit test function, generically designed to test
+    MultiParameter classes and subclasses. This is more for cleanliness
+    and consistency than anything else.
+    """
     print("="*40)
     print()
     
@@ -742,7 +834,7 @@ def check_multi(parameter_tuple, fields = [], values = [],  parameter_kwargs = N
     print("="*40)
 
 
-# In[163]:
+# In[18]:
 
 
 if __name__ == "__main__":
@@ -768,7 +860,7 @@ if __name__ == "__main__":
     check_multi(crop_region, ["xmin", "xmax", "ymin", "ymax"], [1, 155, 1, 155], crop_region2)
 
 
-# In[164]:
+# In[19]:
 
 
 if __name__ == "__main__":
@@ -791,7 +883,7 @@ if __name__ == "__main__":
     check_multi(plate_scale, ["x", "y"], [0.4, 0.4], plate_scale2)
 
 
-# In[165]:
+# In[20]:
 
 
 if __name__ == "__main__":
@@ -808,7 +900,7 @@ if __name__ == "__main__":
     print()
 
 
-# In[166]:
+# In[21]:
 
 
 if __name__ == "__main__":
@@ -821,7 +913,7 @@ if __name__ == "__main__":
     check_multi(position, ["x", "y"], [101, 101])
 
 
-# In[167]:
+# In[22]:
 
 
 if __name__ == "__main__":
@@ -847,7 +939,7 @@ if __name__ == "__main__":
     #print("And an example of summing NumParameter + NumParameter = \n", magnitude + magnitude)
 
 
-# In[168]:
+# In[23]:
 
 
 if __name__ == "__main__":
@@ -866,7 +958,7 @@ if __name__ == "__main__":
     print()
 
 
-# In[169]:
+# In[ ]:
 
 
 if __name__ == "__main__":    
@@ -884,7 +976,7 @@ if __name__ == "__main__":
     check_multi(fourier1, ["amplitude", "phase_angle"], [0.003, 47], fourier3)
 
 
-# In[172]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -916,7 +1008,12 @@ if __name__ == "__main__":
     print()
 
 
-# In[25]:
+# ## Default Functions
+# The following functions load the default parameters for every component we currently use in our research: *Sersic*, *Power*, *Fourier Modes*, and *Sky*. They are both functions of convenience and the basis of the `Component` module seeing as how components have predefined parameter sets and conventions.
+# 
+# Each function creates a dictionary with `key` being the parameter name (to be used as attributes by the `Component` classes, and value being the `Parameter` class in question with further defaults/conventions set for `value`, `fix`, etc.
+
+# In[ ]:
 
 
 # Parameters with defaults for Sersic profile
@@ -986,9 +1083,10 @@ def load_default_sersic_parameters(component_number = None):
     return loc
 
 
-# In[26]:
+# In[ ]:
 
 
+# Parameters with defaults for the Power rotation function
 def load_default_power_parameters(component_number = None):
     
     param_prefix = "R"
@@ -1074,9 +1172,10 @@ def load_default_power_parameters(component_number = None):
     return loc
 
 
-# In[27]:
+# In[ ]:
 
 
+# Parameters with defaults for the Fourier Mode function
 def load_default_fourier_parameters(component_number = None):
     
     F1 = FourierMode(
@@ -1105,10 +1204,10 @@ def load_default_fourier_parameters(component_number = None):
     return loc
 
 
-# In[28]:
+# In[ ]:
 
 
-# Parameters with defaults for Sky profile
+# Parameters with defaults for Sky profile/function
 def load_default_sky_parameters(component_number = None):
     _sky = ComponentType("sky", component_number = component_number)
     
@@ -1151,10 +1250,12 @@ def load_default_sky_parameters(component_number = None):
     return loc
 
 
-# In[29]:
+# In[ ]:
 
 
-# Parameters with defaults for Sky profile
+# Parameters with defaults for the Header
+# Note the optional argument of galaxy_name which will come 
+# into play in the Components and Containers modules.
 def load_default_header_parameters(galaxy_name = ""):
     
     input_image = HeaderParameter(
@@ -1249,10 +1350,16 @@ def load_default_header_parameters(galaxy_name = ""):
     return loc
 
 
-# In[30]:
+# In[ ]:
 
 
 def load_default_parameters():
+    """
+    Load all default components via parameter functions written thus far 
+    as a dictionary. Again, a convenience function but one which finds its 
+    utility in generalizing the module as a whole. Further components can 
+    be added here without detrimental effect to the module.
+    """
     return {
         "header"  : load_default_header_parameters(),
         "sersic"  : load_default_sersic_parameters(),
@@ -1263,7 +1370,10 @@ def load_default_parameters():
     }
 
 
-# In[101]:
+# ## Unit Testing
+# Unit testing in this context is in comparing `stdout` with a confirmed correct `stdout` elsewhere in the module when run via `RegTest.py`. One can look at the results here to confirm that things are working well, otherwise, comparisons must be done by `RegTest.py` or by eye with respect to the output in the respective text files of the TestData directory... most generically, in the `UnitTestStdOutput.txt` file. 
+
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1279,7 +1389,7 @@ if __name__ == "__main__":
     _ = [print(type(v.value), v) for v in load_default_sky_parameters().values()]
 
 
-# In[102]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -1290,7 +1400,7 @@ if __name__ == "__main__":
     ]
 
 
-# In[33]:
+# In[ ]:
 
 
 if __name__ == "__main__":
