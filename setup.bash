@@ -36,6 +36,24 @@ if [ "$SPARCFIRE_HOME" = . ]; then SPARCFIRE_HOME=`/bin/pwd`; fi
 
 PIP_NEED='numpy|Pillow|scipy|astropy|tsv'
 
+
+echo "Now installing python path and its library"
+
+# # find python path (in the set-up scripts, we have already installed python2.7 and 3.7)
+# python_path=$(which python)
+# echo "Python is in this path, and we will change it : $python_path"
+# sudo rm /usr/bin/python
+# sudo ln -s /usr/bin/python2.7 usr/bin/python
+# export PATH="/usr/bin:$PATH"
+
+# PYTHON_SUFFIX=".py2"
+# PIP_HAVE=`(pip2 list; $PYTHON -m pip list) 2>/dev/null | awk '{print $1}' | sort -u | egrep "$PIP_NEED"`
+
+echo "now python is called by $PYTHON and is version:"
+$PYTHON --version
+export SPARCFIRE_PYTHON="$PYTHON"
+export PYTHON_SUFFIX=".py2"
+
 echo "Checking you have Python 2.7 or 3 installed."
 # I think 2.7.5 is unnecessary, only need to check if it is satisfied python 2.7
 if python --version 2>&1 | grep -q '2\.7'; then
@@ -61,10 +79,7 @@ elif python3.7 --version 2>&1; then
 else
     fail "$SETUP_USAGE${NL} SETUP ERROR: You need to install Python 2.7 or 3, and have the executable called python2.7 or python3"
 fi
-echo "Your python is called by $PYTHON and is version:"
-$PYTHON --version
-export SPARCFIRE_PYTHON="$PYTHON"
-export PYTHON_SUFFIX="$PYTHON_SUFFIX"
+
 
 # Regex to check if python >=3.7 (includes 3.10+)
 # NOTE: Would succeed for 3.1
