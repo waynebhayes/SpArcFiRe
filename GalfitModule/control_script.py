@@ -558,7 +558,8 @@ if __name__ == "__main__":
             parallel_run_name = "GALFITTING"
             # Slurm needs different timeout limits
             timeout = 60 # Minutes
-            parallel_options  = f"-M all -t {timeout}"
+            # TODO: Consider SLURM + CPU parallel
+            parallel_options  = f"-M all -c 1 -t {timeout}"
             parallel_verbose  = "-v" if verbose else ""
             chunk_size = 20
 
