@@ -958,7 +958,7 @@ if __name__ == "__main__":
     print()
 
 
-# In[ ]:
+# In[24]:
 
 
 if __name__ == "__main__":    
@@ -976,7 +976,7 @@ if __name__ == "__main__":
     check_multi(fourier1, ["amplitude", "phase_angle"], [0.003, 47], fourier3)
 
 
-# In[ ]:
+# In[25]:
 
 
 if __name__ == "__main__":
@@ -1013,7 +1013,7 @@ if __name__ == "__main__":
 # 
 # Each function creates a dictionary with `key` being the parameter name (to be used as attributes by the `Component` classes, and value being the `Parameter` class in question with further defaults/conventions set for `value`, `fix`, etc.
 
-# In[ ]:
+# In[26]:
 
 
 # Parameters with defaults for Sersic profile
@@ -1083,7 +1083,7 @@ def load_default_sersic_parameters(component_number = None):
     return loc
 
 
-# In[ ]:
+# In[27]:
 
 
 # Parameters with defaults for the Power rotation function
@@ -1172,7 +1172,7 @@ def load_default_power_parameters(component_number = None):
     return loc
 
 
-# In[ ]:
+# In[28]:
 
 
 # Parameters with defaults for the Fourier Mode function
@@ -1204,7 +1204,7 @@ def load_default_fourier_parameters(component_number = None):
     return loc
 
 
-# In[ ]:
+# In[29]:
 
 
 # Parameters with defaults for Sky profile/function
@@ -1250,7 +1250,7 @@ def load_default_sky_parameters(component_number = None):
     return loc
 
 
-# In[ ]:
+# In[30]:
 
 
 # Parameters with defaults for the Header
@@ -1350,7 +1350,7 @@ def load_default_header_parameters(galaxy_name = ""):
     return loc
 
 
-# In[ ]:
+# In[31]:
 
 
 def load_default_parameters():
@@ -1373,7 +1373,7 @@ def load_default_parameters():
 # ## Unit Testing
 # Unit testing in this context is in comparing `stdout` with a confirmed correct `stdout` elsewhere in the module when run via `RegTest.py`. One can look at the results here to confirm that things are working well, otherwise, comparisons must be done by `RegTest.py` or by eye with respect to the output in the respective text files of the TestData directory... most generically, in the `UnitTestStdOutput.txt` file. 
 
-# In[ ]:
+# In[32]:
 
 
 if __name__ == "__main__":
@@ -1389,7 +1389,7 @@ if __name__ == "__main__":
     _ = [print(type(v.value), v) for v in load_default_sky_parameters().values()]
 
 
-# In[ ]:
+# In[33]:
 
 
 if __name__ == "__main__":
@@ -1400,7 +1400,7 @@ if __name__ == "__main__":
     ]
 
 
-# In[ ]:
+# In[34]:
 
 
 if __name__ == "__main__":
