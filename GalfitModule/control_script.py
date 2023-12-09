@@ -550,7 +550,6 @@ if __name__ == "__main__":
             parallel_options  = joblib.cpu_count()
             parallel_verbose  = ""
             chunk_size = len(kwargs_main["galaxy_names"])//joblib.cpu_count() + 1
-            #chunk_size = len(bd_magnitudes)
             # Two whole days for big runs
             timeout = 2880 # Minutes
             
@@ -558,7 +557,7 @@ if __name__ == "__main__":
             # For SLURM/Cluster Computing
             parallel_run_name = "GALFITTING"
             # Slurm needs different timeout limits
-            timeout = 60 # Minutes
+            timeout = 480 # Minutes
             # TODO: Consider SLURM + CPU parallel
             parallel_options  = f"-M all --ntasks-per-node=1 -t {timeout}"
             parallel_verbose  = "-v" if verbose else ""
@@ -572,7 +571,7 @@ if __name__ == "__main__":
             write_to_parallel(cwd, kwargs_main, parallel_file = parallel_file, chunk_size = chunk_size)
             print("Galfitting via parallelization...")
             try:
-                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout = 60*(timeout + 1))
+                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout += 60
             except subprocess.TimeoutExpired:
                 print("Timed out.")
                 pass
@@ -594,7 +593,7 @@ if __name__ == "__main__":
             
             try:
                 print("Piping to parallel")
-                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout = 60*(timeout + 1))
+                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout += 60
             except subprocess.TimeoutExpired:
                 pass
             
