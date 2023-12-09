@@ -571,7 +571,7 @@ if __name__ == "__main__":
             write_to_parallel(cwd, kwargs_main, parallel_file = parallel_file, chunk_size = chunk_size)
             print("Galfitting via parallelization...")
             try:
-                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout += 60
+                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout = timeout + 60)
             except subprocess.TimeoutExpired:
                 print("Timed out.")
                 pass
@@ -593,7 +593,7 @@ if __name__ == "__main__":
             
             try:
                 print("Piping to parallel")
-                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout += 60
+                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout = timeout + 60)
             except subprocess.TimeoutExpired:
                 pass
             
