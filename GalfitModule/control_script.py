@@ -550,6 +550,7 @@ if __name__ == "__main__":
             parallel_options  = joblib.cpu_count()
             parallel_verbose  = ""
             chunk_size = len(kwargs_main["galaxy_names"])//joblib.cpu_count() + 1
+            #chunk_size = len(bd_magnitudes)
             # Two whole days for big runs
             timeout = 2880 # Minutes
             
@@ -559,7 +560,7 @@ if __name__ == "__main__":
             # Slurm needs different timeout limits
             timeout = 60 # Minutes
             # TODO: Consider SLURM + CPU parallel
-            parallel_options  = f"-M all -c 1 -t {timeout}"
+            parallel_options  = f"-M all --ntasks-per-node=1 -t {timeout}"
             parallel_verbose  = "-v" if verbose else ""
             chunk_size = 20
 
