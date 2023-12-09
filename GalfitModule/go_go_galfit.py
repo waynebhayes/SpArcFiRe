@@ -669,7 +669,8 @@ def main(**kwargs):
     # TODO: Move output sigma file as well, figure out race condition
     # base_galfit_cmd = f"{run_galfit} -imax {max_it} -outsig"
     
-    failed = []
+    failed          = []
+    fitted_galaxies = []
     
     # Working on non-parallel for now
     print()
@@ -794,14 +795,24 @@ def main(**kwargs):
         #                 #                  *galfit_output.to_list()
         #                 #                 )
         # ======================================== END GALFIT MAGNITUDE LOOP ========================================
-        
+        # if not any(fitted_galaxies):
+        #     print("No successful deconvolutions.")
+        #     continue
+            
         tmp_png_path  = pj(tmp_png_dir, gname)
         tmp_fits_path_gname = pj(tmp_fits_dir, f"{gname}_galfit_out.fits")
         
         # Some of these may not exist b
-        galaxy_df = pd.concat(fill_objects(gfit, 1, "", feedme_info[gname].header.pixel_mask.value) 
-                              for gfit in fitted_galaxies if gfit
-                             ).reset_index()
+        galaxy_df = pd.concat(
+            fill_objects(
+                gfit, 
+                1, 
+                "", 
+                feedme_info[gname].header.pixel_mask.value
+            ) 
+            for gfit in fitted_galaxies if gfit
+        ).reset_index()
+                  
         try:
             best_fit  = galaxy_df.loc[galaxy_df["nmr_x_1-p"].idxmin(), "gname"]
             
