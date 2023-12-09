@@ -435,7 +435,18 @@ class OutputFits(FitsFile):
         # To invert the matrix since galfit keeps 0 valued areas
         crop_mask = 1
         if mask is not None and np.any(mask.data):
-            crop_mask = 1 - mask.data[xbox_min:xbox_max, ybox_min:ybox_max]
+            cropped_mask = mask.data[xbox_min:xbox_max, ybox_min:ybox_max]
+            if np.shape(cropped_mask) != np.shape(self.model.data):
+                print("Shape mismatch between crop mask and model. Likely an indexing issue due to crop mask running into image bounds. Attempting to fix.")
+                diff = np.shape(cropped_mask) - np.shape(self.model.data)
+                # The issue seems to pop up at the max border when either the min or the max runs up
+                # against the original image size
+                xbox_max -= diff[0]
+                ybox_max -= diff[1]
+                    
+                cropped_mask = mask.data[xbox_min:xbox_max, ybox_min:ybox_max]
+                
+            crop_mask = 1 - cropped_mask
             
         if use_bulge_mask:
             feedme_dir, feedme_file = os.path.split(self.feedme.path_to_feedme)
