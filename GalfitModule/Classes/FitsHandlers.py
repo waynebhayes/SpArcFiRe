@@ -314,7 +314,7 @@ class FitsFile:
 #             setattr(self, key, value)
 
 
-# In[6]:
+# In[57]:
 
 
 class OutputFits(FitsFile):
@@ -431,19 +431,28 @@ class OutputFits(FitsFile):
         # To adjust for python indexing
         # Also, reminder, non-inclusive of end
         xbox_min, xbox_max, ybox_min, ybox_max = crop_box[0] - 1, crop_box[1], crop_box[2] - 1, crop_box[3]
-
+        print(xbox_min, xbox_max, ybox_min, ybox_max)
         # To invert the matrix since galfit keeps 0 valued areas
         crop_mask = 1
         if mask is not None and np.any(mask.data):
             cropped_mask = mask.data[xbox_min:xbox_max, ybox_min:ybox_max]
+            mask_shape = np.shape(mask.data)
             if np.shape(cropped_mask) != np.shape(self.model.data):
-                print("Shape mismatch between crop mask and model. Likely an indexing issue due to crop mask running into image bounds. Attempting to fix.")
-                diff = np.shape(cropped_mask) - np.shape(self.model.data)
                 # The issue seems to pop up at the max border when either the min or the max runs up
                 # against the original image size
-                xbox_max -= diff[0]
-                ybox_max -= diff[1]
+                print("Shape mismatch between crop mask and model. Likely an indexing issue due to crop mask running into image bounds. Attempting to fix.")
+                diff = np.array(np.shape(cropped_mask)) - np.array(np.shape(self.model.data))
+                # One or the other... No graceful way to do this
+                if xbox_min == 0:
+                    xbox_max -= diff[0]
+                else:
+                    xbox_min -= diff[0]
                     
+                if ybox_min == 0:
+                    ybox_max -= diff[0]
+                else:
+                    ybox_min -= diff[0]
+                
                 cropped_mask = mask.data[xbox_min:xbox_max, ybox_min:ybox_max]
                 
             crop_mask = 1 - cropped_mask
