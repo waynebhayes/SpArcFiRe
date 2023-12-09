@@ -708,16 +708,16 @@ def main(**kwargs):
         # Non-inclusive of end
         b_d_magnitudes = [(b, d) for b in range(12, 19) for d in range(11, 16)]
                 
-        #if parallel in (2, 999):
-        fitted_galaxies = asyncio.run(wrapper(
-            b_d_magnitudes,
-            gname,
-            feedme_info[gname], 
-            base_galfit_cmd,
-            disk_axis_ratio,
-            use_async = True,
-            **kwargs
-        ))
+        if parallel in (0, 2):
+            fitted_galaxies = asyncio.run(wrapper(
+                b_d_magnitudes,
+                gname,
+                feedme_info[gname], 
+                base_galfit_cmd,
+                disk_axis_ratio,
+                use_async = True,
+                **kwargs
+            ))
             # Subprocess and Loky backend don't play well together
             # fitted_galaxies = Parallel(n_jobs = -2, backend = "multiprocessing")(
             #            delayed(multi_step_fit)(
@@ -731,19 +731,19 @@ def main(**kwargs):
             #             )
             #            for (bulge_magnitude, disk_magnitude) in b_d_magnitudes
             #                             )
-        # else:
-        #     fitted_galaxies = [
-        #         parameter_search_fit(
-        #         bulge_magnitude,
-        #         disk_magnitude,
-        #         gname,
-        #         feedme_info[gname],
-        #         base_galfit_cmd,
-        #         disk_axis_ratio,
-        #         **kwargs
-        #         ) 
-        #         for (bulge_magnitude, disk_magnitude) in b_d_magnitudes
-        #     ]
+        else:
+            fitted_galaxies = [
+                parameter_search_fit(
+                bulge_magnitude,
+                disk_magnitude,
+                gname,
+                feedme_info[gname],
+                base_galfit_cmd,
+                disk_axis_ratio,
+                **kwargs
+                ) 
+                for (bulge_magnitude, disk_magnitude) in b_d_magnitudes
+            ]
                 
                 # TODO: GET THIS WORKING... so many issues
                 # Dropping this here for final simultaneous fitting following all num_steps
@@ -802,9 +802,14 @@ def main(**kwargs):
         galaxy_df = pd.concat(fill_objects(gfit, 1, "", feedme_info[gname].header.pixel_mask.value) 
                               for gfit in fitted_galaxies if gfit
                              ).reset_index()
+        try:
+            best_fit  = galaxy_df.loc[galaxy_df["nmr_x_1-p"].idxmin(), "gname"]
+            
+        except TypeError:
+            print(f"Something went wrong with galaxy {galaxy_df.gname[0]}, can't find best fit from parameter search.")
         
-        best_fit  = galaxy_df.loc[galaxy_df["nmr_x_1-p"].idxmin(), "gname"]
-        shutil.copy2(pj(tmp_fits_dir, best_fit), tmp_fits_path_gname)
+        else:
+            shutil.copy2(pj(tmp_fits_dir, best_fit), tmp_fits_path_gname)
         
         # For when Simultaneous fitting fails we don't want to use that residual mask
         # for calculating the residual. I think everything else is handled
