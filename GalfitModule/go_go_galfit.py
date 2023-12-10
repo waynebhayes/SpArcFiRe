@@ -707,7 +707,7 @@ def main(**kwargs):
         # ======================================== BEGIN GALFIT MAGNITUDE LOOP ========================================
         
         # Non-inclusive of end
-        b_d_magnitudes = [(b, d) for b in range(12, 19) for d in range(11, 16)]
+        b_d_magnitudes = [(b, d) for b in range(12, 17) for d in range(12, 16)]
                 
         if parallel in (0, 2):
             fitted_galaxies = asyncio.run(wrapper(
