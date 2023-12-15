@@ -13,6 +13,7 @@
 # prev, next, mislabeled. These allow the user to view images in 
 # BASE_DIR (jpg only) and either move them to DIRNAME_FOR_MISLABLED 
 # via 'mislabled' or continue viewing images via next/prev.
+# hint: mogrify -format jpg *.png
 # 
 # Once all images have been viewed/moved, the window will close.
 #
