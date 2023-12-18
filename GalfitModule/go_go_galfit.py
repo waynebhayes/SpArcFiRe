@@ -802,23 +802,31 @@ def main(**kwargs):
         tmp_png_path  = pj(tmp_png_dir, gname)
         tmp_fits_path_gname = pj(tmp_fits_dir, f"{gname}_galfit_out.fits")
         
-        # Some of these may not exist b
-        galaxy_df = pd.concat(
-            fill_objects(
-                gfit, 
-                1, 
-                "", 
-                feedme_info[gname].header.pixel_mask.value
-            ) 
-            for gfit in fitted_galaxies if gfit
-        ).reset_index()
-                  
+        try:
+            # Some of these may not exist b
+            galaxy_df = pd.concat(
+                fill_objects(
+                    gfit, 
+                    1, 
+                    "", 
+                    feedme_info[gname].header.pixel_mask.value
+                ) 
+                for gfit in fitted_galaxies if gfit
+            ).reset_index()
+        except ValueError:
+            print("Could not produce NMR for galaxy {gname}. Counting as a failure (for now) :(")
+            galaxy_df = None
+
         try:
             best_fit  = galaxy_df.loc[galaxy_df["nmr_x_1-p"].idxmin(), "gname"]
             
         except TypeError:
             print(f"Something went wrong with galaxy {galaxy_df.gname[0]}, can't find best fit from parameter search.")
         
+        # For when the NMR cannot be produced.
+        except AttributeError:
+            pass
+
         else:
             shutil.copy2(pj(tmp_fits_dir, best_fit), tmp_fits_path_gname)
         
