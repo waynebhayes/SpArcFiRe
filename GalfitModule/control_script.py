@@ -557,20 +557,21 @@ if __name__ == "__main__":
             # For SLURM/Cluster Computing
             parallel_run_name = "GALFITTING"
             # Slurm needs different timeout limits
-            timeout = 60 # Minutes
-            parallel_options  = f"-M all -t {timeout}"
+            timeout = 480 # Minutes
+            # TODO: Consider SLURM + CPU parallel
+            parallel_options  = f"-M all --ntasks-per-node=1 -t {timeout}"
             parallel_verbose  = "-v" if verbose else ""
             chunk_size = 20
 
             
         # Running things via distributed computing           
-        parallel_run_cmd = f"cat {parallel_file} | {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
+        parallel_run_cmd = f"cat {parallel_file} | nice -19 {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
         
         if not restart:
             write_to_parallel(cwd, kwargs_main, parallel_file = parallel_file, chunk_size = chunk_size)
             print("Galfitting via parallelization...")
             try:
-                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout = 60*(timeout + 1))
+                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout = (timeout + 1) * 60)
             except subprocess.TimeoutExpired:
                 print("Timed out.")
                 pass
@@ -592,7 +593,7 @@ if __name__ == "__main__":
             
             try:
                 print("Piping to parallel")
-                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout = 60*(timeout + 1))
+                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout = (timeout + 1)* 60)
             except subprocess.TimeoutExpired:
                 pass
             
@@ -730,7 +731,7 @@ if __name__ == "__main__":
 
         if count:
             print("parallelizing to combine residuals")
-            parallel_run_cmd = f"cat {parallel_file} | {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
+            parallel_run_cmd = f"cat {parallel_file} | nice -19 {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
             _ = sp(parallel_run_cmd, capture_output = capture_output)
 
         all_output_pkl = [pj(tmp_dir, fname) 

@@ -85,14 +85,18 @@ def export_to_py(notebook_name, output_filename = ""):
 # In[5]:
 
 
-def sp(cmd_str, capture_output = True, timeout = None):
+def sp(cmd_str, capture_output = True, timeout = None, **kwargs):
     # Because it is a pain in the butt to call subprocess with all those commands every time
-    return subprocess.run(cmd_str, 
-                          capture_output = capture_output, 
-                          text = True, 
-                          shell = True,
-                          timeout = timeout,
-                          executable="/bin/bash")
+    return subprocess.run(
+        cmd_str, 
+        capture_output = capture_output, 
+        text           = True, 
+        shell          = True,
+        timeout        = timeout,
+        executable     = "/bin/bash",
+        #stdin          = subprocess.PIPE,
+        **kwargs
+     )
 
 
 # In[6]:
@@ -147,7 +151,7 @@ def exists(filename):
     return bool(int(result.stdout))
 
 
-# In[16]:
+# In[9]:
 
 
 def generate_get_set(input_dict): #, exclude = []):
@@ -160,19 +164,19 @@ def {key}(self):
 @{key}.setter
 def {key}(self, new_val):
     self.{v} = new_val
-    
+
 """
     return exec_str
 
 
-# In[17]:
+# In[10]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[18]:
+# In[11]:
 
 
 # Unit test for sp
@@ -196,7 +200,7 @@ if __name__ == "__main__":
         raise(Exception())
 
 
-# In[19]:
+# In[12]:
 
 
 # Unit test for list_files
@@ -207,7 +211,7 @@ if __name__ == "__main__":
     print(sorted(find_files(pj(TEST_DATA_DIR, "test-out"), "123*", "d")))
 
 
-# In[20]:
+# In[13]:
 
 
 # Unit test for exists
@@ -217,7 +221,7 @@ if __name__ == "__main__":
     print("Does test-spout exist?", exists(pj(TEST_DATA_DIR, "test-spout")))
 
 
-# In[21]:
+# In[14]:
 
 
 if __name__ == "__main__":
@@ -235,7 +239,7 @@ if __name__ == "__main__":
     print(y._x1)
 
 
-# In[15]:
+# In[16]:
 
 
 if __name__ == "__main__":
