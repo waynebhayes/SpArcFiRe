@@ -516,7 +516,7 @@ class FeedmeContainer(ComponentContainer):
                         component.from_file_helper_dict(send_to_helper)
                         
             if len(leftover_dict):
-                print("From FITS: Extra components found in container. Removing them.")
+                #print("From FITS: Extra components found in container. Removing them.")
                 for name in leftover_dict.keys():
                     #print(f"Removing {name}...")
                     self.components.pop(name)
@@ -592,7 +592,7 @@ class FeedmeContainer(ComponentContainer):
                         component.from_file_helper_list(chunk[f_start:])
         
             if len(leftover_dict):
-                print("From text: Extra components found in container. Removing them.")
+                #print("From text: Extra components found in container. Removing them.")
                 for name in leftover_dict.keys():
                     #print(f"Removing {name} with component number {self.components[name].component_number}...")
                     self.components.pop(name)
