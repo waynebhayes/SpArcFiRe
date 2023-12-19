@@ -1,12 +1,12 @@
 
-#  Input menu file: /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-out/1237671124293910779/1237671124293910779_bulge.in
+#  Input menu file: /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/m15m12_1237671124293910779_bulge.in
 
-#  Chi^2/nu = 1.614,  Chi^2 = 14020.134,  Ndof = 8687
+#  Chi^2/nu = 1.614,  Chi^2 = 14020.132,  Ndof = 8687
 
 ================================================================================
 # IMAGE and GALFIT CONTROL PARAMETERS
 A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237671124293910779.fits      # Input data image (FITS file)
-B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237671124293910779_galfit_out.fits      # Output data image block
+B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/m15m12_1237671124293910779_galfit_out.fits      # Output data image block
 C) none                # Sigma image name (made from data if blank or "none") 
 D) ./test-out/1237671124293910779/1237671124293910779_psf.fits          # Input PSF image and (optional) diffusion kernel
 E) 1                   # PSF fine sampling factor relative to data 
@@ -40,13 +40,13 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
  0) sersic                 #  Component type
  1) 59.1797  59.2038  0 0  #  Position x, y
  3) 12.7556     1          #  Integrated magnitude 
- 4) 12.4134     1          #  R_e (effective radius)   [pix]
+ 4) 12.4135     1          #  R_e (effective radius)   [pix]
  5) 1.2450      1          #  Sersic index n (de Vaucouleurs n=4) 
  6) 0.0000      0          #     ----- 
  7) 0.0000      0          #     ----- 
  8) 0.0000      0          #     ----- 
  9) 0.6948      1          #  Axis ratio (b/a)  
-10) -48.4858    1          #  Position angle (PA) [deg: Up=0, Left=90]
+10) -48.4861    1          #  Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 # Component number: 2

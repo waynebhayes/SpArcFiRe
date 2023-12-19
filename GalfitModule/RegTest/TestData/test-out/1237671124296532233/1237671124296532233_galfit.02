@@ -1,12 +1,12 @@
 
-#  Input menu file: /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-out/1237671124296532233/1237671124296532233.in
+#  Input menu file: /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/m12m12_1237671124296532233_bulge.in
 
-#  Chi^2/nu = 0.944,  Chi^2 = 11137.253,  Ndof = 11802
+#  Chi^2/nu = 1.044,  Chi^2 = 12329.282,  Ndof = 11815
 
 ================================================================================
 # IMAGE and GALFIT CONTROL PARAMETERS
 A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237671124296532233.fits      # Input data image (FITS file)
-B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237671124296532233_galfit_out.fits      # Output data image block
+B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/m12m12_1237671124296532233_galfit_out.fits      # Output data image block
 C) none                # Sigma image name (made from data if blank or "none") 
 D) ./test-out/1237671124296532233/1237671124296532233_psf.fits          # Input PSF image and (optional) diffusion kernel
 E) 1                   # PSF fine sampling factor relative to data 
@@ -38,45 +38,22 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 
 # Component number: 1
  0) sersic                 #  Component type
- 1) 73.8200  74.2800  0 0  #  Position x, y
- 3) 14.5367     1          #  Integrated magnitude 
- 4) 11.8234     1          #  R_e (effective radius)   [pix]
- 5) 1.0478      1          #  Sersic index n (de Vaucouleurs n=4) 
+ 1) 73.8201  74.2847  0 0  #  Position x, y
+ 3) 13.2701     1          #  Integrated magnitude 
+ 4) 12.7685     1          #  R_e (effective radius)   [pix]
+ 5) 0.7615      1          #  Sersic index n (de Vaucouleurs n=4) 
  6) 0.0000      0          #     ----- 
  7) 0.0000      0          #     ----- 
  8) 0.0000      0          #     ----- 
- 9) 0.5541      1          #  Axis ratio (b/a)  
-10) -3.9221     1          #  Position angle (PA) [deg: Up=0, Left=90]
+ 9) 0.8370      1          #  Axis ratio (b/a)  
+10) -62.2549    1          #  Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 # Component number: 2
- 0) sersic                 #  Component type
- 1) 73.8201  74.2847  0 0  #  Position x, y
- 3) 13.7330     1          #  Integrated magnitude 
- 4) 21.7189     1          #  R_e (effective radius)   [pix]
- 5) 0.4505      1          #  Sersic index n (de Vaucouleurs n=4) 
- 6) 0.0000      0          #     ----- 
- 7) 0.0000      0          #     ----- 
- 8) 0.0000      0          #     ----- 
- 9) 0.4776      1          #  Axis ratio (b/a)  
-10) 24.4981     1          #  Position angle (PA) [deg: Up=0, Left=90]
-
-R0) power                  #  PA rotation func. (power, log, none)
-R1) 0.0000      0          #  Spiral inner radius [pixels]
-R2) 8.2001      0          #  Spiral outer radius [pixels]
-R3) -160.4415    1          #  Cumul. rotation out to outer radius [degrees]
-R4) 0.2141      1          #  Asymptotic spiral powerlaw 
-R9) -52.8055    1          #  Inclination to L.o.S. [degrees]
-R10) 54.9901    1          #  Sky position angle
-F1) 0.0615   -13.7198 1 1  #  Azim. Fourier mode 1, amplitude, & phase angle
-F3) 0.1400   43.2848  1 1  #  Azim. Fourier mode 3, amplitude, & phase angle
- Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
-
-# Component number: 3
  0) sky                    #  Component type
- 1) 1084.9623    1          #  Sky background at center of fitting region [ADUs]
- 2) -1.917e-03     1       #  dsky/dx (sky gradient in x)     [ADUs/pix]
- 3) 9.936e-04      1       #  dsky/dy (sky gradient in y)     [ADUs/pix]
+ 1) 1084.8264    1          #  Sky background at center of fitting region [ADUs]
+ 2) 1.006e-03      1       #  dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) -1.351e-04     1       #  dsky/dy (sky gradient in y)     [ADUs/pix]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 ================================================================================
