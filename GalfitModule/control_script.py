@@ -138,7 +138,8 @@ if __name__ == "__main__":
                         action   = 'store_const',
                         const    = True,
                         default  = False,
-                        help     = 'Aggressively clean-up directories, removing -in, temp output, psf, and mask files after galfit runs'
+                        #help     = 'Aggressively clean-up directories, removing -in, temp output, psf, and mask files after galfit runs'
+                        help     = 'Aggressively clean-up directories, removing temp output and mask files after galfit runs'
                        )
     
     parser.add_argument('-NS', '--num-steps',
@@ -772,7 +773,7 @@ if __name__ == "__main__":
 # Aggressively tidying up if necessary and moving back to original directory
 # ==========================================================================================================
 if __name__ == "__main__":
-    if aggressive_clean:
+    if aggressive_clean and run_from_tmp:
         print("Final tidying...")
         _ = sp(f"rm -rf {out_dir}", capture_output = capture_output)
         _ = sp(f"mkdir -p {out_dir}", capture_output = capture_output)

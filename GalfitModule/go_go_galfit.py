@@ -936,25 +936,31 @@ def main(**kwargs):
         print()
         
     if aggressive_clean:
-        print("Aggressively cleaning... in, temp galfit output, and psf directories.")
-        to_del_gal_in    = (pj(in_dir, f"{gname}.fits") for gname in galaxy_names
-                            if exists(pj(in_dir, f"{gname}.fits"))
-                           )
+        #print("Aggressively cleaning... in, temp galfit output, and psf directories.")
+        print("Aggressively cleaning... temp galfit output files.")
+        # to_del_gal_in    = (pj(in_dir, f"{gname}.fits") for gname in galaxy_names
+        #                     #if exists(pj(in_dir, f"{gname}.fits"))
+        #                    )
 
-        to_del_tmp_fits  = (pj(tmp_fits_dir, f"{gname}_galfit_out.fits") for gname in galaxy_names
-                            if exists(pj(tmp_fits_dir, f"{gname}_galfit_out.fits"))
+        to_del_tmp_fits  = (pj(tmp_fits_dir, f"*{gname}_galfit_out.fits") for gname in galaxy_names
+                            #if exists(pj(tmp_fits_dir, f"{gname}_galfit_out.fits"))
+                           )
+        
+        to_del_feedmes   = (pj(tmp_fits_dir, f"*{gname}*.in") for gname in galaxy_names
+                            #if exists(pj(tmp_fits_dir, f"{gname}_galfit_out.fits"))
                            )
         
         to_del_masks     = (pj(tmp_masks_dir, f"{gname}_star-rm.fits") for gname in galaxy_names
-                            if exists(pj(tmp_masks_dir, f"{gname}_star-rm.fits"))
+                            #if exists(pj(tmp_masks_dir, f"{gname}_star-rm.fits"))
                            )
         
-        to_del_psf_files = (pj(tmp_psf_dir, f"{gname}_psf.fits") for gname in galaxy_names
-                            if exists(pj(tmp_psf_dir, f"{gname}_psf.fits"))
-                           )
+        #to_del_psf_files = (pj(tmp_psf_dir, f"{gname}_psf.fits") for gname in galaxy_names
+                            #if exists(pj(tmp_psf_dir, f"{gname}_psf.fits"))
+        #                   )
         
         #print(f"rm -rf {' '.join(to_del_in)} {' '.join(to_del_tmp_fits)} {' '.join(to_del_psf_files)}")
-        _ = sp(f"rm -f {' '.join(to_del_gal_in)} {' '.join(to_del_tmp_fits)} {' '.join(to_del_masks)} {' '.join(to_del_psf_files)}",
+        #_ = sp(f"rm -f {' '.join(to_del_gal_in)} {' '.join(to_del_tmp_fits)} {' '.join(to_del_masks)} {' '.join(to_del_psf_files)}",
+        _ = sp(f"rm -f {' '.join(to_del_tmp_fits)} {' '.join(to_del_feedmes)} {' '.join(to_del_masks)}",
                capture_output = capture_output
               )
     
