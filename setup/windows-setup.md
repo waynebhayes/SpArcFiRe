@@ -61,6 +61,7 @@ But the Good News: I have provided scripts to do all the steps above automatical
 **Important Note:** By running this script you are agreeing to MATLAB's terms and conditions [^3] and copy of which can be found [here](https://github.com/cora-schallock/SpArcFiRe/blob/master/setup/licenses/MCR_license.txt).
 Begin by navigating to the setup directory: `cd SpArcFiRe/setup/`
 Now type the command: `./run-full-wsl-setup.bash`
+If you want to install GALFIT, type the command:`./gulfit-setup.bash`
 If there was an issue, take a look at the step by step instructions (you may just have to run a single step again). If everything works, congrats, now it is time to [run SpArcFiRe](https://github.com/cora-schallock/SpArcFiRe/blob/master/setup/windows-setup.md#section-4-running-sparcfire)
 
 ### Step-Step-Setup:
@@ -112,7 +113,7 @@ First navigate to the SpArcFiRe directory and check your setup is valid:
 cd ~/SpArcFiRe
 source ./setup.bash ~/SpArcFiRe
 ```
-If you want to run SpArcFiRe with the defult command line arguments, you can run SpArcFiRe with the command: `~/bin/wschallo/SpArcFiRe-run.sh`
+If you want to run SpArcFiRe with the defult command line arguments, you can run SpArcFiRe with the command: `~/scripts/wschallo/SpArcFiRe-run.sh`
 
 This command is equiallent to running:
 "$HOME"/SpArcFiRe/scripts/SpArcFiRe -convert-FITS $HOME/SDSS/G.in $HOME/SDSS/G.tmp $HOME/SDSS/G.out  -generateFitQuality 0 -writeBulgeMask 1

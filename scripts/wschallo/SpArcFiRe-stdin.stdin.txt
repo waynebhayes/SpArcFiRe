@@ -1,4 +1,11 @@
-/home/wschallo/SDSS/G.tmp 1237648702967054406_g .png _starmask.png NONE /home/wschallo/SDSS/G.out
-/home/wschallo/SDSS/G.tmp 1237648702967251093_g .png _starmask.png NONE /home/wschallo/SDSS/G.out
-/home/wschallo/SDSS/G.tmp 1237648702966988820_g .png _starmask.png NONE /home/wschallo/SDSS/G.out
+/home/diode/SDSS/G.tmp 1237662224625369287 .png _starmask.png NONE NONE /home/diode/SDSS/G.out
+/home/diode/SDSS/G.tmp 1237661416605941822 .png _starmask.png NONE NONE /home/diode/SDSS/G.out
+/home/diode/SDSS/G.tmp 1237661387608359085 .png _starmask.png NONE NONE /home/diode/SDSS/G.out
+/home/diode/SDSS/G.tmp 1237661416067825676 .png _starmask.png NONE NONE /home/diode/SDSS/G.out
+/home/diode/SDSS/G.tmp 1237661387610456252 .png _starmask.png NONE NONE /home/diode/SDSS/G.out
+/home/diode/SDSS/G.tmp 1237648720165273735 .png _starmask.png NONE NONE /home/diode/SDSS/G.out
+/home/diode/SDSS/G.tmp 1237648721232855215 .png _starmask.png NONE NONE /home/diode/SDSS/G.out
+/home/diode/SDSS/G.tmp 1237661387614650383 .png _starmask.png NONE NONE /home/diode/SDSS/G.out
+/home/diode/SDSS/G.tmp 1237665227305451703 .png _starmask.png NONE NONE /home/diode/SDSS/G.out
+/home/diode/SDSS/G.tmp 1237648705669103794 .png _starmask.png NONE NONE /home/diode/SDSS/G.out
 exit
