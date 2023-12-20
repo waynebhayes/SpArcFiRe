@@ -40,9 +40,13 @@ an executable written by Wayne Hayes at UCI. It can be run in serial and has sev
 `control_script.py --help` on the command line.
 See the 'Current Directory Structure' section below for an example of what files are put where when `control_script.py` is run.
 
+![Flow chart for `control_script.py`](control_script_flowchart.png)
+
 `go_go_galfit.py` need not be touched. In fact, it may be a little confusing since it uses many functionalities from the OOP framework
 to do most of the leg work, so it may be more of a rabbit hole than anything else. It is currently only somewhat documented but feel
 free to contact Matthew if something is unclear.
+
+![Flow chart for `go_go_galfit.py`](go_go_galfit_flowchart.png)
 
 Most OOP implementation things can be found in the `Classes` directory in the module. We recommend taking a look at the 
 Jupyter Notebook version of these codes which can be found in the `Notebooks` dirs located inside each class folder in order
