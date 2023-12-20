@@ -2,12 +2,15 @@
 
 #0) Get latests packages:
 sudo apt-get update
+sudo apt install unzip
+sudo apt install imagemagick
 
 #1) Install MRC:
 sudo ./setup-scripts/install-mrc.bash
 
-#2) Install Python 2.7 plus Libraries:
+#2) Install Python 2.7 and 3.7 plus Libraries:
 sudo ./setup-scripts/install-python2-plus-libraries.bash
+sudo ./setup-scripts/install-python3-plus-libraries.bash
 
 #3) Install gcc:
 sudo ./setup-scripts/install-gcc.bash
