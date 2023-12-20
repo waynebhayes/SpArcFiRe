@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[1]:
 
 
 import os
@@ -12,12 +12,13 @@ import subprocess
 from copy import deepcopy
 from IPython import get_ipython
 from astropy.io import fits
+import warnings
 
 import pandas as pd
 import numpy as np
 
 
-# In[ ]:
+# In[2]:
 
 
 # For debugging purposes
@@ -31,7 +32,7 @@ def in_notebook():
         return False
 
 
-# In[ ]:
+# In[3]:
 
 
 _HOME_DIR = os.path.expanduser("~")
@@ -55,30 +56,56 @@ else:
 sys.path.append(_MODULE_DIR)
 
 from Functions.helper_functions import *
+from Classes.Parameters import *
 
 
-# In[ ]:
+# In[4]:
 
 
-# TODO: MAKE ITERABLE
+# TODO: MAKE ITERABLE via generator
+# def reverse(data):
+    # for index in range(len(data)-1, -1, -1):
+    #     yield data[index]
 class GalfitComponent:
     def __init__(self,
-                 component_type = "", 
-                 component_number = 0, 
-                 param_prefix = " "
+                 #parameters       = {}, #load_default_parameters(),
+                 component_type,
+                 component_name   = "",
+                 component_number = 0,
+                 param_prefix     = " ",
+                 **kwargs
                 ):
         
         self.component_type   = component_type
+        # If you decide to name your component *besides and/or including* the
+        # variable itself
+        self.component_name   = component_name
         self.component_number = component_number
-        self.param_prefix     = param_prefix
+        self.param_prefix     = param_prefix  
         
-        key = "Component type"
-        self.param_desc = {key : key}
+        default = load_default_parameters().get(self.component_type, {})
+        assert default, f"Component type {self.component_type} improperly specified or not in defaults."
         
-        # tuple in value for printing
-        self.param_numbers = {0 : key}
-        self.param_values = {key : component_type} #(component_type, "")}
-        self.param_fix = {key : ""}
+        # Assume if an argument is given called 'parameters' they mean to pass
+        # all the parameters for their component in at once. kwargs however take precedence
+        # since we sometimes use parameters for the default.
+        parameters = kwargs.pop("parameters", default)
+        
+        for k, v in kwargs.items():
+            # Only overwrite if the arguments are given correctly
+            # Look in sub dictionary
+            if k in default.keys():
+                #try:
+                parameters.get(k, default[k]).value = v
+                # except KeyError:
+                #     print(f"{self.component_type} instantiation not properly specified. Continuing...")
+        
+        self._parameters       = parameters
+        
+        # Generically handles the parameters fed in
+        for name, parameter in self._parameters.items():
+            setattr(self, name, parameter)
+            getattr(self, name, parameter)             
         
         # For reading from file
         self.start_dict = f"COMP_{self.component_number}"
@@ -86,133 +113,185 @@ class GalfitComponent:
         
         #self.start_dict_value = self.component_type
         
+        # This should work but clarity is probably best here
+        # self.start_text = str(ComponentType(
+        #     self.component_type, 
+        #     parameter_number = f"{self.param_prefix}0", 
+        #     component_number = component_number
+        # ))
         self.start_text = f"# Component number: {self.component_number}"
-        self.end_text   = f"{self.param_prefix.strip()}10"
+        self.end_text   = f"{self.param_prefix.strip()}10"    
+        
+        self._section_sep = "="*80
         
 # ==========================================================================================================
 
-    def add_skip(self, skip_val = 0):
-        key = "skip"
-        #self.skip = skip_val
-        self.param_numbers["Z"] = key
-        self.param_values[key] = skip_val
-        self.param_desc[key] = "Skip this model in output image?  (yes=1, no=0)"
-        self.param_fix[key] = ""
+    def check_parameters_types(self, input_dict):
+        if not input_dict:
+            input_dict = self.parameters
+            
+        for k, parameter in input_dict.items():
+            assert isinstance(parameter, BaseParameter), f"The parameter fed into the GalfitComponent, {k}, is not a valid type."
+
+# ==========================================================================================================
+
+    @property
+    def parameters(self):
+        # Generically handles the parameters fed in
+        for name, parameter in self._parameters.items():
+            setattr(self, name, parameter)
+            getattr(self, name, parameter)
+            
+        return self._parameters
+    
+    @parameters.setter
+    def parameters(self, new_dict):
+        self.check_parameters_types(new_dict)
+        self._parameters = deepcopy(new_dict)
+        
+        # Generically handles the parameters fed in
+        for name, parameter in self._parameters.items():
+            setattr(self, name, parameter)
+            getattr(self, name, parameter)
+
         
 # ==========================================================================================================
 
-    def update_values(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+#     @staticmethod
+#     def component_get_set(component_dict = None, component_type = ""):
+        
+#         exec_dict = {}
+        
+#         # TODO: Set up logging
+#         if not component_dict:
+#             exec_dict = load_default_parameters()
+            
+#             warnings.warn(f"Component type: {component_type} not properly specified " \
+#                       f"upon initializing {GalfitComponent.__name__}.\n" \
+#                       f"Will initalize all component types currently set in 'load_default_parameters()' " \
+#                       f"from 'Parameters' module." \
+#                       "\n".join(exec_dict.keys())
+#                      )
+#         else:
+#             # Give it an empty key so that the following loop works
+#             exec_dict[""] = component_dict
+        
+#         full_str = ""
+            
+#         return "\n".join(
+#             [
+#                 generate_get_set(
+#                     # inner dict looks like this: 
+#                     # "position" : parameters["position"]
+#                     {k : f"parameters[\"{k}\"]" 
+#                      for k in e_dict.keys()
+#                     }
+#                 )
+#                 for e_dict in exec_dict.values()
+#             ]
+#         )        
         
 # ==========================================================================================================
 
-    def update_param_values(self):
-        # Values are the only thing that will change via instance.param_name
-        # We need to update the dictionary that holds all of them since I use
-        # a deepcopy to save myself some lines of code/typing (cheeky)
+    # def update_values(self, **kwargs):
+    #     for key, value in kwargs.items():
+    #         setattr(self, key, value)
+    
+    # Function must return a dict otherwise I can't use 
+    # my fancy decorator
+    def update_parameter_dict_with_dict(func):
         
-        # TODO: Catch values which I use param fix to cheat on 
-        self.param_values.update({k:v for k,v in self.__dict__.items() if k in self.param_values})
-        if self.component_type == "header":
-            self.param_fix["region_to_fit"] = f'{self.__dict__["region_to_fit"][2]} {self.__dict__["region_to_fit"][3]}'
-        
+        def func_wrapper(self, input_dict): #*args, **kwargs):
+            input_dict = func(self, input_dict)
+            
+            assert isinstance(input_dict, dict), \
+            f"update_parameter_dict_with_dict decorator from GalfitComponent " \
+            f"improperly used for a {type(self).__name__} component. " \
+            f"No dictionary was given."
+
+            for pname, pval in input_dict.items():
+                if pname in self.parameters:
+                    self.parameters[pname].value = pval
+                    
+        return func_wrapper
+    
+    # This is by far the more dangerous way
+    def update_parameter_dict_with_list(func):
+        def func_wrapper(self, input_list): #*args, **kwargs):
+            input_list = func(self, input_list)
+            
+            assert isinstance(input_list, list), \
+            f"update_parameter_dict_with_list decorator from GalfitComponent " \
+            f"improperly used for a {type(self).__name__} component. " \
+            f"No list was given."
+
+            # Must check for position to see if we need to add or subtract a list element
+            # since position is multivalued in the log line
+            parameter_names = self.parameters.keys()
+            if "position" in parameter_names:
+                input_list[1] = (input_list[0], input_list[1])
+                input_list[0] = self.component_type
+            else:
+                input_list    = [self.component_type] + input_list
+                
+            if "skip" in parameter_names:
+                input_list.append("0")
+            
+            assert len(input_list) == len(self.parameters), \
+            f"update_parameter_dict_with_list decorator from GalfitComponent " \
+            f"improperly used for a {type(self).__name__} component. " \
+            f"List is not the same length as the dictionary of parameters."
+            
+            for pname, pval in zip(parameter_names, input_list):
+                self.parameters[pname].value = pval
+                    
+        return func_wrapper
+          
 # ==========================================================================================================
 
-    def check_lengths(self):
-        
-        if not all(len(ec) == len(self.param_numbers) for ec in (self.param_numbers, self.param_values, self.param_desc, self.param_fix)):
-            print("Length of array containing parameter numbers, values, and descriptions must be the same!")
-            
-            print("param_numbers:", end = " ")
-            print(*self.param_numbers.keys(), sep = "\n")
-            
-            print("param_values:", end = " ")
-            print(*self.param_values.keys(), sep = "\n")
-            
-            print("param_fix:", end = " ")
-            print(*self.param_fix.keys(), sep = "\n")
-            
-            print("param_desc:", end = " ")
-            print(*self.param_desc.keys(), sep = "\n")
-            
-            raise(Exception())
-            
-# ==========================================================================================================
-
-    # TODO: Add comparison function via subtract
+    # TODO: Add comparison function via subtract(?)
     def __sub__(self):
         pass
     
 # ==========================================================================================================
   
     def __str__(self):
-        # TODO update param_values here so that output is always up to date?
-        # Or find a way not to use it...
-        output_str = ""
-        num_type = ".4f"
-        l_align = "<11"
-        
-        if self.component_type == "header":
-            output_str += "\n\n".join((self.input_menu_file, self.extra_header_info, "="*80))
-            output_str += "\n# IMAGE and GALFIT CONTROL PARAMETERS\n"
-            num_type = "" #".0f"
-            
-        elif self.component_type not in ("power", "fourier", "header"):
-            output_str = f"# Component number: {self.component_number}\n"
-        
-        self.check_lengths()
-        
-        for num, val, fix, desc in zip(self.param_numbers.keys(), self.param_values.values(), self.param_fix.values(), self.param_desc.values()):
-            # Skip component type
-            if isinstance(val, (int, float, np.float32)):
-                if isinstance(num, str):
-                    line = f"{self.param_prefix}{num}) {val:{l_align}} {fix}"
-                else:
-                    line = f"{self.param_prefix}{num}) {val:{l_align}{num_type}} {fix}"
-                
-                # For 10) in sersic
-                if len(f"{self.param_prefix}{num}") >= 3: 
-                    line = line.lstrip()
-                
-            else:
-                # position #, fourier, etc.
-                if isinstance(val[0], (int, float)):
-                    line = f"{self.param_prefix}{num}) {val[0]:<7{num_type}} {val[1]:{num_type}} {fix}"
-                    
-                # comp name
-                else:
-                    line = f"{self.param_prefix}{num}) {val}" #[0]}"
-                
-            output_str += f"{line:<23} # {desc}\n"
-            
-        if self.component_type == "header":
-            output_str += self.post_header
-
-        return output_str
+        return f"# Component number: {self.component_number}\n" + \
+                "\n".join([str(v) for v in self.parameters.values()]) + \
+                "\n"
+    
+    def __repr__(self):
+        return f"# Component number: {self.component_number}\n" + \
+                "\n".join([repr(v) for v in self.parameters.values()]) + \
+                "\n"
 
 # ==========================================================================================================
     
+    @update_parameter_dict_with_list
     def update_from_log(self, in_line:str):
-        # This is a dummy function which is overwritten in all
-        # sub-classes. Just leaving here for documentation
         # Used to update from stdout i.e. what we see in fit.log
         # Requires outside function to loop through log file
         
         # NOTE: These necessarily round to two digits because that's
         # all Galfit outputs to stdout
-        print("Did this get properly overwritten from base in GalfitComponent?")
+        #print("Did this get properly overwritten from base in GalfitComponent?")
+        
+        # Extra empty slot to account for component name in parameter dictionary
+        return [
+            i.strip("[*,]() ") for i in in_line.split() 
+            if any(map(str.isdigit, i))
+        ]
         
 # ==========================================================================================================
 
     # TODO: Update to work with series 
     def from_pandas(self, input_df):
         param_names  = [n.split(f"_{self.component_type}")[0] for n in input_df.columns]
-        param_values = input_df.iloc[0].values.astype(float)
+        param_values = input_df.iloc[0].values.astype(float).round(4)
         new_param_dict = dict(zip(param_names, param_values))
         
         pos = "position"
-        if pos in self.param_values:
+        if pos in self.parameters.keys():
             new_param_dict[pos] = (new_param_dict[f"{pos}_x"], new_param_dict[f"{pos}_y"])
             new_param_dict.pop(f"{pos}_x")
             new_param_dict.pop(f"{pos}_y")
@@ -229,51 +308,153 @@ class GalfitComponent:
                 new_param_dict.pop(f"{mode}_{a}")
                 new_param_dict.pop(f"{mode}_{pha}")
         
-        self.param_values.update(new_param_dict)
-        self.update_values()
+        for k in self.parameters.keys():
+            if k.startswith("_"):
+                continue
+                
+            self.parameters[k].value = new_param_dict[k]
 
 # ==========================================================================================================
 
     def to_pandas(self):
         name = f"{self.component_type}_{self.component_number}"
-        param_values = deepcopy(self.param_values)
-        
-        
-        if "Component type" in param_values:
-            param_values.pop("Component type")
-            
-        multi_valued = [(k,v) for k,v in param_values.items() if isinstance(v, tuple)]
-        
-        if multi_valued:
-            # For components which contain multi values, i.e. position
-            tuple_names = {"sersic"  : ("x","y"),
-                           "fourier" : ("amplitude", "phase_angle")}
-            
-            # Usually only two but to keep things generic we can loop
-            for tup in multi_valued:
-                tup_value = param_values.pop(tup[0])
+        parameter_dict = deepcopy(self.parameters)
                 
-                for i, val in enumerate(tup_value):
-                    param_values[f"{tup[0]}_{tuple_names[self.component_type][i]}"] = val
+        for pname, pval in self.parameters.items():
+            if pname.startswith("_"):
+                parameter_dict.pop(pname)
+                continue
+            
+            # Split multivalued parameters like position
+            # briefly convert to NumParameter to coincide with others
+            if isinstance(pval, MultiParameter):
+                old_keys = pval.value._asdict()
+                parameter_dict.pop(pname)
+                parameter_dict.update({f"{pname}_{k}" : NumParameter(v) for k, v in old_keys.items()})
         
-        param_names  = [f"{i}_{name}" for i in param_values.keys()]
-        param_values = np.array(list(param_values.values()))
-        param_values = param_values.reshape(1, len(param_values))
+        parameter_dict = {f"{k}_{name}" : v.value for k, v in parameter_dict.items()}
         
-        # Redundancy in index name and column names is intentional!
-        all_data = pd.DataFrame(param_values, 
-                                index = [name], 
-                                columns = param_names,
-                                dtype = np.float32)
+        all_data = pd.DataFrame(
+            parameter_dict, 
+            index = [name], 
+            dtype = np.float32
+        )
         
+        # Move skip to end for reasons
+        skip_col = f"skip_{name}"
+        if skip_col in all_data.columns:
+            all_data.insert(len(all_data.columns) - 1, skip_col, all_data.pop(skip_col))
+                
         return all_data
 # ==========================================================================================================
 
-    def from_file_helper(self):
+    def from_file_helper(*args, **kwargs):
         # This function is a placeholder
         # All components will have this, it'll make it easier and less
         # confusing to debug/parse the inputs
-        pass
+        raise Exception("Wrong file helper function called! It's either from_file_helper[_list | _dict].")
+        
+# ==========================================================================================================
+
+    def update_parameters_file_helper(self, file_dict):
+
+        for k, v in file_dict.items():
+            if k.startswith("_"):
+                continue
+            
+            if issubclass(type(self.parameters[k]), MultiParameter):
+                value     = v[:2]
+                fix_value = v[2:]
+                
+            else:
+                value     = v[0]
+                fix_value = v[1]
+            
+            self.parameters[k].value = value
+            self.parameters[k].fix   = fix_value
+            
+# ==========================================================================================================    
+
+    # File dict is only for fits
+    def from_file_helper_dict(self, file_in):
+        # Feed in just the chunk from the main 'from_file' caller
+        # This requires determining param_begin/end in that caller
+        # This can handle component type but it is unnecessary
+        
+        assert self.component_type, f"Component type must be specified to read from file."
+        
+        # to be abundantly safe
+        file_in = deepcopy(file_in)
+        
+        p_names = [
+            k for k in load_default_parameters()[self.component_type].keys()
+            if not k.startswith("_") and k != "position"
+        ]
+        
+        # File dict is only for fits          
+        file_in   = {k : v for k,v in file_in.items() if v != self.component_type}
+        list_vals = list(file_in.values())
+
+        #file_in   = {k:v for k,v in file_in.items() if not k.endswith("_YC") and not k.endswith("_XC")}
+
+        file_dict = {}
+        count = 0
+        for k, v in file_in.items():
+            if not k.endswith("_YC") and not k.endswith("_XC"):
+                file_dict[p_names[count]] = v.split()[0].strip("[]*"), 0 if ("[" in v) and ("]" in v) else 1
+                
+                count += 1
+
+        if "position" in load_default_parameters()[self.component_type].keys():
+            # Assume position is always the first and second index after the component
+            file_dict["position"] = [i.strip("[]*") for i in list_vals[:2]] + \
+                                    [0 if ("[" in i) and ("]" in i) else 1 for i in list_vals[:2]]
+        
+        self.update_parameters_file_helper(file_dict)
+            
+# ==========================================================================================================
+# These used to be unified but Fourier threw a wrench in all that 
+# ==========================================================================================================
+
+    def from_file_helper_list(self, file_in):
+        # Feed in just the chunk from the main 'from_file' caller
+        # This requires determining param_begin/end in that caller
+        # This can handle component type but it is unnecessary
+        
+        assert self.component_type, f"Component type must be specified to read from file."
+        
+        # to be abundantly safe
+        file_in = deepcopy(file_in)
+        
+        # Excludes 0
+        #p_numbers = list(self.param_numbers.keys())[1:]
+        # Invert keys and values for the dict comp a few lines down
+        p_numbers = {
+            str(v.parameter_number) : k 
+            for k, v in load_default_parameters()[self.component_type].items() 
+            if not k.startswith("_")
+        }
+                
+        file_list = file_in
+        file_dict = {
+            line[:line.index(")")].strip(f" {self.param_prefix}") : line[line.index(")") + 1 : line.index("#")].strip()
+            for line in file_list
+            if line.strip()[0] not in ("#") #, "6", "7", "8")
+        } #, "Z")}
+        
+        # join split split gets rid of all extra spacing except for one between everything
+        file_dict = {
+            p_numbers[num] : " ".join(v.split()).split() 
+            for num, v in file_dict.items()           
+            # Sometimes GALFIT outputs empty lines so make sure the line is valid
+            if str(num) in p_numbers
+        }
+        
+        # This is for setting the fix value later
+        if "skip" in file_dict:
+            file_dict["skip"].append(None)
+                                    
+        self.update_parameters_file_helper(file_dict)
 
 # ==========================================================================================================
     
@@ -322,17 +503,7 @@ class GalfitComponent:
                 # Mix check with value (component type) and end key because that's usually known
                 # Comp type should be handled now that we include the beginning
                 feed_in  = {key : value for idx, (key, value) in enumerate(input_in.items()) 
-                            if keys.index(component_start) <= idx <= keys.index(component_end)}
-                
-                # print(ve)
-                # for k,v in input_in.items():
-                #     print(k,v)
-                
-                # 
-                # 
-                # # Usually of form #_param
-                # component_end   = f"{component_start[0]}{self.end_dict[1:]}" 
-                # print(component_start, component_end)               
+                            if keys.index(component_start) <= idx <= keys.index(component_end)}   
             
             input_file.close()
             return feed_in
@@ -370,18 +541,20 @@ class GalfitComponent:
         ext = os.path.splitext(filename)[1]
         if ext == ".fits":
             feed_in = from_fits(self, filename)
+            self.from_file_helper_dict(feed_in)
         else:
             feed_in = from_text(self, filename)
+            self.from_file_helper_list(feed_in)
         
-        self.from_file_helper(feed_in)
-        self.update_param_values()
-
+        #raise Exception("Something went wrong importing from text!")
+        #update_parameters_file_helper(self, file_dict)
+        
 # ==========================================================================================================
 
     def to_file(self, filename, *args):
         # For skipped power and fourier
-        if self.param_values.get("skip",0) == 1 and self.component_type in ("power", "fourier"):
-            return None
+        # if self.parameters.get("skip", 0) == 1 and self.component_type in ("power", "fourier"):
+        #     return None
         
         try:
             with open(filename, "w") as f:
@@ -400,7 +573,7 @@ class GalfitComponent:
 
                 for i, component in enumerate(args):
                     # For skipped power and fourier
-                    if component.param_values.get("skip",0) == 1 and component.component_type in ("power", "fourier"):
+                    if component.parameters.get("skip",0) == 1 and component.component_type in ("power", "fourier"):
                         continue
                         
                     f.write(str(component))
@@ -414,55 +587,22 @@ class GalfitComponent:
             
         except OSError as ose:
             print(f"Something went wrong! {ose}")
-    
-    
-    # Either 
-    # instance.param_name = #
-    # instance.update_param_values()
-    # or
-    # instance.param_values["param_name"] = #
-    # works
             
-    # #https://stackoverflow.com/a/35282351
-    # def __iter__(self):
-    #     return self.__dict__.iteritems()
 
 
-# In[ ]:
+# In[5]:
 
 
 class Sersic(GalfitComponent):
     def __init__(self, component_number, **kwargs):
         
-        self.position         = kwargs.get("position", (0.0000, 0.0000))
-        self.magnitude        = float(kwargs.get("magnitude", 13))
-        self.effective_radius = float(kwargs.get("effective_radius", 10))
-        self.sersic_index     = float(kwargs.get("sersic_index", 4))
-        self.axis_ratio       = float(kwargs.get("axis_ratio", 0.6))
-        self.position_angle   = float(kwargs.get("position_angle", 0))
-        #self.skip = kwargs.get("skip", 0)
-        
-        param_dict = deepcopy(vars(self))
-        
-        GalfitComponent.__init__(self, component_type = "sersic", component_number = component_number)
-        
-        self.param_numbers.update(dict(
-                                       zip([1,3,4,5,9,10], param_dict.keys())
-                                      )
-                                  )
-        
-        self.param_values.update(param_dict)
-                
-        self.param_fix.update({k : 1 for k in param_dict.keys()})
-        self.param_fix["position"] = "0 0"
-        
-        pd = self.param_desc
-        pd["position"] = "Position x, y"
-        pd["magnitude"] = "Integrated magnitude"
-        pd["effective_radius"] = "R_e (effective radius)   [pix]"
-        pd["sersic_index"] = "Sersic index n (de Vaucouleurs n=4)"
-        pd["axis_ratio"] = "Axis ratio (b/a)"
-        pd["position_angle"] = "Position angle (PA) [deg: Up=0, Left=90]"
+        # SersicParameters               
+        GalfitComponent.__init__(self, 
+                                 component_type = "sersic", 
+                                 component_number = component_number,
+                                 parameters = load_default_sersic_parameters(component_number = component_number),
+                                 **kwargs
+                                )
         
         # For reading from file
         self.start_dict = f"COMP_{self.component_number}"
@@ -471,140 +611,28 @@ class Sersic(GalfitComponent):
         # text kept at defaults
         #self.start_text = f"# Component number: {self.component_number}"
         #self.end_text   = f"{self.param_prefix.strip()}10"
-        
-    def from_file_helper(self, file_in):
-        # Feed in just the chunk from the main 'from_file' caller
-        # This requires determining param_begin/end in that caller
-        # This can handle component type but it is unnecessary 
-        
-        # to be abundantly safe
-        file_in = deepcopy(file_in)
-        
-        # Excludes 0
-        p_numbers = list(self.param_numbers.keys())[1:]
-        
-        # File dict is only for fits
-        if isinstance(file_in, dict):
-            file_dict = {}
-            file_in = {k:v for k,v in file_in.items() if v.lower() != "sersic"}
-            
-            x_key = [name for name in file_in.keys() if name.endswith("_XC")][0]
-            x_pos = file_in.pop(x_key).strip("[]")
-            
-            for num, v in zip(p_numbers, file_in.values()): # file_dict.keys()
-                if "+/-" in v:
-                    v = v.split("+/-")[0]
-                    
-                file_dict[num] = [float(v.strip("[* ]"))]
-                
-                # For param_fix
-                if "[" in v and "]" in v:
-                    file_dict[num].append(0)
-
-                    if num == 1:
-                        file_dict[1] += [0, 0]
-                        
-                else:
-                    file_dict[num].append(1)
-            
-            file_dict[1] = [float(x_pos)] + file_dict[1]
-                        
-        elif isinstance(file_in, list):
-            file_list = file_in
-            file_dict = {int(line[:line.index(")")].strip()) : line[line.index(")") + 1 : line.index("#")].strip()
-                         for line in file_list if line.strip()[0] not in ("#", "Z")}
-            
-            file_dict = {k: " ".join(v.split()).split() for k,v in file_dict.items()}
-            
-            if file_list[-1].strip().startswith("Z"):
-                self.add_skip()
-                            
-        else:
-            print(f"Could not grab {self.component_type} components, no file list/dict specified.")
-            return 
-        
-        self.position         = (float(file_dict[1][0]), float(file_dict[1][1]))
-        position_fix          = f"{file_dict[1][2]} {file_dict[1][3]}"
-        self.magnitude        = float(file_dict[3][0])
-        self.effective_radius = float(file_dict[4][0])
-        self.sersic_index     = float(file_dict[5][0])
-        self.axis_ratio       = float(file_dict[9][0])
-        self.position_angle   = float(file_dict[10][0])
-
-        self.param_fix.update({self.param_numbers[k] : int(file_dict[k][1]) for k in p_numbers if k not in [1, "Z"]})
-        self.param_fix["position"] = position_fix
-        
-        # It makes more sense to do this immediately
-        # TODO: Check to remove redundancies for this
-        self.update_param_values()
-        
-        return
-        
-    def update_from_log(self, in_line):
-        
-        # example
-        # sersic    : (  [62.90],  [62.90])  14.11     13.75    0.30    0.63    60.82
-        # does not include position
-        #params = in_line.split("])")[1]
-        #params = " ".join(params.split())
-        #params = params.split()
-        #params = [i.strip("*") for i in params]
-        #params = [i.strip("[]") for i in params.split()]
-        params = [i.strip("[*,]()") for i in in_line.split() 
-                  if any(map(str.isdigit, i))
-                 ]
-        
-        self.position         = (float(params[0]), float(params[1]))
-        self.magnitude        = float(params[2])
-        self.effective_radius = float(params[3])
-        self.sersic_index     = float(params[4])
-        self.axis_ratio       = float(params[5])
-        self.position_angle   = float(params[6])
-        self.update_param_values()
-        
-        return
+    
+    # Maybe it's silly to do it this way but in the future, it should be easier
+    # to implement new components and it should be safer
+    #exec(GalfitComponent.component_get_set(load_default_sersic_parameters()))
+    
 
 
-# In[ ]:
+# In[6]:
 
 
 class Power(GalfitComponent):
     def __init__(self, component_number, **kwargs):
         #self.component_type = "power"
-        self.inner_rad          = float(kwargs.get("inner_rad", 0))
-        self.outer_rad          = float(kwargs.get("outer_rad", 20))
-        self.cumul_rot          = float(kwargs.get("cumul_rot", 90))
-        self.powerlaw           = float(kwargs.get("powerlaw", 1))
-        self.inclination        = float(kwargs.get("inclination", 15))
-        self.sky_position_angle = float(kwargs.get("sky_position_angle", 45))
-        #self.skip = kwargs.get("skip", 0)
+        #power_parameters = load_default_power_parameters(component_number = component_number)
         
-        param_dict = deepcopy(vars(self))
-        
-        GalfitComponent.__init__(self, component_type = "power", 
-                                 param_prefix = "R", 
-                                 component_number = component_number
+        GalfitComponent.__init__(self, 
+                                 component_type = "power", 
+                                 component_number = component_number,
+                                 param_prefix = "R",
+                                 parameters = load_default_power_parameters(component_number = component_number),
+                                 **kwargs
                                 )
-        
-        self.param_numbers.update(dict(
-                                       zip([1,2,3,4,9,10], param_dict.keys())
-                                      )
-                                  )
-        
-        self.param_values.update(param_dict)
-        
-        self.param_fix.update({k : 1 for k in param_dict.keys()})
-        self.param_fix["inner_rad"] = 0
-        self.param_fix["outer_rad"] = 0
-        
-        pd = self.param_desc
-        pd["Component type"] = "PA rotation func. (power, log, none)"
-        pd["inner_rad"] = "Spiral inner radius [pixels]"
-        pd["outer_rad"] = "Spiral outer radius [pixels]"
-        pd["cumul_rot"] = "Cumul. rotation out to outer radius [degrees]"
-        pd["powerlaw"] = "Asymptotic spiral powerlaw"
-        pd["inclination"] = "Inclination to L.o.S. [degrees]"
-        pd["sky_position_angle"] = "Sky position angle"
         
         # For reading from file
         # 2_ may not always be the case but that's why I have a try except in there ;)
@@ -614,116 +642,60 @@ class Power(GalfitComponent):
         self.start_text = f"{self.param_prefix}0) power"
         # end kept at defult
         #self.end_text   = f"{self.param_prefix.strip()}10"
-        
-    def from_file_helper(self, file_in):
-        # Feed in just the chunk from the main 'from_file' caller
-        # This requires determining param_begin/end in that caller
-        # This can handle component type but it is unnecessary 
-        
-        # to be abundantly safe
-        file_in = deepcopy(file_in)
-        
-        # Excludes 0
-        p_numbers = list(self.param_numbers.keys())[1:]                 
-            
-        # File dict is only for fits
-        if isinstance(file_in, dict):
-            file_dict = {}
-            file_in = {k:v for k,v in file_in.items() if v.lower() != "power"}
-            
-            for num, v in zip(p_numbers, file_in.values()): # file_dict.keys()
-                if "+/-" in v:
-                    v = v.split("+/-")[0]
-                    
-                file_dict[num] = [float(v.strip("[* ]"))]
-                
-                # For param_fix
-                if "[" in v and "]" in v:
-                    file_dict[num].append(0)
-
-                else:
-                    file_dict[num].append(1)
-            
-        elif isinstance(file_in, list):
-            file_list = file_in
-            file_dict = {int(line[:line.index(")")].strip(f"{self.param_prefix} ")) : line[line.index(")") + 1 : line.index("#")].strip()
-                         for line in file_list if line.strip()[0] not in ("#", "Z")}
-            
-            file_dict = {k: " ".join(v.split()).split() for k,v in file_dict.items()}
-            
-            if file_list[-1].strip().startswith("Z"):
-                self.add_skip()
-                            
-        else:
-            print(f"Could not grab {self.component_type} components, no file list/dict specified.")
-            return
-                
-        self.inner_rad          = float(file_dict[1][0])
-        self.outer_rad          = float(file_dict[2][0])
-        self.cumul_rot          = float(file_dict[3][0])
-        self.powerlaw           = float(file_dict[4][0])
-        self.inclination        = float(file_dict[9][0])
-        self.sky_position_angle = float(file_dict[10][0])
-
-        self.param_fix.update({self.param_numbers[k] : int(file_dict[k][1]) for k in p_numbers if k not in [1, "Z"]})
-        
-        self.update_param_values()
-        return
-        
-    def update_from_log(self, in_line):
-        # example
-        # power   :     [0.00]   [23.51]  219.64     -0.16     ---  -44.95   -15.65
-        
-        #params = in_line.split("]")[2] 
-        #params = " ".join(params.split())
-        params = [i.strip("[*]") for i in in_line.split() 
-                  if any(map(str.isdigit, i))
-                 ]
-        
-        self.inner_rad          = float(params[0])
-        self.outer_rad          = float(params[1])
-        self.cumul_rot          = float(params[2])
-        self.powerlaw           = float(params[3])
-        self.inclination        = float(params[4])
-        self.sky_position_angle = float(params[5])
-        self.update_param_values()
-        return
+    
+    
+    
+    # dict for get set looks like this: 
+    # "position" : parameters["position"]
+    #exec(GalfitComponent.component_get_set(load_default_power_parameters()))  
+    
+    # Since this one does not have a component number, it gets special treatment
+    def __str__(self):
+        return "\n".join(GalfitComponent.__str__(self).split("\n")[1:])
+    
+    def __repr__(self):
+        return "\n".join(GalfitComponent.__repr__(self).split("\n")[1:])
+    
 
 
-# In[ ]:
+# In[7]:
 
 
 class Fourier(GalfitComponent):
     # kwargs is a placeholder
     def __init__(self, component_number, n = {1 : (0.05, 45), 3 : (0.05, 25)}, **kwargs):
+        
+        parameters = load_default_fourier_parameters(component_number = component_number)
+        
+        if n:
+            for fnum, (amplitude, phase_angle) in n.items():
+                parameters[f"F{fnum}"] = FourierMode(
+                    mode = str(fnum),
+                    amplitude = amplitude,
+                    phase_angle = phase_angle,
+                    component_number = component_number
+                )
+         
         GalfitComponent.__init__(self, 
-                                 component_type = "fourier", 
+                                 component_type = "fourier",
                                  param_prefix = "F",
-                                 component_number = component_number
+                                 component_number = component_number,
+                                 parameters = parameters,
+                                 **kwargs
                                 )
+        
+        self.sort_parameters()
+        
         # normal rules don't apply here
         # Still use inheritance for the other functions
-        self.param_numbers = {}
-        self.param_values = {}
-        self.param_desc = {}
-        self.param_fix = {}
-        
-        self.include_fn(n = n)
-        
-        amplitudes   = []
-        phase_angles = []
-        for k,v in self.param_values.items():
-            if k.lower() != "skip":
-                amplitudes.append(v[0])
-                phase_angles.append(v[1])
         
         # TODO: FIND SOME WAY TO UPDATE THIS WHEN OBJECT IS UPDATED
         # preferably without copying and pasting things
         # TODO: These do not update via update_param_values...
-        self.amplitudes   = amplitudes
-        self.phase_angles = phase_angles
+        self._amplitudes   = [mode.amplitude for pname, mode in self.parameters.items() if pname != "skip"]
+        self._phase_angles = [mode.phase_angle for pname, mode in self.parameters.items() if pname != "skip"]
         
-        p_numbers = list(self.param_numbers.keys())
+        p_numbers = list(self.parameters.keys())
         # For reading from file
         self.start_dict = f"{self.component_number}_F{p_numbers[0]}"
         self.end_dict   = f"{self.component_number}_F{p_numbers[-1]}PA"
@@ -731,74 +703,119 @@ class Fourier(GalfitComponent):
         self.start_text = f"F{p_numbers[0]}"
         self.end_text   = f"{self.param_prefix}{p_numbers[-1]}"
         
-    def include_fn(self, n:dict):
-        for num, values in n.items():
-            key = f"{self.param_prefix}{num}"
-            self.param_numbers[num] = key
-            self.param_values[key] = tuple(values)
-            self.param_desc[key] = f"Azim. Fourier mode {num}, amplitude, & phase angle"
-            self.param_fix[key] = self.param_fix.get(key, "1 1")
+    #exec(GalfitComponent.component_get_set(load_default_fourier_parameters()))
+    
+    exec(
+        generate_get_set(
+            {
+                "amplitudes" : "_amplitudes",
+                "phase_angles" : "_phase_angles"
+            }
+        )
+    )
+    
+# ==========================================================================================================
 
-    def from_file_helper(self, file_in):
-        # Feed in just the chunk from the main 'from_file' caller
-        # This requires determining param_begin/end in that caller
+    def __str__(self):
+        return "\n".join(GalfitComponent.__str__(self).split("\n")[1:])
+    
+    def __repr__(self):
+        return "\n".join(GalfitComponent.__repr__(self).split("\n")[1:])
+    
+# ==========================================================================================================
+
+    # To keep things in proper order
+    def sort_parameters(self):    
+        self.parameters = dict(sorted(self.parameters.items()))
         
+# ==========================================================================================================
+    
+    def include_fn(self, n:dict):
+        for fnum, values in n.items():
+            self.parameters[f"{self.param_prefix}{str(fnum)}"] = FourierMode(
+                mode = str(fnum),
+                amplitude = values[0],
+                phase_angle = values[1],
+                component_number = self.component_number
+            )
+            
+        self.sort_parameters()
+        
+# ==========================================================================================================
+        
+    def from_file_helper_dict(self, file_in):
+               
         # to be abundantly safe
         file_in = deepcopy(file_in)
         
-        p_numbers = list(self.param_numbers.keys())
-        
-        # File dict is only for fits
-        if isinstance(file_in, dict):
-            n_dict = {}
+        # Excludes 0
+        #p_numbers = list(self.param_numbers.keys())[1:]
+        n_dict = {}
             
-            for k,v in file_in.items():
-                
-                if "+/-" in v:
-                    v = v.split("+/-")[0]
-                    
-                #ex: 1_F1 -> 1
-                # 1_F3PA -> 3
-                k_num = int(k.split("_")[1][1])
-                if k_num not in n_dict:
-                    n_dict[k_num] = [float(v.strip("[* ] "))]
-                else:
-                    n_dict[k_num] += [float(v.strip("[* ] "))]
-                
-                # For param_fix
-                if "[" in v and "]" in v:
-                    self.param_fix[f"{self.param_prefix}{k_num}"] = "0 0"
-                        
-                else:
-                    self.param_fix[f"{self.param_prefix}{k_num}"] = "1 1"
-                
-        elif isinstance(file_in, list):
-            file_list = file_in
-            file_dict = {int(line[:line.index(")")].strip(f"{self.param_prefix} ")) : line[line.index(")") + 1 : line.index("#")].strip()
-                         for line in file_list if line.strip()[0] not in ("#", "Z")}
+        for k,v in file_in.items():
+
+            if "+/-" in v:
+                v = v.split("+/-")[0]
+
+            #ex: 1_F1 -> 1
+            # 1_F3PA -> 3
+            k_num = int(k.split("_")[1][1])
             
-            n_dict = {}
-            for k,v in file_dict.items():
-                value = " ".join(v.split()).split()
-                n_dict[k] = (float(value[0]), float(value[1]))
-            
-            if file_list[-1].strip().startswith("Z"):
-                self.add_skip()
-                            
-        else:
-            print(f"Could not grab {self.component_type} components, no file list/dict specified.")
-            return
-        
+            if k_num not in n_dict:
+                n_dict[k_num] = [float(v.strip("[* ] "))]
+            else:
+                n_dict[k_num] += [float(v.strip("[* ] "))]
+                
         self.include_fn(n_dict)
         
-        # TODO: do I need these? Do I need to update param_fix? Fourier is different
+        for k,v in file_in.items():
+            # For param_fix
+            if "[" in v and "]" in v:
+                if "PA" in k:
+                    self.parameters[f"{self.param_prefix}{k_num}"].fix_phase_angle = "0"
+                else:
+                    self.parameters[f"{self.param_prefix}{k_num}"].fix_amplitude   = "0"
 
-        # self.param_fix.update({self.param_numbers[k] : int(file_dict[k][1]) for k in p_numbers if k not in [1, "Z"]})
-        # self.param_fix["position"] = position_fix
+            else:
+                if "PA" in k:
+                    self.parameters[f"{self.param_prefix}{k_num}"].fix_phase_angle = "1"
+                else:
+                    self.parameters[f"{self.param_prefix}{k_num}"].fix_amplitude   = "1"
+
+# ==========================================================================================================
+
+    def from_pandas(self, input_df):
+        param_names  = [n.split(f"_{self.component_type}")[0] for n in input_df.columns]
+        param_values = input_df.iloc[0].values.astype(float)
+        new_param_dict = dict(zip(param_names, param_values))
         
-        self.update_param_values()
-        return
+        # pos = "position"
+        # if pos in self.parameters.keys():
+        #     new_param_dict[pos] = (new_param_dict[f"{pos}_x"], new_param_dict[f"{pos}_y"])
+        #     new_param_dict.pop(f"{pos}_x")
+        #     new_param_dict.pop(f"{pos}_y")
         
+        # No graceful way to do this...
+        f_modes = set([pn.split("_")[0] for pn in param_names])
+        a   = "amplitude"
+        pha = "phase_angle"
+            
+        for mode in f_modes:
+            if mode == "skip":
+                continue
+                
+            new_param_dict[mode] = (new_param_dict[f"{mode}_{a}"], new_param_dict[f"{mode}_{pha}"])
+            new_param_dict.pop(f"{mode}_{a}")
+            new_param_dict.pop(f"{mode}_{pha}")
+        
+        for k in self.parameters.keys():
+            if k.startswith("_"):
+                continue
+                
+            self.parameters[k].value = new_param_dict[k]
+
+# ==========================================================================================================
+
     def update_from_log(self, in_line):
         # example
         # fourier : (1:  0.06,   -6.67)   (3:  0.05,    0.18)
@@ -806,38 +823,23 @@ class Fourier(GalfitComponent):
         # rstrip avoids a hanging ) later
         params = in_line.lstrip("fourier : ").replace(" ", "").rstrip(")").split(")(")
         
-        self.param_values = {n: eval(f"({params[i].split(':')[1].replace('*', '')})")
-                             for i, n in enumerate(self.param_values.keys())}
-        self.update_param_values()
-        return
+        for i, pname in enumerate(self.parameters.keys()):
+            if pname != "skip":
+                self.parameters[pname].value = eval(f"({params[i].split(':')[1].replace('*', '')})")
 
 
-# In[ ]:
+# In[8]:
 
 
 class Sky(GalfitComponent):
     def __init__(self, component_number, **kwargs):
-        self.sky_background = float(kwargs.get("sky_background", 1000))
-        self.dsky_dx        = float(kwargs.get("dsky_dx", 0))
-        self.dsky_dy        = float(kwargs.get("dsky_dy", 0))
         
-        param_dict = deepcopy(vars(self))
-        
-        GalfitComponent.__init__(self, component_type = "sky", component_number = component_number)
-        
-        self.param_numbers.update(dict(
-                                       zip([1,2,3], param_dict.keys())
-                                      )
-                                  )
-        
-        self.param_values.update(param_dict)
-        
-        self.param_fix.update({k : 1 for k in param_dict.keys()})
-        
-        pd = self.param_desc
-        pd["sky_background"] = "Sky background at center of fitting region [ADUs]"
-        pd["dsky_dx"] = "dsky/dx (sky gradient in x)     [ADUs/pix]"
-        pd["dsky_dy"] = "dsky/dy (sky gradient in y)     [ADUs/pix]"
+        GalfitComponent.__init__(self, 
+                                 component_type = "sky", 
+                                 component_number = component_number,
+                                 parameters = load_default_sky_parameters(component_number = component_number),
+                                 **kwargs
+                                )
         
         # For reading from file
         self.start_dict = f"COMP_{self.component_number}"
@@ -846,131 +848,41 @@ class Sky(GalfitComponent):
         self.start_text = f"# Component number: {self.component_number}"
         self.end_text   = f"{self.param_prefix.strip()}3"
         
-    def from_file_helper(self, file_in):
-        # Feed in just the chunk from the main 'from_file' caller
-        # This requires determining param_begin/end in that caller
-        # This can handle component type but it is unnecessary 
-        
-        # to be abundantly safe
-        file_in = deepcopy(file_in)
-        
-        # Excludes 0
-        p_numbers = list(self.param_numbers.keys())[1:]                 
-            
-        # File dict is only for fits
-        if isinstance(file_in, dict):
-            file_dict = {}
-            file_in = {k:v for k,v in file_in.items() if v.lower() != "sky" and k.split("_")[1] not in ["XC", "YC"]}
-            
-            for num, v in zip(p_numbers, file_in.values()): # file_dict.keys()
-                if "+/-" in v:
-                    v = v.split("+/-")[0]
-                    
-                file_dict[num] = [float(v.strip("[* ]"))]
-                
-                # For param_fix
-                if "[" in v and "]" in v:
-                    file_dict[num].append(0)
-
-                else:
-                    file_dict[num].append(1)
-            
-        elif isinstance(file_in, list):
-            file_list = file_in
-            file_dict = {int(line[:line.index(")")].strip(f"{self.param_prefix} ")) : line[line.index(")") + 1 : line.index("#")].strip()
-                         for line in file_list if line.strip()[0] not in ("#", "Z")}
-            
-            file_dict = {k: " ".join(v.split()).split() for k,v in file_dict.items()}
-            
-            if file_list[-1].strip().startswith("Z"):
-                self.add_skip()
-                            
-        else:
-            print(f"Could not grab {self.component_type} components, no file list/dict specified.")
-            return
-                
-        self.sky_background = float(file_dict[1][0])
-        self.dsky_dx        = float(file_dict[2][0])
-        self.dsky_dy        = float(file_dict[3][0])
-        
-        self.param_fix.update({self.param_numbers[k] : int(file_dict[k][1]) for k in p_numbers if k not in [1, "Z"]})
-        
-        self.update_param_values()
-        return
-        
+    # dict for get set looks like this: 
+    # "position" : parameters["position"]
+    #exec(GalfitComponent.component_get_set(load_default_sky_parameters()))
     
+# ==========================================================================================================
+
+    @GalfitComponent.update_parameter_dict_with_list
     def update_from_log(self, in_line):
-        # example
-        #sky       : [ 63.00,  63.00]  1130.51  -4.92e-02  1.00e-02
-        
-        # params = in_line.split("]")[1]
-        # params = " ".join(params.split())
-        # params = params.split()
-        # params = [i.strip("*") for i in params]
-        params = [i.strip("[*,]") for i in in_line.split() 
+#         # example
+#         #sky       : [ 63.00,  63.00]  1130.51  -4.92e-02  1.00e-02
+
+        # Ignore position
+        return [i.strip("[*,]") for i in in_line.split() 
                   if any(map(str.isdigit, i))
-                 ]
-        
-        # params[0] and [1] are position
-        self.sky_background = float(params[2])
-        self.dsky_dx = float(params[3])
-        self.dsky_dy = float(params[4])
-        self.update_param_values()
-        return
+               ][2:]
 
 
-# In[ ]:
+# In[9]:
 
 
 class GalfitHeader(GalfitComponent):
     
-    def __init__(self, galaxy_name = "", **kwargs):
+    def __init__(self, parameters = {}, galaxy_name = "", **kwargs):
+        
+        # normal rules don't apply here
+        # Still use inheritance for the other functions
         
         # If not fully specified, will use galaxy_name as default so it's good to use
         # it as an argument even if I am specifying each individually
-        self.input_image     = kwargs.get("input_image", f"{galaxy_name}.fits")
-        self.output_image    = kwargs.get("output_image", f"{galaxy_name}_galfit_out.fits")
-        self.sigma_image     = kwargs.get("sigma_image", "none")
-        self.psf             = kwargs.get("psf", f"{galaxy_name}_psf.fits") # May add gname to this
-        self.fine_sampling   = kwargs.get("fine_sampling", 1)
-        self.pixel_mask      = kwargs.get("pixel_mask", f"{galaxy_name}_star-rm.fits")
-        self.constraints     = kwargs.get("constraints", "none")
-        self.region_to_fit   = kwargs.get("region_to_fit", (0, 255, 0, 255))
-        self.convolution_box = kwargs.get("convolution_box", (52, 52))
-        self.mag_zeropoint   = kwargs.get("mag_zeropoint" , 24.800) # SDSS DR7
-        self.plate_scale     = kwargs.get("plate_scale", (0.396, 0.396)) # SDSS DR7
-        self.display_type    = kwargs.get("display_type", "regular")
-        self.optimize        = kwargs.get("optimize", 0)
-            
-        header_dict = deepcopy(self.__dict__)
-        # normal rules don't apply here
-        # Still use inheritance for the other functions
-        GalfitComponent.__init__(self, component_type = "header", param_prefix = "")
-
-        self.param_numbers = dict(
-                                  zip(["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "O", "P"], header_dict.keys())
-                                  )
-                                  
-        self.param_values = deepcopy(header_dict)
-        # For region to fit, otherwise the 'fix' is empty
-        self.param_fix = {k: (f"  {v[2]}   {v[3]}" if k == "region_to_fit" else "") for k,v in deepcopy(header_dict).items()}
-        
-        self.param_desc = deepcopy(header_dict)
-        pd = self.param_desc
-        
-        pd["input_image"]     = "Input data image (FITS file)"
-        pd["output_image"]    = "Output data image block"
-        pd["sigma_image"]     = "Sigma image name (made from data if blank or 'none')"
-        pd["psf"]             = "Input PSF image and (optional) diffusion kernel"
-        pd["fine_sampling"]   = "PSF fine sampling factor relative to data"
-        pd["pixel_mask"]      = "Bad pixel mask (FITS image or ASCII coord list)"
-        pd["constraints"]     = "File with parameter constraints (ASCII file)"
-        pd["region_to_fit"]   = "Image region to fit (xmin xmax ymin ymax)"
-        pd["convolution_box"] = "Size of the convolution box (x y)"
-        pd["mag_zeropoint"]   = "Magnitude photometric zeropoint"
-        pd["plate_scale"]     = "Plate scale (dx dy)   [arcsec per pixel]"
-        pd["display_type"]    = "Display type (regular, curses, both)"
-        pd["optimize"]        = "Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps"
+        GalfitComponent.__init__(self, 
+                                 component_type = "header",
+                                 param_prefix   = "",
+                                 parameters = load_default_header_parameters(galaxy_name = galaxy_name),
+                                 **kwargs
+                                )
         
         # For reading from file
         self.start_dict = "INITFILE"
@@ -981,7 +893,7 @@ class GalfitHeader(GalfitComponent):
         
         # No newlines added so the strings can be added to directly
         self.input_menu_file   = f"#  Input menu file: {kwargs.get('input_menu_file', '')}.in"
-        self.extra_header_info = f"#  {kwargs.get('extra_header_info', '')}"        
+        self.extra_header_info = f"#  {kwargs.get('extra_header_info', '')}"      
         
         # Don't mess with this tabbing
         self.post_header = """
@@ -1002,95 +914,181 @@ class GalfitHeader(GalfitComponent):
 #   par)    par value(s)    fit toggle(s)    # parameter description 
 # ------------------------------------------------------------------------------
 """
+
+    # dict for get set looks like this: 
+    # "position" : parameters["position"]
+    #exec(GalfitComponent.component_get_set(load_default_header_parameters()))
+    
+# ==========================================================================================================
+
+    def __str__(self):
+        return self.input_menu_file   + "\n\n" + \
+               self.extra_header_info + "\n\n" + \
+               self._section_sep      + "\n"   + \
+               "# IMAGE and GALFIT CONTROL PARAMETERS\n" + \
+               "\n".join(GalfitComponent.__str__(self).split("\n")[1:]) + \
+               self.post_header
+    
+    # def __repr__(self):
+    #     return self.input_menu_file   + "\n\n" + \
+    #            self.extra_header_info + "\n\n" + \
+    #            self._section_sep      + "\n"   + \
+    #            "# IMAGE and GALFIT CONTROL PARAMETERS\n" + \
+    #            "\n".join(GalfitComponent.__repr__(self).split("\n")[1:]) + \
+    #            self.post_header
+    
+# ==========================================================================================================
+
+#     def to_pandas(self):
+#         name = f"{self.component_type}_{self.component_number}"
+#         parameter_dict = deepcopy(self.parameters)
+                
+#         for pname, pval in self.parameters.items():
+#             if pname.startswith("_"):
+#                 parameter_dict.pop(pname)
+#                 continue
+            
+#             # Split multivalued parameters like position
+#             # briefly convert to NumParameter to coincide with others
+#             if isinstance(pval, MultiParameter):
+#                 old_keys = pval.value._asdict()
+#                 parameter_dict.pop(pname)
+#                 parameter_dict.update({f"{pname}_{k}" : NumParameter(v) for k, v in old_keys.items()})
         
-    def from_file_helper(self, file_in, **kwargs):
+#         parameter_dict = {f"{k}_{name}" : v.value for k, v in parameter_dict.items()}
+        
+#         all_data = pd.DataFrame(
+#             parameter_dict, 
+#             index = [name]
+#         )
+        
+#         # Move skip to end for reasons
+#         skip_col = f"skip_{name}"
+#         if skip_col in all_data.columns:
+#             all_data.insert(len(all_data.columns) - 1, skip_col, all_data.pop(skip_col))
+                
+#         return all_data
+    
+# ==========================================================================================================
+
+    def update_parameters_file_helper(self, file_dict):
+        
+        for k,v in file_dict.items():
+            if k.startswith("_"):
+                continue
+            
+            value     = v
+            if not issubclass(type(self.parameters[k]), MultiParameter):
+                value = v[0]
+            
+            self.parameters[k].value = value
+            
+# ==========================================================================================================
+
+    # This one is unlike the others so does not call
+    # self.update_parameters_file_helper(file_dict)            
+    @GalfitComponent.update_parameter_dict_with_dict
+    def from_file_helper_dict(self, file_in, **kwargs):
         # Feed in just the chunk from the main 'from_file' caller
         # This requires determining param_begin/end in that caller
         
         # to be abundantly safe
         file_in = deepcopy(file_in)
         
-        p_numbers = list(self.param_numbers.keys())
-            
-        # File dict is only for fits
-        if isinstance(file_in, dict):
-            file_dict = {}
-            # From file
-            file_dict["C"] = [file_in["SIGMA"]]
-            file_dict["D"] = [file_in["PSF"]]
-            file_dict["G"] = [file_in["CONSTRNT"]]
-            file_dict["H"] = eval(file_in["FITSECT"].replace(":", ","))
-            file_dict["I"] = eval(f"({file_in['CONVBOX']})")
-            file_dict["J"] = [float(file_in["MAGZPT"])]
-            
-            # Everything else...
-            file_dict["A"] = [kwargs.get("input_image", self.input_image)]
-            file_dict["B"] = [kwargs.get("output_image", self.output_image)]
-            file_dict["E"] = [kwargs.get("fine_sampling", self.fine_sampling)]
-            file_dict["F"] = [kwargs.get("pixel_mask", self.pixel_mask)]
-            file_dict["K"] = kwargs.get("plate_scale", self.plate_scale)
-            file_dict["O"] = [kwargs.get("display_type", self.display_type)]
-            file_dict["P"] = [kwargs.get("optimize", self.optimize)]
-            
-        elif isinstance(file_in, list):
-            #print(file_in)
-            file_list = file_in
-            file_dict = {line[:line.index(")")].strip(f"{self.param_prefix} ") : line[line.index(")") + 1 : line.index("#")].strip()
-                         for line in file_list if line.strip()[0] not in ("#")} #, "Z")}
-            
-            file_dict = {k: " ".join(v.split()).split() for k,v in file_dict.items()}
-            #print(file_dict)
-            # if file_list[-1].strip().startswith("Z"):
-            #     self.add_skip()
-                            
-        else:
-            print(f"Could not grab {self.component_type} components, no file list/dict specified.")
-            return
+        file_dict = kwargs
+        # What can actually be gleaned from file
+        file_dict["sigma_image"]         = file_in["SIGMA"]
+        file_dict["psf"]                 = file_in["PSF"]
+        file_dict["constraint_file"]     = file_in["CONSTRNT"]
+        file_dict["region_to_fit"]       = tuple([int(v) for v in eval(file_in["FITSECT"].replace(":", ","))])
+        file_dict["convolution_box"]     = tuple([int(v) for v in eval(f"({file_in['CONVBOX']})")])
+        file_dict["mag_photo_zeropoint"] = float(file_in["MAGZPT"])
         
-        self.input_image     = file_dict["A"][0]
-        self.output_image    = file_dict["B"][0]
-        self.sigma_image     = file_dict["C"][0]
-        self.psf             = file_dict["D"][0]
-        self.fine_sampling   = int(file_dict["E"][0])
-        self.pixel_mask      = file_dict["F"][0]
-        self.constraints     = file_dict["G"][0]
-        self.region_to_fit   = (int(file_dict["H"][0]), 
-                                int(file_dict["H"][1]), 
-                                int(file_dict["H"][2]), 
-                                int(file_dict["H"][3]))
-        #self.param_fix["region_to_fit"] = f"{int(file_dict['H'][2])} {int(file_dict['H'][3])}"
-        
-        self.convolution_box = (int(file_dict["I"][0]), 
-                                int(file_dict["I"][1]))
-        self.mag_zeropoint   = float(file_dict["J"][0])
-        self.plate_scale     = (float(file_dict["K"][0]),
-                                float(file_dict["K"][0]))
-        self.display_type    = file_dict["O"][0]
-        self.optimize        = int(file_dict["P"][0])
-        
-        self.update_param_values()
-        return
+        return file_dict
 
 
-# In[ ]:
+# In[10]:
+
+
+def load_all_components(with_header = True):
+    all_components = {}
+    
+    if with_header:
+        all_components["header"] = GalfitHeader()
+        
+    all_components["sersic"]     = Sersic(1)
+    # Alias for convenience
+    #all_components["bulge"]      = all_components["sersic"]
+    #all_components["disk"]       = Sersic(2)
+    
+    all_components["power"]      = Power(1)
+    # Alias for convenience
+    #all_components["arms"]       = all_components["power"]
+    
+    all_components["fourier"]    = Fourier(1)
+    all_components["sky"]        = Sky(2)
+    
+    return all_components
+
+
+# In[11]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
+    end_str = "--\n"
 
 
-# In[ ]:
+# In[12]:
+
+
+if __name__ == "__main__":
+    def unit_tests(component, parameter, bogus_list, bogus_dict, log_line, pvalue = 555555, end_str = "--\n", base_out = ""):
+    
+        component_copy = deepcopy(component)
+
+        print(f"Defaults{end_str}", component.parameters)
+        print()
+
+        component.parameters[parameter].value = pvalue
+        print(f"Modifying {parameter} directly{end_str}", component)
+
+        component.from_file_helper_list(bogus_list)
+        print(f"From file helper, list{end_str}", component)
+
+        print(f"Sending to file{end_str}", component)
+        component.to_file(f"{base_out}_{component.component_type.capitalize()}.txt")
+
+        component = deepcopy(component_copy)
+        component.from_file_helper_dict(bogus_dict)
+        print(f"From file helper, dict{end_str}", component)
+
+        component_df = component.to_pandas()
+        print(f"To pandas{end_str}", component_df)
+        print()
+
+        component_df.iloc[0,0] = 111
+        component_df.iloc[0,1] = 112
+        component_df.iloc[0,2] = 113
+        component.from_pandas(component_df)
+        print(f"From pandas, modified parameters{end_str}", component)
+
+        component.update_from_log(log_line)
+        print(f"From log line{end_str}", component)
+
+
+# In[13]:
 
 
 # Unit Test for GalfitComponent
 if __name__ == "__main__":
-    component = GalfitComponent()
-    print("Testing default values of base class GalfitComponent...")
+    component = GalfitComponent("header")
+    print(f"Testing default values of base class GalfitComponent{end_str}")
     for k,v in component.__dict__.items():
         print(k,v)
 
 
-# In[ ]:
+# In[14]:
 
 
 if __name__ == "__main__":
@@ -1115,21 +1113,50 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps""".
  'CONSTRNT': 'none',
  'MASK': '/home/portmanm/testing_python_control/sparcfire-tmp/galfit_masks/123',
  'FITSECT': '[36:98,37:99]',
- 'CONVBOX': '50, 50',
+ 'CONVBOX': '51, 50',
  'MAGZPT': 24.8}""")
 
+    print(f"Initializing header{end_str}")
     header = GalfitHeader()
-    header.from_file_helper(bogus_list)
+    print(header)
+    print()
+    
+    print(f"Reading header from file via list{end_str}")
+    header.from_file_helper_list(bogus_list)
     #header.update_param_values()
     print(header)
+    print()
+    
+    print(f"Printing header to file {base_out}_header.txt{end_str}")
     header.to_file(f"{base_out}_header.txt")
-
-    header.from_file_helper(bogus_dict)
+    print()
+    
+    print(f"Reading header from file via dict {end_str}")
+    header.from_file_helper_dict(bogus_dict)
     #header.update_param_values()
     print(header)
+    print()
 
 
-# In[ ]:
+# In[15]:
+
+
+if __name__ == "__main__":
+    bulge = Sersic(
+            component_number = 1, 
+            position         = (25,25),
+            magnitude        = 15,
+            # Sometimes sparcfire messes this up
+            effective_radius = 10.010101001,
+            # According to other paper GALFIT usually doesn't have a problem with the index
+            sersic_index     = 4.52,
+            axis_ratio       = 0.6,
+            position_angle   = 90.01
+        )
+    print(f"Updating Sersic (as an example GalfitComponent) from kwargs{end_str}", bulge)
+
+
+# In[16]:
 
 
 if __name__ == "__main__":
@@ -1152,33 +1179,14 @@ if __name__ == "__main__":
      '1_N': '0.3433 +/- 0.0064',
      '1_AR': '0.6214 +/- 0.0039',
      '1_PA': '-19.1534 +/- 0.5867'}""")
-
-    bulge = Sersic(1)
-    bulge.from_file_helper(bogus_list)
-    #bulge.update_param_values()
-    print(bulge)
-    bulge.to_file(f"{base_out}_Sersic.txt")
-
-    bulge.from_file_helper(bogus_dict)
-    #bulge.update_param_values()
-    print(bulge)
-    
-    bulge_df = bulge.to_pandas()
-    print(bulge_df)
-    print()
-    bulge_df.iloc[0,0] = 111
-    bulge_df.iloc[0,1] = 112
-    bulge_df.iloc[0,2] = 113
-    bulge.from_pandas(bulge_df)
-    print(bulge)
     
     log_line = "sersic    : (  [62.90],  [62.90])  14.11*     13.75    0.30    0.63    60.82"
     
-    bulge.update_from_log(log_line)
-    print(bulge)
+    bulge = Sersic(1)
+    unit_tests(bulge, "magnitude", bogus_list, bogus_dict, log_line, base_out = base_out)
 
 
-# In[ ]:
+# In[17]:
 
 
 if __name__ == "__main__":
@@ -1197,33 +1205,15 @@ R10) 72.0972    1          #  Sky position angle""".split("\n")
  '2_ALPHA': '-2.3697 +/- 0.0691',
  '2_INCL': '40.8043 +/- 2.7380',
  '2_SPA': '24.3010 +/- 4.5444'}""")
-
-    arms = Power(2)
-    arms.from_file_helper(bogus_list)
-    #arms.update_param_values()
-    arms.to_file(f"{base_out}_Power.txt")
-    print(arms)
-
-    arms.from_file_helper(bogus_dict)
-    #arms.update_param_values()
-    print(arms)
-    
-    arms_df = arms.to_pandas()
-    print(arms_df)
-    print()
-    arms_df.iloc[0,0] = 111
-    arms_df.iloc[0,1] = 112
-    arms_df.iloc[0,2] = 113
-    arms.from_pandas(arms_df)
-    print(arms)
     
     log_line = "power   :     [0.00]   23.51  219.64     -0.16*     ---  -44.95   -15.65"
+
+    arms = Power(2)
+    unit_tests(arms, "powerlaw_index", bogus_list, bogus_dict, log_line, base_out = base_out)
     
-    arms.update_from_log(log_line)
-    print(arms)
 
 
-# In[ ]:
+# In[18]:
 
 
 if __name__ == "__main__":
@@ -1234,50 +1224,15 @@ F3) -0.0690  -31.8175 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle""".
  '2_F1PA': '44.3015 +/- 7.1154',
  '2_F3': '0.0979 +/- 0.0104',
  '2_F3PA': '-35.1366 +/- 4.4060'}""")
-
-    fourier = Fourier(2)
-    fourier.from_file_helper(bogus_list)
-    #fourier.update_param_values()
-    fourier.to_file(f"{base_out}_Fourier.txt")
-    print(fourier)
-
-    fourier.from_file_helper(bogus_dict)
-    #fourier.update_param_values()
-    print(fourier)
-    
-    print(fourier.param_values)
-    fourier_df = fourier.to_pandas()
-    print(fourier_df)
-    print()
-    fourier_df.iloc[0,0] = 111
-    fourier_df.iloc[0,1] = 112
-    fourier_df.iloc[0,2] = 113
-    fourier.from_pandas(fourier_df)
-    print(fourier)
     
     log_line = "fourier : (1:  0.06,   -6.67)   (3:  0.05,    0.18)"
+
+    fourier = Fourier(2)
+    unit_tests(fourier, "F1", bogus_list, bogus_dict, log_line, pvalue = (555, 555), base_out = base_out)
     
-    fourier.update_from_log(log_line)
-    print(fourier)
 
 
-# In[ ]:
-
-
-if __name__ == "__main__":
-    arms.add_skip(skip_val = 1)
-    fourier.add_skip(skip_val = 1)
-    
-    # We should see an RZ, FZ which is nonsensical but when we write to file
-    # the power and fourier functions simply won't show
-
-    print(arms)
-    print(fourier)
-    
-    bulge.to_file(f"{base_out}_PowerFourierSkip.txt", arms, fourier)
-
-
-# In[ ]:
+# In[19]:
 
 
 if __name__ == "__main__":
@@ -1286,12 +1241,6 @@ if __name__ == "__main__":
  2) 1.264e-02      1       #  dsky/dx (sky gradient in x)     [ADUs/pix]
  3) 1.813e-02      1       #  dsky/dy (sky gradient in y)     [ADUs/pix]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)""".split("\n")
-
-    sky = Sky(3)
-    sky.from_file_helper(bogus_list)
-    #sky.update_param_values()
-    sky.to_file(f"{base_out}_Sky.txt")
-    print(sky)
     
     bogus_dict = eval("""{'COMP_3': 'sky',
  '3_XC': '[67.0000]',
@@ -1299,27 +1248,25 @@ if __name__ == "__main__":
  '3_SKY': '1133.4166 +/- 0.1595',
  '3_DSDX': '0.0119 +/- 0.0048',
  '3_DSDY': '-0.0131 +/- 0.0047'}""")
-
-    sky.from_file_helper(bogus_dict)
-    #sky.update_param_values()
-    print(sky)
-    
-    sky_df = sky.to_pandas()
-    print(sky_df)
-    print()
-    sky_df.iloc[0,0] = 111
-    sky_df.iloc[0,1] = 112
-    sky_df.iloc[0,2] = 113
-    sky.from_pandas(sky_df)
-    print(sky)
     
     log_line = "sky       : [ 63.00,  63.00]  1130.51  -4.92e-02  1.00e-02"
     
-    sky.update_from_log(log_line)
-    print(sky)
+    sky = Sky(3)
+    unit_tests(sky, "sky_background", bogus_list, bogus_dict, log_line, base_out = base_out)
+    
 
 
-# In[ ]:
+# In[20]:
+
+
+if __name__ == "__main__":
+    print(f"Checking load_all_components() function{end_str}")
+    for component_name, component in load_all_components().items():
+        print(component_name)
+        print(component)
+
+
+# In[21]:
 
 
 if __name__ == "__main__":

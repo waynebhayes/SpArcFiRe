@@ -51,7 +51,7 @@ python3 "${SPARCFIRE_HOME}/GalfitModule/Utilities/grab_model_from_output.py" $pr
 
 ext="*.fits"
 conv_fits="-convert-FITS "
-img_standardize="1"
+#img_standardize="1"
 
 if [ -x "`/bin/which fitspng 2>/dev/null`" ]; then
     fitspng=$(/bin/which fitspng)
@@ -88,7 +88,7 @@ if [ -x "`/bin/which fitspng 2>/dev/null`" ]; then
     
     ext="*.png"
     conv_fits=""
-    img_std="0"
+    #img_std="0"
 fi
 
 # Prep for parallel
@@ -110,7 +110,7 @@ for (( cpu_num=0; cpu_num<$cpu_count; ++cpu_num )); do
     # Also no need for star masking
     # Pad images to even so that we can turn off image standardization
     if [[ $arr_start -lt $input_count ]]; then
-        echo "${SPARCFIRE_HOME}/scripts/SpArcFiRe ${conv_fits}-compute-starmask false -ignore-starmask $new_dir $default_tmp $default_out -generateFitQuality 0 -writeBulgeMask 1 -allowArcBeyond2pi 0 -unsharpMaskAmt 8 -useDeProjectStretch 0 -fixToCenter 1 -errRatioThres 3 -medFiltRad 0 -useImageStandardization $img_std"
+        echo "${SPARCFIRE_HOME}/scripts/SpArcFiRe ${conv_fits}-compute-starmask false -ignore-starmask $new_dir $default_tmp $default_out -generateFitQuality 0 -writeBulgeMask 1 -allowArcBeyond2pi 0 -unsharpMaskAmt 8 -useDeProjectStretch 0 -fixToCenter 0 -medFiltRad 0 -useImageStandardization 1 -numOrientationFieldLevels 4"
     fi
     
     arr_start=$(( $cpu_num*$per_cpu  ))

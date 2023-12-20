@@ -1,19 +1,19 @@
 
-#  Input menu file: /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-out/1237667735565238388/1237667735565238388.in
+#  Input menu file: /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/m14m14_1237667735565238388_bulge.in
 
-#  Chi^2/nu = 1.552,  Chi^2 = 8093.758,  Ndof = 5215
+#  Chi^2/nu = 1.533,  Chi^2 = 8012.679,  Ndof = 5228
 
 ================================================================================
 # IMAGE and GALFIT CONTROL PARAMETERS
 A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237667735565238388.fits      # Input data image (FITS file)
-B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237667735565238388_galfit_out.fits      # Output data image block
+B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/m14m14_1237667735565238388_galfit_out.fits      # Output data image block
 C) none                # Sigma image name (made from data if blank or "none") 
-D) 1237667735565238388_psf.fits          # Input PSF image and (optional) diffusion kernel
+D) ./test-out/1237667735565238388/1237667735565238388_psf.fits          # Input PSF image and (optional) diffusion kernel
 E) 1                   # PSF fine sampling factor relative to data 
 F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237667735565238388_star-rm.fits      # Bad pixel mask (FITS image or ASCII coord list)
 G) none                # File with parameter constraints (ASCII file) 
 H) 12   84   11   83   # Image region to fit (xmin xmax ymin ymax)
-I) 50     50           # Size of the convolution box (x y)
+I) 52     52           # Size of the convolution box (x y)
 J) 24.8000             # Magnitude photometric zeropoint 
 K) 0.3960  0.3960      # Plate scale (dx dy)   [arcsec per pixel]
 O) regular             # Display type (regular, curses, both)
@@ -39,44 +39,21 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 # Component number: 1
  0) sersic                 #  Component type
  1) 47.5102  47.1619  0 0  #  Position x, y
- 3) 20.0710     1          #  Integrated magnitude 
- 4) 40.8733     1          #  R_e (effective radius)   [pix]
- 5) 19.3500     1          #  Sersic index n (de Vaucouleurs n=4) 
+ 3) 13.3816     1          #  Integrated magnitude 
+ 4) 8.9974      1          #  R_e (effective radius)   [pix]
+ 5) 1.4836      1          #  Sersic index n (de Vaucouleurs n=4) 
  6) 0.0000      0          #     ----- 
  7) 0.0000      0          #     ----- 
  8) 0.0000      0          #     ----- 
- 9) 0.0471      1          #  Axis ratio (b/a)  
-10) 43.5927     1          #  Position angle (PA) [deg: Up=0, Left=90]
+ 9) 0.7442      1          #  Axis ratio (b/a)  
+10) -64.4674    1          #  Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 # Component number: 2
- 0) sersic                 #  Component type
- 1) 47.5100  47.1600  0 0  #  Position x, y
- 3) 13.3022     1          #  Integrated magnitude 
- 4) 9.2261      1          #  R_e (effective radius)   [pix]
- 5) 1.5916      1          #  Sersic index n (de Vaucouleurs n=4) 
- 6) 0.0000      0          #     ----- 
- 7) 0.0000      0          #     ----- 
- 8) 0.0000      0          #     ----- 
- 9) 0.9175      1          #  Axis ratio (b/a)  
-10) -59.8607    1          #  Position angle (PA) [deg: Up=0, Left=90]
-
-R0) power                  #  PA rotation func. (power, log, none)
-R1) 0.0000      0          #  Spiral inner radius [pixels]
-R2) 5.8504      0          #  Spiral outer radius [pixels]
-R3) -45.9089    1          #  Cumul. rotation out to outer radius [degrees]
-R4) 3.6563      1          #  Asymptotic spiral powerlaw 
-R9) -28.5369    1          #  Inclination to L.o.S. [degrees]
-R10) 19.9626    1          #  Sky position angle
-F1) 0.0587   87.9230  1 1  #  Azim. Fourier mode 1, amplitude, & phase angle
-F3) 0.0186   -54.8706 1 1  #  Azim. Fourier mode 3, amplitude, & phase angle
- Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
-
-# Component number: 3
  0) sky                    #  Component type
- 1) 1114.4858    1          #  Sky background at center of fitting region [ADUs]
- 2) -1.570e-02     1       #  dsky/dx (sky gradient in x)     [ADUs/pix]
- 3) 2.922e-03      1       #  dsky/dy (sky gradient in y)     [ADUs/pix]
+ 1) 1114.8693    1          #  Sky background at center of fitting region [ADUs]
+ 2) -1.503e-02     1       #  dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) 3.405e-03      1       #  dsky/dy (sky gradient in y)     [ADUs/pix]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 ================================================================================

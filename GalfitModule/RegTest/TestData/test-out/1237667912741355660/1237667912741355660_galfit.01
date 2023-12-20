@@ -1,19 +1,19 @@
 
-#  Input menu file: /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-out/1237667912741355660/1237667912741355660_disk.in
+#  Input menu file: /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/m16m14_1237667912741355660_bulge.in
 
 #  Chi^2/nu = 1.201,  Chi^2 = 5048.380,  Ndof = 4205
 
 ================================================================================
 # IMAGE and GALFIT CONTROL PARAMETERS
 A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237667912741355660.fits      # Input data image (FITS file)
-B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237667912741355660_galfit_out.fits      # Output data image block
+B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/m16m14_1237667912741355660_galfit_out.fits      # Output data image block
 C) none                # Sigma image name (made from data if blank or "none") 
-D) 1237667912741355660_psf.fits          # Input PSF image and (optional) diffusion kernel
+D) ./test-out/1237667912741355660/1237667912741355660_psf.fits          # Input PSF image and (optional) diffusion kernel
 E) 1                   # PSF fine sampling factor relative to data 
 F) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfit_masks/1237667912741355660_star-rm.fits      # Bad pixel mask (FITS image or ASCII coord list)
 G) none                # File with parameter constraints (ASCII file) 
 H) 17   81   18   82   # Image region to fit (xmin xmax ymin ymax)
-I) 50     50           # Size of the convolution box (x y)
+I) 52     52           # Size of the convolution box (x y)
 J) 24.8000             # Magnitude photometric zeropoint 
 K) 0.3960  0.3960      # Plate scale (dx dy)   [arcsec per pixel]
 O) regular             # Display type (regular, curses, both)

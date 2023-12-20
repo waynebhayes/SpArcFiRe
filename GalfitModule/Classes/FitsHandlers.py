@@ -58,9 +58,10 @@ else:
 
 sys.path.append(_MODULE_DIR)
 
-from Functions.helper_functions import *
-from Classes.Components import *
+#from Classes.Parameters import *
+#from Classes.Components import *
 from Classes.Containers import *
+from Functions.helper_functions import *
 
 
 # In[4]:
@@ -128,19 +129,20 @@ class FitsFile:
         # FITS starts the index at 0 but GALFIT outputs the observation image at 1
         # Also converting the header to a dict to save some trouble
         try:
-            self.header = dict(file_in[1].header)
-            self.data   = file_in[1].data
+            self.header   = dict(file_in[1].header)
+            self.data     = file_in[1].data
             self.num_imgs = len(file_in) - 1
+            
         except IndexError:
-            self.header = dict(file_in[0].header)
-            self.data   = file_in[0].data
+            self.header   = dict(file_in[0].header)
+            self.data     = file_in[0].data
             self.num_imgs = 1       
         
         hdu = HDU(name = name, header = self.header, data = self.data)
-        self.observation = hdu
         
         self.all_hdu  = {name : hdu}
-        self.file = file_in
+        #self.observation = hdu
+        self.file     = file_in
         
         # Wait is for continuing to use the file in some other capacity
         # i.e. for outputfits below to grab more info
@@ -149,6 +151,39 @@ class FitsFile:
         
         #print("Did it close?", file_in.closed)
         # assert hdu_num == 4, "File being passed into FitsHandler has too few output HDUs."
+# ==========================================================================================================
+
+    def check_hdu_type(self, hdu):
+        assert isinstance(hdu, HDU), "Input HDU is not an HDU class!"
+        
+# ==========================================================================================================
+    @property
+    def observation(self):
+        return self.all_hdu.get("observation", None)
+    
+    @observation.setter
+    def observation(self, new_hdu):
+        self.check_hdu_type(new_hdu)
+        self.all_hdu["observation"] = new_hdu
+        
+    @property
+    def model(self):
+        return self.all_hdu.get("model", None)
+    
+    @model.setter
+    def model(self, new_hdu):
+        self.check_hdu_type(new_hdu)
+        self.all_hdu["model"] = new_hdu
+        
+    @property
+    def residual(self):
+        return self.all_hdu.get("residual", None)
+    
+    @residual.setter
+    def residual(self, new_hdu):
+        self.check_hdu_type(new_hdu)
+        self.all_hdu["residual"] = new_hdu
+
 # ==========================================================================================================
 
     #def close(self):
@@ -176,29 +211,29 @@ class FitsFile:
 
     def to_png(self, cleanup = True, **kwargs): #tmp_fits_path = "", tmp_png_path = "", out_filename = ""):
         
-        gname         = kwargs.get("gname", self.gname)
+        gname          = kwargs.get("gname", self.gname)
         
         # TODO: BAD ASSUMPTION MOVING FORWARD
         #tmp_fits_path = kwargs.get("tmp_fits_path", self.filepath)
-        fits_path = kwargs.get("fits_path", self.filepath)
+        fits_path      = kwargs.get("fits_path", self.filepath)
         # .../galfits -> galfit_png
         #tmp_png_dir   = os.path.split(tmp_fits_path)[0].rstrip("s") + "_png"
-        tmp_png_dir   = kwargs.get("tmp_png_dir", "./")
-        tmp_png_path  = pj(tmp_png_dir, gname)
-        tmp_png_path  = kwargs.get("tmp_png_path", tmp_png_path)
+        tmp_png_dir    = kwargs.get("tmp_png_dir", "./")
+        tmp_png_path   = pj(tmp_png_dir, gname)
+        tmp_png_path   = kwargs.get("tmp_png_path", tmp_png_path)
         
-        out_png_dir   = kwargs.get("out_png_dir", "./")
+        out_png_dir    = kwargs.get("out_png_dir", "./")
         
         capture_output = bool(kwargs.get("silent", False))
         
-        fitspng_param = "0.25,1" #1,150"
+        fitspng_param  = "0.25,1" #1,150"
         
         # run_fitspng from helper_functions, string path to fitspng program
-        fitspng_cmd1 = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}.png {fits_path}[1]"
+        fitspng_cmd1   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}.png {fits_path}[1]"
         
-        fitspng_cmd2 = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}_out.png {fits_path}[2]"
+        fitspng_cmd2   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}_out.png {fits_path}[2]"
         
-        fitspng_cmd3 = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}_residual.png {fits_path}[3]"
+        fitspng_cmd3   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}_residual.png {fits_path}[3]"
         
         cmds = [fitspng_cmd1, fitspng_cmd2, fitspng_cmd3]
         
@@ -274,17 +309,17 @@ class FitsFile:
         
 # ==========================================================================================================
 
-    def update_params(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+#     def update_params(self, **kwargs):
+#         for key, value in kwargs.items():
+#             setattr(self, key, value)
 
 
-# In[6]:
+# In[25]:
 
 
 class OutputFits(FitsFile):
 
-    def __init__(self, filepath, names = []):
+    def __init__(self, filepath, names = [], load_default = True):
         
         FitsFile.__init__(self, filepath = filepath, wait = True)
         
@@ -302,15 +337,14 @@ class OutputFits(FitsFile):
             self.all_hdu[name] = hdu
             
         # For convenience, we usually use the model here
-            
-        self.update_params(**self.all_hdu) 
+        #self.update_params(**self.all_hdu) 
         
         # Dict is very redundant here but just for funsies
+        # FITS header not Feedme header
         self.header = dict(self.model.header)
-        _header = GalfitHeader()
         # Can call the helper directly since we're just using the header dict
-        _header.from_file_helper(self.header)
-        self.feedme = FeedmeContainer(path_to_feedme = filepath, header = _header)
+        #_header.from_file_helper_dict(self.header)
+        self.feedme = FeedmeContainer(path_to_feedme = filepath, header = GalfitHeader(), load_default = load_default)
         self.feedme.from_file(self.header)
         
         self.data = self.model.data
@@ -327,6 +361,7 @@ class OutputFits(FitsFile):
         
         # Thanks Azra!
         bulge_mask = np.ones(np.shape(self.model.data))
+        
         try:
             info = pd.read_csv(sparcfire_csv, dtype = str).dropna()
         except FileNotFoundError as fe:
@@ -353,12 +388,12 @@ class OutputFits(FitsFile):
         major_rad = int(bulge_rad * len(self.model.data[0]) // input_size) + 1
         minor_rad = int(major_rad/axis_ratio)
 
-        crop_box = self.feedme.header.region_to_fit
+        crop_box = self.feedme.header.region_to_fit.value
         # To adjust for python indexing
         xbox_min, ybox_min = crop_box[0] - 1, crop_box[2] - 1
         
         # Shifting everything to origin
-        center_x, center_y = np.array(self.feedme.bulge.position, dtype = int) - 1 -\
+        center_x, center_y = np.array(self.feedme.bulge.position.value, dtype = int) - 1 -\
                              np.array((xbox_min, ybox_min), dtype = int)
         
         # center_x2, bulge_y2 = np.array(self.feedme.bulge.position, dtype = int) - \
@@ -392,25 +427,51 @@ class OutputFits(FitsFile):
 
         small_number = 1e-8
         
-        crop_box = self.feedme.header.region_to_fit
+        crop_box = self.feedme.header.region_to_fit.value
         # To adjust for python indexing
         # Also, reminder, non-inclusive of end
         xbox_min, xbox_max, ybox_min, ybox_max = crop_box[0] - 1, crop_box[1], crop_box[2] - 1, crop_box[3]
-
         # To invert the matrix since galfit keeps 0 valued areas
         crop_mask = 1
         if mask is not None and np.any(mask.data):
-            crop_mask = 1 - mask.data[xbox_min:xbox_max, ybox_min:ybox_max]
+            cropped_mask = mask.data[xbox_min:xbox_max, ybox_min:ybox_max]
+            mask_shape = np.shape(mask.data)
+            # Fixing two common issues, hence two if statements
+            if np.shape(cropped_mask) != np.shape(self.model.data):
+                # The issue seems to pop up at the max border when either the min or the max runs up
+                # against the original image size
+                print("Shape mismatch between crop mask and model. Likely an indexing issue due to crop mask running into image bounds. Attempting to fix.")
+                diff = np.array(np.shape(cropped_mask)) - np.array(np.shape(self.model.data))
+                # One or the other... No graceful way to do this
+                if xbox_min == 0:
+                    xbox_max -= diff[0]
+                else:
+                    xbox_min -= diff[0]
+                    
+                if ybox_min == 0:
+                    ybox_max -= diff[0]
+                else:
+                    ybox_min -= diff[0]
+                
+                cropped_mask = mask.data[xbox_min:xbox_max, ybox_min:ybox_max]
+                
+            # Now we're just trying to brute force it and hope for the best
+            if np.shape(cropped_mask) != np.shape(self.model.data):
+                print("Shape mismatch (again) between crop mask and model. Likely an indexing issue due to crop mask running into image bounds. Attempting to fix.")
+                diff = np.abs(np.array(np.shape(cropped_mask)) - np.array(np.shape(self.model.data)))
+                cropped_mask = np.pad(cropped_mask, ((diff[0],0), (diff[1],0)), 'constant')
+                
+            crop_mask = 1 - cropped_mask
             
         if use_bulge_mask:
             feedme_dir, feedme_file = os.path.split(self.feedme.path_to_feedme)
             
             if exists(pj(feedme_dir, f"{self.gname}.csv")):
-                crop_mask *= self.generate_bulge_mask(pj(feedme_dir, f"{self.gname}.csv"))
+                crop_mask = self.generate_bulge_mask(pj(feedme_dir, f"{self.gname}.csv")) * crop_mask
             else:
                 # REQUIRES GENERATE_BULGE_MASK TO BE RUN SEPARATE WITH CSV FILE SPECIFIED 
                 try:
-                    crop_mask *= self.bulge_mask
+                    crop_mask = self.bulge_mask * crop_mask
                 except AttributeError:
                     print(f"Could not generate bulge mask for {self.gname}. Check location of csv or run generate_bulge_mask with a specified csv file.")
                 except ValueError:
@@ -490,9 +551,9 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     
     gname = "1237671124296532233"
-    obs   = pj(TEST_DATA_DIR, "test-in", f"{gname}.fits")
-    model = pj(TEST_DATA_DIR, "test-out", gname, f"{gname}_galfit_out.fits")
-    mask  = pj(TEST_DATA_DIR, "test-out", gname, f"{gname}_star-rm.fits")
+    obs   = pj(SAMPLE_DIR, f"{gname}.fits")
+    model = pj(SAMPLE_DIR, f"{gname}_galfit_out.fits")
+    mask  = pj(SAMPLE_DIR, f"{gname}_star-rm.fits")
     
     test_obs   = FitsFile(obs)
     test_model = OutputFits(model)
@@ -524,7 +585,7 @@ if __name__ == "__main__":
     print(np.shape(test_model.observation.data))
     print(np.shape(test_model.data))
     print(np.shape(test_model.residual.data))
-    crop_box = test_model.feedme.header.region_to_fit
+    crop_box = test_model.feedme.header.region_to_fit.value
     # + 1 to account for python indexing
     crop_rad = crop_box[1] - crop_box[0] + 1
     print(f"({crop_rad}, {crop_rad})")
@@ -561,10 +622,11 @@ if __name__ == "__main__":
     #print(np.min(test_model.observation.data))
 
 
-# In[14]:
+# In[10]:
 
 
 if __name__ == "__main__":
+    model           = pj(SAMPLE_DIR, f"sample_model_galfit_out.fits")
     model_to_update = pj(TEST_OUTPUT_DIR, f"temp_galfit_out.fits")
     
     if exists(model_to_update):
@@ -578,7 +640,8 @@ if __name__ == "__main__":
     print("Does the updated FITS file contain NMR and KStest keys?")
     keys_to_check = ("NMR", "KS_P", "KS_STAT")
     
-    print("Before...", all(k in test_model.header for k in keys_to_check))
+    # TODO: replace fits file with one without those header options
+    print("Before... (expect False)", all(k in test_model.header for k in keys_to_check))
     
     _ = test_model.generate_masked_residual(test_mask)
     test_model = OutputFits(model_to_update)

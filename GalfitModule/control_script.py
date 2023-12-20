@@ -3,9 +3,7 @@
 
 # **Author: Matthew Portman**
 # 
-# **Date (Github date will likely be more accurate): 4/17/23**
-
-# In[1]:
+# **Date (Github date will likely be more accurate): 11/29/23**
 
 
 import sys
@@ -23,9 +21,6 @@ import pickle
 import joblib
 
 
-# In[2]:
-
-
 # For debugging purposes
 from IPython import get_ipython
 def in_notebook():
@@ -35,10 +30,6 @@ def in_notebook():
         return True
     else:
         return False
-
-
-# In[3]:
-
 
 _HOME_DIR = os.path.expanduser("~")
 if in_notebook():
@@ -63,30 +54,28 @@ else:
     
 sys.path.append(_MODULE_DIR)
 
-from Classes.Components import *
-from Classes.Containers import *
-from Functions.helper_functions import *
-import Utilities.parallel_residual_calc as parallel_residual_calc
-import Utilities.combine_via_parallel as combine_via_parallel
-
 # This should give me numpy and pandas and whatnot
 # also gives this, from os.path import join as pj
 from sparc_to_galfit_feedme_gen import *
 import go_go_galfit
 
+#from Classes.Components import *
+from Classes.Containers import *
+from Functions.helper_functions import *
+import Utilities.parallel_residual_calc as parallel_residual_calc
+import Utilities.combine_via_parallel as combine_via_parallel
 
-# In[ ]:
-
-
+# Separations were previously code blocks in jupyter notebook
+# ==========================================================================================================
+# Parse input
+# ==========================================================================================================
 if __name__ == "__main__":
-    # TODO: Add run_dir? and default to cwd if not specified
     
-    # Force >python 3.7 for various compatabilities
-    out_str = "\t Python3.7 or greater required! Exitting without generating feedmes..."
-    assert sys.version_info >= (3, 7), out_str
+    # out_str = "\t Python3.7 or greater required! Exitting without generating feedmes..."
+    # assert sys.version_info >= (3, 7), out_str
     
-    cwd = absp(os.getcwd()) # Doesn't work *in* notebook
-    old_cwd = absp(cwd) # Strings are immutable
+    cwd = absp(os.getcwd())
+    old_cwd = absp(cwd)
     
     username = os.environ["USER"]
     
@@ -102,7 +91,7 @@ if __name__ == "__main__":
               [-r | --restart]
               [-nsf | --no-simultaneous-fitting]
               [-v | --verbose]
-              [-n | --name]
+              [-n | --basename]
 
     This script is the wrapping script for running GALFIT using SpArcFiRe to inform 
     the input. By default, it runs from the RUN (or current) directory and uses the
@@ -160,8 +149,8 @@ if __name__ == "__main__":
                         default  = 2,
                         help     = 'Run GALFIT using step-by-step component selection (up to 3), i.e.\n\t\
                                     1: Bulge + Disk + Arms,\n\t\
-                                    2: Bulge -> Bulge + Disk + Arms,\n\t\
-                                    3: Bulge -> Bulge + Disk -> Bulge + Disk + Arms'
+                                    2: Disk -> Bulge + Disk + Arms,\n\t\
+                                    3: Disk -> Bulge + Disk -> Bulge + Disk + Arms'
                        )
     
     parser.add_argument('-r', '--restart',
@@ -193,7 +182,7 @@ if __name__ == "__main__":
                         action   = 'store_const',
                         const    = True,
                         default  = False,
-                        help     = 'Verbose output for all bash commands in control script.'
+                        help     = 'Verbose output. Includes stdout.'
                        )
     
     parser.add_argument(dest     = 'paths',
@@ -277,11 +266,9 @@ if __name__ == "__main__":
     # Changing to specified working dir
     os.chdir(cwd)
 
-
-# ## Checking file directories and installed programs
-
-# In[ ]:
-
+# ==========================================================================================================
+# Checking file directories and installed programs
+# ==========================================================================================================
 
 if __name__ == "__main__":
     # Checking dirs
@@ -296,28 +283,15 @@ if __name__ == "__main__":
     if not in_notebook():
         # This is in helper_functions
         run_galfit, run_fitspng, run_python = check_programs()
-#         # This seems to work in Python directly so I'm leaving it as-is
-#         # Checking galfit
-#         run_galfit = shutil.which("galfit")
-#         #run_galfit = response.stdout.strip()
-        
-#         # Checking fitspng
-#         run_fitspng   = shutil.which("fitspng")
-#         fitspng_param = "0.25,1" #1,150"
-        
-#         # Checking exact python3 call
-#         run_python = shutil.which("python3")
 
     else:
         run_galfit  = pj(_HOME_DIR, ".local/bin/galfit")
         run_fitspng = pj(_HOME_DIR, ".local/bin/fitspng")
         run_python  = "/opt/conda/bin/python3"
 
-
-# ## Setting up directories and handy variables
-
-# In[ ]:
-
+# ==========================================================================================================
+# Setting up directories and handy variables
+# ==========================================================================================================
 
 if __name__ == "__main__":
     # Setting up paths and variables
@@ -342,12 +316,9 @@ if __name__ == "__main__":
                 print("Continuing...")
                 break
         
-    #need_masks_dir  = pj(tmp_dir, "need_masks")
-    
-    #all_galfit_out = pj(out_dir, "all_galfit_out")
     out_png_dir     = pj(out_dir, "galfit_png")
     
-    # Should be same as SpArcFiRe's but I'm packaging it with just in case
+    # Minor changes to SpArcFiRe's version
     star_removal_path = pj(_MODULE_DIR, "star_removal")
     
     if parallel == 1:
@@ -375,34 +346,25 @@ if __name__ == "__main__":
                                #tmp_psf_dir, 
                                tmp_png_dir, 
                                out_png_dir
-                              )#, 
-                               #need_masks_dir) 
+                              )
          if not exists(i)
         ]
     
     if simultaneous_fitting:
         _ = [os.mkdir(i) for i in (sf_tmp_dir, 
                                    sf_masks_dir
-                                  )#, 
-                               #need_masks_dir) 
+                                  )
          if not exists(i)
         ]
     
-    # makedirs will make both at once, handy!
-    #if not exists(out_png): os.makedirs(out_png)
-
-
-# ## Running sextractor (if necessary)
-
-# In[ ]:
-
+# ==========================================================================================================
+# Finding input FITS files (observations), shuffling things around from SpArcFiRe
+# ==========================================================================================================
 
 if __name__ == "__main__":    
     # Grabbing list of file names and masks with bash variable expansion
     print("Setting up, finding files...")
-    # input_filenames = glob.glob(pj(in_dir, "*.fits"))
-    # output_folders  = glob.glob(pj(out_dir, "123*/"))
-    # star_masks      = glob.glob(pj(tmp_dir, "*_star-rm.fits"))
+
     input_filenames = find_files(in_dir, "*.fits", "f")
     if not input_filenames:
         print(f"No input files found in {in_dir}. Is something wrong?")
@@ -414,31 +376,14 @@ if __name__ == "__main__":
                       ]
     
     star_masks      = find_files(tmp_dir, "*_star-rm.fits", "f")
-    
-    # The ONLY reason we need this is because of how remove_stars_with... works
-    # If we change that, the whole mess of code and operations that use can go away
-    # the need_masks_dir can go away
-    #in_need_masks   = glob.glob(pj(need_masks_dir, "*.fits"))
-#     in_need_masks    = find_files(need_masks_dir, "*.fits", "f")
-    
-#     check_need_masks = set(output_folders).intersection(
-#                        set([os.path.basename(i) for i in in_need_masks])
-#                                                         )
-#     if not check_need_masks:
-#         _ = sp(f"rm -rf {need_masks_dir}", capture_output = capture_output)
-#         os.mkdir(need_masks_dir)
-#         in_need_masks = []
-    
+       
     # Sparcfire plops them into tmp so I just move them to where I need them
     if star_masks and not restart:
         sp(f"mv {pj(tmp_dir,'*_star-rm.fits')} {tmp_masks_dir}", capture_output = capture_output)
-        
-    #star_masks = glob.glob(pj(tmp_masks_dir, "*_star-rm.fits"))
-    #star_masks      = find_files(tmp_masks_dir, "*_star-rm.fits", "f")
 
-
-# In[ ]:
-
+# ==========================================================================================================
+# Getting setup to generate starmasks
+# ==========================================================================================================
 
 if __name__ == "__main__":
     generate_starmasks = True
@@ -451,132 +396,10 @@ if __name__ == "__main__":
         if simultaneous_fitting and not exists(pj(sf_masks_dir, 'remove_stars_with_sextractor.log')):
             # remove_stars_with_sextractor needs this available before it can log
             _ = sp(f"touch {pj(sf_masks_dir, 'remove_stars_with_sextractor.log')}", capture_output = capture_output)
-        
-#         try:
-#             star_removal_path = pj(os.environ["SPARCFIRE_HOME"], "star_removal")
-            
-#         except KeyError as k:
-#             print("SPARCFIRE_HOME environment variable is not set.")
-#             print("Will use 'remove_stars_with_sextractor.py' from GalfitModule")
-#             print("If they have already been generated, ignore this message.")
-#             print()
-            
-        # else:
-        
-        # Compare against output folders because extra observations may be in input directory
-        # GALFIT can only run on what's there... I mean there are defaults for SpArcFiRe
-        # but this is the more appropriate choice. 
-        # Now done in go_go_galfit
-        # if len(output_folders) != len(star_masks):
-        #     print("The temp directory has a different number of star masks than the number of output directories.") 
-        # else:
-        #     generate_starmasks = False
-            
-# DEPRECATED
-                           
-#             print("Getting things ready to generate star masks...")
-#             #galaxy_folder_names = [os.path.basename(i.rstrip("/")) for i in output_folders]
-#             #star_mask_names = [os.path.basename(i) for i in star_masks]
-            
-#             parallel_copy_input = "parallel_copy_inputs"
-#             if parallel:
-#                 if exists(parallel_copy_input):
-#                     _ = sp(f"rm {parallel_copy_input}", capture_output = capture_output)
 
-#                 _ = sp(f"touch {parallel_copy_input}", capture_output = capture_output)
-
-#                 sci = open(parallel_copy_input, "a")
-                
-#             # TODO: Could also tar then transfer(?)
-#             if len(in_need_masks) + len(star_mask_names) != len(output_folders):
-#                 print("Copying input galaxies without masks to 'need_masks' in tmp folder")
-#                 for gname in galaxy_folder_names:
-#                     star_mask_filename = f"{gname}_star-rm.fits"
-#                     in_file = f"{gname}.fits"
-#                     cp_cmd = f"cp -uv {pj(in_dir, in_file)} {need_masks_dir}"
-
-#                     if in_file in in_need_masks:
-#                         continue
-                    
-#                     # This is probably unecessary but keeping just in case
-#                     elif in_file.split(".fits")[0] not in galaxy_folder_names:
-#                         _ = sp(f"rm -f {pj(need_masks_dir, in_file)}", capture_output = capture_output)
-
-#                     elif star_mask_filename not in star_mask_names:
-
-#                         if parallel:
-#                             cp_cmd += "\n"
-#                             sci.write(cp_cmd)
-
-#                         else:
-#                             try:
-#                                 shutil.copy2(pj(in_dir, in_file), need_masks_dir)
-#                             except FileNotFoundError:
-#                                 print(f"Could not find {gname} in {in_dir}. Continuing...")
-#                             #result = sp(f"cp -u {pj(need_masks_dir, in_file)}", capture_output = True)
-#                             # if result.stderr:
-#                             #     print(f"Could not find {gname} in {in_dir}, {result.stderr}. Continuing...")
-#                     else:
-#                         # To remove extras, print out the rest of this list
-#                         star_mask_names.remove(star_mask_filename)
-#                         _ = sp(f"rm -f {pj(need_masks_dir, in_file)}", capture_output = capture_output)
-
-#                 if parallel:
-#                     sci.close()
-
-#                     extra_parallel = ""
-#                     if verbose:
-#                         extra_parallel = "-v"
-
-#                     parallel_run_name = "COPYING_INPUT_FILES"
-#                     parallel_run_cmd = f"cat {parallel_copy_input} | {pipe_to_parallel_cmd} {parallel_run_name} -M all {extra_parallel}"
-#                     # Running without timeout for now
-#                     print("Performing the copy with parallel...")
-#                     _ = sp(f"{parallel_run_cmd}", capture_output = capture_output)
-                
-#             print("Generating starmasks...")
-#             os.chdir(star_removal_path)
-#             out_text = sp(f"python3 {pj(star_removal_path, 'remove_stars_with_sextractor.py3')} {need_masks_dir} {tmp_masks_dir}", capture_output = capture_output)
-#             os.chdir(cwd)
-            
-#             #star_masks = glob.glob(pj(tmp_masks_dir, "*_star-rm.fits"))
-#             star_masks = find_files(tmp_masks_dir, "*_star-rm.fits", "f")
-#             issue_masking_gnames = [os.path.basename(sm).rstrip("_star-rm.fits") 
-#                                     for sm in star_masks
-#                                     if sm not in galaxy_folder_names
-#                                    ]
-            
-#             # GALFIT can still run on these galaxies without a mask 
-#             # so I don't have to worry about letting it know
-#             if issue_masking_gnames:
-#                 issue_file = pj(tmp_dir, "issue_masking.txt")
-                
-#                 # This is so that I don't have to generate all star masks again...
-#                 with open(issue_file, "w") as f:
-#                     for im in issue_masking_gnames:
-#                         _ = sp(f"touch {pj(tmp_masks_dir, im)}-failed_star-rm.fits")
-#                         f.write(im)
-                    
-#                 print("Could not produce a star mask for all galaxies")
-#                 print(f"See {issue_file} for more details, creating empties...")
-            
-#             if out_text.stderr:
-#                 print(f"Something went wrong running 'remove_stars_with_sextractor.py'! Printing debug info...")
-#                 print(out_text)
-#                 #print(type(out_text.stderr))
-#             else:
-#                 print("Star masks have been generated successfully.")
-#                 print()
-                
-    # else:
-    #     generate_starmasks = False
-    #     print("Star masks have already been generated, proceeding.")
-
-
-# ## Galfitting!
-
-# In[ ]:
-
+# ==========================================================================================================
+# write_to_parallel function sets up a text file for piping to parallel scripts
+# ==========================================================================================================
 
 def write_to_parallel(cwd, 
                    kwargs_main, 
@@ -609,7 +432,9 @@ def write_to_parallel(cwd,
     sp(f"chmod a+x {parallel_file}", capture_output = capture_output)
 
 
-# In[ ]:
+# ==========================================================================================================
+# check_galfit_out_hangups function checks for output being successful/insuccessful
+# ==========================================================================================================
 
 
 def check_galfit_out_hangups(tmp_fits_dir, out_dir, kwargs_main):
@@ -625,9 +450,9 @@ def check_galfit_out_hangups(tmp_fits_dir, out_dir, kwargs_main):
     # because it's good practice...
     return kwargs_main
 
-
-# In[ ]:
-
+# ==========================================================================================================
+# write_failed function writes a list of failures to file :(
+# ==========================================================================================================
 
 def write_failed(failed_dir = cwd, failures = []):
     if failures:
@@ -638,14 +463,11 @@ def write_failed(failed_dir = cwd, failures = []):
             ff.writelines("\n".join(failures))
             ff.write("\n")
 
-
-# In[ ]:
-
+# ==========================================================================================================
+# GALFITting! Here it all comes together.
+# ==========================================================================================================
 
 if __name__ == "__main__":    
-    #print("Finding all galaxies...")
-    # galaxy_names = [os.path.basename(i).rstrip(".fits") 
-    #                 for i in input_filenames]
     
     # Replace is safer than rstrip because rstrip could remove those characters
     # from the end of the filename
@@ -712,8 +534,7 @@ if __name__ == "__main__":
     kwargs_main = check_galfit_out_hangups(tmp_fits_dir, out_dir, kwargs_main)
     parallel_file = "parallel_cmd_file"
     
-#    raise(AssertionError())
-    # One at a time
+    # Getting read for parallelizing
     if parallel:
         if not kwargs_main["galaxy_names"] and not restart:
             print("No galaxies to fit, exitting.")
@@ -736,19 +557,21 @@ if __name__ == "__main__":
             # For SLURM/Cluster Computing
             parallel_run_name = "GALFITTING"
             # Slurm needs different timeout limits
-            timeout = 60 # Minutes
-            parallel_options  = f"-M all -t {timeout}"
+            timeout = 480 # Minutes
+            # TODO: Consider SLURM + CPU parallel
+            parallel_options  = f"-M all --ntasks-per-node=1 -t {timeout}"
             parallel_verbose  = "-v" if verbose else ""
             chunk_size = 20
 
             
-        parallel_run_cmd = f"cat {parallel_file} | {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
+        # Running things via distributed computing           
+        parallel_run_cmd = f"cat {parallel_file} | nice -19 {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
         
         if not restart:
             write_to_parallel(cwd, kwargs_main, parallel_file = parallel_file, chunk_size = chunk_size)
             print("Galfitting via parallelization...")
             try:
-                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout = 60*(timeout + 1))
+                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout = (timeout + 1) * 60)
             except subprocess.TimeoutExpired:
                 print("Timed out.")
                 pass
@@ -759,6 +582,7 @@ if __name__ == "__main__":
         else:
             print("Restart fitting commencing")
         
+        # Just in case something happened on one of the nodes i.e. too slow/frozen/etc.
         count = 2
         while kwargs_main["galaxy_names"] and count < 10:
             if not restart:
@@ -769,7 +593,7 @@ if __name__ == "__main__":
             
             try:
                 print("Piping to parallel")
-                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout = 60*(timeout + 1))
+                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout = (timeout + 1)* 60)
             except subprocess.TimeoutExpired:
                 pass
             
@@ -781,25 +605,20 @@ if __name__ == "__main__":
             print("Did not finish all galaxies. There is likely an error. Check parallel output files if possible. Restart with -r option.")
             print("Quitting.")
             sys.exit()
-            
-#             run_galfit.main(cwd          = cwd,
-#                             in_dir       = in_dir,
-#                             tmp_dir      = tmp_dir,
-#                             out_dir      = out_dir,
-#                             num_steps    = num_steps,
-#                             rerun        = rerun,
-#                             galaxy_names = gname
-#                            )
         
+    # Running in serial
     else:
         failures = go_go_galfit.main(**kwargs_main, 
-                                     run_galfit = run_galfit, 
+                                     run_galfit  = run_galfit, 
                                      run_fitspng = run_fitspng, 
-                                     run_python = run_python)
+                                     run_python  = run_python
+                                    )
         
         write_failed(out_dir, failures)
 
-    # Unused but here for a good time
+# ==========================================================================================================
+# Unused but here for a good time
+# ==========================================================================================================
     boom = """Numerical Recipes run-time error...
 gaussj: Singular Matrix-1
 ...now exiting to system...
@@ -830,10 +649,10 @@ gaussj: Singular Matrix-1
    too small/big, Nuker powerlaw too small/big.  If frustrated or
    problem should persist, email for help or report problem to:
                      Chien.Y.Peng@gmail.com"""
-# ## Tidying Up in case anything is leftover
-
-# In[ ]:
-
+    
+# ==========================================================================================================
+# Tidying Up in case anything is leftover
+# ==========================================================================================================
 
 if __name__ == "__main__":
     print("Cleaning up...")
@@ -847,17 +666,15 @@ if __name__ == "__main__":
         #_ = sp(f"rm {parallel_copy_input}", capture_output = capture_output)
 
 
-# ## Combining Residuals
-
-# In[ ]:
-
-
+# ==========================================================================================================
+# Combining Residuals
+# ==========================================================================================================
 if __name__ == "__main__":
-    #basename = "GALFIT"
     pkl_end_str = "output_results"
     final_pkl_file = pj(out_dir, f"{basename}_{pkl_end_str}.pkl")
     num = 1
     
+    # Iterative naming for subsequent runs
     while exists(final_pkl_file) and num < 100:
         final_pkl_file = pj(out_dir, f"{basename}_{pkl_end_str}{num}.pkl")
         num += 1
@@ -869,9 +686,9 @@ if __name__ == "__main__":
         
     print(f"Combining all the residual calculations into {final_pkl_file}")
 
-    #all_nmr = {}
     output_df = pd.DataFrame()
     
+    # Piping to parallel again because we're already setup to do so
     if parallel:
         python_parallel   = pj(_MODULE_DIR, "Utilities", "combine_via_parallel.py")
         parallel_file     = "parallel_combine_residual"
@@ -889,6 +706,7 @@ if __name__ == "__main__":
             parallel_options  = "-M all"
 
         finished_pkl_num = 0
+        # Performing a similar check to that above for failures/success
         if restart:
             check_output_pkl = [int(os.path.basename(i).split("_")[0].replace(basename, "")) 
                                 for i in find_files(tmp_dir, f'{basename}*_{pkl_end_str}.pkl', "f")
@@ -913,7 +731,7 @@ if __name__ == "__main__":
 
         if count:
             print("parallelizing to combine residuals")
-            parallel_run_cmd = f"cat {parallel_file} | {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
+            parallel_run_cmd = f"cat {parallel_file} | nice -19 {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
             _ = sp(parallel_run_cmd, capture_output = capture_output)
 
         all_output_pkl = [pj(tmp_dir, fname) 
@@ -921,24 +739,14 @@ if __name__ == "__main__":
                           if fname != f"{basename}_{pkl_end_str}.pkl"
                          ]
         #_ = [all_nmr.update(pickle.load(open(file, 'rb'))) for file in all_output_pkl]
+        # Joining everything together
         out_df = pd.concat(
                            [pd.read_pickle(file) for file in all_output_pkl 
                             if os.path.basename(file) != f"{basename}_{pkl_end_str}.pkl"
                            ]
                           ) 
-        
+    # Serial
     else:
-        # for gname in galaxy_names:
-        #     output_file = pj(out_dir, gname, f"{gname}_galfit_out.fits")
-        #     if exists(output_file):
-        #         with fits.open(output_file) as hdul: 
-        #             all_nmr[gname] = (hdul[2].header.get("NMR", None), 
-        #                               hdul[2].header.get("ks_p", None),
-        #                               hdul[2].header.get("ks_stat", None)
-        #                              )
-        #basename         = args[0]
-        #out_dir          = args[1] #os.path.dirname(basename)
-        #galaxy_names     = args[2].split(",")
         
         # In this case it's not parallel but I'm just saving some hassle here
         out_df = combine_via_parallel.main("", pkl_end_str, out_dir, ",".join(galaxy_names))
@@ -959,36 +767,10 @@ if __name__ == "__main__":
         _ = sp(f"rm -f {pj(tmp_dir, basename)}*_{pkl_end_str}.pkl", capture_output = capture_output)
         _ = sp(f"rm -f {parallel_file}", capture_output = capture_output)
         
-    #_ = sp(f"mv {pickle_filename_temp} {pkl_file}", capture_output = capture_output)
-
-
-# In[ ]:
-
-
-# Deprecated
-# Combine the residuals now that they're in the headers
-    # print("Calculating residuals")
-    # parallel_residual_calc.main(run_dir           = cwd,
-    #                             # Don't actually need in_dir
-    #                             #in_dir            = in_dir,
-    #                             tmp_dir           = tmp_dir,
-    #                             out_dir           = out_dir,
-    #                             basename          = "GALFIT",
-    #                             parallel             = parallel,
-    #                             dont_remove_parallel = dont_remove_parallel,
-    #                             restart           = restart,
-    #                             verbose           = verbose,
-    #                             capture_output    = not verbose
-    #                            )
-    # if aggressive_clean:
-    #     # May need to use find and delete
-    #     print("Aggressively cleaning, removing star masks.")
-    #     _ = sp(f"rm -rf {pj(tmp_masks_dir)} {pj(tmp_png_dir)}", capture_output = capture_output)
-
-
-# In[ ]:
-
-
+        
+# ==========================================================================================================
+# Aggressively tidying up if necessary and moving back to original directory
+# ==========================================================================================================
 if __name__ == "__main__":
     if aggressive_clean:
         print("Final tidying...")
@@ -998,12 +780,3 @@ if __name__ == "__main__":
     print("All done!")
     # Moving back to original directory
     os.chdir(old_cwd)
-
-
-# In[ ]:
-
-
-if __name__ == "__main__":
-    # in_notebook() is checked in the export function
-    export_to_py("control_script_debug", pj(_MODULE_DIR, "control_script"))
-
