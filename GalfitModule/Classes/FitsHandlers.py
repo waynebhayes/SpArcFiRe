@@ -266,7 +266,7 @@ class FitsFile:
             
         # Combining the images using ImageMagick
         # If this is a single image, it'll also resize for me so that's why I leave it in
-        montage_cmd += f" -tile {tiling} -geometry \"175x175+2+2<\" \
+        montage_cmd += f" -tile {tiling} -geometry \"175x175+2+2\" \
                         {pj(out_png_dir, gname)}{combined}.png"
             
         _ = sp(montage_cmd, capture_output = capture_output)            
