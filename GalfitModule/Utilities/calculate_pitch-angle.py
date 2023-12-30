@@ -40,6 +40,7 @@ else:
     
 sys.path.append(_MODULE_DIR)
 
+from Classes.Parameters import *
 from Classes.Components import *
 from Classes.Containers import *
 from Classes.FitsHandlers import *
@@ -185,6 +186,7 @@ def plot_scatter(
     gname = str(galaxy_info.name[0])
     
     plt.clf()
+    plt.figure(figsize=(8, 6))
     plt.scatter(rgrid, pitch_angles)#, label='_nolegend_')
     plt.axvline(x = rgrid[inner_idx], color = 'mediumseagreen', alpha = 0.5)
     plt.axvline(x = rgrid[outer_idx], color = 'mediumseagreen', alpha = 0.5, label='_nolegend_')
@@ -372,7 +374,7 @@ def generate_galfit_model_no_inclination(gname, feedme, out_dir, model_dir = "tm
     
     return feedme.header.output_image.value
 
-# Recommend turning use_inner_outer_rad for pictures otherwise this is more informative
+# Recommend turning use_inner_outer_rad on for pictures otherwise this is more informative
 def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, validation_plot = False, use_inner_outer_rad = False, model_dir = "tmp_galfit_models"):
     
     gname = os.path.basename(gpath)
@@ -551,7 +553,7 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
     #return avg_constrained_pa, rvals_grid[inner_idx], rvals_grid[outer_idx]
     return pitch_angles, thetas, rgrid #, inner_idx, outer_idx #rgrid[inner_idx : outer_idx]
       
-def main(in_dir, out_dir, num_pts = 100, scatter_plot = True, validation_plot = False, model_dir = "tmp_galfit_models"):
+def main(in_dir, out_dir, num_pts = 500, scatter_plot = True, validation_plot = False, model_dir = "tmp_galfit_models"):
     
     gpaths = glob.glob(pj(out_dir, "123*"))
     gnames = [os.path.basename(i) for i in gpaths]
@@ -561,10 +563,11 @@ def main(in_dir, out_dir, num_pts = 100, scatter_plot = True, validation_plot = 
                                gpath,
                                in_dir,
                                out_dir,
-                               num_pts   = num_pts,
-                               scatter_plot    = scatter_plot,
-                               validation_plot = validation_plot,
-                               model_dir = model_dir
+                               num_pts             = num_pts,
+                               scatter_plot        = scatter_plot,
+                               validation_plot     = validation_plot,
+                               use_inner_outer_rad = True,
+                               model_dir           = model_dir
                                                 )
                            for gpath in gpaths
                                             )
@@ -587,7 +590,7 @@ if __name__ == "__main__":
     out_dir = "sparcfire-out"
     
     scatter_plot    = True
-    validation_plot = False
+    validation_plot = True
     cleanup = True
     
     if len(sys.argv) == 3:
