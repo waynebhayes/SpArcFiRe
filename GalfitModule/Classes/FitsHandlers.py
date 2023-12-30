@@ -260,12 +260,16 @@ class FitsFile:
                       " ".join(im_cmd for idx, im_cmd in enumerate([im1, im2, im3]) 
                                if idx <= self.num_imgs)
         
+        tiling = f"{self.num_imgs}x1"
+        if kwargs.get("vertical", None):
+            tiling = f"1x{self.num_imgs}"
+            
         # Combining the images using ImageMagick
         # If this is a single image, it'll also resize for me so that's why I leave it in
-        montage_cmd += f" -tile {self.num_imgs}x1 -geometry \"175x175+2+0<\" \
+        montage_cmd += f" -tile {tiling} -geometry \"175x175+2+2<\" \
                         {pj(out_png_dir, gname)}{combined}.png"
             
-        _ = sp(montage_cmd, capture_output = capture_output)
+        _ = sp(montage_cmd, capture_output = capture_output)            
         
         if cleanup:
             _ = sp(f"rm {im1} {im2} {im3}")
@@ -314,7 +318,7 @@ class FitsFile:
 #             setattr(self, key, value)
 
 
-# In[25]:
+# In[6]:
 
 
 class OutputFits(FitsFile):
