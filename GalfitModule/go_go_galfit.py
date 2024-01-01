@@ -707,7 +707,7 @@ def main(**kwargs):
         # ======================================== BEGIN GALFIT MAGNITUDE LOOP ========================================
         
         # Non-inclusive of end
-        b_d_magnitudes = [(b, d) for b in range(12, 17) for d in range(12, 16)]
+        b_d_magnitudes = [(b, d) for b in range(12, 17) for d in range(12, 16)]       
                 
         if parallel in (0, 2):
             fitted_galaxies = asyncio.run(wrapper(
@@ -813,6 +813,7 @@ def main(**kwargs):
                 ) 
                 for gfit in fitted_galaxies if gfit
             ).reset_index()
+            
         except ValueError:
             print("Could not produce NMR for galaxy {gname}. Counting as a failure (for now) :(")
             galaxy_df = None
@@ -821,7 +822,7 @@ def main(**kwargs):
             best_fit  = galaxy_df.loc[galaxy_df["nmr_x_1-p"].idxmin(), "gname"]
             
         except TypeError:
-            print(f"Something went wrong with galaxy {galaxy_df.gname[0]}, can't find best fit from parameter search.")
+            print(f"Something went wrong with galaxy {os.path.basename(galaxy_df.gname[0]).split('_')[1]}, can't find best fit from parameter search.")
         
         # For when the NMR cannot be produced.
         except AttributeError:
