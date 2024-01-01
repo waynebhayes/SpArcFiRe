@@ -209,6 +209,14 @@ if __name__ == "__main__":
         
         verbose           = args.verbose
         capture_output    = not args.verbose
+
+        print(f"Number of fitting steps: {num_steps}")
+        print(f"Parallel choice (0 - serial, 1 - CPU, 2 - SLURM): {parallel}")
+        print(f"Run from temporary directory? {run_from_tmp}")
+        print(f"Aggressively clean? {aggressive_clean}")
+        print(f"Verbosity? {verbose}")
+        if parallel == 2:
+            print(f"Don't remove SLURM dump files? {dont_remove_slurm}")
         
         # if num_steps not in range(1,4):
         #     print("The number of steps you selected cannot be used!")
@@ -560,7 +568,9 @@ if __name__ == "__main__":
             # Slurm needs different timeout limits
             timeout = 480 # Minutes
             # TODO: Consider SLURM + CPU parallel
-            parallel_options  = f"-M all --ntasks-per-node=1 -t {timeout}"
+            # --ntasks-per-node=1 and --ntasks=1 ensures processes will stay
+            # on the same node which is crucial for asyncio
+            parallel_options  = f"-M all --ntasks=1 --ntasks-per-node=1 -t {timeout}"
             parallel_verbose  = "-v" if verbose else ""
             chunk_size = 20
 
