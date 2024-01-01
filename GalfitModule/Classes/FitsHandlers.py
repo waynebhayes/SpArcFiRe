@@ -465,6 +465,11 @@ class OutputFits(FitsFile):
                 diff = np.abs(np.array(np.shape(cropped_mask)) - np.array(np.shape(self.model.data)))
                 cropped_mask = np.pad(cropped_mask, ((diff[0],0), (diff[1],0)), 'constant')
                 
+            # Giving up and proceeding without
+            if np.shape(cropped_mask) != np.shape(self.model.data):
+                print("Shape mismatch. Proceeding without crop mask.")
+                cropped_mask = 0
+                
             crop_mask = 1 - cropped_mask
             
         if use_bulge_mask:
