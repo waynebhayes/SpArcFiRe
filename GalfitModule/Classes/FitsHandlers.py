@@ -525,15 +525,15 @@ class OutputFits(FitsFile):
 
             if update_fits_header:
                 with fits.open(self.filepath, mode='update', output_verify='ignore') as hdul:
-                    hdul[2].header["NMR"] = (round(self.nmr, 4), "Norm of the masked residual")
+                    hdul[2].header["NMR"] = (round(self.nmr, 8), "Norm of the masked residual")
 
                     # pvalue is sometimes none but round can't handle it
-                    if pvalue and statistic:
-                        hdul[2].header["ks_p"]    = (round(pvalue, 4), "p value of kstest vs noise")
-                        hdul[2].header["ks_stat"] = (round(statistic, 4), "statistic value of kstest vs noise")
+                    if isinstance(pvalue, float) and isinstance(statistic, float):
+                        hdul[2].header["KS_P"]    = (round(pvalue, 8), "p value of kstest vs noise")
+                        hdul[2].header["KS_STAT"] = (round(statistic, 8), "statistic value of kstest vs noise")
                     else:
-                        hdul[2].header["ks_p"]    = (None, "p value of kstest vs noise")
-                        hdul[2].header["ks_stat"] = (None, "statistic value of kstest vs noise")
+                        hdul[2].header["KS_P"]    = (None, "p value of kstest vs noise")
+                        hdul[2].header["KS_STAT"] = (None, "statistic value of kstest vs noise")
 
         except ValueError:
             print(f"There may be a broadcast issue, observation, model, crop mask: ", end = "")
