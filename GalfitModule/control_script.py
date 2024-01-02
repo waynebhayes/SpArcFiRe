@@ -773,13 +773,12 @@ if __name__ == "__main__":
     #pickle.dump(all_nmr, open(final_pkl_file, 'wb'))
     out_df.to_pickle(final_pkl_file)
     
-    if not dont_remove_slurm and parallel:
-        if parallel == 2:
+    if parallel:
+        if parallel == 2 and not dont_remove_slurm:
             _ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
             
         _ = sp(f"rm -f {pj(tmp_dir, basename)}*_{pkl_end_str}.pkl", capture_output = capture_output)
         _ = sp(f"rm -f {parallel_file}", capture_output = capture_output)
-        
         
 # ==========================================================================================================
 # Aggressively tidying up if necessary and moving back to original directory
