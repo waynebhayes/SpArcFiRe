@@ -707,8 +707,10 @@ def main(**kwargs):
         # ======================================== BEGIN GALFIT MAGNITUDE LOOP ========================================
         
         # Non-inclusive of end
-        b_d_magnitudes = [(b, d) for b in range(12, 17) for d in range(12, 16)]       
-                
+        b_d_magnitudes = [(b, d) for b in range(12, 17) for d in range(12, 16)]
+        # Used for testing
+        #b_d_magnitudes = [(b, d) for b in range(16, 17) for d in range(15, 16)]       
+        
         if parallel in (0, 2):
             fitted_galaxies = asyncio.run(wrapper(
                 b_d_magnitudes,
@@ -822,7 +824,7 @@ def main(**kwargs):
             best_fit  = galaxy_df.loc[galaxy_df["nmr_x_1-p"].idxmin(), "gname"]
             
         except TypeError:
-            print(f"Something went wrong with galaxy {os.path.basename(galaxy_df.gname[0]).split('_')[1]}, can't find best fit from parameter search.")
+            print(f"Something went wrong with galaxy {gname}, can't find best fit from parameter search.")
         
         # For when the NMR cannot be produced.
         except AttributeError:
@@ -936,34 +938,35 @@ def main(**kwargs):
         
         print()
         
-    if aggressive_clean:
-        #print("Aggressively cleaning... in, temp galfit output, and psf directories.")
-        print("Aggressively cleaning... temp galfit output files.")
-        # to_del_gal_in    = (pj(in_dir, f"{gname}.fits") for gname in galaxy_names
-        #                     #if exists(pj(in_dir, f"{gname}.fits"))
-        #                    )
+        if aggressive_clean:
+            #print("Aggressively cleaning... in, temp galfit output, and psf directories.")
+            print("Aggressively cleaning... temp galfit output files.")
+            # to_del_gal_in    = (pj(in_dir, f"{gname}.fits") for gname in galaxy_names
+            #                     #if exists(pj(in_dir, f"{gname}.fits"))
+            #                    )
 
-        to_del_tmp_fits  = (pj(tmp_fits_dir, f"*{gname}_galfit_out.fits") for gname in galaxy_names
-                            #if exists(pj(tmp_fits_dir, f"{gname}_galfit_out.fits"))
-                           )
-        
-        to_del_feedmes   = (pj(tmp_fits_dir, f"*{gname}*.in") for gname in galaxy_names
-                            #if exists(pj(tmp_fits_dir, f"{gname}_galfit_out.fits"))
-                           )
-        
-        to_del_masks     = (pj(tmp_masks_dir, f"{gname}_star-rm.fits") for gname in galaxy_names
-                            #if exists(pj(tmp_masks_dir, f"{gname}_star-rm.fits"))
-                           )
-        
-        #to_del_psf_files = (pj(tmp_psf_dir, f"{gname}_psf.fits") for gname in galaxy_names
-                            #if exists(pj(tmp_psf_dir, f"{gname}_psf.fits"))
-        #                   )
-        
-        #print(f"rm -rf {' '.join(to_del_in)} {' '.join(to_del_tmp_fits)} {' '.join(to_del_psf_files)}")
-        #_ = sp(f"rm -f {' '.join(to_del_gal_in)} {' '.join(to_del_tmp_fits)} {' '.join(to_del_masks)} {' '.join(to_del_psf_files)}",
-        _ = sp(f"rm -f {' '.join(to_del_tmp_fits)} {' '.join(to_del_feedmes)} {' '.join(to_del_masks)}",
-               capture_output = capture_output
-              )
+            to_del_tmp_fits  = (pj(tmp_fits_dir, f"m*{gname}_galfit_out.fits") for gname in galaxy_names
+                                #if exists(pj(tmp_fits_dir, f"{gname}_galfit_out.fits"))
+                               )
+
+            to_del_feedmes   = (pj(tmp_fits_dir, f"*{gname}*.in") for gname in galaxy_names
+                                #if exists(pj(tmp_fits_dir, f"{gname}_galfit_out.fits"))
+                               )
+
+            to_del_masks     = (pj(tmp_masks_dir, f"{gname}_star-rm.fits") for gname in galaxy_names
+                                #if exists(pj(tmp_masks_dir, f"{gname}_star-rm.fits"))
+                               )
+
+            #to_del_psf_files = (pj(tmp_psf_dir, f"{gname}_psf.fits") for gname in galaxy_names
+                                #if exists(pj(tmp_psf_dir, f"{gname}_psf.fits"))
+            #                   )
+
+            #print(f"rm -rf {' '.join(to_del_in)} {' '.join(to_del_tmp_fits)} {' '.join(to_del_psf_files)}")
+            #_ = sp(f"rm -f {' '.join(to_del_gal_in)} {' '.join(to_del_tmp_fits)} {' '.join(to_del_masks)} {' '.join(to_del_psf_files)}",
+            #print(f"rm -f {' '.join(to_del_tmp_fits)} {' '.join(to_del_feedmes)} {' '.join(to_del_masks)}")
+            _ = sp(f"rm -f {' '.join(to_del_tmp_fits)} {' '.join(to_del_feedmes)} {' '.join(to_del_masks)}",
+                   capture_output = capture_output
+                  )
     
     return failed
         
