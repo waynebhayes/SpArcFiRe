@@ -774,7 +774,9 @@ if __name__ == "__main__":
     out_df.to_pickle(final_pkl_file)
     
     if not dont_remove_slurm and parallel:
-        _ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
+        if parallel == 2:
+            _ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
+            
         _ = sp(f"rm -f {pj(tmp_dir, basename)}*_{pkl_end_str}.pkl", capture_output = capture_output)
         _ = sp(f"rm -f {parallel_file}", capture_output = capture_output)
         
