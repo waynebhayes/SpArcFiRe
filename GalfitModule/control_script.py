@@ -341,11 +341,11 @@ if __name__ == "__main__":
     if not restart:
         # Remove old
         print("Removing old results in tmp folder (if they exist).")
-        _ = sp(f"rm -rf {tmp_fits_dir}", capture_output = capture_output)
-        # try:
-        #     shutil.rmtree(tmp_fits_dir)
-        # except OSError as e:
-        #     pass
+        #_ = sp(f"rm -rf {tmp_fits_dir}", capture_output = capture_output)
+        try:
+            shutil.rmtree(tmp_fits_dir)
+        except OSError as e:
+            pass
     else:
         print("Restarting the run (still have to find everything).")
 
@@ -388,7 +388,8 @@ if __name__ == "__main__":
        
     # Sparcfire plops them into tmp so I just move them to where I need them
     if star_masks and not restart:
-        sp(f"mv {pj(tmp_dir,'*_star-rm.fits')} {tmp_masks_dir}", capture_output = capture_output)
+        #sp(f"mv {pj(tmp_dir,'*_star-rm.fits')} {tmp_masks_dir}", capture_output = capture_output)
+        _ = [shutil.move(i, tmp_masks_dir) for i in glob(pj(tmp_dir,'*_star-rm.fits'))]
 
 # ==========================================================================================================
 # Getting setup to generate starmasks
@@ -398,13 +399,15 @@ if __name__ == "__main__":
     generate_starmasks = True
     if not restart:
         #generate_starmasks = True
-        if not exists(pj(tmp_masks_dir, 'remove_stars_with_sextractor.log')):
+        #if not exists(pj(tmp_masks_dir, 'remove_stars_with_sextractor.log')):
             # remove_stars_with_sextractor needs this available before it can log
-            _ = sp(f"touch {pj(tmp_masks_dir, 'remove_stars_with_sextractor.log')}", capture_output = capture_output)
+            #_ = sp(f"touch {pj(tmp_masks_dir, 'remove_stars_with_sextractor.log')}", capture_output = capture_output)
+        with open(pj(tmp_masks_dir, 'remove_stars_with_sextractor.log'), mode='a'): pass
             
-        if simultaneous_fitting and not exists(pj(sf_masks_dir, 'remove_stars_with_sextractor.log')):
+        if simultaneous_fitting: # and not exists(pj(sf_masks_dir, 'remove_stars_with_sextractor.log')):
+            with open(pj(sf_masks_dir, 'remove_stars_with_sextractor.log'), mode='a'): pass
             # remove_stars_with_sextractor needs this available before it can log
-            _ = sp(f"touch {pj(sf_masks_dir, 'remove_stars_with_sextractor.log')}", capture_output = capture_output)
+            #_ = sp(f"touch {pj(sf_masks_dir, 'remove_stars_with_sextractor.log')}", capture_output = capture_output)
 
 # ==========================================================================================================
 # write_to_parallel function sets up a text file for piping to parallel scripts
@@ -566,7 +569,7 @@ if __name__ == "__main__":
             # For SLURM/Cluster Computing
             parallel_run_name = "GALFITTING"
             # Slurm needs different timeout limits
-            timeout = 480 # Minutes
+            timeout = 2880 # Minutes
             # TODO: Consider SLURM + CPU parallel
             # --ntasks-per-node=1 and --ntasks=1 ensures processes will stay
             # on the same node which is crucial for asyncio
@@ -576,7 +579,7 @@ if __name__ == "__main__":
 
             
         # Running things via distributed computing           
-        parallel_run_cmd = f"cat {parallel_file} | nice -19 {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
+        parallel_run_cmd = f"cat {parallel_file} | {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
         
         if not restart:
             write_to_parallel(cwd, kwargs_main, parallel_file = parallel_file, chunk_size = chunk_size)
@@ -667,13 +670,19 @@ gaussj: Singular Matrix-1
 
 if __name__ == "__main__":
     print("Cleaning up...")
-    _ = sp("rm galfit.* fit.log", capture_output = capture_output)
-    _ = sp("rm *.png", capture_output = capture_output)
+    rm_files(*glob(pj(cwd, "galfit.*")))
+    rm_files(*glob(pj(cwd, "*.png")))
+    rm_files(pj(cwd, "fit.log"))
+    #_ = sp("rm galfit.* fit.log", capture_output = capture_output)
+    #_ = sp("rm *.png", capture_output = capture_output)
     
     # We use the negative of remove slurm because we want cleanup to be the default
     if parallel and not dont_remove_slurm:
-        _ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
-        _ = sp(f"rm {parallel_file}", capture_output = capture_output)
+        #_ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
+        #_ = sp(f"rm {parallel_file}", capture_output = capture_output)
+        shutil.rmtree(pj(_HOME_DIR, "SLURM_turds", parallel_run_name))
+        rm_files(pj(cwd, parallel_file))
+        
         #_ = sp(f"rm {parallel_copy_input}", capture_output = capture_output)
 
 
@@ -703,8 +712,10 @@ if __name__ == "__main__":
     if parallel:
         python_parallel   = pj(_MODULE_DIR, "Utilities", "combine_via_parallel.py")
         parallel_file     = "parallel_combine_residual"
-        if exists(parallel_file):
-            _ = sp(f"rm -f {parallel_file}", capture_output = capture_output)
+        #if exists(parallel_file):
+            #_ = sp(f"rm -f {parallel_file}", capture_output = capture_output)
+        
+        rm_files(pj(cwd, parallel_file))
         
         if parallel == 1:
             # For CPU parallel
@@ -775,10 +786,13 @@ if __name__ == "__main__":
     
     if parallel:
         if parallel == 2 and not dont_remove_slurm:
-            _ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
+            #_ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
+            shutil.rmtree(pj(_HOME_DIR, "SLURM_turds", parallel_run_name))
             
-        _ = sp(f"rm -f {pj(tmp_dir, basename)}*_{pkl_end_str}.pkl", capture_output = capture_output)
-        _ = sp(f"rm -f {parallel_file}", capture_output = capture_output)
+        #_ = sp(f"rm -f {pj(tmp_dir, basename)}*_{pkl_end_str}.pkl", capture_output = capture_output)
+        rm_files(*glob(f"{pj(tmp_dir, basename)}*_{pkl_end_str}.pkl"))
+        #_ = sp(f"rm -f {parallel_file}", capture_output = capture_output)
+        rm_files(parallel_file)
         
 # ==========================================================================================================
 # Aggressively tidying up if necessary and moving back to original directory
@@ -786,8 +800,10 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     if aggressive_clean and run_from_tmp:
         print("Final tidying...")
-        _ = sp(f"rm -rf {out_dir}", capture_output = capture_output)
-        _ = sp(f"mkdir -p {out_dir}", capture_output = capture_output)
+        #_ = sp(f"rm -rf {out_dir}", capture_output = capture_output)
+        shutil.rmtree(out_dir)
+        #_ = sp(f"mkdir -p {out_dir}", capture_output = capture_output)
+        os.mkdir(out_dir)
         
     print("All done!")
     # Moving back to original directory
