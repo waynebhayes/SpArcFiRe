@@ -673,16 +673,15 @@ if __name__ == "__main__":
     rm_files(*glob(pj(cwd, "galfit.*")))
     rm_files(*glob(pj(cwd, "*.png")))
     rm_files(pj(cwd, "fit.log"))
+    rm_files(pj(cwd, parallel_file))
     #_ = sp("rm galfit.* fit.log", capture_output = capture_output)
     #_ = sp("rm *.png", capture_output = capture_output)
     
     # We use the negative of remove slurm because we want cleanup to be the default
-    if parallel and not dont_remove_slurm:
+    if parallel == 2 and not dont_remove_slurm:
         #_ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
         #_ = sp(f"rm {parallel_file}", capture_output = capture_output)
         shutil.rmtree(pj(_HOME_DIR, "SLURM_turds", parallel_run_name))
-        rm_files(pj(cwd, parallel_file))
-        
         #_ = sp(f"rm {parallel_copy_input}", capture_output = capture_output)
 
 
