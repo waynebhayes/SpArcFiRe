@@ -59,7 +59,8 @@ def touch_failed_fits(gname, tmp_fits_dir):
     prefix = "failed_"
     #filepath = os.path.dirname(tmp_fits_dir)
     fail_fileout = pj(tmp_fits_dir, f"{prefix}{gname}_galfit_out.fits")
-    sp(f"touch {fail_fileout}", capture_output = False)
+    #sp(f"touch {fail_fileout}", capture_output = False)
+    with open(fail_fileout, mode='a'): pass
     
 def check_for_starmasks(gnames, masks_dir):
     masks_in_dir = [os.path.basename(i).split("_star-rm.fits")[0] for i in find_files(masks_dir, "*star-rm.fits", "f")]
@@ -672,11 +673,17 @@ def main(**kwargs):
     failed          = []
     fitted_galaxies = []
     
+    # Non-inclusive of end
+    b_d_magnitudes = [(b, d) for b in range(12, 17) for d in range(12, 16)]
+    # Used for testing
+    #b_d_magnitudes = [(b, d) for b in range(16, 17) for d in range(15, 16)]
+    
     # Working on non-parallel for now
     print()
     print(f"Galfitting with {num_steps} component steps... (stdout is captured):")
     for gname in galaxy_names:
         # For debugging
+        #feedme_info[gname].header.optimize.value = 1
         #if gname != "1237668298219127022":
         #    continue
         
@@ -704,12 +711,7 @@ def main(**kwargs):
             except KeyError:
                 print(f"There is no spirality keyword in the header for {gname}.")
         
-        # ======================================== BEGIN GALFIT MAGNITUDE LOOP ========================================
-        
-        # Non-inclusive of end
-        b_d_magnitudes = [(b, d) for b in range(12, 17) for d in range(12, 16)]
-        # Used for testing
-        #b_d_magnitudes = [(b, d) for b in range(16, 17) for d in range(15, 16)]       
+        # ======================================== BEGIN GALFIT PARAMETER SEARCH LOOP ========================================    
         
         if parallel in (0, 2):
             fitted_galaxies = asyncio.run(wrapper(
@@ -817,7 +819,7 @@ def main(**kwargs):
             ).reset_index()
             
         except ValueError:
-            print("Could not produce NMR for galaxy {gname}. Counting as a failure (for now) :(")
+            print(f"Could not produce NMR. Counting as a failure (for now) :(")
             galaxy_df = None
 
         try:
@@ -900,7 +902,7 @@ def main(**kwargs):
 
         # No point in doing this in parallel because race conditions
         if not parallel:
-            for galfit_out in glob.glob(pj(cwd, "galfit.*")):
+            for galfit_out in glob(pj(cwd, "galfit.*")):
                 ext_num = galfit_out.split(".")[-1]
                 shutil.move(galfit_out, pj(out_dir, gname, f"{gname}_galfit.{ext_num}"))
                 
@@ -909,7 +911,8 @@ def main(**kwargs):
             #_ = fill_objects(gname, 1, tmp_fits_dir, sf_masks_dir)
             
             # Remove copied masks
-            _ = sp(f"rm -f {' '.join(replacement_sf_masks)}", capture_output = capture_output)
+            rm_files(*replacement_sf_masks)
+            #_ = sp(f"rm -f {' '.join(replacement_sf_masks)}", capture_output = capture_output)
         # else:
         #     _ = fill_objects(gname, 1, tmp_fits_dir, tmp_masks_dir)
 
@@ -945,17 +948,41 @@ def main(**kwargs):
         #                     #if exists(pj(in_dir, f"{gname}.fits"))
         #                    )
 
-        to_del_tmp_fits  = (pj(tmp_fits_dir, f"m*{gname}_galfit_out.fits") for gname in galaxy_names
-                            #if exists(pj(tmp_fits_dir, f"{gname}_galfit_out.fits"))
-                           )
+        # Spell these out explicitly to avoid needing to glob anything... all that searching takes time!
+        to_del = []
+        for (b,d) in b_d_magnitudes:
+            prefix = f"m{b}m{d}"
+            
+            # Parameter Search outputs
+            to_del.extend([
+                pj(tmp_fits_dir, f"{prefix}_{gname}_galfit_out.fits") for gname in galaxy_names
+            ])
 
-        to_del_feedmes   = (pj(tmp_fits_dir, f"*{gname}*.in") for gname in galaxy_names
-                            #if exists(pj(tmp_fits_dir, f"{gname}_galfit_out.fits"))
-                           )
+            # Feedmes
+            to_del.extend([
+                pj(tmp_fits_dir, f"{prefix}_{gname}.in") for gname in galaxy_names
+            ])
+            
+            if num_steps >= 2:
+                # Bulge feedmes
+                to_del.extend([
+                    pj(tmp_fits_dir, f"{prefix}_{gname}_bulge.in") for gname in galaxy_names
+                ])
+                
+                if num_steps == 3:
+                    # Disk feedmes
+                    to_del.extend([
+                        pj(tmp_fits_dir, f"{prefix}_{gname}_disk.in") for gname in galaxy_names
+                    ])
 
-        to_del_masks     = (pj(tmp_masks_dir, f"{gname}_star-rm.fits") for gname in galaxy_names
-                            #if exists(pj(tmp_masks_dir, f"{gname}_star-rm.fits"))
-                           )
+        # Masks
+        to_del.extend([
+            pj(tmp_masks_dir, f"{gname}_star-rm.fits") for gname in galaxy_names
+        ])
+        
+        # Use try except instead of checking existence to save time
+        # In most cases these files *should* exist
+        rm_files(*to_del)
 
         #to_del_psf_files = (pj(tmp_psf_dir, f"{gname}_psf.fits") for gname in galaxy_names
                             #if exists(pj(tmp_psf_dir, f"{gname}_psf.fits"))
@@ -964,9 +991,9 @@ def main(**kwargs):
         #print(f"rm -rf {' '.join(to_del_in)} {' '.join(to_del_tmp_fits)} {' '.join(to_del_psf_files)}")
         #_ = sp(f"rm -f {' '.join(to_del_gal_in)} {' '.join(to_del_tmp_fits)} {' '.join(to_del_masks)} {' '.join(to_del_psf_files)}",
         #print(f"rm -f {' '.join(to_del_tmp_fits)} {' '.join(to_del_feedmes)} {' '.join(to_del_masks)}")
-        _ = sp(f"rm -f {' '.join(to_del_tmp_fits)} {' '.join(to_del_feedmes)} {' '.join(to_del_masks)}",
-               capture_output = capture_output
-              )
+        # _ = sp(f"rm -f {' '.join(to_del_tmp_fits)} {' '.join(to_del_feedmes)} {' '.join(to_del_masks)}",
+        #        capture_output = capture_output
+        #       )
     
     return failed
         
