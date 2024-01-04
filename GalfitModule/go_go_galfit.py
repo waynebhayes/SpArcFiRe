@@ -5,7 +5,7 @@ from os.path import join as pj
 # from os.path import exists
 from astropy.io import fits
 
-#from joblib import Parallel, delayed
+#from joblib import cpu_count #Parallel, delayed
 import asyncio
 
 _HOME_DIR = os.path.expanduser("~")    
@@ -89,13 +89,25 @@ async def async_sp(*args, **kwargs):
         
     try:
         stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout = timeout)
-        
+        # This can only be used for python>3.11 and theoretically works better than the current method
+        #async with asyncio.timeout(timeout):
+        stdout, stderr = await proc.communicate()
+
         stdout = stdout.decode('utf8')
         stderr = stderr.decode('utf8')
         
     except asyncio.TimeoutError:
+        #if kwargs.get("verbose"):
+        print(f"GALFIT timed out.") 
+        print(f"Timeout is set to {timeout/60} minutes. If this is not enough, please consider increasing this value.")
+        # Using this alone gives an error but seems to actually work...so ignore it?
+        # the other method gets hung up.
+        proc.kill()
+        _ = await proc.communicate()
+        
         stdout = "...now exiting to system..."
         stderr = ""
+        #reset_all()
     
     # For debuggin
     #print(*stdout.decode('utf8').split("\n")[:75], sep = "\n")
@@ -109,9 +121,15 @@ async def parameter_search_fit(
     initial_feedme, 
     base_galfit_cmd,
     disk_axis_ratio,
-    use_async = False,
+    use_async = True,
     **kwargs
 ):
+    # With this timeout set, galaxies will take no longer than two hours per
+    # for default settings searching 20 parameters synchronously
+    # i.e. 2 steps, 20 parameter variations, 1 minutes max per = 40 min.
+    
+    # The value timeout is set to should, of course, depend on the average 
+    # image resolution and expected runtime
     timeout   = 60 # Seconds
     timeout  *= 3  # Minutes
     
@@ -337,7 +355,7 @@ async def parameter_search_fit(
         run_galfit_cmd = f"{base_galfit_cmd} {tmp_feedme_in}"
         #print("Bulge + Disk + Arms (if applicable)")
         
-        if async:
+        if use_async:
             final_galfit_output = OutputContainer(
                 await async_sp(run_galfit_cmd, timeout = timeout), 
                 path_to_feedme  = tmp_feedme_in,
@@ -586,19 +604,23 @@ async def wrapper(
     initial_feedme, 
     base_galfit_cmd,
     disk_axis_ratio,
-    use_async = False,
+    use_async = True,
     **kwargs
 ):
-    fitted_galaxies = await asyncio.gather(*(parameter_search_fit(
-        bulge_magnitude,
-        disk_magnitude,
-        gname,
-        initial_feedme,
-        base_galfit_cmd,
-        disk_axis_ratio,
-        use_async = use_async,
-        **kwargs
-    ) for (bulge_magnitude, disk_magnitude) in b_d_magnitudes))
+    # Even if we are not using async, I believe we must still "await" or an error will be thrown
+    fitted_galaxies = await asyncio.gather(*(
+        parameter_search_fit(
+            bulge_magnitude,
+            disk_magnitude,
+            gname,
+            initial_feedme,
+            base_galfit_cmd,
+            disk_axis_ratio,
+            use_async = use_async,
+            **kwargs
+        ) 
+        for (bulge_magnitude, disk_magnitude) in b_d_magnitudes
+    ))
     
     return fitted_galaxies
     
@@ -621,6 +643,7 @@ def main(**kwargs):
     # Of course the important things
     num_steps = int(kwargs.get("num_steps", 2))
     parallel  = int(kwargs.get("parallel", 1))
+    use_async = kwargs.get("use_async", True)
     
     # For simultaneous fitting
     simultaneous_fitting = kwargs.get("simultaneous_fitting", False)
@@ -771,19 +794,42 @@ def main(**kwargs):
         
         # ======================================== BEGIN GALFIT PARAMETER SEARCH LOOP ========================================    
         
-        use_async = False
-        if parallel in (0, 2):
-            use_async = True
+        # use_async = False
+        # if parallel in (0, 2):
+        #     use_async = True
+        # Limiting our # of asynchronous processes
+        
+        chunk = 20
+        #if parallel == 1:
+        #    chunk = 5
             
-        fitted_galaxies = asyncio.run(wrapper(
-            b_d_magnitudes,
-            gname,
-            feedme_info[gname], 
-            base_galfit_cmd,
-            disk_axis_ratio,
-            use_async = use_async,
-            **kwargs
-        ))
+        #if len(b_d_magnitudes) > chunk:
+        fitted_galaxies = []
+        for i in range(0, len(b_d_magnitudes), chunk):
+            if (i + chunk) < len(b_d_magnitudes):
+                b_d_chunk = b_d_magnitudes[i:i + chunk]
+            else:
+                b_d_chunk = b_d_magnitudes[i:]
+
+            fitted_galaxies.extend(asyncio.run(wrapper(
+                b_d_chunk,
+                gname,
+                feedme_info[gname], 
+                base_galfit_cmd,
+                disk_axis_ratio,
+                use_async = use_async,
+                **kwargs
+            )))
+            
+        # fitted_galaxies = asyncio.run(wrapper(
+        #     b_d_magnitudes,
+        #     gname,
+        #     feedme_info[gname], 
+        #     base_galfit_cmd,
+        #     disk_axis_ratio,
+        #     use_async = use_async,
+        #     **kwargs
+        # ))
             # Subprocess and Loky backend don't play well together
             # fitted_galaxies = Parallel(n_jobs = -2, backend = "multiprocessing")(
             #            delayed(multi_step_fit)(
