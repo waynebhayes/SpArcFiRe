@@ -752,7 +752,7 @@ if __name__ == "__main__":
 
         if count:
             print("parallelizing to combine residuals")
-            parallel_run_cmd = f"cat {parallel_file} | nice -19 {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
+            parallel_run_cmd = f"cat {parallel_file} | {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
             _ = sp(parallel_run_cmd, capture_output = capture_output)
 
         all_output_pkl = [pj(tmp_dir, fname) 
@@ -768,7 +768,6 @@ if __name__ == "__main__":
                           ) 
     # Serial
     else:
-        
         # In this case it's not parallel but I'm just saving some hassle here
         out_df = combine_via_parallel.main("", pkl_end_str, out_dir, ",".join(galaxy_names))
 
