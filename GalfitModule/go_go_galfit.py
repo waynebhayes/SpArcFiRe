@@ -76,246 +76,44 @@ def check_success(in_fits, previous_state = False):
     
     return (previous_state or False)
 
-def parameter_search_fit(
-    bulge_magnitude, # loop variables
-    disk_magnitude,  # loop variables
-    gname,
-    initial_feedme, 
-    base_galfit_cmd,
-    disk_axis_ratio,
-    **kwargs
-):
-    
-    out_dir   = kwargs.get("out_dir")
-    num_steps = int(kwargs.get("num_steps"))
-    
-    #tmp_fits_dir  = kwargs.get("tmp_fits_dir")
-    
-    # This doesn't change
-    # initial_feedme is a FeedmeContainer object
-    #header       = initial_feedme.header
-    #feedme_path  = initial_feedme.path_to_feedme
-    output_image = initial_feedme.header.output_image.value
-    
-    # This is to clean up the code and make it easier to understand
-    # Make a deepcopy just in case
-    initial_components = deepcopy(initial_feedme)
-    
-    header = initial_components.header
-    
-    initial_components.bulge.magnitude.value = bulge_magnitude
-    initial_components.disk.magnitude.value  = disk_magnitude
-
-    # Whether or not to load default components
-    # If arms are not used, we select False and let the code
-    # figure it out on reading in (this avoids some output/extra processing)
-    load_default = True
-    if len(initial_components.components) <= 4:
-        load_default = False
-
-    # ---------------------------------------------------------------------
-    # Note to self, OutputContainer is *just* for handling output
-    # It does not retain the input state fed into Galfit
-    # And the input dict is *before* output but will be updated *by* output
-    # ---------------------------------------------------------------------
-    
-    bulge_str = f"m{bulge_magnitude}"
-    disk_str  = f"m{disk_magnitude}"
-                
-    #print(f"Bulge magnitude {bulge_magnitude}, Disk magnitude {disk_magnitude}")
-    
-    basepath, basename = os.path.split(output_image)
-    new_basename       = f"{bulge_str}{disk_str}_{basename}"
-    new_output_image   = pj(basepath, new_basename)
-    initial_components.header.output_image.value = new_output_image
-    
-    feedme_name     = os.path.basename(initial_feedme.path_to_feedme)
-    new_feedme_name = f"{bulge_str}{disk_str}_{feedme_name}"
-    tmp_feedme_in   = pj(basepath, new_feedme_name)
-
-    success = False
-    
-    # Any galfit runs that feed into an output container *must* have capture_output = True or 
-    # they won't update the new parameters
-    if num_steps == 1:
-        run_galfit_cmd = f"{base_galfit_cmd} {tmp_feedme_in}"
-
-        if load_default:
-            initial_components.disk.axis_ratio.value = disk_axis_ratio
-            
-        initial_components.to_file(filename = tmp_feedme_in)
-
-        final_galfit_output = OutputContainer(
-            sp(run_galfit_cmd),
-            path_to_feedme = tmp_feedme_in,
-            **initial_components.components
-        )
-
-        success = check_success(final_galfit_output, success)
-
-    elif num_steps >= 2:
-        # Top is disk first, bottom is bulge first, choose your own adventure
-        #disk_in = pj(out_dir, gname, f"{gname}_disk.in")
-        #bulge_in = pj(out_dir, gname, f"{gname}_bulge.in")
-        bulge_in = f"{tmp_feedme_in.replace('.in', '')}_bulge.in"
-
-        #header.to_file(disk_in, initial_components.disk, initial_components.sky)
-        header.to_file(bulge_in, initial_components.bulge, initial_components.sky)
-
-        #run_galfit_cmd = f"{base_galfit_cmd} {disk_in}"
-        run_galfit_cmd = f"{base_galfit_cmd} {bulge_in}"
-
-        #print("Disk")
-        #print("Bulge")
-
-        # galfit_output = OutputContainer(
-        #     sp(run_galfit_cmd), 
-        #     sersic_order   = ["disk"], 
-        #     path_to_feedme = feedme_path,
-        #     load_default   = load_default,
-        #     **feedme_info[gname].components
-        # )
-        galfit_output = OutputContainer(
-            sp(run_galfit_cmd), 
-            sersic_order   = ["bulge"], 
-            path_to_feedme = bulge_in,
-            load_default   = load_default,
-            **initial_components.components
-        )
-
-        success = check_success(galfit_output, success)
-
-        # Only fix sky if first step is successful
-        # if galfit_output.success:
-        #     # Fix sky parameters per Galfit 'tips' recommendation
-        #     for key in galfit_output.sky.param_fix:
-        #         galfit_output.sky.param_fix[key] = 0
-
-        # Assume rerun is to refine final fit
-        # This will also be better for prototyping multiband fits
-        # if rerun:
-        #     galfit_output = rerun_galfit(galfit_output,
-        #                                  base_galfit_cmd,
-        #                                  # Pass in initial components here to generically
-        #                                  # determine which were optimized on
-        #                                  initial_components.disk, initial_components.sky
-        #                                 )
-
-        # load_default here because a three step fit is impossible with only two components
-        if num_steps == 3 and load_default:
-
-            # For fitting *just* the bulge + a few pixels
-            # Trying Just disk, just bulge, then all together with arms
-#                 bulge_header = deepcopy(feedme_info[gname].header)
-#                 xcenter, ycenter = initial_components.bulge.position
-#                 bulge_rad = 2*initial_components.bulge.effective_radius
-#                 bulge_header.region_to_fit = (
-#                                               round(xcenter - bulge_rad), 
-#                                               round(xcenter + bulge_rad), 
-#                                               round(ycenter - bulge_rad), 
-#                                               round(ycenter + bulge_rad)
-#                                              )
-#                 bulge_header.param_fix["region_to_fit"] = f"{round(ycenter - bulge_rad)} {round(ycenter + bulge_rad)}"
-#                 bulge_header.update_param_values()
-
-#                 bulge_in = pj(out_dir, gname, f"{gname}_bulge.in")
-#                 bulge_header.to_file(bulge_in, initial_components.bulge, galfit_output.sky)
-
-            # Fit disk first, now to fit the bulge and refine the disk
-            bulge_disk_in = f"{tmp_feedme_in.replace('.in', '')}_bulge+disk.in"
-
-            # Note initial components disk and galfit output the rest
-            # Those are updated!
-            header.to_file(bulge_disk_in, initial_components.bulge, galfit_output.disk, galfit_output.sky)
-            #header.to_file(bulge_disk_in, galfit_output.bulge, initial_components.disk, galfit_output.sky)
-
-            run_galfit_cmd = f"{base_galfit_cmd} {bulge_disk_in}"
-            #print("Bulge + Disk")
-            galfit_output = OutputContainer(
-                sp(run_galfit_cmd), 
-                path_to_feedme = bulge_disk_in,
-                load_default   = load_default,
-                **galfit_output.components
-            )
-
-            success = check_success(galfit_output, success)
-
-#                 if rerun:
-#                     galfit_output = rerun_galfit(galfit_output,
-#                                                  base_galfit_cmd,
-#                                                  initial_components.bulge, galfit_output.disk, galfit_output.sky
-#                                                 )
-
-        # Overwrite original... for now 
-        # Also good thing dicts retain order, this frequently comes up
-        # if galfit_output.arms.param_values.get("skip", 0):
-        #     # By default includes the header
-        #     print("Skipping Arms")
-        #     galfit_output.to_file(galfit_output.bulge, galfit_output.disk, galfit_output.sky)
-        # else:
-        if load_default:
-            galfit_output.disk.axis_ratio.value = disk_axis_ratio
-
-            # After determining sky and initial component(s) with extended background,
-            # shrink fitting region closer to the galaxy itself
-            # xcenter, ycenter = galfit_output.bulge.position
-            # old_region = galfit_output.header.region_to_fit
-            # crop_mult = 2
-            # crop_rad = 1.5*(xcenter - old_region[0])/crop_mult
-            # galfit_output.header.region_to_fit = (
-            #                               max(round(xcenter - crop_rad), 0), # Just in case
-            #                               round(xcenter + crop_rad), 
-            #                               max(round(ycenter - crop_rad), 0), 
-            #                               round(ycenter + crop_rad)
-            #                              )
-            # galfit_output.header.update_param_values()
-
-            #galfit_output.arms.param_fix["outer_rad"] = 1
-            
-        # to_file no arguments uses the feedme path attribute for location
-        # and uses all the components in the container object (in whatever order they're in)
-        galfit_output.to_file(filename = tmp_feedme_in)
-
-        run_galfit_cmd = f"{base_galfit_cmd} {tmp_feedme_in}"
-        #print("Bulge + Disk + Arms (if applicable)")
-        final_galfit_output = OutputContainer(
-            sp(run_galfit_cmd), 
-            path_to_feedme  = tmp_feedme_in,
-            load_default    = load_default,
-            **galfit_output.components, 
-            store_text      = True
-        )
-        success = check_success(final_galfit_output, success)
-        
-        if kwargs.get("verbose"):
-            print(str(final_galfit_output))
-        
-    if success:   
-        return new_output_image
-
 async def async_sp(*args, **kwargs):
+    
+    timeout = kwargs.pop("timeout", 3*60)
+    
     proc = await asyncio.create_subprocess_shell(
         *args,
         stdout = asyncio.subprocess.PIPE,
         stderr = asyncio.subprocess.PIPE,
         **kwargs
     )
-    stdout, stderr = await proc.communicate()
+        
+    try:
+        stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout = timeout)
+        
+        stdout = stdout.decode('utf8')
+        stderr = stderr.decode('utf8')
+        
+    except asyncio.TimeoutError:
+        stdout = "...now exiting to system..."
+        stderr = ""
     
     # For debuggin
     #print(*stdout.decode('utf8').split("\n")[:75], sep = "\n")
     
-    return subprocess.CompletedProcess("", 0, stdout = stdout.decode('utf8'), stderr = stderr.decode('utf8'))
+    return subprocess.CompletedProcess("", 0, stdout = stdout, stderr = stderr)
 
-async def async_parameter_search_fit(
+async def parameter_search_fit(
     bulge_magnitude, # loop variables
     disk_magnitude,  # loop variables
     gname,
     initial_feedme, 
     base_galfit_cmd,
     disk_axis_ratio,
+    use_async = False,
     **kwargs
 ):
+    timeout   = 60 # Seconds
+    timeout  *= 3  # Minutes
     
     out_dir   = kwargs.get("out_dir")
     num_steps = int(kwargs.get("num_steps"))
@@ -368,6 +166,8 @@ async def async_parameter_search_fit(
     
     # Any galfit runs that feed into an output container *must* have capture_output = True or 
     # they won't update the new parameters
+    # TODO: Add timeout to all galfit sp calls (5 min)
+    # TODO: plop parameter_search_fit in async function... should work exactly the same but double check
     if num_steps == 1:
         run_galfit_cmd = f"{base_galfit_cmd} {tmp_feedme_in}"
 
@@ -376,11 +176,19 @@ async def async_parameter_search_fit(
             
         initial_components.to_file(filename = tmp_feedme_in)
 
-        final_galfit_output = OutputContainer(
-            await async_sp(run_galfit_cmd),
-            path_to_feedme = tmp_feedme_in,
-            **initial_components.components
-        )
+        if use_async:
+            final_galfit_output = OutputContainer(
+                await async_sp(run_galfit_cmd, timeout = timeout),
+                path_to_feedme = tmp_feedme_in,
+                **initial_components.components
+            )
+            
+        else:
+            final_galfit_output = OutputContainer(
+                sp(run_galfit_cmd, timeout = timeout),
+                path_to_feedme = tmp_feedme_in,
+                **initial_components.components
+            )
 
         success = check_success(final_galfit_output, success)
 
@@ -406,13 +214,23 @@ async def async_parameter_search_fit(
         #     load_default   = load_default,
         #     **feedme_info[gname].components
         # )
-        galfit_output = OutputContainer(
-            await async_sp(run_galfit_cmd), 
-            sersic_order   = ["bulge"], 
-            path_to_feedme = bulge_in,
-            load_default   = load_default,
-            **initial_components.components
-        )
+        if use_async:
+            galfit_output = OutputContainer(
+                await async_sp(run_galfit_cmd, timeout = timeout),
+                sersic_order   = ["bulge"], 
+                path_to_feedme = bulge_in,
+                load_default   = load_default,
+                **initial_components.components
+            )
+            
+        else:
+            galfit_output = OutputContainer(
+                sp(run_galfit_cmd, timeout = timeout), 
+                sersic_order   = ["bulge"], 
+                path_to_feedme = bulge_in,
+                load_default   = load_default,
+                **initial_components.components
+            )
 
         success = check_success(galfit_output, success)
 
@@ -462,12 +280,21 @@ async def async_parameter_search_fit(
 
             run_galfit_cmd = f"{base_galfit_cmd} {bulge_disk_in}"
             #print("Bulge + Disk")
-            galfit_output = OutputContainer(
-                await async_sp(run_galfit_cmd), 
-                path_to_feedme = bulge_disk_in,
-                load_default   = load_default,
-                **galfit_output.components
-            )
+            if use_async:
+                galfit_output = OutputContainer(
+                    await async_sp(run_galfit_cmd, timeout = timeout), 
+                    path_to_feedme = bulge_disk_in,
+                    load_default   = load_default,
+                    **galfit_output.components
+                )
+                
+            else:
+                galfit_output = OutputContainer(
+                    sp(run_galfit_cmd, timeout = timeout), 
+                    path_to_feedme = bulge_disk_in,
+                    load_default   = load_default,
+                    **galfit_output.components
+                )
 
             success = check_success(galfit_output, success)
 
@@ -509,13 +336,25 @@ async def async_parameter_search_fit(
 
         run_galfit_cmd = f"{base_galfit_cmd} {tmp_feedme_in}"
         #print("Bulge + Disk + Arms (if applicable)")
-        final_galfit_output = OutputContainer(
-            await async_sp(run_galfit_cmd), 
-            path_to_feedme  = tmp_feedme_in,
-            load_default    = load_default,
-            **galfit_output.components, 
-            store_text      = True
-        )
+        
+        if async:
+            final_galfit_output = OutputContainer(
+                await async_sp(run_galfit_cmd, timeout = timeout), 
+                path_to_feedme  = tmp_feedme_in,
+                load_default    = load_default,
+                **galfit_output.components, 
+                store_text      = True
+            )
+            
+        else:
+            final_galfit_output = OutputContainer(
+                sp(run_galfit_cmd, timeout = timeout), 
+                path_to_feedme  = tmp_feedme_in,
+                load_default    = load_default,
+                **galfit_output.components, 
+                store_text      = True
+            )
+            
         success = check_success(final_galfit_output, success)
         
         if kwargs.get("verbose"):
@@ -523,6 +362,223 @@ async def async_parameter_search_fit(
         
     if success:   
         return new_output_image
+
+# async def async_parameter_search_fit(
+#     bulge_magnitude, # loop variables
+#     disk_magnitude,  # loop variables
+#     gname,
+#     initial_feedme, 
+#     base_galfit_cmd,
+#     disk_axis_ratio,
+#     **kwargs
+# ):
+    
+#     out_dir   = kwargs.get("out_dir")
+#     num_steps = int(kwargs.get("num_steps"))
+    
+#     #tmp_fits_dir  = kwargs.get("tmp_fits_dir")
+    
+#     # This doesn't change
+#     # initial_feedme is a FeedmeContainer object
+#     #header       = initial_feedme.header
+#     #feedme_path  = initial_feedme.path_to_feedme
+#     output_image = initial_feedme.header.output_image.value
+    
+#     # This is to clean up the code and make it easier to understand
+#     # Make a deepcopy just in case
+#     initial_components = deepcopy(initial_feedme)
+    
+#     header = initial_components.header
+    
+#     initial_components.bulge.magnitude.value = bulge_magnitude
+#     initial_components.disk.magnitude.value  = disk_magnitude
+
+#     # Whether or not to load default components
+#     # If arms are not used, we select False and let the code
+#     # figure it out on reading in (this avoids some output/extra processing)
+#     load_default = True
+#     if len(initial_components.components) <= 4:
+#         load_default = False
+
+#     # ---------------------------------------------------------------------
+#     # Note to self, OutputContainer is *just* for handling output
+#     # It does not retain the input state fed into Galfit
+#     # And the input dict is *before* output but will be updated *by* output
+#     # ---------------------------------------------------------------------
+    
+#     bulge_str = f"m{bulge_magnitude}"
+#     disk_str  = f"m{disk_magnitude}"
+                
+#     #print(f"Bulge magnitude {bulge_magnitude}, Disk magnitude {disk_magnitude}")
+    
+#     basepath, basename = os.path.split(output_image)
+#     new_basename       = f"{bulge_str}{disk_str}_{basename}"
+#     new_output_image   = pj(basepath, new_basename)
+#     initial_components.header.output_image.value = new_output_image
+    
+#     feedme_name     = os.path.basename(initial_feedme.path_to_feedme)
+#     new_feedme_name = f"{bulge_str}{disk_str}_{feedme_name}"
+#     tmp_feedme_in   = pj(basepath, new_feedme_name)
+
+#     success = False
+    
+#     # Any galfit runs that feed into an output container *must* have capture_output = True or 
+#     # they won't update the new parameters
+#     if num_steps == 1:
+#         run_galfit_cmd = f"{base_galfit_cmd} {tmp_feedme_in}"
+
+#         if load_default:
+#             initial_components.disk.axis_ratio.value = disk_axis_ratio
+            
+#         initial_components.to_file(filename = tmp_feedme_in)
+
+#         final_galfit_output = OutputContainer(
+#             await async_sp(run_galfit_cmd),
+#             path_to_feedme = tmp_feedme_in,
+#             **initial_components.components
+#         )
+
+#         success = check_success(final_galfit_output, success)
+
+#     elif num_steps >= 2:
+#         # Top is disk first, bottom is bulge first, choose your own adventure
+#         #disk_in = pj(out_dir, gname, f"{gname}_disk.in")
+#         #bulge_in = pj(out_dir, gname, f"{gname}_bulge.in")
+#         bulge_in = f"{tmp_feedme_in.replace('.in', '')}_bulge.in"
+
+#         #header.to_file(disk_in, initial_components.disk, initial_components.sky)
+#         header.to_file(bulge_in, initial_components.bulge, initial_components.sky)
+
+#         #run_galfit_cmd = f"{base_galfit_cmd} {disk_in}"
+#         run_galfit_cmd = f"{base_galfit_cmd} {bulge_in}"
+
+#         #print("Disk")
+#         #print("Bulge")
+
+#         # galfit_output = OutputContainer(
+#         #     sp(run_galfit_cmd), 
+#         #     sersic_order   = ["disk"], 
+#         #     path_to_feedme = feedme_path,
+#         #     load_default   = load_default,
+#         #     **feedme_info[gname].components
+#         # )
+#         galfit_output = OutputContainer(
+#             await async_sp(run_galfit_cmd), 
+#             sersic_order   = ["bulge"], 
+#             path_to_feedme = bulge_in,
+#             load_default   = load_default,
+#             **initial_components.components
+#         )
+
+#         success = check_success(galfit_output, success)
+
+#         # Only fix sky if first step is successful
+#         # if galfit_output.success:
+#         #     # Fix sky parameters per Galfit 'tips' recommendation
+#         #     for key in galfit_output.sky.param_fix:
+#         #         galfit_output.sky.param_fix[key] = 0
+
+#         # Assume rerun is to refine final fit
+#         # This will also be better for prototyping multiband fits
+#         # if rerun:
+#         #     galfit_output = rerun_galfit(galfit_output,
+#         #                                  base_galfit_cmd,
+#         #                                  # Pass in initial components here to generically
+#         #                                  # determine which were optimized on
+#         #                                  initial_components.disk, initial_components.sky
+#         #                                 )
+
+#         # load_default here because a three step fit is impossible with only two components
+#         if num_steps == 3 and load_default:
+
+#             # For fitting *just* the bulge + a few pixels
+#             # Trying Just disk, just bulge, then all together with arms
+# #                 bulge_header = deepcopy(feedme_info[gname].header)
+# #                 xcenter, ycenter = initial_components.bulge.position
+# #                 bulge_rad = 2*initial_components.bulge.effective_radius
+# #                 bulge_header.region_to_fit = (
+# #                                               round(xcenter - bulge_rad), 
+# #                                               round(xcenter + bulge_rad), 
+# #                                               round(ycenter - bulge_rad), 
+# #                                               round(ycenter + bulge_rad)
+# #                                              )
+# #                 bulge_header.param_fix["region_to_fit"] = f"{round(ycenter - bulge_rad)} {round(ycenter + bulge_rad)}"
+# #                 bulge_header.update_param_values()
+
+# #                 bulge_in = pj(out_dir, gname, f"{gname}_bulge.in")
+# #                 bulge_header.to_file(bulge_in, initial_components.bulge, galfit_output.sky)
+
+#             # Fit disk first, now to fit the bulge and refine the disk
+#             bulge_disk_in = f"{tmp_feedme_in.replace('.in', '')}_bulge+disk.in"
+
+#             # Note initial components disk and galfit output the rest
+#             # Those are updated!
+#             header.to_file(bulge_disk_in, initial_components.bulge, galfit_output.disk, galfit_output.sky)
+#             #header.to_file(bulge_disk_in, galfit_output.bulge, initial_components.disk, galfit_output.sky)
+
+#             run_galfit_cmd = f"{base_galfit_cmd} {bulge_disk_in}"
+#             #print("Bulge + Disk")
+#             galfit_output = OutputContainer(
+#                 await async_sp(run_galfit_cmd), 
+#                 path_to_feedme = bulge_disk_in,
+#                 load_default   = load_default,
+#                 **galfit_output.components
+#             )
+
+#             success = check_success(galfit_output, success)
+
+# #                 if rerun:
+# #                     galfit_output = rerun_galfit(galfit_output,
+# #                                                  base_galfit_cmd,
+# #                                                  initial_components.bulge, galfit_output.disk, galfit_output.sky
+# #                                                 )
+
+#         # Overwrite original... for now 
+#         # Also good thing dicts retain order, this frequently comes up
+#         # if galfit_output.arms.param_values.get("skip", 0):
+#         #     # By default includes the header
+#         #     print("Skipping Arms")
+#         #     galfit_output.to_file(galfit_output.bulge, galfit_output.disk, galfit_output.sky)
+#         # else:
+#         if load_default:
+#             galfit_output.disk.axis_ratio.value = disk_axis_ratio
+
+#             # After determining sky and initial component(s) with extended background,
+#             # shrink fitting region closer to the galaxy itself
+#             # xcenter, ycenter = galfit_output.bulge.position
+#             # old_region = galfit_output.header.region_to_fit
+#             # crop_mult = 2
+#             # crop_rad = 1.5*(xcenter - old_region[0])/crop_mult
+#             # galfit_output.header.region_to_fit = (
+#             #                               max(round(xcenter - crop_rad), 0), # Just in case
+#             #                               round(xcenter + crop_rad), 
+#             #                               max(round(ycenter - crop_rad), 0), 
+#             #                               round(ycenter + crop_rad)
+#             #                              )
+#             # galfit_output.header.update_param_values()
+
+#             #galfit_output.arms.param_fix["outer_rad"] = 1
+            
+#         # to_file no arguments uses the feedme path attribute for location
+#         # and uses all the components in the container object (in whatever order they're in)
+#         galfit_output.to_file(filename = tmp_feedme_in)
+
+#         run_galfit_cmd = f"{base_galfit_cmd} {tmp_feedme_in}"
+#         #print("Bulge + Disk + Arms (if applicable)")
+#         final_galfit_output = OutputContainer(
+#             await async_sp(run_galfit_cmd), 
+#             path_to_feedme  = tmp_feedme_in,
+#             load_default    = load_default,
+#             **galfit_output.components, 
+#             store_text      = True
+#         )
+#         success = check_success(final_galfit_output, success)
+        
+#         if kwargs.get("verbose"):
+#             print(str(final_galfit_output))
+        
+#     if success:   
+#         return new_output_image
     
 async def wrapper(
     b_d_magnitudes,
@@ -530,15 +586,17 @@ async def wrapper(
     initial_feedme, 
     base_galfit_cmd,
     disk_axis_ratio,
+    use_async = False,
     **kwargs
 ):
-    fitted_galaxies = await asyncio.gather(*(async_parameter_search_fit(
+    fitted_galaxies = await asyncio.gather(*(parameter_search_fit(
         bulge_magnitude,
         disk_magnitude,
         gname,
         initial_feedme,
         base_galfit_cmd,
         disk_axis_ratio,
+        use_async = use_async,
         **kwargs
     ) for (bulge_magnitude, disk_magnitude) in b_d_magnitudes))
     
@@ -713,16 +771,19 @@ def main(**kwargs):
         
         # ======================================== BEGIN GALFIT PARAMETER SEARCH LOOP ========================================    
         
+        use_async = False
         if parallel in (0, 2):
-            fitted_galaxies = asyncio.run(wrapper(
-                b_d_magnitudes,
-                gname,
-                feedme_info[gname], 
-                base_galfit_cmd,
-                disk_axis_ratio,
-                use_async = True,
-                **kwargs
-            ))
+            use_async = True
+            
+        fitted_galaxies = asyncio.run(wrapper(
+            b_d_magnitudes,
+            gname,
+            feedme_info[gname], 
+            base_galfit_cmd,
+            disk_axis_ratio,
+            use_async = use_async,
+            **kwargs
+        ))
             # Subprocess and Loky backend don't play well together
             # fitted_galaxies = Parallel(n_jobs = -2, backend = "multiprocessing")(
             #            delayed(multi_step_fit)(
@@ -736,19 +797,6 @@ def main(**kwargs):
             #             )
             #            for (bulge_magnitude, disk_magnitude) in b_d_magnitudes
             #                             )
-        else:
-            fitted_galaxies = [
-                parameter_search_fit(
-                bulge_magnitude,
-                disk_magnitude,
-                gname,
-                feedme_info[gname],
-                base_galfit_cmd,
-                disk_axis_ratio,
-                **kwargs
-                ) 
-                for (bulge_magnitude, disk_magnitude) in b_d_magnitudes
-            ]
                 
                 # TODO: GET THIS WORKING... so many issues
                 # Dropping this here for final simultaneous fitting following all num_steps
@@ -983,6 +1031,7 @@ def main(**kwargs):
         # Use try except instead of checking existence to save time
         # In most cases these files *should* exist
         rm_files(*to_del)
+        print("Done!")
 
         #to_del_psf_files = (pj(tmp_psf_dir, f"{gname}_psf.fits") for gname in galaxy_names
                             #if exists(pj(tmp_psf_dir, f"{gname}_psf.fits"))
