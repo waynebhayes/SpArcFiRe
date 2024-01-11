@@ -91,7 +91,7 @@ async def async_sp(*args, **kwargs):
         stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout = timeout)
         # This can only be used for python>3.11 and theoretically works better than the current method
         #async with asyncio.timeout(timeout):
-        stdout, stderr = await proc.communicate()
+        #stdout, stderr = await proc.communicate()
 
         stdout = stdout.decode('utf8')
         stderr = stderr.decode('utf8')
@@ -198,6 +198,7 @@ async def parameter_search_fit(
             final_galfit_output = OutputContainer(
                 await async_sp(run_galfit_cmd, timeout = timeout),
                 path_to_feedme = tmp_feedme_in,
+                store_text     = True,
                 **initial_components.components
             )
             
@@ -205,6 +206,7 @@ async def parameter_search_fit(
             final_galfit_output = OutputContainer(
                 sp(run_galfit_cmd, timeout = timeout),
                 path_to_feedme = tmp_feedme_in,
+                store_text     = True,
                 **initial_components.components
             )
 
@@ -238,6 +240,7 @@ async def parameter_search_fit(
                 sersic_order   = ["bulge"], 
                 path_to_feedme = bulge_in,
                 load_default   = load_default,
+                store_text     = True,
                 **initial_components.components
             )
             
@@ -247,6 +250,7 @@ async def parameter_search_fit(
                 sersic_order   = ["bulge"], 
                 path_to_feedme = bulge_in,
                 load_default   = load_default,
+                store_text     = True,
                 **initial_components.components
             )
 
@@ -303,6 +307,7 @@ async def parameter_search_fit(
                     await async_sp(run_galfit_cmd, timeout = timeout), 
                     path_to_feedme = bulge_disk_in,
                     load_default   = load_default,
+                    store_text     = True,
                     **galfit_output.components
                 )
                 
@@ -311,6 +316,7 @@ async def parameter_search_fit(
                     sp(run_galfit_cmd, timeout = timeout), 
                     path_to_feedme = bulge_disk_in,
                     load_default   = load_default,
+                    store_text     = True,
                     **galfit_output.components
                 )
 
@@ -621,7 +627,7 @@ async def wrapper(
         ) 
         for (bulge_magnitude, disk_magnitude) in b_d_magnitudes
     ))
-    
+ 
     return fitted_galaxies
     
 def main(**kwargs):
@@ -800,8 +806,8 @@ def main(**kwargs):
         # Limiting our # of asynchronous processes
         
         chunk = 20
-        #if parallel == 1:
-        #    chunk = 5
+        if parallel == 1:
+            chunk = 5
             
         #if len(b_d_magnitudes) > chunk:
         fitted_galaxies = []
@@ -820,7 +826,7 @@ def main(**kwargs):
                 use_async = use_async,
                 **kwargs
             )))
-            
+ 
         # fitted_galaxies = asyncio.run(wrapper(
         #     b_d_magnitudes,
         #     gname,
@@ -912,8 +918,9 @@ def main(**kwargs):
                 for gfit in fitted_galaxies if gfit
             ).reset_index()
             
-        except ValueError:
+        except ValueError as ve:
             print(f"Could not produce NMR. Counting as a failure (for now) :(")
+            print("Debugging info: ", ve)
             galaxy_df = None
 
         try:
@@ -923,7 +930,8 @@ def main(**kwargs):
             print(f"Something went wrong with galaxy {gname}, can't find best fit from parameter search.")
         
         # For when the NMR cannot be produced.
-        except AttributeError:
+        except AttributeError as ae:
+            #print(ae)
             pass
 
         else:
