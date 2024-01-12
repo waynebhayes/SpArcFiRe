@@ -91,21 +91,34 @@ async def async_sp(*args, **kwargs):
         stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout = timeout)
         # This can only be used for python>3.11 and theoretically works better than the current method
         #async with asyncio.timeout(timeout):
-        #stdout, stderr = await proc.communicate()
+        #    stdout, stderr = await proc.communicate()
 
         stdout = stdout.decode('utf8')
         stderr = stderr.decode('utf8')
         
-    except asyncio.TimeoutError:
-        #if kwargs.get("verbose"):
+    except TimeoutError:
+        #if proc.returncode is None:
+        #    parent = psutil.Process(proc.pid)
+        #    for child in parent.children(recursive=True): 
+        #        child.terminate()
+        #    parent.terminate()
+
+        #await asyncio.sleep(1)
+        proc.kill()
+        await proc.wait()
+        process._transport.close()
         print(f"GALFIT timed out.") 
         print(f"Timeout is set to {timeout/60} minutes. If this is not enough, please consider increasing this value.")
-        proc.kill()
-        #_ = await proc.communicate()
+        #if kwargs.get("verbose"):
         
         stdout = "...now exiting to system..."
         stderr = ""
         #reset_all()
+
+    except Exception as e:
+        print(f"Something went wrong! {e}")
+        stdout = "...now exiting to system..."
+        stderr = ""
     
     # For debuggin
     #print(*stdout.decode('utf8').split("\n")[:75], sep = "\n")
@@ -611,20 +624,35 @@ async def wrapper(
     use_async = True,
     **kwargs
 ):
+    # If we use gather again, set return_exceptions=True
+    
     # Even if we are not using async, I believe we must still "await" or an error will be thrown
-    fitted_galaxies = await asyncio.gather(*(
-        parameter_search_fit(
-            bulge_magnitude,
-            disk_magnitude,
-            gname,
-            initial_feedme,
-            base_galfit_cmd,
-            disk_axis_ratio,
-            use_async = use_async,
-            **kwargs
-        ) 
-        for (bulge_magnitude, disk_magnitude) in b_d_magnitudes
-    ))
+    #loop = asyncio.get_event_loop()
+    
+    fitted_galaxies = await asyncio.gather(*(parameter_search_fit(
+        bulge_magnitude,
+        disk_magnitude,
+        gname,
+        initial_feedme,
+        base_galfit_cmd,
+        disk_axis_ratio,
+        use_async = use_async,
+        **kwargs
+    ) for (bulge_magnitude, disk_magnitude) in b_d_magnitudes
+                          ), return_exceptions = True
+                        )
+    
+    # finished, _ = loop.run_until_complete(
+    #     asyncio.wait(
+    #         tasks, 
+    #         return_when = asyncio.ALL_COMPLETED,
+    #         timeout = 60*3*kwargs.get("num_steps", 2) # seconds, 3 minutes per step
+    #     )
+    # )
+        
+    #fitted_galaxies = finished.result()
+    
+    #loop.close()
  
     return fitted_galaxies
     
