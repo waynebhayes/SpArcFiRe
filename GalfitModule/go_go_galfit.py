@@ -100,10 +100,8 @@ async def async_sp(*args, **kwargs):
         #if kwargs.get("verbose"):
         print(f"GALFIT timed out.") 
         print(f"Timeout is set to {timeout/60} minutes. If this is not enough, please consider increasing this value.")
-        # Using this alone gives an error but seems to actually work...so ignore it?
-        # the other method gets hung up.
         proc.kill()
-        _ = await proc.communicate()
+        #_ = await proc.communicate()
         
         stdout = "...now exiting to system..."
         stderr = ""
