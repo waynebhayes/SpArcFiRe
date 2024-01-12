@@ -53,43 +53,48 @@ ext="*.fits"
 conv_fits="-convert-FITS "
 #img_standardize="1"
 
-if [ -x "`/bin/which fitspng 2>/dev/null`" ]; then
-    fitspng=$(/bin/which fitspng)
-    working_dir=$(pwd)
+# if [ -x "`/bin/which fitspng 2>/dev/null`" ]; then
+#     fitspng=$(/bin/which fitspng)
+#     working_dir=$(pwd)
     
-    cd $default_in
-    $fitspng *".fits"
+#     cd $default_in
+#     #$fitspng *".fits"
+
+#     # Process all image files
+#     for f in *".fits"; do
+
+#         png_galaxy="${f%.fits}.png"
+
+#         #convert "$f" "$png_galaxy"
     
-    # Ignore case, and suppress errors if no files 
-    shopt -s nullglob
-    shopt -s nocaseglob
+#         # Ignore case, and suppress errors if no files 
+#         shopt -s nullglob
+#         shopt -s nocaseglob
 
-    # Process all image files
-    for f in *".png"; do
-
-        # Get image's width and height, in one go
-        read w h < <(identify -format "%w %h" "$f")
+#         # Get image's width and height, in one go
+#         # Do I need this???
+#         read w h < <(identify -format "%w %h" "$f")
         
-        if [ $((w % 2)) -eq 1 ]
-        then
-            w=$((++w))
-        fi
+#         if [ $((w % 2)) -eq 1 ]
+#         then
+#             w=$((++w))
+#         fi
 
-        if [ $((w/2 % 2)) -eq 1 ]
-        then
-            w=$((w+2))
-        fi
+#         if [ $((w/2 % 2)) -eq 1 ]
+#         then
+#             w=$((w+2))
+#         fi
         
-        convert "$f" "-resize" "${w}x${w}" "$f"
+#         convert "$f" "-resize" "${w}x${w}" "$png_galaxy"
 
-    done
+#     done
 
-    cd $working_dir
+#     cd $working_dir
     
-    ext="*.png"
-    conv_fits=""
-    #img_std="0"
-fi
+#     ext="*.png"
+#     conv_fits=""
+#     #img_std="0"
+# fi
 
 # Prep for parallel
 #input_arr=($(ls "$default_in/"*".fits"))
@@ -110,7 +115,8 @@ for (( cpu_num=0; cpu_num<$cpu_count; ++cpu_num )); do
     # Also no need for star masking
     # Pad images to even so that we can turn off image standardization
     if [[ $arr_start -lt $input_count ]]; then
-        echo "${SPARCFIRE_HOME}/scripts/SpArcFiRe ${conv_fits}-compute-starmask false -ignore-starmask $new_dir $default_tmp $default_out -generateFitQuality 0 -writeBulgeMask 1 -allowArcBeyond2pi 0 -unsharpMaskAmt 8 -useDeProjectStretch 0 -fixToCenter 0 -medFiltRad 0 -useImageStandardization 1 -numOrientationFieldLevels 4"
+        #echo "${SPARCFIRE_HOME}/scripts/SpArcFiRe ${conv_fits}-compute-starmask false -ignore-starmask $new_dir $default_tmp $default_out -generateFitQuality 0 -writeBulgeMask 1 -allowArcBeyond2pi 0 -unsharpMaskAmt 8 -useDeProjectStretch 0 -fixToCenter 0 -medFiltRad 0 -useImageStandardization 1 -numOrientationFieldLevels 4"
+        echo "${SPARCFIRE_HOME}/scripts/SpArcFiRe ${conv_fits}-compute-starmask false -ignore-starmask $new_dir $default_tmp $default_out -generateFitQuality 0 -writeBulgeMask 1 -allowArcBeyond2pi 0 -unsharpMaskAmt 10 -useDeProjectStretch 0 -fixToCenter 0 -medFiltRad 0 -useImageStandardization 1"
     fi
     
     arr_start=$(( $cpu_num*$per_cpu  ))
