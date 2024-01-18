@@ -546,6 +546,7 @@ if __name__ == "__main__":
     kwargs_main = check_galfit_out_hangups(tmp_fits_dir, out_dir, kwargs_main)
     parallel_file = "parallel_cmd_file"
     
+    start_time = time.time()
     # Getting read for parallelizing
     if parallel:
         if not kwargs_main["galaxy_names"] and not restart:
@@ -629,6 +630,17 @@ if __name__ == "__main__":
                                     )
         
         write_failed(out_dir, failures)
+        
+    end_time = time.time()
+    run_time = (end_time - start_time)/60
+    time_str = "min"
+    
+    if run_time >= 60:
+        run_time /= 60
+        time_str = "hrs"
+        
+    print(f"Total GALFITting run time: {run_time:.2f} {time_str}")
+    print()
 
 # ==========================================================================================================
 # Unused but here for a good time
