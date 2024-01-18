@@ -698,7 +698,7 @@ def main(**kwargs):
         
         # ======================================== BEGIN GALFIT PARAMETER SEARCH LOOP ========================================    
         
-        use_async = False
+        use_async = True
         #if parallel in (0, 1):
         #    use_async = True
         # Limiting our # of asynchronous processes
