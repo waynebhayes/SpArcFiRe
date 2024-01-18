@@ -729,10 +729,12 @@ if __name__ == "__main__":
         finished_pkl_num = 0
         # Performing a similar check to that above for failures/success
         if restart:
-            check_output_pkl = [int(os.path.basename(i).split("_")[0].replace(basename, "")) 
-                                for i in find_files(tmp_dir, f'{basename}*_{pkl_end_str}.pkl', "f")
-                                if os.path.basename(i).split("_")[0].replace(basename, "")
-                                ]
+            check_output_pkl = [
+                int(os.path.basename(i).split(f"_{pkl_end_str}")[0].replace(basename, "")) 
+                for i in find_files(tmp_dir, f'{basename}*_{pkl_end_str}.pkl', "f")
+                if os.path.basename(i).split(f"_{pkl_end_str}")[0].replace(basename, "")
+            ]
+            
             if check_output_pkl:
                 finished_pkl_num = max(check_output_pkl)
 
