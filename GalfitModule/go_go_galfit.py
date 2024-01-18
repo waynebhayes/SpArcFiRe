@@ -4,9 +4,11 @@ import os
 from os.path import join as pj
 # from os.path import exists
 from astropy.io import fits
+from collections import ChainMap
 
 #from joblib import cpu_count #Parallel, delayed
 import asyncio
+import psutil
 
 _HOME_DIR = os.path.expanduser("~")    
 
@@ -26,7 +28,7 @@ sys.path.append(_MODULE_DIR)
 from sparc_to_galfit_feedme_gen import *
 from Classes.FitsHandlers import *
 from Functions.helper_functions import *
-from Utilities.parallel_residual_calc import fill_objects #, parallel_wrapper
+#from Utilities.parallel_residual_calc import fill_objects #, parallel_wrapper
 
 import star_removal.no_log_remove_stars_with_sextractor as remove_stars_with_sextractor
 
@@ -63,7 +65,10 @@ def touch_failed_fits(gname, tmp_fits_dir):
     with open(fail_fileout, mode='a'): pass
     
 def check_for_starmasks(gnames, masks_dir):
-    masks_in_dir = [os.path.basename(i).split("_star-rm.fits")[0] for i in find_files(masks_dir, "*star-rm.fits", "f")]
+    masks_in_dir = [
+        os.path.basename(i).split("_star-rm.fits")[0] 
+        for i in find_files(masks_dir, "*star-rm.fits", "f")
+    ]
     return list(set(gnames).difference(set(masks_in_dir)))
 
 def check_success(in_fits, previous_state = False):
@@ -78,47 +83,95 @@ def check_success(in_fits, previous_state = False):
 
 async def async_sp(*args, **kwargs):
     
+    # BIG thanks to these blogs
+    # https://blog.dalibo.com/2022/09/12/monitoring-python-subprocesses.html
+    # https://blog.meadsteve.dev/programming/2020/02/23/monitoring-async-python/
+    
     timeout = kwargs.pop("timeout", 3*60)
     
-    proc = await asyncio.create_subprocess_shell(
-        *args,
+    # Some defaults in case I've implemented things incorrectly...
+    stdout = "...now exiting to system..."
+    stderr = ""
+    
+    #proc = await asyncio.create_subprocess_shell(
+    #args = [a.split() for a in args][0]
+    proc = await asyncio.create_subprocess_exec(
+        *[a.split() for a in args][0],
         stdout = asyncio.subprocess.PIPE,
         stderr = asyncio.subprocess.PIPE,
         **kwargs
     )
-        
-    try:
-        stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout = timeout)
-        # This can only be used for python>3.11 and theoretically works better than the current method
-        #async with asyncio.timeout(timeout):
-        #    stdout, stderr = await proc.communicate()
+    
+    async def check_time():
+        loop = asyncio.get_running_loop()
+        while loop.is_running():
 
+            # This can happen if it's running too fast ;) 
+            # i.e. for some Bulge fits
+            try:
+                #print(f"Time {psutil.Process(proc.pid).cpu_times().user}")
+                exec_time = psutil.Process(proc.pid).cpu_times().user
+            except psutil.NoSuchProcess:
+                break
+            
+            if exec_time >= timeout:
+                print(f"Subprocess call timed out by cpu time.")
+                #stdout = "...now exiting to system..."
+                stderr = f"GALFIT timed out."
+                #raise TimeoutError(f"GALFIT timed out.")
+                proc.kill()
+                #await proc.wait()
+                return stdout, stderr
+            
+            # Check every 30 seconds
+            await asyncio.sleep(30)
+            
+    #try:
+        #stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout = timeout)
+        # p = psutil.Process(proc.pid)
+        # user_time = p.cpu_times().user
+        
+    ct = asyncio.create_task(check_time())
+    #(stdout, stderr), _ = await asyncio.gather(proc.communicate(), ct, return_exceptions = True)
+    (stdout, stderr), timeout_tup = await asyncio.gather(proc.communicate(), ct, return_exceptions = True)
+
+    # This can only be used for python>3.11 and theoretically works better than the current method
+    #async with asyncio.timeout(timeout):
+    #    stdout, stderr = await proc.communicate()
+
+    if timeout_tup:
+        stdout = timeout_tup[0]
+        stderr = timeout_tup[1]
+
+    if isinstance(stdout, bytes):
         stdout = stdout.decode('utf8')
+
+    if isinstance(stderr, bytes):
         stderr = stderr.decode('utf8')
         
-    except TimeoutError:
-        #if proc.returncode is None:
-        #    parent = psutil.Process(proc.pid)
-        #    for child in parent.children(recursive=True): 
-        #        child.terminate()
-        #    parent.terminate()
+#     except TimeoutError:
+#         #if proc.returncode is None:
+#         #    parent = psutil.Process(proc.pid)
+#         #    for child in parent.children(recursive=True): 
+#         #        child.terminate()
+#         #    parent.terminate()
 
-        #await asyncio.sleep(1)
-        proc.kill()
-        await proc.wait()
-        process._transport.close()
-        print(f"GALFIT timed out.") 
-        print(f"Timeout is set to {timeout/60} minutes. If this is not enough, please consider increasing this value.")
-        #if kwargs.get("verbose"):
+#         #await asyncio.sleep(1)
+#         proc.kill()
+#         await proc.wait()
+#         #process._transport.close()
+#         print(f"Subprocess call timed out.") 
+#         #print(f"Timeout is set to {timeout/60} minutes. If this is not enough, please consider increasing this value.")
+#         #if kwargs.get("verbose"):
         
-        stdout = "...now exiting to system..."
-        stderr = ""
-        #reset_all()
+#         stdout = "...now exiting to system..."
+#         stderr = ""
+#         #reset_all()
 
-    except Exception as e:
-        print(f"Something went wrong! {e}")
-        stdout = "...now exiting to system..."
-        stderr = ""
+    # except Exception as e:
+    #     print(f"Something went wrong in grabbing stdout from GALFIT! {e}")
+    #     stdout = "...now exiting to system..."
+    #     stderr = ""
     
     # For debuggin
     #print(*stdout.decode('utf8').split("\n")[:75], sep = "\n")
@@ -143,6 +196,7 @@ async def parameter_search_fit(
     # image resolution and expected runtime
     timeout   = 60 # Seconds
     timeout  *= 3  # Minutes
+    #psutil.Process(proc.pid).cpu_times().user >= timeout:
     
     out_dir   = kwargs.get("out_dir")
     num_steps = int(kwargs.get("num_steps"))
@@ -395,225 +449,39 @@ async def parameter_search_fit(
         if kwargs.get("verbose"):
             print(str(final_galfit_output))
         
-    if success:   
-        return new_output_image
-
-# async def async_parameter_search_fit(
-#     bulge_magnitude, # loop variables
-#     disk_magnitude,  # loop variables
-#     gname,
-#     initial_feedme, 
-#     base_galfit_cmd,
-#     disk_axis_ratio,
-#     **kwargs
-# ):
-    
-#     out_dir   = kwargs.get("out_dir")
-#     num_steps = int(kwargs.get("num_steps"))
-    
-#     #tmp_fits_dir  = kwargs.get("tmp_fits_dir")
-    
-#     # This doesn't change
-#     # initial_feedme is a FeedmeContainer object
-#     #header       = initial_feedme.header
-#     #feedme_path  = initial_feedme.path_to_feedme
-#     output_image = initial_feedme.header.output_image.value
-    
-#     # This is to clean up the code and make it easier to understand
-#     # Make a deepcopy just in case
-#     initial_components = deepcopy(initial_feedme)
-    
-#     header = initial_components.header
-    
-#     initial_components.bulge.magnitude.value = bulge_magnitude
-#     initial_components.disk.magnitude.value  = disk_magnitude
-
-#     # Whether or not to load default components
-#     # If arms are not used, we select False and let the code
-#     # figure it out on reading in (this avoids some output/extra processing)
-#     load_default = True
-#     if len(initial_components.components) <= 4:
-#         load_default = False
-
-#     # ---------------------------------------------------------------------
-#     # Note to self, OutputContainer is *just* for handling output
-#     # It does not retain the input state fed into Galfit
-#     # And the input dict is *before* output but will be updated *by* output
-#     # ---------------------------------------------------------------------
-    
-#     bulge_str = f"m{bulge_magnitude}"
-#     disk_str  = f"m{disk_magnitude}"
-                
-#     #print(f"Bulge magnitude {bulge_magnitude}, Disk magnitude {disk_magnitude}")
-    
-#     basepath, basename = os.path.split(output_image)
-#     new_basename       = f"{bulge_str}{disk_str}_{basename}"
-#     new_output_image   = pj(basepath, new_basename)
-#     initial_components.header.output_image.value = new_output_image
-    
-#     feedme_name     = os.path.basename(initial_feedme.path_to_feedme)
-#     new_feedme_name = f"{bulge_str}{disk_str}_{feedme_name}"
-#     tmp_feedme_in   = pj(basepath, new_feedme_name)
-
-#     success = False
-    
-#     # Any galfit runs that feed into an output container *must* have capture_output = True or 
-#     # they won't update the new parameters
-#     if num_steps == 1:
-#         run_galfit_cmd = f"{base_galfit_cmd} {tmp_feedme_in}"
-
-#         if load_default:
-#             initial_components.disk.axis_ratio.value = disk_axis_ratio
-            
-#         initial_components.to_file(filename = tmp_feedme_in)
-
-#         final_galfit_output = OutputContainer(
-#             await async_sp(run_galfit_cmd),
-#             path_to_feedme = tmp_feedme_in,
-#             **initial_components.components
-#         )
-
-#         success = check_success(final_galfit_output, success)
-
-#     elif num_steps >= 2:
-#         # Top is disk first, bottom is bulge first, choose your own adventure
-#         #disk_in = pj(out_dir, gname, f"{gname}_disk.in")
-#         #bulge_in = pj(out_dir, gname, f"{gname}_bulge.in")
-#         bulge_in = f"{tmp_feedme_in.replace('.in', '')}_bulge.in"
-
-#         #header.to_file(disk_in, initial_components.disk, initial_components.sky)
-#         header.to_file(bulge_in, initial_components.bulge, initial_components.sky)
-
-#         #run_galfit_cmd = f"{base_galfit_cmd} {disk_in}"
-#         run_galfit_cmd = f"{base_galfit_cmd} {bulge_in}"
-
-#         #print("Disk")
-#         #print("Bulge")
-
-#         # galfit_output = OutputContainer(
-#         #     sp(run_galfit_cmd), 
-#         #     sersic_order   = ["disk"], 
-#         #     path_to_feedme = feedme_path,
-#         #     load_default   = load_default,
-#         #     **feedme_info[gname].components
-#         # )
-#         galfit_output = OutputContainer(
-#             await async_sp(run_galfit_cmd), 
-#             sersic_order   = ["bulge"], 
-#             path_to_feedme = bulge_in,
-#             load_default   = load_default,
-#             **initial_components.components
-#         )
-
-#         success = check_success(galfit_output, success)
-
-#         # Only fix sky if first step is successful
-#         # if galfit_output.success:
-#         #     # Fix sky parameters per Galfit 'tips' recommendation
-#         #     for key in galfit_output.sky.param_fix:
-#         #         galfit_output.sky.param_fix[key] = 0
-
-#         # Assume rerun is to refine final fit
-#         # This will also be better for prototyping multiband fits
-#         # if rerun:
-#         #     galfit_output = rerun_galfit(galfit_output,
-#         #                                  base_galfit_cmd,
-#         #                                  # Pass in initial components here to generically
-#         #                                  # determine which were optimized on
-#         #                                  initial_components.disk, initial_components.sky
-#         #                                 )
-
-#         # load_default here because a three step fit is impossible with only two components
-#         if num_steps == 3 and load_default:
-
-#             # For fitting *just* the bulge + a few pixels
-#             # Trying Just disk, just bulge, then all together with arms
-# #                 bulge_header = deepcopy(feedme_info[gname].header)
-# #                 xcenter, ycenter = initial_components.bulge.position
-# #                 bulge_rad = 2*initial_components.bulge.effective_radius
-# #                 bulge_header.region_to_fit = (
-# #                                               round(xcenter - bulge_rad), 
-# #                                               round(xcenter + bulge_rad), 
-# #                                               round(ycenter - bulge_rad), 
-# #                                               round(ycenter + bulge_rad)
-# #                                              )
-# #                 bulge_header.param_fix["region_to_fit"] = f"{round(ycenter - bulge_rad)} {round(ycenter + bulge_rad)}"
-# #                 bulge_header.update_param_values()
-
-# #                 bulge_in = pj(out_dir, gname, f"{gname}_bulge.in")
-# #                 bulge_header.to_file(bulge_in, initial_components.bulge, galfit_output.sky)
-
-#             # Fit disk first, now to fit the bulge and refine the disk
-#             bulge_disk_in = f"{tmp_feedme_in.replace('.in', '')}_bulge+disk.in"
-
-#             # Note initial components disk and galfit output the rest
-#             # Those are updated!
-#             header.to_file(bulge_disk_in, initial_components.bulge, galfit_output.disk, galfit_output.sky)
-#             #header.to_file(bulge_disk_in, galfit_output.bulge, initial_components.disk, galfit_output.sky)
-
-#             run_galfit_cmd = f"{base_galfit_cmd} {bulge_disk_in}"
-#             #print("Bulge + Disk")
-#             galfit_output = OutputContainer(
-#                 await async_sp(run_galfit_cmd), 
-#                 path_to_feedme = bulge_disk_in,
-#                 load_default   = load_default,
-#                 **galfit_output.components
-#             )
-
-#             success = check_success(galfit_output, success)
-
-# #                 if rerun:
-# #                     galfit_output = rerun_galfit(galfit_output,
-# #                                                  base_galfit_cmd,
-# #                                                  initial_components.bulge, galfit_output.disk, galfit_output.sky
-# #                                                 )
-
-#         # Overwrite original... for now 
-#         # Also good thing dicts retain order, this frequently comes up
-#         # if galfit_output.arms.param_values.get("skip", 0):
-#         #     # By default includes the header
-#         #     print("Skipping Arms")
-#         #     galfit_output.to_file(galfit_output.bulge, galfit_output.disk, galfit_output.sky)
-#         # else:
-#         if load_default:
-#             galfit_output.disk.axis_ratio.value = disk_axis_ratio
-
-#             # After determining sky and initial component(s) with extended background,
-#             # shrink fitting region closer to the galaxy itself
-#             # xcenter, ycenter = galfit_output.bulge.position
-#             # old_region = galfit_output.header.region_to_fit
-#             # crop_mult = 2
-#             # crop_rad = 1.5*(xcenter - old_region[0])/crop_mult
-#             # galfit_output.header.region_to_fit = (
-#             #                               max(round(xcenter - crop_rad), 0), # Just in case
-#             #                               round(xcenter + crop_rad), 
-#             #                               max(round(ycenter - crop_rad), 0), 
-#             #                               round(ycenter + crop_rad)
-#             #                              )
-#             # galfit_output.header.update_param_values()
-
-#             #galfit_output.arms.param_fix["outer_rad"] = 1
-            
-#         # to_file no arguments uses the feedme path attribute for location
-#         # and uses all the components in the container object (in whatever order they're in)
-#         galfit_output.to_file(filename = tmp_feedme_in)
-
-#         run_galfit_cmd = f"{base_galfit_cmd} {tmp_feedme_in}"
-#         #print("Bulge + Disk + Arms (if applicable)")
-#         final_galfit_output = OutputContainer(
-#             await async_sp(run_galfit_cmd), 
-#             path_to_feedme  = tmp_feedme_in,
-#             load_default    = load_default,
-#             **galfit_output.components, 
-#             store_text      = True
-#         )
-#         success = check_success(final_galfit_output, success)
+    if success:
         
-#         if kwargs.get("verbose"):
-#             print(str(final_galfit_output))
+        fits_file = OutputFits(new_output_image)
+        use_bulge_mask = False
         
-#     if success:   
-#         return new_output_image
+        try:
+            mask_fits_file = FitsFile(header.pixel_mask.value)
+        except Exception as e:
+            print(f"There was an issue opening star mask for {new_basename}. Proceeding without mask...")
+            # Logic implemented to handle None
+            mask_fits_file = None #np.zeros((500,500))
+
+        # If skip is enabled then arms are not fit so bulge masking doesn't make sense
+        c_types = [comp.component_type for comp in fits_file.feedme.components.values()]
+        
+        if use_bulge_mask and out_dir and ("power" in c_types):
+            _ = fits_file.generate_bulge_mask(pj(out_dir, gname, f"{gname}.csv"))
+        else:
+            use_bulge_mask = False
+
+        masked_residual_normalized = fits_file.generate_masked_residual(
+            mask_fits_file, 
+            use_bulge_mask     = use_bulge_mask,
+            update_fits_header = False
+        )
+        
+        if masked_residual_normalized is None:
+            print(f"Could not calculate nmr for {new_basename}. Continuing...")
+            # returning some absurd number
+            return {new_output_image : {"pvalue" : 0, "nmr" : 100000}}
+
+        # output image path : {p value : KS test p value, nmr : NMR})
+        return {new_output_image : {"pvalue" : fits_file.kstest.pvalue, "nmr" : fits_file.nmr}}
     
 async def wrapper(
     b_d_magnitudes,
@@ -624,7 +492,6 @@ async def wrapper(
     use_async = True,
     **kwargs
 ):
-    # If we use gather again, set return_exceptions=True
     
     # Even if we are not using async, I believe we must still "await" or an error will be thrown
     #loop = asyncio.get_event_loop()
@@ -642,6 +509,11 @@ async def wrapper(
                           ), return_exceptions = True
                         )
     
+    
+
+    # Convert list of dicts to single dict
+    # gpath : nmr value
+    fitted_galaxies = dict(ChainMap(*fitted_galaxies[::-1]))
     # finished, _ = loop.run_until_complete(
     #     asyncio.wait(
     #         tasks, 
@@ -826,24 +698,24 @@ def main(**kwargs):
         
         # ======================================== BEGIN GALFIT PARAMETER SEARCH LOOP ========================================    
         
-        # use_async = False
-        # if parallel in (0, 2):
-        #     use_async = True
+        use_async = False
+        #if parallel in (0, 1):
+        #    use_async = True
         # Limiting our # of asynchronous processes
         
         chunk = 20
-        if parallel == 1:
-            chunk = 5
+        #if parallel == 1:
+        #    chunk = 5
             
         #if len(b_d_magnitudes) > chunk:
-        fitted_galaxies = []
+        fitted_galaxies = {}
         for i in range(0, len(b_d_magnitudes), chunk):
             if (i + chunk) < len(b_d_magnitudes):
                 b_d_chunk = b_d_magnitudes[i:i + chunk]
             else:
                 b_d_chunk = b_d_magnitudes[i:]
 
-            fitted_galaxies.extend(asyncio.run(wrapper(
+            fitted_galaxies.update(asyncio.run(wrapper(
                 b_d_chunk,
                 gname,
                 feedme_info[gname], 
@@ -853,77 +725,6 @@ def main(**kwargs):
                 **kwargs
             )))
  
-        # fitted_galaxies = asyncio.run(wrapper(
-        #     b_d_magnitudes,
-        #     gname,
-        #     feedme_info[gname], 
-        #     base_galfit_cmd,
-        #     disk_axis_ratio,
-        #     use_async = use_async,
-        #     **kwargs
-        # ))
-            # Subprocess and Loky backend don't play well together
-            # fitted_galaxies = Parallel(n_jobs = -2, backend = "multiprocessing")(
-            #            delayed(multi_step_fit)(
-            #                bulge_magnitude,
-            #                disk_magnitude,
-            #                gname,
-            #                feedme_info[gname], 
-            #                base_galfit_cmd,
-            #                disk_axis_ratio,
-            #                **kwargs
-            #             )
-            #            for (bulge_magnitude, disk_magnitude) in b_d_magnitudes
-            #                             )
-                
-                # TODO: GET THIS WORKING... so many issues
-                # Dropping this here for final simultaneous fitting following all num_steps
-                # replacement_sf_masks = []
-                
-        #         if simultaneous_fitting and gname in sf_feedme_info:
-        #             print("Fitting again via Simultaneous Fitting technique")
-        #         #elif exists(sf_info.header.input_image):
-        #             sf_info = sf_feedme_info.get(gname, None)
-
-        #             header = final_galfit_output.header
-        #             sf_header = sf_info.header
-
-        #             header.input_image   = sf_header.input_image
-        #             header.region_to_fit = sf_header.region_to_fit
-
-        #             if exists(sf_header.psf):
-        #                 header.psf = sf_header.psf
-
-        #             header.pixel_mask = sf_header.pixel_mask
-        #             # Compare across g hardcoded for now
-        #             # Values found here https://classic.sdss.org/dr7/algorithms/fluxcal.php
-        #             header.mag_zeropoint = 25.11 #sf_header.mag_zeropoint
-
-        #             # This should work because pass by reference
-        #             # aka mutability wink wink
-        #             header.update_param_values()
-        #             #header.param_fix["region_to_fit"] = f"{header.region_to_fit[2]} {header.region_to_fit[3]}"
-
-        #             # Usually within a pixel but to be abundantly safe
-        #             # Save a line of code by updating the dictionary from which things are output itself
-        #             final_galfit_output.bulge.param_values["position"] = sf_info.bulge.position
-        #             final_galfit_output.disk.param_values["position"]  = sf_info.disk.position
-
-        #             # Allow sky background to optimize again just in case
-        #             for key in final_galfit_output.sky.param_fix:
-        #                 final_galfit_output.sky.param_fix[key] = 1
-
-        #             if final_galfit_output.arms.param_values.get("skip", 0):
-        #                 # By default includes the header
-        #                 final_galfit_output.to_file(final_galfit_output.bulge, final_galfit_output.disk, final_galfit_output.sky)
-        #             else:
-        #                 final_galfit_output.to_file()
-
-        #             final_galfit_output = OutputContainer(sp(run_galfit_cmd), **final_galfit_output.to_dict(), store_text = True)
-        #                 # _ = rerun_galfit(final_galfit_output,
-        #                 #                  base_galfit_cmd,
-        #                 #                  *galfit_output.to_list()
-        #                 #                 )
         # ======================================== END GALFIT MAGNITUDE LOOP ========================================
         # if not any(fitted_galaxies):
         #     print("No successful deconvolutions.")
@@ -932,36 +733,34 @@ def main(**kwargs):
         tmp_png_path  = pj(tmp_png_dir, gname)
         tmp_fits_path_gname = pj(tmp_fits_dir, f"{gname}_galfit_out.fits")
         
+        # nmr_x_1-p
+        fitted_galaxies_nmr_x_1_p = {
+            gpath : (1 - inner_dict["pvalue"])*inner_dict["nmr"] 
+            for gpath, inner_dict in fitted_galaxies.items()
+        }
+        
         try:
-            # Some of these may not exist b
-            galaxy_df = pd.concat(
-                fill_objects(
-                    gfit, 
-                    1, 
-                    "", 
-                    feedme_info[gname].header.pixel_mask.value
-                ) 
-                for gfit in fitted_galaxies if gfit
-            ).reset_index()
+            best_fit_gpath = min(fitted_galaxies, key = fitted_galaxies_nmr_x_1_p.get)
             
         except ValueError as ve:
-            print(f"Could not produce NMR. Counting as a failure (for now) :(")
-            print("Debugging info: ", ve)
-            galaxy_df = None
-
-        try:
-            best_fit  = galaxy_df.loc[galaxy_df["nmr_x_1-p"].idxmin(), "gname"]
-            
-        except TypeError:
+            #print(ve)
             print(f"Something went wrong with galaxy {gname}, can't find best fit from parameter search.")
-        
-        # For when the NMR cannot be produced.
-        except AttributeError as ae:
-            #print(ae)
-            pass
-
         else:
-            shutil.copy2(pj(tmp_fits_dir, best_fit), tmp_fits_path_gname)
+            # If filling each of the FITS files is desired... it may not be if too much I/O is happening
+            # so commented out for now.
+            
+#             best_fit_p   = fitted_galaxies[best_fit_gpath]["pvalue"]
+#             best_fit_nmr = fitted_galaxies[best_fit_gpath]["nmr"]
+            
+#             with fits.open(best_fit_gpath, mode = "update", output_verify = "ignore") as hdul:
+#                 hdul[2].header["NMR"]      = (round(best_fit_nmr, 8), "Norm of the masked residual")
+
+#                 # pvalue is sometimes none but round can't handle it
+#                 if isinstance(pvalue, float):
+#                     hdul[2].header["KS_P"] = (round(best_fit_pvalue, 8), "p value of kstest vs noise")
+#                 else:
+#                     hdul[2].header["KS_P"] = (None, "p value of kstest vs noise")
+            shutil.copy2(best_fit_gpath, tmp_fits_path_gname)
         
         # For when Simultaneous fitting fails we don't want to use that residual mask
         # for calculating the residual. I think everything else is handled
@@ -981,11 +780,6 @@ def main(**kwargs):
             #failed.append(gname)
             continue
         
-        #tmp_fits_path = kwargs.get("tmp_fits_path", self.filepath)
-        # .../galfits -> galfit_png
-        # tmp_png_path  = kwargs.get("tmp_png_path", tmp_png_path)
-        # out_png_dir   = kwargs.get("out_png_dir", "./")
-        #capture_output = bool(kwargs.get("silent", False))
         if sp(f"hostname").stdout.split(".")[0] == "bayonet-09":
                 
             tmp_fits_obj = OutputFits(tmp_fits_path_gname, load_default = False)
@@ -997,39 +791,8 @@ def main(**kwargs):
             
             shutil.copy2(f"{pj(out_png_dir, gname)}_combined.png", pj(out_dir, gname))
 
-#         fitspng_param = "0.25,1" #1,150"
-        
-#         fitspng_cmd1 = f"{run_fitspng} -fr \"{fitspng_param}\" -o \
-#                         {tmp_png_path}.png {tmp_fits_path_gname}[1]"
-#         fitspng_cmd2 = f"{run_fitspng} -fr \"{fitspng_param}\" -o \
-#                         {tmp_png_path}_out.png {tmp_fits_path_gname}[2]"
-#         fitspng_cmd3 = f"{run_fitspng} -fr \"{fitspng_param}\" -o \
-#                         {tmp_png_path}_residual.png {tmp_fits_path_gname}[3]"
-        
-#         fitspng_out = sp(fitspng_cmd1)
-        
-#         # Because this doesn't work on some of the clusters
-#         if "error" not in fitspng_out.stderr:
-            
-#             _ = sp(fitspng_cmd2, capture_output = capture_output)
-#             _ = sp(fitspng_cmd3, capture_output = capture_output)
-
-#             # Combining the images using ImageMagick
-#             montage_cmd = f"montage {tmp_png_path}.png \
-#                                     {tmp_png_path}_out.png \
-#                                     {tmp_png_path}_residual.png \
-#                                     -tile 3x1 -geometry \"175x175+2+0<\" \
-#                                     {pj(out_png_dir, gname)}_combined.png"
-
-#             _ = sp(montage_cmd, capture_output = capture_output)
-#             # Drop a copy in the sparfire-out folder of each galaxy for ease of navigating/viewing
-#             shutil.copy2(f"{pj(out_png_dir, gname)}_combined.png", pj(out_dir, gname))
-                
-#         else:
-#             print("Skipping fitspng conversion... there is likely a library (libcfitsio) issue.")
-
         # No point in doing this in parallel because race conditions
-        if not parallel:
+        if not parallel and not use_async:
             for galfit_out in glob(pj(cwd, "galfit.*")):
                 ext_num = galfit_out.split(".")[-1]
                 shutil.move(galfit_out, pj(out_dir, gname, f"{gname}_galfit.{ext_num}"))
@@ -1040,32 +803,8 @@ def main(**kwargs):
             
             # Remove copied masks
             rm_files(*replacement_sf_masks)
-            #_ = sp(f"rm -f {' '.join(replacement_sf_masks)}", capture_output = capture_output)
-        # else:
-        #     _ = fill_objects(gname, 1, tmp_fits_dir, tmp_masks_dir)
-
-        # This is now done via FitsHandler
-        #_, gname_nmr, gname_pvalue, gname_statistic = fill_objects(gname, 1, tmp_fits_dir, tmp_masks_dir)
-        
-#         with fits.open(tmp_fits_path_gname, mode='update', output_verify='ignore') as hdul:
-#             hdul[2].header["NMR"] = (gname_nmr, "Norm of the masked residual")
-            
-#             # pvalue is sometimes none but round can't handle it
-#             if gname_pvalue:
-#                 hdul[2].header["ks_p"] = (round(gname_pvalue, 4), "p value of kstest vs noise")
-#                 hdul[2].header["ks_stat"] = (round(gname_statistic, 4), "statistic value of kstest vs noise")
-#             else:
-#                 hdul[2].header["ks_p"] = (None, "p value of kstest vs noise")
-#                 hdul[2].header["ks_stat"] = (None, "statistic value of kstest vs noise")
-            # Flush done automatically in update mode
-            #hdul.flush()
 
         shutil.copy2(tmp_fits_path_gname, pj(out_dir, gname, f"{gname}_galfit_out.fits"))
-        
-        # TODO(?): Output final GALFIT parameters/components to file via FITS header and
-        # FitsHandler routines. This may somewhat useful for future comparison but
-        # theoretically any comparison will likely take place in python and can
-        # therefore use the FitsHandler routines at run time.
         
         print()
         
@@ -1112,17 +851,6 @@ def main(**kwargs):
         # In most cases these files *should* exist
         rm_files(*to_del)
         print("Done!")
-
-        #to_del_psf_files = (pj(tmp_psf_dir, f"{gname}_psf.fits") for gname in galaxy_names
-                            #if exists(pj(tmp_psf_dir, f"{gname}_psf.fits"))
-        #                   )
-
-        #print(f"rm -rf {' '.join(to_del_in)} {' '.join(to_del_tmp_fits)} {' '.join(to_del_psf_files)}")
-        #_ = sp(f"rm -f {' '.join(to_del_gal_in)} {' '.join(to_del_tmp_fits)} {' '.join(to_del_masks)} {' '.join(to_del_psf_files)}",
-        #print(f"rm -f {' '.join(to_del_tmp_fits)} {' '.join(to_del_feedmes)} {' '.join(to_del_masks)}")
-        # _ = sp(f"rm -f {' '.join(to_del_tmp_fits)} {' '.join(to_del_feedmes)} {' '.join(to_del_masks)}",
-        #        capture_output = capture_output
-        #       )
     
     return failed
         
