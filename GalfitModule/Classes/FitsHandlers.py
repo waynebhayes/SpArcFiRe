@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[25]:
 
 
 import os
@@ -13,6 +13,7 @@ from copy import deepcopy
 from IPython import get_ipython
 from astropy.io import fits
 import gc
+import psutil
 
 import numpy as np
 import scipy.linalg as slg
@@ -64,7 +65,7 @@ from Classes.Containers import *
 from Functions.helper_functions import *
 
 
-# In[4]:
+# In[17]:
 
 
 class HDU:
@@ -73,8 +74,8 @@ class HDU:
                  header = {}, 
                  data   = None):
         self.name   = name
-        self.header = dict(header)
-        self.data   = data
+        self.header = deepcopy(dict(header))
+        self.data   = deepcopy(data)
         
     def to_dict(self):
         return {"name"   : name,
@@ -91,7 +92,7 @@ class HDU:
         return output_str
 
 
-# In[5]:
+# In[27]:
 
 
 class FitsFile:
@@ -129,13 +130,13 @@ class FitsFile:
         # FITS starts the index at 0 but GALFIT outputs the observation image at 1
         # Also converting the header to a dict to save some trouble
         try:
-            self.header   = dict(file_in[1].header)
-            self.data     = file_in[1].data
+            self.header   = deepcopy(dict(file_in[1].header))
+            self.data     = deepcopy(file_in[1].data)
             self.num_imgs = len(file_in) - 1
             
         except IndexError:
-            self.header   = dict(file_in[0].header)
-            self.data     = file_in[0].data
+            self.header   = deepcopy(dict(file_in[0].header))
+            self.data     = deepcopy(file_in[0].data)
             self.num_imgs = 1       
         
         hdu = HDU(name = name, header = self.header, data = self.data)
@@ -147,7 +148,8 @@ class FitsFile:
         # Wait is for continuing to use the file in some other capacity
         # i.e. for outputfits below to grab more info
         if not wait:
-            file_in.close(verbose = True)
+            #file_in.close(verbose = True)
+            self.close()
         
         #print("Did it close?", file_in.closed)
         # assert hdu_num == 4, "File being passed into FitsHandler has too few output HDUs."
@@ -318,7 +320,7 @@ class FitsFile:
 #             setattr(self, key, value)
 
 
-# In[6]:
+# In[28]:
 
 
 class OutputFits(FitsFile):
@@ -345,15 +347,15 @@ class OutputFits(FitsFile):
         
         # Dict is very redundant here but just for funsies
         # FITS header not Feedme header
-        self.header = dict(self.model.header)
+        self.header = deepcopy(dict(self.model.header))
         # Can call the helper directly since we're just using the header dict
         #_header.from_file_helper_dict(self.header)
         self.feedme = FeedmeContainer(path_to_feedme = filepath, header = GalfitHeader(), load_default = load_default)
         self.feedme.from_file(self.header)
         
-        self.data = self.model.data
+        self.data = deepcopy(self.model.data)
         
-        self.bulge_mask = np.ones(np.shape(self.model.data))
+        self.bulge_mask = np.ones(np.shape(self.data))
         
         self.close()
         
@@ -423,7 +425,8 @@ class OutputFits(FitsFile):
 #         temp[xx, yy] = np.min(self.model.data[np.nonzero(self.model.data)])
 #         plt.imshow(temp, origin = "lower")
 #         plt.show()
-            
+
+        #self.close()
         return bulge_mask
         
         
@@ -541,19 +544,22 @@ class OutputFits(FitsFile):
             # print(np.shape(mask_fits_file.data))
             # print(np.shape(fits_file.data))
             # print(crop_box)
+            #self.close()
             return None
+        
+        #self.close()
         
         return self.masked_residual_normalized
 
 
-# In[7]:
+# In[29]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[8]:
+# In[30]:
 
 
 # Testing from_file
@@ -602,7 +608,7 @@ if __name__ == "__main__":
     print(np.shape(test_obs.observation.data))
 
 
-# In[9]:
+# In[31]:
 
 
 # Unit test to check value of masked residual
@@ -631,7 +637,7 @@ if __name__ == "__main__":
     #print(np.min(test_model.observation.data))
 
 
-# In[10]:
+# In[32]:
 
 
 if __name__ == "__main__":
@@ -656,6 +662,14 @@ if __name__ == "__main__":
     test_model = OutputFits(model_to_update)
 
     print("After...", all(k in test_model.header for k in keys_to_check))
+
+
+# In[41]:
+
+
+if __name__ == "__main__":
+    print("Checking if all FITS files are closed...")
+    print("Expect True:", not any("fits" in pof.path for pof in psutil.Process().open_files()))
 
 
 # In[11]:
