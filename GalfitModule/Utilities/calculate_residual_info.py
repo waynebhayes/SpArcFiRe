@@ -13,7 +13,7 @@ from math import ceil
 # import matplotlib.pyplot as plt
 # import matplotlib.colors as colors
 # from matplotlib.colors import LinearSegmentedColormap
-import glob
+#import glob
 import os
 import argparse
 
@@ -83,7 +83,7 @@ def fill_objects(
     
     #last_feedme_file = pj(out_dir, gname, f"{gname}.in")
     #if not exists(last_feedme_file):
-    #feedme_files = glob.glob(pj(out_dir, gname, f"*.in"))
+    #feedme_files = glob(pj(out_dir, gname, f"*.in"))
     if galfit_mask_path.endswith(".fits"):
         mask_fits_name = galfit_mask_path
     else:
@@ -210,7 +210,7 @@ def main(**kwargs):
     #sf_mask_path = pj(tmp_dir, "sim_fitting", "sparcfire-tmp", "galfit_masks")
     out_png_dir = pj(out_dir, "galfit_png")
     
-    all_gname_tmp_out = [os.path.basename(i).replace("_galfit_out.fits","") for i in glob.glob(pj(galfit_tmp_path, "*_galfit_out.fits"))]
+    all_gname_tmp_out = [os.path.basename(i).replace("_galfit_out.fits","") for i in glob(pj(galfit_tmp_path, "*_galfit_out.fits"))]
     
     #out_nmr = {}
     out_df = pd.DataFrame()
@@ -229,7 +229,7 @@ def main(**kwargs):
         
     elif parallel:
         _, _, run_python = check_programs()
-        python_parallel   = pj(_MODULE_DIR, "Utilities", "residual_via_parallel.py")
+        python_parallel   = pj(_MODULE_DIR, "Utilities", f"{os.path.basename(__file__)}_helper.py")
         parallel_file     = "parallel_combine_residual"
         
         if exists(parallel_file):
@@ -250,10 +250,11 @@ def main(**kwargs):
         
         finished_pkl_num = 0
         if restart:
-            check_output_pkl = [int(os.path.basename(i).split("_")[0].replace(basename, "")) 
-                                for i in find_files(tmp_dir, f'{basename}*_{pkl_end_str}.pkl', "f")
-                                if os.path.basename(i).split("_")[0].replace(basename, "")
-                                ]
+            check_output_pkl = [
+                int(os.path.basename(i).split(f"_{pkl_end_str}")[0].replace(basename, "")) 
+                for i in find_files(tmp_dir, f'{basename}*_{pkl_end_str}.pkl', "f")
+                if os.path.basename(i).split(f"_{pkl_end_str}")[0].replace(basename, "")
+            ]
             if check_output_pkl:
                 finished_pkl_num = max(check_output_pkl)
         
@@ -267,7 +268,7 @@ def main(**kwargs):
                 
                 gal_to_parallel = all_gname_tmp_out[chunk - chunk_size:][:chunk_size]
                 #num_str = f"{i:0>3}"
-                sf.write(f"{run_python} {python_parallel} {pj(tmp_dir, basename + str(i))} {galfit_tmp_path} {galfit_mask_path} {out_dir} {out_png_dir} {','.join(gal_to_parallel)}\n")
+                sf.write(f"{run_python} {python_parallel} {pj(tmp_dir, basename + str(i))} {pkl_end_str} {galfit_tmp_path} {galfit_mask_path} {out_dir} {out_png_dir} {','.join(gal_to_parallel)}\n")
                 count += 1
         
         if count:
@@ -280,7 +281,7 @@ def main(**kwargs):
                 # Rerun out_nmr
         
         #else:
-        all_output_pkl = glob.glob(pj(tmp_dir, f'{basename}*_{pkl_end_str}.pkl'))
+        all_output_pkl = glob(pj(tmp_dir, f'{basename}*_{pkl_end_str}.pkl'))
         #_ = [out_nmr.update(pickle.load(open(file, 'rb'))) for file in all_output_pkl if os.path.basename(file) != f"{basename}_output_nmr.pkl"]
         out_df = pd.concat(
                            [pd.read_pickle(file) for file in all_output_pkl 
