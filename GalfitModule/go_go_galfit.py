@@ -750,19 +750,19 @@ def main(**kwargs):
             print(f"Something went wrong with galaxy {gname}, can't find best fit from parameter search.")
         else:
             # If filling each of the FITS files is desired... it may not be if too much I/O is happening
-            # so commented out for now.
             
-#             best_fit_p   = fitted_galaxies[best_fit_gpath]["pvalue"]
-#             best_fit_nmr = fitted_galaxies[best_fit_gpath]["nmr"]
+            best_fit_p   = fitted_galaxies[best_fit_gpath]["pvalue"]
+            best_fit_nmr = fitted_galaxies[best_fit_gpath]["nmr"]
             
-#             with fits.open(best_fit_gpath, mode = "update", output_verify = "ignore") as hdul:
-#                 hdul[2].header["NMR"]      = (round(best_fit_nmr, 8), "Norm of the masked residual")
+            with fits.open(best_fit_gpath, mode = "update", output_verify = "ignore") as hdul:
+                hdul[2].header["NMR"]      = (round(best_fit_nmr, 8), "Norm of the masked residual")
 
-#                 # pvalue is sometimes none but round can't handle it
-#                 if isinstance(pvalue, float):
-#                     hdul[2].header["KS_P"] = (round(best_fit_pvalue, 8), "p value of kstest vs noise")
-#                 else:
-#                     hdul[2].header["KS_P"] = (None, "p value of kstest vs noise")
+                # pvalue is sometimes none but round can't handle it
+                if isinstance(pvalue, float):
+                    hdul[2].header["KS_P"] = (round(best_fit_pvalue, 8), "p value of kstest vs noise")
+                else:
+                    hdul[2].header["KS_P"] = (None, "p value of kstest vs noise")
+                    
             shutil.copy2(best_fit_gpath, tmp_fits_path_gname)
         
         # For when Simultaneous fitting fails we don't want to use that residual mask
