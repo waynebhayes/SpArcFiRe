@@ -54,12 +54,16 @@ if __name__ == "__main__":
     OLD_SPARCIN  = pj(OLD_BASE_DIR, "sparcfire-in") #"/tmp/portmanm_galfitting/sparcfire-in"
 
     NEW_SPARCIN  = pj(NEW_BASE_DIR, "sparcfire-in") 
+    NEW_SPARCTMP = pj(NEW_BASE_DIR, "sparcfire-tmp") 
     NEW_SPARCOUT = pj(NEW_BASE_DIR, "sparcfire-out") #"/extra/wayne1/preserve/portmanm/sparcfire-out"
 
     # Make sparcfire-in if not found
     # No need to do this for sparcfire-out, I use makedirs to cover that later
     if not exists(NEW_SPARCIN):
         os.mkdir(NEW_SPARCIN)
+
+    if not exists(NEW_SPARCTMP):
+        os.mkdir(NEW_SPARCTMP)
     
     gal_sparc_in = find_files(OLD_SPARCIN, "123*.fits", "f")
     
