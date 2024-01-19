@@ -476,12 +476,17 @@ async def parameter_search_fit(
         )
         
         if masked_residual_normalized is None:
-            print(f"Could not calculate nmr for {new_basename}. Continuing...")
+            print(f"Could not calculate nmr for {new_basename}.")
             # returning some absurd number
             return {new_output_image : {"pvalue" : 0, "nmr" : 100000}}
 
         # output image path : {p value : KS test p value, nmr : NMR})
         return {new_output_image : {"pvalue" : fits_file.kstest.pvalue, "nmr" : fits_file.nmr}}
+    
+    else:
+        print(f"Could not calculate nmr for {new_basename}.")
+        
+    return {new_output_image : {"pvalue" : 0, "nmr" : 100000}}
     
 async def wrapper(
     b_d_magnitudes,
@@ -509,8 +514,6 @@ async def wrapper(
                           ), return_exceptions = True
                         )
     
-    
-
     # Convert list of dicts to single dict
     # gpath : nmr value
     fitted_galaxies = dict(ChainMap(*fitted_galaxies[::-1]))
