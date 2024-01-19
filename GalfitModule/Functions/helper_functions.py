@@ -138,7 +138,7 @@ def find_files(search_dir = ".", search_pattern = "*", filetype = "f"):
     elif filetype in ("f", "file"):
         type_cmd = "f"
         
-    result = sp(f"find {pj(search_dir)} -maxdepth 1 -type {filetype} -name \"{search_pattern}\"")
+    result = sp(f"find -L {pj(search_dir)} -maxdepth 1 -type {filetype} -name \"{search_pattern}\"")
     
     return [os.path.basename(i) for i in result.stdout.split("\n") if i]
 
@@ -149,7 +149,9 @@ def find_files(search_dir = ".", search_pattern = "*", filetype = "f"):
 # Writing this to do generic deletion without calling subprocess
 def rm_files(*args):
     # Assume list/tuple given by accident
-    if not args: return
+    if not args:
+        print("Nothing was fed into rm_files...")
+        return
 
     if isinstance(args[0], (tuple, list)):
         print("Please expand your iterable(s) before feeding into rm_files, thanks!")
