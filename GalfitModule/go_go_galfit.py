@@ -758,8 +758,8 @@ def main(**kwargs):
                 hdul[2].header["NMR"]      = (round(best_fit_nmr, 8), "Norm of the masked residual")
 
                 # pvalue is sometimes none but round can't handle it
-                if isinstance(pvalue, float):
-                    hdul[2].header["KS_P"] = (round(best_fit_pvalue, 8), "p value of kstest vs noise")
+                if isinstance(best_fit_p, float):
+                    hdul[2].header["KS_P"] = (round(best_fit_p, 8), "p value of kstest vs noise")
                 else:
                     hdul[2].header["KS_P"] = (None, "p value of kstest vs noise")
                     
