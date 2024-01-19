@@ -62,8 +62,10 @@ import go_go_galfit
 #from Classes.Components import *
 from Classes.Containers import *
 from Functions.helper_functions import *
-import Utilities.parallel_residual_calc as parallel_residual_calc
-import Utilities.combine_via_parallel as combine_via_parallel
+#import Utilities.parallel_residual_calc as parallel_residual_calc
+#import Utilities.combine_via_parallel as combine_via_parallel
+# import Utilities.calculate_residual_info as calculate_residual_info
+import Utilities.extract_residual_info_from_headers as extract_residual_info_from_headers
 
 # Separations were previously code blocks in jupyter notebook
 # ==========================================================================================================
@@ -721,7 +723,7 @@ if __name__ == "__main__":
     
     # Piping to parallel again because we're already setup to do so
     if parallel:
-        python_parallel   = pj(_MODULE_DIR, "Utilities", "combine_via_parallel.py")
+        python_parallel   = pj(_MODULE_DIR, "Utilities", "extract_residual_info_from_headers.py") #"combine_via_parallel.py")
         parallel_file     = "parallel_combine_residual"
         #if exists(parallel_file):
             #_ = sp(f"rm -f {parallel_file}", capture_output = capture_output)
@@ -783,7 +785,8 @@ if __name__ == "__main__":
     # Serial
     else:
         # In this case it's not parallel but I'm just saving some hassle here
-        out_df = combine_via_parallel.main("", pkl_end_str, out_dir, ",".join(galaxy_names))
+        #out_df = combine_via_parallel.main("", pkl_end_str, out_dir, ",".join(galaxy_names))
+        out_df = extract_residual_info_from_headers.main("", pkl_end_str, out_dir, ",".join(galaxy_names))
 
     # Could split this into the above if/else but this keeps everything output
     # related in one place
