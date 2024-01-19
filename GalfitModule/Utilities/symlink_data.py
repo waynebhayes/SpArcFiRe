@@ -55,10 +55,15 @@ if __name__ == "__main__":
 
     NEW_SPARCIN  = pj(NEW_BASE_DIR, "sparcfire-in") 
     NEW_SPARCOUT = pj(NEW_BASE_DIR, "sparcfire-out") #"/extra/wayne1/preserve/portmanm/sparcfire-out"
+
+    # Make sparcfire-in if not found
+    # No need to do this for sparcfire-out, I use makedirs to cover that later
+    if not exists(NEW_SPARCIN):
+        os.mkdir(NEW_SPARCIN)
     
     gal_sparc_in = find_files(OLD_SPARCIN, "123*.fits", "f")
     
-    copy_filename = f"copy_galaxy_folders.sh" #pj(NEW_BASE_DIR, f"slurm_copy_galaxy_folders")
+    copy_filename = f"{os.path.basename(NEW_BASE_DIR)}_copy_galaxy_folders.sh" #pj(NEW_BASE_DIR, f"slurm_copy_galaxy_folders")
     
     write2 = True
     if write2:
@@ -75,7 +80,7 @@ if __name__ == "__main__":
                 new_folder  = pj(NEW_SPARCOUT, gname)
                 if exists(folder_path):
                     if not exists(new_folder):
-                        os.mkdir(new_folder)
+                        os.makedirs(new_folder)
 
                     #_ = sp(f"rsync {folder_path}/*.csv {new_folder}")
                     #f.write(f"rsync -u {folder_path}/*.csv* {new_folder}\n")
