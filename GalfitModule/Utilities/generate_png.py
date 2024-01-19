@@ -81,7 +81,7 @@ if __name__ == "__main__":
         dir_name = list_o_fits[0]
         list_o_fits = [pj(dir_name, gfit) for gfit in find_files(dir_name, "*.fits")]
     
-    if sp(f"hostname").stdout.split(".")[0] == "bayonet-09":
+    if "bayonet" in sp(f"hostname").stdout.split(".")[0]:
         if len(list_o_fits) > 500:
             Parallel(n_jobs = -2)(delayed(wrapper)(gfits, out_png_dir, vertical) for gfits in list_o_fits)
         else:
