@@ -578,8 +578,7 @@ if __name__ == "__main__":
             # on the same node which is crucial for asyncio
             parallel_options  = f"-M all --ntasks=1 --ntasks-per-node=1 -t {timeout}"
             parallel_verbose  = "-v" if verbose else ""
-            chunk_size = 20
-
+            chunk_size = 10
             
         # Running things via distributed computing           
         parallel_run_cmd = f"cat {parallel_file} | {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
