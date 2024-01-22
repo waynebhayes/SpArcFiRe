@@ -151,16 +151,7 @@ $FITS && $COMPUTE_STARMASK && (
 	echo ""
     fi
     cd $SPARCFIRE_HOME/scripts/ArcPNGcreator/star_removal || die "cd failed!"
-    case `hostname` in
-    bayonet-06*) 
-        #source $SPARCFIRE_HOME/scripts/SpArcFiRe-pyvenv-bayonet-06/bin/activate;
-        $SPARCFIRE_PYTHON "remove_stars_with_sextractor-bayonet-06${PYTHON_SUFFIX}" "$sfDir" "$pngDir";;
-        #source deactivate;;
-    *) 
-        #source $SPARCFIRE_HOME/scripts/SpArcFiRe-pyvenv/bin/activate;
-        $SPARCFIRE_PYTHON "remove_stars_with_sextractor${PYTHON_SUFFIX}"  "$sfDir" "$pngDir";; 
-        #source deactivate;;
-    esac
+    $SPARCFIRE_HOME/scripts/remove_stars_with_sextractor "$sfDir" "$pngDir"
 )
 
 # Now run FITStoPNG convesion, if requested
@@ -179,8 +170,7 @@ for i in $sfDir/*; do
     sizex=`file $pngDir/$b.png | sed -e 's/.*://' -e 's/,//g' | awk '{printf $4}'`
     sizey=`file $pngDir/$b.png | sed -e 's/.*://' -e 's/,//g' | awk '{printf $6}'`
     if echo "0$sizex$sizey" | grep '[^0-9]' >/dev/null || [ "$sizex" -gt 1024 -o "$sizey" -gt 1024 ]; then
-	convert $CONVERT_ARGS $pngDir/$b.png -size 512x512 /tmp/x$$
-	mv /tmp/x$$ $pngDir/$b.png
+	convert $CONVERT_ARGS $pngDir/$b.png -size 512x512 $pngDir/$b.png
     fi
 done
 

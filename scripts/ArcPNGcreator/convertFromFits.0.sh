@@ -48,8 +48,13 @@ fitsDir="$2"
 pngDir="$3"
 [ -d "$fitsDir" ] || die "second arg must be FITs input directory, and it must exist"
 [ -d "$pngDir" ] || die "third arg must be PNG output directory, and it must exist"
+
+# WARNING: we used to assume galaxy names matched "[a-zA-Z0-9_-]+", but it seemed to restrictive, so now we're allowing
+# galaxy names to contain any characters at all except dots, which are only allowed before the extension (.fits, .png, etc.)
+NAME_REGEXP='[^.]+'     # was "[a-zA-Z0-9_-]+"
+
 if echo $starmask | grep -i none >/dev/null; then
-    "${exe_dir}/batchConvertFromFits.r$R" "$fitsDir" "[a-zA-Z0-9_]+" .fits .png $PARAMS NONE NONE NONE $pngDir
+    "${exe_dir}/batchConvertFromFits.r$R" "$fitsDir" "$NAME_REGEXP" .fits .png $PARAMS NONE NONE NONE $pngDir
 else
-    "${exe_dir}/batchConvertFromFits.r$R" "$fitsDir" "[a-zA-Z0-9_]+" .fits .png $PARAMS "$pngDir" "$starmask" 255 $pngDir
+    "${exe_dir}/batchConvertFromFits.r$R" "$fitsDir" "$NAME_REGEXP" .fits .png $PARAMS "$pngDir" "$starmask" 255 $pngDir
 fi
