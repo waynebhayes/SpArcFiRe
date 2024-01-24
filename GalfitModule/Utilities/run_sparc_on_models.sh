@@ -1,7 +1,14 @@
 #!/bin/bash
 
-in_dir=$1
-out_dir=$2
+basename=$1
+if [[ ! $basename ]]; then
+    echo "Please provide a basename which matches the runname used."
+    echo "The default is GALFIT_output. *NOT proceeding on that assumption."
+    exit
+fi
+
+in_dir=$2
+out_dir=$3
 
 default_in="$(pwd)"/"sparcfire-in"
 default_tmp="$(pwd)"/"sparcfire-tmp"
@@ -41,12 +48,13 @@ fi
 mv $in_dir $pre_galfit_in
 mv $out_dir $pre_galfit_out
 
-cp $pre_galfit_out/"galaxy.csv" $pre_galfit_out/"pre_galfit_galaxy.csv"
-cp $pre_galfit_out/"galaxy_arcs.csv" $pre_galfit_out/"pre_galfit_galaxy_arcs.csv"
+cp $pre_galfit_out/"galaxy.csv" $pre_galfit_out/"${basename}_pre_galfit_galaxy.csv"
+cp $pre_galfit_out/"galaxy_arcs.csv" $pre_galfit_out/"${basename}_pre_galfit_galaxy_arcs.csv"
 
 mkdir -p $default_in $default_tmp $default_out
 
 # Populate input folder with models
+echo "Populating input folder with models. This may take awhile..."
 python3 "${SPARCFIRE_HOME}/GalfitModule/Utilities/grab_model_from_output.py" $pre_galfit_in $pre_galfit_out $default_in
 
 ext="*.fits"
@@ -97,10 +105,12 @@ conv_fits="-convert-FITS "
 # fi
 
 # Prep for parallel
+echo "Preparing to run SpArcFiRe with distributed computing"
 #input_arr=($(ls "$default_in/"*".fits"))
 input_arr=($(find "$default_in" -name "$ext"))
 input_count="${#input_arr[@]}"
 cpu_count=$(nproc --all)
+cpu_count=$((cpu_count / 4)) # Since MATLAB uses multithreading (3)
 cpu_count=$(( cpu_count < input_count ? cpu_count : input_count ))
 
 parallel_file="send_to_parallel_sparcfire"
@@ -138,19 +148,19 @@ parallel_script="${SPARCFIRE_HOME}/GalfitModule/ParallelDrivers/parallel"
 
 # RUN SPARCFIRE
 echo "Running SpArcFiRe (again) with $cpu_count nodes"
-cat "$parallel_file" | "$parallel_script" "$cpu_count"
+cat "$parallel_file" | "nice -19" "$parallel_script" "$cpu_count"
 
 mv $in_dir $post_galfit_in
 mv $out_dir $post_galfit_out
 
-cp $post_galfit_out/"galaxy.csv" $post_galfit_out/"post_galfit_galaxy.csv"
-cp $post_galfit_out/"galaxy_arcs.csv" $post_galfit_out/"post_galfit_galaxy_arcs.csv"
+cp $post_galfit_out/"galaxy.csv" $post_galfit_out/"${basename}_post_galfit_galaxy.csv"
+cp $post_galfit_out/"galaxy_arcs.csv" $post_galfit_out/"${basename}_post_galfit_galaxy_arcs.csv"
 
 mv $pre_galfit_in $in_dir
 mv $pre_galfit_out $out_dir
 
-cp $post_galfit_out/"post_galfit_galaxy.csv" $out_dir/"post_galfit_galaxy.csv"
-cp $post_galfit_out/"post_galfit_galaxy_arcs.csv" $out_dir/"post_galfit_galaxy_arcs.csv"
+cp $post_galfit_out/"${basename}_post_galfit_galaxy.csv" $out_dir/"${basename}_post_galfit_galaxy.csv"
+cp $post_galfit_out/"${basename}_post_galfit_galaxy_arcs.csv" $out_dir/"${basename}_post_galfit_galaxy_arcs.csv"
 
 # Cleanup
 rm -rf $parallel_file "sparcfire-in_"*
