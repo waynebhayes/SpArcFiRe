@@ -608,7 +608,7 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
             # Sometimes sparcfire messes this up
             effective_radius = min(max(galaxy_dict["bulge_maj_axs_len"], 2), 0.2*crop_rad),
             # According to other paper GALFIT usually doesn't have a problem with the index
-            sersic_index     = 1, #4,
+            sersic_index     = 4, #1,
             axis_ratio       = bulge_axis_ratio,
             position_angle   = galaxy_dict["bulge_rot_angle"]
         )
