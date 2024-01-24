@@ -148,7 +148,7 @@ parallel_script="${SPARCFIRE_HOME}/GalfitModule/ParallelDrivers/parallel"
 
 # RUN SPARCFIRE
 echo "Running SpArcFiRe (again) with $cpu_count nodes"
-cat "$parallel_file" | "nice -19" "$parallel_script" "$cpu_count"
+cat "$parallel_file" | "nice" "-19" "$parallel_script" "$cpu_count"
 
 mv $in_dir $post_galfit_in
 mv $out_dir $post_galfit_out
