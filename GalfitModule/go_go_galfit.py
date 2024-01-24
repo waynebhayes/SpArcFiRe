@@ -704,11 +704,11 @@ def main(**kwargs):
         use_async = True
         #if parallel in (0, 1):
         #    use_async = True
-        # Limiting our # of asynchronous processes
         
+        # Limiting our # of asynchronous processes
         chunk = 20
-        #if parallel == 1:
-        #    chunk = 5
+        if parallel == 1:
+            chunk = 5
             
         #if len(b_d_magnitudes) > chunk:
         fitted_galaxies = {}
