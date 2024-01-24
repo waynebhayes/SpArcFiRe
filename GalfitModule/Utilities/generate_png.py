@@ -76,10 +76,13 @@ if __name__ == "__main__":
     verbose        = args.verbose
     capture_output = not args.verbose
     
-    # Assume it's a dir of fits
+    # Check if dir or file
     if len(list_o_fits) == 1:
-        dir_name = list_o_fits[0]
-        list_o_fits = [pj(dir_name, gfit) for gfit in find_files(dir_name, "*.fits")]
+        file_or_dirname = list_o_fits[0]
+        
+        # If dir, prep list, if not do nothing
+        if os.path.isdir(file_or_dirname):
+            list_o_fits = [pj(file_or_dirname, gfit) for gfit in find_files(file_or_dirname, "*.fits")]
     
     if "bayonet" in sp(f"hostname").stdout.split(".")[0]:
         if len(list_o_fits) > 500:
