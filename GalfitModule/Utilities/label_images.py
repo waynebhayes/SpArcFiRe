@@ -103,7 +103,8 @@ def main():
             else:
                 print("image has already been moved... continuing")
 
-            if location == len(images) - 1:
+            # -2 to account for recent pop
+            if location == len(images) - 2:
                 break
             else:
                 location += 1
