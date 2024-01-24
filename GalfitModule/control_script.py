@@ -564,7 +564,8 @@ if __name__ == "__main__":
             parallel_run_name = ""#"GALFITTING"
             parallel_options  = joblib.cpu_count()
             parallel_verbose  = ""
-            chunk_size = len(kwargs_main["galaxy_names"])//joblib.cpu_count() + 1
+            #chunk_size = len(kwargs_main["galaxy_names"])//joblib.cpu_count() + 1
+            chunk_size = 10
             # Two whole days for big runs
             timeout = 2880 # Minutes
             
@@ -581,7 +582,7 @@ if __name__ == "__main__":
             chunk_size = 10
             
         # Running things via distributed computing           
-        parallel_run_cmd = f"cat {parallel_file} | {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
+        parallel_run_cmd = f"cat {parallel_file} | nice -19 {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
         
         if not restart:
             write_to_parallel(cwd, kwargs_main, parallel_file = parallel_file, chunk_size = chunk_size)
