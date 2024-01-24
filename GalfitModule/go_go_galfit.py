@@ -269,7 +269,7 @@ async def parameter_search_fit(
             
         else:
             final_galfit_output = OutputContainer(
-                sp(run_galfit_cmd, timeout = timeout),
+                sp(run_galfit_cmd), #, timeout = timeout),
                 path_to_feedme = tmp_feedme_in,
                 store_text     = True,
                 **initial_components.components
@@ -311,7 +311,7 @@ async def parameter_search_fit(
             
         else:
             galfit_output = OutputContainer(
-                sp(run_galfit_cmd, timeout = timeout), 
+                sp(run_galfit_cmd), #, timeout = timeout), 
                 sersic_order   = ["bulge"], 
                 path_to_feedme = bulge_in,
                 load_default   = load_default,
@@ -378,7 +378,7 @@ async def parameter_search_fit(
                 
             else:
                 galfit_output = OutputContainer(
-                    sp(run_galfit_cmd, timeout = timeout), 
+                    sp(run_galfit_cmd), #, timeout = timeout), 
                     path_to_feedme = bulge_disk_in,
                     load_default   = load_default,
                     store_text     = True,
@@ -437,7 +437,7 @@ async def parameter_search_fit(
             
         else:
             final_galfit_output = OutputContainer(
-                sp(run_galfit_cmd, timeout = timeout), 
+                sp(run_galfit_cmd), #, timeout = timeout), 
                 path_to_feedme  = tmp_feedme_in,
                 load_default    = load_default,
                 **galfit_output.components, 
