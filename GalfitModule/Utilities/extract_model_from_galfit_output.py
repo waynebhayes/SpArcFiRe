@@ -13,8 +13,8 @@ new_in_dir  = sys.argv[3]
 try:
     flip    = sys.argv[4]
 except IndexError:
-    print("Flip (up/down for SpArcFiRe purposes) not specified. Assuming flip.")
-    flip    = "true"
+    print("Flip (up/down for SpArcFiRe purposes) not specified. Assuming no flip.")
+    flip    = "no flip :("
 
 for in_fits in glob.glob(f"{old_in_dir}/*.fits"):
     gname = os.path.basename(in_fits).split(".fits")[0]
