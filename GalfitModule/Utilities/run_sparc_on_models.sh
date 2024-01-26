@@ -55,7 +55,7 @@ mkdir -p $default_in $default_tmp $default_out
 
 # Populate input folder with models
 echo "Populating input folder with models. This may take awhile..."
-python3 "${SPARCFIRE_HOME}/GalfitModule/Utilities/extract_model_from_output.py" $pre_galfit_in $pre_galfit_out $default_in "true"
+python3 "${SPARCFIRE_HOME}/GalfitModule/Utilities/extract_model_from_galfit_output.py" $pre_galfit_in $pre_galfit_out $default_in "true"
 
 ext="*.fits"
 conv_fits="-convert-FITS "
