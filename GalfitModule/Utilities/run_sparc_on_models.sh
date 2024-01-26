@@ -55,7 +55,7 @@ mkdir -p $default_in $default_tmp $default_out
 
 # Populate input folder with models
 echo "Populating input folder with models. This may take awhile..."
-python3 "${SPARCFIRE_HOME}/GalfitModule/Utilities/grab_model_from_output.py" $pre_galfit_in $pre_galfit_out $default_in
+python3 "${SPARCFIRE_HOME}/GalfitModule/Utilities/extract_model_from_output.py" $pre_galfit_in $pre_galfit_out $default_in "true"
 
 ext="*.fits"
 conv_fits="-convert-FITS "
@@ -125,8 +125,7 @@ for (( cpu_num=0; cpu_num<$cpu_count; ++cpu_num )); do
     # Also no need for star masking
     # Pad images to even so that we can turn off image standardization
     if [[ $arr_start -lt $input_count ]]; then
-        #echo "${SPARCFIRE_HOME}/scripts/SpArcFiRe ${conv_fits}-compute-starmask false -ignore-starmask $new_dir $default_tmp $default_out -generateFitQuality 0 -writeBulgeMask 1 -allowArcBeyond2pi 0 -unsharpMaskAmt 8 -useDeProjectStretch 0 -fixToCenter 0 -medFiltRad 0 -useImageStandardization 1 -numOrientationFieldLevels 4"
-        echo "${SPARCFIRE_HOME}/scripts/SpArcFiRe ${conv_fits}-compute-starmask false -ignore-starmask $new_dir $default_tmp $default_out -generateFitQuality 0 -writeBulgeMask 1 -allowArcBeyond2pi 0 -unsharpMaskAmt 10 -useDeProjectStretch 0 -fixToCenter 0 -medFiltRad 0 -useImageStandardization 1"
+        echo "${SPARCFIRE_HOME}/scripts/SpArcFiRe ${conv_fits}-compute-starmask false -ignore-starmask $new_dir $default_tmp $default_out -generateFitQuality 0 -writeBulgeMask 1 -allowArcBeyond2pi 0 -unsharpMaskAmt 10 -useDeProjectStretch 1 -fixToCenter 0 -medFiltRad 0 -useImageStandardization 1 -errRatioThres 3"
     fi
     
     arr_start=$(( $cpu_num*$per_cpu  ))
@@ -163,6 +162,6 @@ cp $post_galfit_out/"${basename}_post_galfit_galaxy.csv" $out_dir/"${basename}_p
 cp $post_galfit_out/"${basename}_post_galfit_galaxy_arcs.csv" $out_dir/"${basename}_post_galfit_galaxy_arcs.csv"
 
 # Cleanup
-rm -rf $parallel_file "sparcfire-in_"*
+rm -rf "$parallel_file" "sparcfire-in_"*
 # Sparcfire junk
 rm -rf "a" "not" "tty" "SpArcFiRe-stdin.stdin.txt" *"_settings.txt"
