@@ -38,9 +38,10 @@ if __name__ == "__main__":
 
     python3 ./{sys.argv[0]} [OPTION] PNG-OUT-DIRECTORY [FITS-DIRECTORY | SPACE SEPARATED FITS FILES]
     
-    OPTIONS =>[-h | --help]
-              [-H | --horizontal]
-              [-v | --verbose]
+    OPTIONS =>[-h  | --help]
+              [-H  | --horizontal]
+              [-v  | --verbose]
+              [-ff | --from-file]
 
     This script is a utility to generate images from output GALFIT FITS files using the to_png 
     functionality of the OutputFits class.
@@ -54,6 +55,14 @@ if __name__ == "__main__":
                         const    = True,
                         default  = False,
                         help     = 'Choose to orient the output images from GALFIT horizontally as opposed to vertically (better for papers).'
+                       )
+    
+    parser.add_argument('-ff', '--from-file',
+                        dest     = 'from_file',
+                        action   = 'store_const',
+                        const    = True,
+                        default  = False,
+                        help     = 'Use a file containing the image names from GALFIT rather than a list of fits read in on the command line.'
                        )
     
     parser.add_argument('-v', '--verbose',
@@ -78,6 +87,8 @@ if __name__ == "__main__":
     list_o_fits    = args.list_o_fits
     
     horizontal     = args.horizontal
+    from_file      = args.from_file
+    
     verbose        = args.verbose
     capture_output = not args.verbose
     
@@ -85,8 +96,17 @@ if __name__ == "__main__":
     if len(list_o_fits) == 1:
         file_or_dirname = list_o_fits[0]
         
+        if from_file:
+            with open(file_or_dirname, "r") as f:
+                list_o_fits = [fname.strip() for fname in f.readlines()]
+                
+        elif not list_o_fits.endswith((".fits", ".fit", ".FITS", ".FIT")):
+            print("Did you mean to specify that we are reading from file?")
+            print("Please do so using the '-ff' option. Quitting.")
+            sys.exit()
+        
         # If dir, prep list, if not do nothing
-        if os.path.isdir(file_or_dirname):
+        elif os.path.isdir(file_or_dirname):
             list_o_fits = [pj(file_or_dirname, gfit) for gfit in find_files(file_or_dirname, "*.fits")]
     
     #if "bayonet" in sp(f"hostname").stdout.split(".")[0]:
