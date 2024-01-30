@@ -23,9 +23,13 @@ from Classes.Containers import *
 from Classes.FitsHandlers import *
 from Functions.helper_functions import *
 
-def wrapper(gfits, out_png_dir, vertical = False):
+def wrapper(gfits, out_png_dir, hoirzontal = False):
+    if os.stat(gfits).st_size == 0:
+        print(f"{os.path.basename(gfits)} is empty!!!")
+        return
+
     output = OutputFits(gfits)
-    output.to_png(out_png_dir = out_png_dir, vertical = vertical)
+    output.to_png(out_png_dir = out_png_dir, horizontal = horizontal)
 
 
 if __name__ == "__main__":
@@ -34,7 +38,8 @@ if __name__ == "__main__":
 
     python3 ./{sys.argv[0]} [OPTION] PNG-OUT-DIRECTORY [FITS-DIRECTORY | SPACE SEPARATED FITS FILES]
     
-    OPTIONS =>[-vert | --vertical]
+    OPTIONS =>[-h | --help]
+              [-H | --horizontal]
               [-v | --verbose]
 
     This script is a utility to generate images from output GALFIT FITS files using the to_png 
@@ -43,12 +48,12 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description = USAGE)
     
-    parser.add_argument('-vert', '--vertical',
-                        dest     = 'vertical',
+    parser.add_argument('-H', '--horizontal',
+                        dest     = 'horizontal',
                         action   = 'store_const',
                         const    = True,
                         default  = False,
-                        help     = 'Choose to orient the output images from GALFIT vertically as opposed to horizontally.'
+                        help     = 'Choose to orient the output images from GALFIT horizontally as opposed to vertically (better for papers).'
                        )
     
     parser.add_argument('-v', '--verbose',
@@ -72,7 +77,7 @@ if __name__ == "__main__":
     out_png_dir    = args.out_png_dir
     list_o_fits    = args.list_o_fits
     
-    vertical       = args.vertical
+    horizontal     = args.horizontal
     verbose        = args.verbose
     capture_output = not args.verbose
     
@@ -84,10 +89,10 @@ if __name__ == "__main__":
         if os.path.isdir(file_or_dirname):
             list_o_fits = [pj(file_or_dirname, gfit) for gfit in find_files(file_or_dirname, "*.fits")]
     
-    if "bayonet" in sp(f"hostname").stdout.split(".")[0]:
-        if len(list_o_fits) > 500:
-            Parallel(n_jobs = -2)(delayed(wrapper)(gfits, out_png_dir, vertical) for gfits in list_o_fits)
-        else:
-            _ = [wrapper(gfits, out_png_dir, vertical) for gfits in list_o_fits]
+    #if "bayonet" in sp(f"hostname").stdout.split(".")[0]:
+    if len(list_o_fits) > 500:
+        Parallel(n_jobs = -2)(delayed(wrapper)(gfits, out_png_dir, horizontal) for gfits in list_o_fits)
     else:
-        print("Not on bayonet, can't generate galaxies.")
+        _ = [wrapper(gfits, out_png_dir, horizontal) for gfits in list_o_fits]
+    #else:
+    #    print("Not on bayonet, can't generate galaxies.")
