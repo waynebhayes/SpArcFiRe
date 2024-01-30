@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[25]:
+# In[1]:
 
 
 import os
@@ -65,7 +65,7 @@ from Classes.Containers import *
 from Functions.helper_functions import *
 
 
-# In[17]:
+# In[4]:
 
 
 class HDU:
@@ -92,7 +92,7 @@ class HDU:
         return output_str
 
 
-# In[27]:
+# In[5]:
 
 
 class FitsFile:
@@ -262,9 +262,9 @@ class FitsFile:
                       " ".join(im_cmd for idx, im_cmd in enumerate([im1, im2, im3]) 
                                if idx <= self.num_imgs)
         
-        tiling = f"{self.num_imgs}x1"
-        if kwargs.get("vertical", None):
-            tiling = f"1x{self.num_imgs}"
+        tiling = f"1x{self.num_imgs}"
+        if kwargs.get("horizontal", None):
+            tiling = tiling = f"{self.num_imgs}x1"            
             
         # Combining the images using ImageMagick
         # If this is a single image, it'll also resize for me so that's why I leave it in
@@ -320,7 +320,7 @@ class FitsFile:
 #             setattr(self, key, value)
 
 
-# In[28]:
+# In[6]:
 
 
 class OutputFits(FitsFile):
@@ -552,14 +552,14 @@ class OutputFits(FitsFile):
         return self.masked_residual_normalized
 
 
-# In[29]:
+# In[7]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[30]:
+# In[8]:
 
 
 # Testing from_file
@@ -608,7 +608,7 @@ if __name__ == "__main__":
     print(np.shape(test_obs.observation.data))
 
 
-# In[31]:
+# In[9]:
 
 
 # Unit test to check value of masked residual
@@ -637,7 +637,7 @@ if __name__ == "__main__":
     #print(np.min(test_model.observation.data))
 
 
-# In[32]:
+# In[10]:
 
 
 if __name__ == "__main__":
@@ -664,7 +664,7 @@ if __name__ == "__main__":
     print("After...", all(k in test_model.header for k in keys_to_check))
 
 
-# In[41]:
+# In[11]:
 
 
 if __name__ == "__main__":
@@ -672,7 +672,7 @@ if __name__ == "__main__":
     print("Expect True:", not any("fits" in pof.path for pof in psutil.Process().open_files()))
 
 
-# In[11]:
+# In[12]:
 
 
 if __name__ == "__main__":
