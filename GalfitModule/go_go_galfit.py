@@ -446,35 +446,39 @@ async def parameter_search_fit(
             
         success = check_success(final_galfit_output, success)
         
-        # ********************************************************************
-        # TODO(?): Round two, releasing holds on inner and outer spiral radius
-        # ********************************************************************
-        
-        final_galfit_output.arms.inner_rad.fix = 1
-        final_galfit_output.arms.outer_rad.fix = 1
-        
-        final_galfit_output.to_file(filename = tmp_feedme_in)
-
-        if use_async:
-            final_galfit_output = OutputContainer(
-                await async_sp(run_galfit_cmd, timeout = timeout),
-                path_to_feedme = tmp_feedme_in,
-                store_text     = True,
-                **final_galfit_output.components
-            )
-            
-        else:
-            final_galfit_output = OutputContainer(
-                sp(run_galfit_cmd), #, timeout = timeout),
-                path_to_feedme = tmp_feedme_in,
-                store_text     = True,
-                **final_galfit_output.components
-            )
-
-        success = check_success(final_galfit_output, success)
-        
         if kwargs.get("verbose"):
             print(str(final_galfit_output))
+        
+        # ********************************************************************
+        # Release holds on inner and outer spiral radius
+        # does not seem to make a significant difference
+        # ********************************************************************
+#         try:
+#             final_galfit_output.arms.inner_rad.fix = 1
+#             final_galfit_output.arms.outer_rad.fix = 1
+
+#             final_galfit_output.to_file(filename = tmp_feedme_in)
+
+#             if use_async:
+#                 final_galfit_output = OutputContainer(
+#                     await async_sp(run_galfit_cmd, timeout = timeout),
+#                     path_to_feedme = tmp_feedme_in,
+#                     store_text     = True,
+#                     **final_galfit_output.components
+#                 )
+
+#             else:
+#                 final_galfit_output = OutputContainer(
+#                     sp(run_galfit_cmd), #, timeout = timeout),
+#                     path_to_feedme = tmp_feedme_in,
+#                     store_text     = True,
+#                     **final_galfit_output.components
+#                 )
+
+#             success = check_success(final_galfit_output, success)
+        # For when arms aren't present
+        # except AttributeError:
+        #     pass
         
     if success:
         
@@ -814,16 +818,16 @@ def main(**kwargs):
             #failed.append(gname)
             continue
         
-        #if sp(f"hostname").stdout.split(".")[0] == "bayonet-09":
+        if sp(f"hostname").stdout.split(".")[0] == "bayonet-09":
                 
-        tmp_fits_obj = OutputFits(tmp_fits_path_gname, load_default = False)
-        tmp_fits_obj.to_png(tmp_fits_path = tmp_fits_path_gname,
-                            tmp_png_path  = tmp_png_path,
-                            out_png_dir   = out_png_dir
-                            #cleanup = False # TEMPORARY UNTIL IMAGEMAGICK WORKS AGAIN
-                           )
+            tmp_fits_obj = OutputFits(tmp_fits_path_gname, load_default = False)
+            tmp_fits_obj.to_png(tmp_fits_path = tmp_fits_path_gname,
+                                tmp_png_path  = tmp_png_path,
+                                out_png_dir   = out_png_dir
+                                #cleanup = False # TEMPORARY UNTIL IMAGEMAGICK WORKS AGAIN
+                               )
 
-        shutil.copy2(f"{pj(out_png_dir, gname)}_combined.png", pj(out_dir, gname))
+            shutil.copy2(f"{pj(out_png_dir, gname)}_combined.png", pj(out_dir, gname))
 
         # No point in doing this in parallel because race conditions
         if not parallel and not use_async:
