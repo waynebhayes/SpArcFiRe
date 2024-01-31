@@ -558,28 +558,29 @@ if __name__ == "__main__":
         #print("Piping to parallel")
         print(f"{len(kwargs_main['galaxy_names'])} galaxies")
         
-        chunk_size = 5
+        chunk_size = 1 if len(kwargs_main['galaxy_names']) < 50 else 10
+        timeout = 2880 # Minutes
         if parallel == 1:
             # For CPU parallel
             parallel_run_name = ""#"GALFITTING"
             parallel_options  = joblib.cpu_count()
             parallel_verbose  = ""
             #chunk_size = len(kwargs_main["galaxy_names"])//joblib.cpu_count() + 1
-            chunk_size = 1 if len(kwargs_main['galaxy_names']) < 50 else 10
+            #chunk_size = 1 if len(kwargs_main['galaxy_names']) < 50 else 10
             # Two whole days for big runs
-            timeout = 2880 # Minutes
+            # timeout = 2880 # Minutes
             
         elif parallel == 2:
             # For SLURM/Cluster Computing
             parallel_run_name = "GALFITTING"
             # Slurm needs different timeout limits
-            timeout = 2880 # Minutes
+            # timeout = 2880 # Minutes
             # TODO: Consider SLURM + CPU parallel
             # --ntasks-per-node=1 and --ntasks=1 ensures processes will stay
             # on the same node which is crucial for asyncio
             parallel_options  = f"-M all --ntasks=1 --ntasks-per-node=1 -t {timeout}"
             parallel_verbose  = "-v" if verbose else ""
-            chunk_size = 10
+            #chunk_size = 1 if len(kwargs_main['galaxy_names']) < 50 else 10
             
         # Running things via distributed computing           
         parallel_run_cmd = f"cat {parallel_file} | nice -19 {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
