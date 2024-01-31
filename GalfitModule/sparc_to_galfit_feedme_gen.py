@@ -617,15 +617,26 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
             component_number = 2, 
             position         = (center_pos_x, center_pos_y),
             magnitude        = float(petromag) - 2,
-            effective_radius = galaxy_dict["disk_maj_axs_len"],
-            # According to comparison tests, this usually ends up much higher than classical probably due to the spiral.
+            effective_radius = 0.5*galaxy_dict["disk_maj_axs_len"],
+            # According to comparison tests, this usually ends up much lower than classical probably due to the spiral.
             sersic_index     = 1,
             axis_ratio       = galaxy_dict["disk_axis_ratio"],
             position_angle   = galaxy_dict["disk_rot_angle"]
         )
             
+        # Setting *almost* everything to the same values as the disk
+        disk_for_arms  = Sersic(
+            component_number = 3, 
+            position         = (center_pos_x, center_pos_y),
+            magnitude        = float(petromag) - 2,
+            effective_radius = galaxy_dict["disk_maj_axs_len"],
+            sersic_index     = 1,
+            axis_ratio       = galaxy_dict["disk_axis_ratio"],
+            position_angle   = galaxy_dict["disk_rot_angle"]
+        )
+        
         arms  = Power(
-            component_number   = 2,
+            component_number   = 3,
             inner_rad          = in_rad, # Chosen based on where *detection* of arms usually start
             outer_rad          = arc_dict["outer_rad"],
             cumul_rot          = float(f"{galaxy_dict['spin_parity']}{arc_dict['cumul_rot']}"),
@@ -634,24 +645,26 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
             sky_position_angle = (galaxy_dict["pos_angle_power"] - galaxy_dict["disk_rot_angle"]) % 180 #90 
         )
         
-        fourier = Fourier(component_number = 2)    
-        sky     = Sky(component_number = 3)
+        fourier = Fourier(component_number = 3)
+        sky     = Sky(component_number = 4)
         
         # Take 90 pixels (in the 256x256 image) to be the cutoff for an arm
         # Use a simple cut off for now
         # Looking at the first two arms may be too unreliable
         #print("Max arc length in 256 img", scale_var(max_arc, 0.5*256/crop_rad))
         container_to_feed = {
-            "header"  : header,
-            "bulge"   : bulge,
-            "disk"    : disk,
-            "arms"    : arms,
-            "fourier" : fourier,
-            "sky"     : sky
+            "header"        : header,
+            "bulge"         : bulge,
+            "disk"          : disk,
+            "disk_for_arms" : disk_for_arms,
+            "arms"          : arms,
+            "fourier"       : fourier,
+            "sky"           : sky
         }
         
         if scale_var(galaxy_dict["max_arc_length"], 1/scale_fact_std) < 75:
             print("Skipping Arms, max arc len is", galaxy_dict["max_arc_length"]/scale_fact_std)
+            container_to_feed.pop("disk_for_arms")
             container_to_feed.pop("arms")
             container_to_feed.pop("fourier")
             #arms.skip.value = 1
@@ -683,6 +696,8 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
         container = FeedmeContainer(path_to_feedme = pj(gfolder, f"{gname}.in"),
                                     load_default = False, **container_to_feed
                                    )
+        #print(container.disk_for_arms)
+        #sys.exit()
         container.to_file()
         # skip = 1
         # if arms.parameters.skip.value:
