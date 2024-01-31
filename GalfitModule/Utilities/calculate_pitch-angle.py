@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 
 import numpy as np
-import glob
+#import glob
 import csv
 import pandas as pd
 
@@ -555,7 +555,7 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
       
 def main(in_dir, out_dir, num_pts = 500, scatter_plot = True, validation_plot = False, model_dir = "tmp_galfit_models"):
     
-    gpaths = glob.glob(pj(out_dir, "123*"))
+    gpaths = glob(pj(out_dir, "123*"))
     gnames = [os.path.basename(i) for i in gpaths]
     
     pa_inner_outer = Parallel(n_jobs = -2)(
