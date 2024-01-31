@@ -284,7 +284,7 @@ async def parameter_search_fit(
 
         success = check_success(final_galfit_output, success)
 
-    elif num_steps == 2: #>= 2:
+    elif num_steps >= 2:
         # Top is disk first, bottom is bulge first, choose your own adventure
         #disk_in = pj(out_dir, gname, f"{gname}_disk.in")
         #bulge_in = pj(out_dir, gname, f"{gname}_bulge.in")
@@ -306,27 +306,29 @@ async def parameter_search_fit(
         #     load_default   = load_default,
         #     **feedme_info[gname].components
         # )
-        if use_async:
-            galfit_output = OutputContainer(
-                await async_sp(run_galfit_cmd, timeout = timeout),
-                sersic_order   = ["bulge"], 
-                path_to_feedme = bulge_in,
-                load_default   = load_default,
-                store_text     = True,
-                **initial_components.components
-            )
-            
-        else:
-            galfit_output = OutputContainer(
-                sp(run_galfit_cmd), #, timeout = timeout), 
-                sersic_order   = ["bulge"], 
-                path_to_feedme = bulge_in,
-                load_default   = load_default,
-                store_text     = True,
-                **initial_components.components
-            )
+        # TEMPORARY: FOR TESTING PURPOSES
+        if False:
+            if use_async:
+                galfit_output = OutputContainer(
+                    await async_sp(run_galfit_cmd, timeout = timeout),
+                    sersic_order   = ["bulge"], 
+                    path_to_feedme = bulge_in,
+                    load_default   = load_default,
+                    store_text     = True,
+                    **initial_components.components
+                )
 
-        success = check_success(galfit_output, success)
+            else:
+                galfit_output = OutputContainer(
+                    sp(run_galfit_cmd), #, timeout = timeout), 
+                    sersic_order   = ["bulge"], 
+                    path_to_feedme = bulge_in,
+                    load_default   = load_default,
+                    store_text     = True,
+                    **initial_components.components
+                )
+
+            success = check_success(galfit_output, success)
 
         # Only fix sky if first step is successful
         # if galfit_output.success:
@@ -346,6 +348,7 @@ async def parameter_search_fit(
 
         # load_default here because a three step fit is impossible with only two components
         if num_steps == 3 and use_spiral:
+            galfit_output = deepcopy(initial_components)
 
             # For fitting *just* the bulge + a few pixels
             # Trying Just disk, just bulge, then all together with arms
@@ -744,7 +747,7 @@ def main(**kwargs):
         
         # ======================================== BEGIN GALFIT PARAMETER SEARCH LOOP ========================================    
         
-        use_async = True
+        use_async = False
         #if parallel in (0, 1):
         #    use_async = True
         
