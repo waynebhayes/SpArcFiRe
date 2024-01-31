@@ -306,29 +306,28 @@ async def parameter_search_fit(
         #     load_default   = load_default,
         #     **feedme_info[gname].components
         # )
-        # TEMPORARY: FOR TESTING PURPOSES
-        if False:
-            if use_async:
-                galfit_output = OutputContainer(
-                    await async_sp(run_galfit_cmd, timeout = timeout),
-                    sersic_order   = ["bulge"], 
-                    path_to_feedme = bulge_in,
-                    load_default   = load_default,
-                    store_text     = True,
-                    **initial_components.components
-                )
 
-            else:
-                galfit_output = OutputContainer(
-                    sp(run_galfit_cmd), #, timeout = timeout), 
-                    sersic_order   = ["bulge"], 
-                    path_to_feedme = bulge_in,
-                    load_default   = load_default,
-                    store_text     = True,
-                    **initial_components.components
-                )
+        if use_async:
+            galfit_output = OutputContainer(
+                await async_sp(run_galfit_cmd, timeout = timeout),
+                sersic_order   = ["bulge"], 
+                path_to_feedme = bulge_in,
+                load_default   = load_default,
+                store_text     = True,
+                **initial_components.components
+            )
 
-            success = check_success(galfit_output, success)
+        else:
+            galfit_output = OutputContainer(
+                sp(run_galfit_cmd), #, timeout = timeout), 
+                sersic_order   = ["bulge"], 
+                path_to_feedme = bulge_in,
+                load_default   = load_default,
+                store_text     = True,
+                **initial_components.components
+            )
+
+        success = check_success(galfit_output, success)
 
         # Only fix sky if first step is successful
         # if galfit_output.success:
