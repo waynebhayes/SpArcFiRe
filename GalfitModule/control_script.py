@@ -149,7 +149,7 @@ if __name__ == "__main__":
                         action   = 'store',
                         type     = int,
                         choices  = range(1,4),
-                        default  = 2,
+                        default  = 3,
                         help     = 'Run GALFIT using step-by-step component selection (up to 3), i.e.\n\t\
                                     1: Bulge + Disk + Arms,\n\t\
                                     2: Disk -> Bulge + Disk + Arms,\n\t\
