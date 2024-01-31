@@ -565,7 +565,7 @@ if __name__ == "__main__":
             parallel_options  = joblib.cpu_count()
             parallel_verbose  = ""
             #chunk_size = len(kwargs_main["galaxy_names"])//joblib.cpu_count() + 1
-            chunk_size = 10
+            chunk_size = 1 if len(kwargs_main['galaxy_names']) < 50 else 10
             # Two whole days for big runs
             timeout = 2880 # Minutes
             
