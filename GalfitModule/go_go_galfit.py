@@ -221,9 +221,15 @@ async def parameter_search_fit(
     # Whether or not to load default components
     # If arms are not used, we select False and let the code
     # figure it out on reading in (this avoids some output/extra processing)
-    load_default = True
+    # WORK IN PROGRESS
+    # This may change if three (+1) components becomes the default
+    #load_default = True
+    load_default = False
+    #if len(initial_components.components) <= 4:
+    #    load_default = False
+    use_spiral = True
     if len(initial_components.components) <= 4:
-        load_default = False
+        use_spiral = False
 
     # ---------------------------------------------------------------------
     # Note to self, OutputContainer is *just* for handling output
@@ -254,8 +260,9 @@ async def parameter_search_fit(
     if num_steps == 1:
         run_galfit_cmd = f"{base_galfit_cmd} {tmp_feedme_in}"
 
-        if load_default:
-            initial_components.disk.axis_ratio.value = disk_axis_ratio
+        #if load_default:
+        if use_spiral:
+            initial_components.disk_for_arms.axis_ratio.value = disk_axis_ratio
             
         initial_components.to_file(filename = tmp_feedme_in)
 
@@ -277,7 +284,7 @@ async def parameter_search_fit(
 
         success = check_success(final_galfit_output, success)
 
-    elif num_steps >= 2:
+    elif num_steps == 2: #>= 2:
         # Top is disk first, bottom is bulge first, choose your own adventure
         #disk_in = pj(out_dir, gname, f"{gname}_disk.in")
         #bulge_in = pj(out_dir, gname, f"{gname}_bulge.in")
@@ -338,7 +345,7 @@ async def parameter_search_fit(
         #                                 )
 
         # load_default here because a three step fit is impossible with only two components
-        if num_steps == 3 and load_default:
+        if num_steps == 3 and use_spiral:
 
             # For fitting *just* the bulge + a few pixels
             # Trying Just disk, just bulge, then all together with arms
@@ -400,8 +407,9 @@ async def parameter_search_fit(
         #     print("Skipping Arms")
         #     galfit_output.to_file(galfit_output.bulge, galfit_output.disk, galfit_output.sky)
         # else:
-        if load_default:
-            galfit_output.disk.axis_ratio.value = disk_axis_ratio
+        #if load_default:
+        if use_spiral:
+            galfit_output.disk_for_arms.axis_ratio.value = disk_axis_ratio
 
             # After determining sky and initial component(s) with extended background,
             # shrink fitting region closer to the galaxy itself
@@ -453,32 +461,36 @@ async def parameter_search_fit(
         # Release holds on inner and outer spiral radius
         # does not seem to make a significant difference
         # ********************************************************************
-#         try:
-#             final_galfit_output.arms.inner_rad.fix = 1
-#             final_galfit_output.arms.outer_rad.fix = 1
+        if use_spiral:
+            final_galfit_output.arms.inner_rad.fix = 1
+            final_galfit_output.arms.outer_rad.fix = 1
 
-#             final_galfit_output.to_file(filename = tmp_feedme_in)
+            final_galfit_output.to_file(filename = tmp_feedme_in)
 
-#             if use_async:
-#                 final_galfit_output = OutputContainer(
-#                     await async_sp(run_galfit_cmd, timeout = timeout),
-#                     path_to_feedme = tmp_feedme_in,
-#                     store_text     = True,
-#                     **final_galfit_output.components
-#                 )
+            if use_async:
+                final_galfit_output = OutputContainer(
+                    await async_sp(run_galfit_cmd, timeout = timeout),
+                    path_to_feedme = tmp_feedme_in,
+                    store_text     = True,
+                    **final_galfit_output.components
+                )
 
-#             else:
-#                 final_galfit_output = OutputContainer(
-#                     sp(run_galfit_cmd), #, timeout = timeout),
-#                     path_to_feedme = tmp_feedme_in,
-#                     store_text     = True,
-#                     **final_galfit_output.components
-#                 )
+            else:
+                final_galfit_output = OutputContainer(
+                    sp(run_galfit_cmd), #, timeout = timeout),
+                    path_to_feedme = tmp_feedme_in,
+                    store_text     = True,
+                    **final_galfit_output.components
+                )
 
-#             success = check_success(final_galfit_output, success)
+            
+            success = check_success(final_galfit_output, success)
+            if kwargs.get("verbose"):
+                print(str(final_galfit_output))
+            
         # For when arms aren't present
-        # except AttributeError:
-        #     pass
+        #except AttributeError:
+        #    pass
         
     if success:
         
