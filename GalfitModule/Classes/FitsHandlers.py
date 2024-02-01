@@ -325,9 +325,9 @@ class FitsFile:
 
 class OutputFits(FitsFile):
 
-    def __init__(self, filepath, names = [], load_default = True):
+    def __init__(self, filepath, names = [], load_default = True, **kwargs):
         
-        FitsFile.__init__(self, filepath = filepath, wait = True)
+        FitsFile.__init__(self, filepath = filepath, wait = True, **kwargs)
         
         # by initializing FitsFile we already have observation
         if not names:
@@ -350,7 +350,7 @@ class OutputFits(FitsFile):
         self.header = deepcopy(dict(self.model.header))
         # Can call the helper directly since we're just using the header dict
         #_header.from_file_helper_dict(self.header)
-        self.feedme = FeedmeContainer(path_to_feedme = filepath, header = GalfitHeader(), load_default = load_default)
+        self.feedme = FeedmeContainer(path_to_feedme = filepath, header = GalfitHeader(), load_default = load_default, **kwargs)
         self.feedme.from_file(self.header)
         
         self.data = deepcopy(self.model.data)
