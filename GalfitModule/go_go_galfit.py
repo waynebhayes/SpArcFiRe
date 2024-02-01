@@ -746,7 +746,7 @@ def main(**kwargs):
         
         # ======================================== BEGIN GALFIT PARAMETER SEARCH LOOP ========================================    
         
-        use_async = False
+        use_async = True
         #if parallel in (0, 1):
         #    use_async = True
         
@@ -890,8 +890,13 @@ def main(**kwargs):
                 
                 if num_steps == 3:
                     # Disk feedmes
+                    # to_del.extend([
+                    #     pj(tmp_fits_dir, f"{prefix}_{gname}_disk.in") for gname in galaxy_names
+                    # ])
+                    
+                    # Bulge+Disk feedmes
                     to_del.extend([
-                        pj(tmp_fits_dir, f"{prefix}_{gname}_disk.in") for gname in galaxy_names
+                        pj(tmp_fits_dir, f"{prefix}_{gname}_bulge+disk.in") for gname in galaxy_names
                     ])
 
         # Masks
