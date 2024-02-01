@@ -99,15 +99,15 @@ if __name__ == "__main__":
         if from_file:
             with open(file_or_dirname, "r") as f:
                 list_o_fits = [fname.strip() for fname in f.readlines()]
-                
-        elif not list_o_fits.endswith((".fits", ".fit", ".FITS", ".FIT")):
-            print("Did you mean to specify that we are reading from file?")
-            print("Please do so using the '-ff' option. Quitting.")
-            sys.exit()
         
         # If dir, prep list, if not do nothing
         elif os.path.isdir(file_or_dirname):
             list_o_fits = [pj(file_or_dirname, gfit) for gfit in find_files(file_or_dirname, "*.fits")]
+            
+        elif not list_o_fits.endswith((".fits", ".fit", ".FITS", ".FIT")):
+            print("Did you mean to specify that we are reading from file?")
+            print("Please do so using the '-ff' option. Quitting.")
+            sys.exit()
     
     #if "bayonet" in sp(f"hostname").stdout.split(".")[0]:
     if len(list_o_fits) > 500:
