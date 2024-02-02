@@ -1,7 +1,7 @@
 # SpArcFiRe
 SPiral ARC FInder and REporter - find spiral arcs in galaxies.... or maybe hurricanes too?
 The "documentation" directory contains the original paper and some other (possibly irrelevant) info.
-The documentaton below is up-to-date as of March 2020.
+The documentation below is up-to-date as of March 2020.
 If you have any questions, please email whayes@uci.edu, or jeenglis@uci.edu
 
 ## Installation ##
@@ -40,6 +40,9 @@ Enabling this will tell SpArcFiRe not to attempt to block out the noise or stars
 **-elps_dir DIR**
 
 In order to view a galaxy straight on SpArcFiRe has to warp the original image of the galaxy into one where it appears circular.  This is done by fitting an ellipse around the galaxy and warping it into a circle, which is done automatically by SpArcFiRe unless this option is set.  If this option is set then a file following the format GALAXY_NAME_epls.txt is expected for each galaxy in DIR.
+
+**-skip FILE_DIR**
+Using this option you can specify a list of galaxies you don't want to run in the FILE_DIR. Make sure each line contains one galaxy name.
 
 
 ## Required Arguments ##
