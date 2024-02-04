@@ -81,6 +81,36 @@ def check_success(in_fits, previous_state = False):
     
     return (previous_state or False)
 
+def generate_model_for_sparcfire(gfits, base_galfit_cmd, tmp_fits_dir = ""):
+    gname  = os.path.basename(gfits).replace("_galfit_out.fits", "")
+    suffix = "for_sparcfire"
+    if not tmp_fits_dir:
+        tmp_fits_dir = os.path.split(gfits)[0]
+        
+    fits_file = OutputFits(gfits, load_default = False)
+    feedme = fits_file.feedme
+    
+    feedme.header.output_image.value = pj(tmp_fits_dir, f"{gname}_{suffix}.fits")
+    feedme.header.optimize.value     = 1
+    
+    if "power_0" in feedme.components: #or "arms" in feedme.components:
+        power_comp_number = feedme.power_0.component_number
+        
+        # Set all other sersic components to 0 to just keep the disk being rotated
+        # and the header and sky
+        for c_name, comp in feedme.components.items():
+            if "sky" in c_name or "header" in c_name:
+                continue
+                
+            if comp.component_number != power_comp_number:
+                comp.skip.value = 1
+        
+    filename = pj(tmp_fits_dir, f"{gname}_{suffix}.in")
+    feedme.to_file(filename = filename)
+    _ = sp(f"{base_galfit_cmd} {filename}", capture_output = True)
+    
+    return feedme.header.output_image.value
+
 async def async_sp(*args, **kwargs):
     
     # BIG thanks to these blogs
@@ -213,11 +243,6 @@ async def parameter_search_fit(
     # Make a deepcopy just in case
     initial_components = deepcopy(initial_feedme)
     
-    header = initial_components.header
-    
-    initial_components.bulge.magnitude.value = bulge_magnitude
-    initial_components.disk.magnitude.value  = disk_magnitude
-
     # Whether or not to load default components
     # If arms are not used, we select False and let the code
     # figure it out on reading in (this avoids some output/extra processing)
@@ -230,6 +255,13 @@ async def parameter_search_fit(
     use_spiral = True
     if len(initial_components.components) <= 4:
         use_spiral = False
+    
+    header = initial_components.header
+    
+    initial_components.bulge.magnitude.value = bulge_magnitude
+    initial_components.disk.magnitude.value  = disk_magnitude
+    if use_spiral:
+        initial_components.disk_for_arms.magnitude.value  = disk_magnitude
 
     # ---------------------------------------------------------------------
     # Note to self, OutputContainer is *just* for handling output
@@ -728,7 +760,7 @@ def main(**kwargs):
             
         print(gname)
         
-        disk_axis_ratio = 0.6
+        disk_axis_ratio = 0.7
         with fits.open(pj(in_dir, f"{gname}.fits")) as gf:
             try:
                 #SURVEY = SDSS-r  DR7
@@ -737,16 +769,16 @@ def main(**kwargs):
                 p_spirality = float(gf[0].header.get("spirality", 0))
                 # p_spirality, disk_axis_ratio
                 if p_spirality >= 0.9: 
-                    disk_axis_ratio = 0.4
-                elif p_spirality >= 0.75:
                     disk_axis_ratio = 0.5
+                elif p_spirality >= 0.75:
+                    disk_axis_ratio = 0.6
                     
             except KeyError:
                 print(f"There is no spirality keyword in the header for {gname}.")
         
         # ======================================== BEGIN GALFIT PARAMETER SEARCH LOOP ========================================    
         
-        use_async = True
+        #use_async = True
         #if parallel in (0, 1):
         #    use_async = True
         
@@ -858,6 +890,10 @@ def main(**kwargs):
 
         shutil.copy2(tmp_fits_path_gname, pj(out_dir, gname, f"{gname}_galfit_out.fits"))
         
+        # Creating a version of the galaxy for SpArcFiRe to use
+        # Do this last just in case there's an issue
+        _ = generate_model_for_sparcfire(tmp_fits_path_gname, base_galfit_cmd)
+        
         print()
         
     if aggressive_clean:
@@ -902,6 +938,11 @@ def main(**kwargs):
         # Masks
         to_del.extend([
             pj(tmp_masks_dir, f"{gname}_star-rm.fits") for gname in galaxy_names
+        ])
+        
+        # For sparcfire inputs
+        to_del.extend([
+            pj(tmp_fits_dir, f"{gname}_for_sparcfire.in") for gname in galaxy_names
         ])
         
         # Use try except instead of checking existence to save time
