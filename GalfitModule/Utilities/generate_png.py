@@ -95,6 +95,7 @@ if __name__ == "__main__":
     # Check if dir or file
     if len(list_o_fits) == 1:
         file_or_dirname = list_o_fits[0]
+        glob_attempt = glob(file_or_dirname)
         
         if from_file:
             with open(file_or_dirname, "r") as f:
@@ -104,11 +105,14 @@ if __name__ == "__main__":
         elif os.path.isdir(file_or_dirname):
             list_o_fits = [pj(file_or_dirname, gfit) for gfit in find_files(file_or_dirname, "*.fits")]
             
-        elif not list_o_fits.endswith((".fits", ".fit", ".FITS", ".FIT")):
+        elif glob_attempt:
+            list_o_fits = glob_attempt
+        
+        elif not file_or_dirname.endswith((".fits", ".fit", ".FITS", ".FIT")):
             print("Did you mean to specify that we are reading from file?")
             print("Please do so using the '-ff' option. Quitting.")
             sys.exit()
-    
+            
     #if "bayonet" in sp(f"hostname").stdout.split(".")[0]:
     if len(list_o_fits) > 500:
         Parallel(n_jobs = -2)(delayed(wrapper)(gfits, out_png_dir, horizontal) for gfits in list_o_fits)
