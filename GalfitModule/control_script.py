@@ -85,15 +85,15 @@ if __name__ == "__main__":
 
     python3 ./{sys.argv[0]} [OPTION] [[RUN-DIRECTORY] IN-DIRECTORY TMP-DIRECTORY OUT-DIRECTORY]
     
-    OPTIONS =>[-p | --parallel]
-              [-drs | --dont-remove-slurm]
-              [-t  | --tmp]
-              [-ac | --aggressive-clean]
-              [-NS | --num-steps] 
-              [-r | --restart]
+    OPTIONS =>[-p   | --parallel               ]
+              [-drs | --dont-remove-slurm      ]
+              [-t   | --tmp                    ]
+              [-nac | --no-aggressive-clean    ]
+              [-NS  | --num-steps              ] 
+              [-r   | --restart                ]
               [-nsf | --no-simultaneous-fitting]
-              [-v | --verbose]
-              [-n | --basename]
+              [-v   | --verbose                ]
+              [-n   | --basename               ]
 
     This script is the wrapping script for running GALFIT using SpArcFiRe to inform 
     the input. By default, it runs from the RUN (or current) directory and uses the
@@ -135,13 +135,13 @@ if __name__ == "__main__":
                                     under the assumption that tmp will be wiped at some point in the near future.'
                        )
     
-    parser.add_argument('-ac', '--aggressive-clean',
-                        dest     = 'aggressive_clean',
+    parser.add_argument('-nac', '--no-aggressive-clean',
+                        dest     = 'no_aggressive_clean',
                         action   = 'store_const',
                         const    = True,
                         default  = False,
-                        #help     = 'Aggressively clean-up directories, removing -in, temp output, psf, and mask files after galfit runs'
-                        help     = 'Aggressively clean-up directories, removing temp output and mask files after galfit runs'
+                        #help     = 'Aggressively clean-up directories, removing -in, parameter search output, psf, and mask files after galfit runs'
+                        help     = '*Do not* aggressively clean-up directories, leaving temp inputs, parameter search outputs, and mask files after galfit runs'
                        )
     
     parser.add_argument('-NS', '--num-steps',
@@ -201,7 +201,8 @@ if __name__ == "__main__":
         parallel          = args.parallel
         dont_remove_slurm = args.dont_remove_slurm
         run_from_tmp      = args.run_from_tmp
-        aggressive_clean  = args.aggressive_clean
+        # Invert
+        aggressive_clean  = not args.no_aggressive_clean
         
         restart           = args.restart
         basename          = args.basename
