@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[57]:
+# In[1]:
 
 
 import os
@@ -233,7 +233,7 @@ class ComponentContainer:
         return out_str
 
 
-# In[114]:
+# In[5]:
 
 
 class FeedmeContainer(ComponentContainer):
@@ -437,6 +437,11 @@ class FeedmeContainer(ComponentContainer):
                          comp.component_type   == c_type
                 ]
 
+                # NOTE: This is designed for as such for reading from an OutputFits
+                # which may have an unknown component set. 
+                # If you are initializing a container directly, you *must* 
+                # initialize it with the known components as kwargs 
+                # otherwise you will get an error.
                 if len(matches) == 0:
                     #print(f"No matches found to {c_type} with component #{c_num} in component container. Proceeding...")
                     
@@ -444,10 +449,13 @@ class FeedmeContainer(ComponentContainer):
                     #component.component_number = len(self.components) + 1
                     # We don't want to overwrite anything in case there are multiple components
                     # of the same type that aren't initialized
-                    count = 1
-                    while c_type in self.components:
-                        c_type += str(count)
+                    count = 0
+                    new_c_type = f"{c_type}_{count}"
+                    while new_c_type in self.components:
                         count  += 1
+                        new_c_type = f"{c_type}_{count}"
+                        
+                    c_type = new_c_type
                     #if c_type in self.components:
                         #c_type = "_" + c_type
                         
@@ -659,7 +667,7 @@ class FeedmeContainer(ComponentContainer):
         
 
 
-# In[115]:
+# In[6]:
 
 
 class OutputContainer(FeedmeContainer):
@@ -801,14 +809,14 @@ class OutputContainer(FeedmeContainer):
             return ""
 
 
-# In[116]:
+# In[7]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[117]:
+# In[8]:
 
 
 if __name__ == "__main__":
@@ -822,7 +830,7 @@ if __name__ == "__main__":
     print(container_df)
 
 
-# In[118]:
+# In[9]:
 
 
 # Testing FeedmeContainer kwargs and to_file
@@ -858,7 +866,7 @@ if __name__ == "__main__":
     container.to_file()
 
 
-# In[119]:
+# In[10]:
 
 
 # Testing FeedmeContainer from_file
@@ -884,7 +892,7 @@ if __name__ == "__main__":
     
 
 
-# In[120]:
+# In[11]:
 
 
 # Testing FeedmeContainer from_file with just bulge
@@ -924,7 +932,7 @@ if __name__ == "__main__":
     print()
 
 
-# In[121]:
+# In[12]:
 
 
 # Testing FeedmeContainer from_file with no arms
@@ -951,7 +959,7 @@ if __name__ == "__main__":
     
 
 
-# In[122]:
+# In[13]:
 
 
 # Testing extraction into FeedmeContainer attributes
@@ -972,7 +980,7 @@ if __name__ == "__main__":
     
 
 
-# In[124]:
+# In[14]:
 
 
 # Testing extraction into FeedmeContainer attributes with non-default components
@@ -1021,7 +1029,7 @@ if __name__ == "__main__":
     
 
 
-# In[93]:
+# In[15]:
 
 
 # Testing OutputContainer
