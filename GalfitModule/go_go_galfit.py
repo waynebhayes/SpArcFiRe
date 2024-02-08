@@ -469,7 +469,7 @@ async def parameter_search_fit(
         #print("Bulge + Disk + Arms (if applicable)")
         
         if use_async:
-            final_galfit_output = OutputContainer(
+            galfit_output = OutputContainer(
                 await async_sp(run_galfit_cmd, timeout = timeout), 
                 path_to_feedme  = tmp_feedme_in,
                 load_default    = load_default,
@@ -478,7 +478,7 @@ async def parameter_search_fit(
             )
             
         else:
-            final_galfit_output = OutputContainer(
+            galfit_output = OutputContainer(
                 sp(run_galfit_cmd), #, timeout = timeout), 
                 path_to_feedme  = tmp_feedme_in,
                 load_default    = load_default,
@@ -486,27 +486,27 @@ async def parameter_search_fit(
                 store_text      = True
             )
             
-        success = check_success(final_galfit_output, success)
+        success = check_success(galfit_output, success)
         
         if kwargs.get("verbose"):
-            print(str(final_galfit_output))
+            print(str(galfit_output))
         
         # ********************************************************************
         # Release holds on inner and outer spiral radius
         # does not seem to make a significant difference
         # ********************************************************************
         if use_spiral:
-            final_galfit_output.arms.inner_rad.fix = 1
-            final_galfit_output.arms.outer_rad.fix = 1
+            galfit_output.arms.inner_rad.fix = 1
+            galfit_output.arms.outer_rad.fix = 1
 
-            final_galfit_output.to_file(filename = tmp_feedme_in)
+            galfit_output.to_file(filename = tmp_feedme_in)
 
             if use_async:
                 final_galfit_output = OutputContainer(
                     await async_sp(run_galfit_cmd, timeout = timeout),
                     path_to_feedme = tmp_feedme_in,
                     store_text     = True,
-                    **final_galfit_output.components
+                    **galfit_output.components
                 )
 
             else:
@@ -514,7 +514,7 @@ async def parameter_search_fit(
                     sp(run_galfit_cmd), #, timeout = timeout),
                     path_to_feedme = tmp_feedme_in,
                     store_text     = True,
-                    **final_galfit_output.components
+                    **galfit_output.components
                 )
 
             
