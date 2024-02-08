@@ -560,6 +560,8 @@ if __name__ == "__main__":
         print(f"{len(kwargs_main['galaxy_names'])} galaxies")
         
         chunk_size = 1 if len(kwargs_main['galaxy_names']) < 50 else 10
+        
+        # Timeout DOES NOT properly kill the parallelized process via sp
         timeout = 2880 # Minutes
         if parallel == 1:
             # For CPU parallel
@@ -590,7 +592,7 @@ if __name__ == "__main__":
             write_to_parallel(cwd, kwargs_main, parallel_file = parallel_file, chunk_size = chunk_size)
             print("Galfitting via parallelization...")
             try:
-                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout = (timeout + 1) * 60)
+                sp(f"{parallel_run_cmd}", capture_output = capture_output) #, timeout = (timeout + 1) * 60)
             except subprocess.TimeoutExpired:
                 print("Timed out.")
                 pass
@@ -612,7 +614,7 @@ if __name__ == "__main__":
             
             try:
                 print("Piping to parallel")
-                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout = (timeout + 1)* 60)
+                sp(f"{parallel_run_cmd}", capture_output = capture_output) #, timeout = (timeout + 1)* 60)
             except subprocess.TimeoutExpired:
                 pass
             
