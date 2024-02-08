@@ -783,8 +783,8 @@ def main(**kwargs):
         #    use_async = True
         
         # Limiting our # of asynchronous processes
-        chunk = 20
-        if parallel == 1:
+        #chunk = 10
+        if parallel in (1, 2):
             chunk = 5
             
         #if len(b_d_magnitudes) > chunk:
