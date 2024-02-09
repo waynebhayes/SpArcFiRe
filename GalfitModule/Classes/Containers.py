@@ -206,7 +206,7 @@ class ComponentContainer:
         return "\n".join(repr(comp) for comp in self.to_list())
 
 
-# In[26]:
+# In[5]:
 
 
 class FeedmeContainer(ComponentContainer):
@@ -649,7 +649,7 @@ class FeedmeContainer(ComponentContainer):
         
 
 
-# In[27]:
+# In[6]:
 
 
 class OutputContainer(FeedmeContainer):
@@ -664,7 +664,6 @@ class OutputContainer(FeedmeContainer):
         # and then updated by store_text
         
         store_text = kwargs.pop("store_text", False)
-        self._used_default = kwargs.get("load_default", False)
         
         FeedmeContainer.__init__(self, **kwargs)
         
@@ -814,14 +813,14 @@ class OutputContainer(FeedmeContainer):
             return ""
 
 
-# In[28]:
+# In[7]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[29]:
+# In[8]:
 
 
 if __name__ == "__main__":
@@ -835,7 +834,7 @@ if __name__ == "__main__":
     print(container_df)
 
 
-# In[30]:
+# In[9]:
 
 
 # Testing FeedmeContainer kwargs and to_file
@@ -873,7 +872,7 @@ if __name__ == "__main__":
     container.to_file()
 
 
-# In[31]:
+# In[10]:
 
 
 # Testing FeedmeContainer from_file
@@ -899,7 +898,7 @@ if __name__ == "__main__":
     print(iff(str(container)))
 
 
-# In[39]:
+# In[11]:
 
 
 # Testing FeedmeContainer from_file with just bulge
@@ -941,7 +940,7 @@ if __name__ == "__main__":
     print()
 
 
-# In[33]:
+# In[12]:
 
 
 # Testing FeedmeContainer from_file with no arms
@@ -968,7 +967,7 @@ if __name__ == "__main__":
     
 
 
-# In[34]:
+# In[13]:
 
 
 # Testing extraction into FeedmeContainer attributes with default components
@@ -1018,7 +1017,7 @@ if __name__ == "__main__":
     
 
 
-# In[35]:
+# In[14]:
 
 
 # Testing extraction into FeedmeContainer attributes with non-default components
@@ -1040,7 +1039,7 @@ if __name__ == "__main__":
     
 
 
-# In[36]:
+# In[15]:
 
 
 # Testing extraction into OutputContainer with non-default components
@@ -1083,7 +1082,7 @@ if __name__ == "__main__":
     _ = [print(str(comp)) for comp in good_output.to_list()]
 
 
-# In[37]:
+# In[16]:
 
 
 # Testing extraction into OutputContainer with non-default components
@@ -1131,7 +1130,7 @@ if __name__ == "__main__":
     _ = [print(str(comp)) for comp in good_output.to_list()]
 
 
-# In[38]:
+# In[17]:
 
 
 # Testing OutputContainer
