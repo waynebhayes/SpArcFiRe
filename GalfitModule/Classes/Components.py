@@ -108,19 +108,19 @@ class GalfitComponent:
             getattr(self, name, parameter)             
         
         # For reading from file
-        self.start_dict = f"COMP_{self.component_number}"
-        self.end_dict   = f"COMP_{self.component_number + 1}"
+        self._start_dict = f"COMP_{self.component_number}"
+        self._end_dict   = f"COMP_{self.component_number + 1}"
         
-        #self.start_dict_value = self.component_type
+        #self._start_dict_value = self.component_type
         
         # This should work but clarity is probably best here
-        # self.start_text = str(ComponentType(
+        # self._start_text = str(ComponentType(
         #     self.component_type, 
         #     parameter_number = f"{self.param_prefix}0", 
         #     component_number = component_number
         # ))
-        self.start_text = f"# Component number: {self.component_number}"
-        self.end_text   = f"{self.param_prefix.strip()}10"    
+        self._start_text = f"# Component number: {self.component_number}"
+        self._end_text   = f"{self.param_prefix.strip()}10"    
         
         self._section_sep = "="*80
         
@@ -131,7 +131,7 @@ class GalfitComponent:
             input_dict = self.parameters
             
         for k, parameter in input_dict.items():
-            assert isinstance(parameter, BaseParameter), f"The parameter fed into the GalfitComponent, {k}, is not a valid type."
+            assert isinstance(parameter, GalfitParameter), f"The parameter fed into the GalfitComponent, {k}, is not a valid type."
 
 # ==========================================================================================================
 
@@ -483,21 +483,21 @@ class GalfitComponent:
             # Should not affect output so here try/except is for anything else
             try:
                 feed_in  = {key : value for idx, (key, value) in enumerate(input_in.items()) 
-                            if keys.index(self.start_dict) < idx <= keys.index(self.end_dict)}
+                            if keys.index(self._start_dict) < idx <= keys.index(self._end_dict)}
                 
             except ValueError as ve:
                 # Trying to recover...
                 # End will *always* (header excluded) be #_param                
-                component_end = [k for k in keys if k.endswith(self.end_dict[2:])][0]
+                component_end = [k for k in keys if k.endswith(self._end_dict[2:])][0]
                              
                 if component_end[0].isnumeric():
-                    component_start = f"{component_end[0]}_{self.start_dict[2:]}"
+                    component_start = f"{component_end[0]}_{self._start_dict[2:]}"
                     
                 else:
                     print(f"Can't find start/end of {self.component_type} segment.")
                     print(f"Check the filename or start/end_dict variables.")
                     print(f"Filename: {filename}")
-                    print(f"Start/End: {self.start_dict}/{self.end_dict}")
+                    print(f"Start/End: {self._start_dict}/{self._end_dict}")
                     raise ValueError(ve)
                     
                 # Mix check with value (component type) and end key because that's usually known
@@ -525,13 +525,13 @@ class GalfitComponent:
             store   = False
             feed_in = []
             for line in input_file:
-                if line.strip().startswith(self.start_text):
+                if line.strip().startswith(self._start_text):
                     store = True
                     
                 if store:
                     feed_in.append(line)
                     
-                if line.strip().startswith(self.end_text):
+                if line.strip().startswith(self._end_text):
                     store = False
                     
             input_file.close()
@@ -605,12 +605,12 @@ class Sersic(GalfitComponent):
                                 )
         
         # For reading from file
-        self.start_dict = f"COMP_{self.component_number}"
-        self.end_dict   = f"{self.component_number}_PA"
+        self._start_dict = f"COMP_{self.component_number}"
+        self._end_dict   = f"{self.component_number}_PA"
         
         # text kept at defaults
-        #self.start_text = f"# Component number: {self.component_number}"
-        #self.end_text   = f"{self.param_prefix.strip()}10"
+        #self._start_text = f"# Component number: {self.component_number}"
+        #self._end_text   = f"{self.param_prefix.strip()}10"
     
     # Maybe it's silly to do it this way but in the future, it should be easier
     # to implement new components and it should be safer
@@ -636,12 +636,12 @@ class Power(GalfitComponent):
         
         # For reading from file
         # 2_ may not always be the case but that's why I have a try except in there ;)
-        self.start_dict = f"{self.component_number}_ROTF"
-        self.end_dict   = f"{self.component_number}_SPA"
+        self._start_dict = f"{self.component_number}_ROTF"
+        self._end_dict   = f"{self.component_number}_SPA"
         
-        self.start_text = f"{self.param_prefix}0) power"
+        self._start_text = f"{self.param_prefix}0) power"
         # end kept at defult
-        #self.end_text   = f"{self.param_prefix.strip()}10"
+        #self._end_text   = f"{self.param_prefix.strip()}10"
     
     
     
@@ -697,11 +697,11 @@ class Fourier(GalfitComponent):
         
         p_numbers = list(self.parameters.keys())
         # For reading from file
-        self.start_dict = f"{self.component_number}_F{p_numbers[0]}"
-        self.end_dict   = f"{self.component_number}_F{p_numbers[-1]}PA"
+        self._start_dict = f"{self.component_number}_F{p_numbers[0]}"
+        self._end_dict   = f"{self.component_number}_F{p_numbers[-1]}PA"
         
-        self.start_text = f"F{p_numbers[0]}"
-        self.end_text   = f"{self.param_prefix}{p_numbers[-1]}"
+        self._start_text = f"F{p_numbers[0]}"
+        self._end_text   = f"{self.param_prefix}{p_numbers[-1]}"
         
     #exec(GalfitComponent.component_get_set(load_default_fourier_parameters()))
     
@@ -842,11 +842,11 @@ class Sky(GalfitComponent):
                                 )
         
         # For reading from file
-        self.start_dict = f"COMP_{self.component_number}"
-        self.end_dict   = f"{self.component_number}_DSDY"
+        self._start_dict = f"COMP_{self.component_number}"
+        self._end_dict   = f"{self.component_number}_DSDY"
         
-        self.start_text = f"# Component number: {self.component_number}"
-        self.end_text   = f"{self.param_prefix.strip()}3"
+        self._start_text = f"# Component number: {self.component_number}"
+        self._end_text   = f"{self.param_prefix.strip()}3"
         
     # dict for get set looks like this: 
     # "position" : parameters["position"]
@@ -885,11 +885,11 @@ class GalfitHeader(GalfitComponent):
                                 )
         
         # For reading from file
-        self.start_dict = "INITFILE"
-        self.end_dict   = "MAGZPT"
+        self._start_dict = "INITFILE"
+        self._end_dict   = "MAGZPT"
         
-        self.start_text = f"A" # {self.input_image}"
-        self.end_text   = f"P" #{self.optimize}"
+        self._start_text = f"A" # {self.input_image}"
+        self._end_text   = f"P" #{self.optimize}"
         
         # No newlines added so the strings can be added to directly
         self.input_menu_file   = f"#  Input menu file: {kwargs.get('input_menu_file', '')}.in"
