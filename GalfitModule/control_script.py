@@ -85,15 +85,15 @@ if __name__ == "__main__":
 
     python3 ./{sys.argv[0]} [OPTION] [[RUN-DIRECTORY] IN-DIRECTORY TMP-DIRECTORY OUT-DIRECTORY]
     
-    OPTIONS =>[-p | --parallel]
-              [-drs | --dont-remove-slurm]
-              [-t  | --tmp]
-              [-ac | --aggressive-clean]
-              [-NS | --num-steps] 
-              [-r | --restart]
+    OPTIONS =>[-p   | --parallel               ]
+              [-drs | --dont-remove-slurm      ]
+              [-t   | --tmp                    ]
+              [-nac | --no-aggressive-clean    ]
+              [-NS  | --num-steps              ] 
+              [-r   | --restart                ]
               [-nsf | --no-simultaneous-fitting]
-              [-v | --verbose]
-              [-n | --basename]
+              [-v   | --verbose                ]
+              [-n   | --basename               ]
 
     This script is the wrapping script for running GALFIT using SpArcFiRe to inform 
     the input. By default, it runs from the RUN (or current) directory and uses the
@@ -135,13 +135,13 @@ if __name__ == "__main__":
                                     under the assumption that tmp will be wiped at some point in the near future.'
                        )
     
-    parser.add_argument('-ac', '--aggressive-clean',
-                        dest     = 'aggressive_clean',
+    parser.add_argument('-nac', '--no-aggressive-clean',
+                        dest     = 'no_aggressive_clean',
                         action   = 'store_const',
                         const    = True,
                         default  = False,
-                        #help     = 'Aggressively clean-up directories, removing -in, temp output, psf, and mask files after galfit runs'
-                        help     = 'Aggressively clean-up directories, removing temp output and mask files after galfit runs'
+                        #help     = 'Aggressively clean-up directories, removing -in, parameter search output, psf, and mask files after galfit runs'
+                        help     = '*Do not* aggressively clean-up directories, leaving temp inputs, parameter search outputs, and mask files after galfit runs'
                        )
     
     parser.add_argument('-NS', '--num-steps',
@@ -149,7 +149,7 @@ if __name__ == "__main__":
                         action   = 'store',
                         type     = int,
                         choices  = range(1,4),
-                        default  = 2,
+                        default  = 3,
                         help     = 'Run GALFIT using step-by-step component selection (up to 3), i.e.\n\t\
                                     1: Bulge + Disk + Arms,\n\t\
                                     2: Disk -> Bulge + Disk + Arms,\n\t\
@@ -201,7 +201,8 @@ if __name__ == "__main__":
         parallel          = args.parallel
         dont_remove_slurm = args.dont_remove_slurm
         run_from_tmp      = args.run_from_tmp
-        aggressive_clean  = args.aggressive_clean
+        # Invert
+        aggressive_clean  = not args.no_aggressive_clean
         
         restart           = args.restart
         basename          = args.basename
@@ -558,28 +559,31 @@ if __name__ == "__main__":
         #print("Piping to parallel")
         print(f"{len(kwargs_main['galaxy_names'])} galaxies")
         
-        chunk_size = 5
+        chunk_size = 1 if len(kwargs_main['galaxy_names']) < 50 else 10
+        
+        # Timeout DOES NOT properly kill the parallelized process via sp
+        timeout = 2880 # Minutes
         if parallel == 1:
             # For CPU parallel
             parallel_run_name = ""#"GALFITTING"
             parallel_options  = joblib.cpu_count()
             parallel_verbose  = ""
             #chunk_size = len(kwargs_main["galaxy_names"])//joblib.cpu_count() + 1
-            chunk_size = 10
+            #chunk_size = 1 if len(kwargs_main['galaxy_names']) < 50 else 10
             # Two whole days for big runs
-            timeout = 2880 # Minutes
+            # timeout = 2880 # Minutes
             
         elif parallel == 2:
             # For SLURM/Cluster Computing
             parallel_run_name = "GALFITTING"
             # Slurm needs different timeout limits
-            timeout = 2880 # Minutes
+            # timeout = 2880 # Minutes
             # TODO: Consider SLURM + CPU parallel
             # --ntasks-per-node=1 and --ntasks=1 ensures processes will stay
             # on the same node which is crucial for asyncio
             parallel_options  = f"-M all --ntasks=1 --ntasks-per-node=1 -t {timeout}"
             parallel_verbose  = "-v" if verbose else ""
-            chunk_size = 10
+            #chunk_size = 1 if len(kwargs_main['galaxy_names']) < 50 else 10
             
         # Running things via distributed computing           
         parallel_run_cmd = f"cat {parallel_file} | nice -19 {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
@@ -588,7 +592,7 @@ if __name__ == "__main__":
             write_to_parallel(cwd, kwargs_main, parallel_file = parallel_file, chunk_size = chunk_size)
             print("Galfitting via parallelization...")
             try:
-                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout = (timeout + 1) * 60)
+                sp(f"{parallel_run_cmd}", capture_output = capture_output) #, timeout = (timeout + 1) * 60)
             except subprocess.TimeoutExpired:
                 print("Timed out.")
                 pass
@@ -610,7 +614,7 @@ if __name__ == "__main__":
             
             try:
                 print("Piping to parallel")
-                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout = (timeout + 1)* 60)
+                sp(f"{parallel_run_cmd}", capture_output = capture_output) #, timeout = (timeout + 1)* 60)
             except subprocess.TimeoutExpired:
                 pass
             

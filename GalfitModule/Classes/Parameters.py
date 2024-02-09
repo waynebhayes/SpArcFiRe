@@ -64,13 +64,13 @@ sys.path.append(_MODULE_DIR)
 from Functions.helper_functions import *
 
 
-# ## BaseParameter Class
-# `BaseParameter` generically defines the parameters in each **GALFIT** component. In **GALFIT**, every component parameter has a `name`, a `value`, a `fix` value (whether or not to optimize on that parameter), a `parameter_number`, and a `comment` which details what the parameter does. Furthermore, every parameter is a member of a component so for convenience, we also store component-related attributes such as `component_name`, `component_number`, and `parameter_prefix`, which is defined by the component.
+# ## GalfitParameter Class
+# `GalfitParameter` generically defines the parameters in each **GALFIT** component. In **GALFIT**, every component parameter has a `name`, a `value`, a `fix` value (whether or not to optimize on that parameter), a `parameter_number`, and a `comment` which details what the parameter does. Furthermore, every parameter is a member of a component so for convenience, we also store component-related attributes such as `component_name`, `component_number`, and `parameter_prefix`, which is defined by the component.
 
 # In[4]:
 
 
-class BaseParameter():
+class GalfitParameter():
     def __init__(self, value, **kwargs):
         
         # All underscored attributes are likely to change
@@ -143,14 +143,14 @@ class BaseParameter():
 
 
 # ## ComponentType Class
-# `ComponentType` inherits the `BaseParameter` class and `str`. This is to emphasize/force the attribute `value` to be a string since the `value` in this case merely represents the first line of a component which specifies which component type is being used, i.e. *Sersic*, *Power*, *Sky*, etc.
+# `ComponentType` inherits the `GalfitParameter` class and `str`. This is to emphasize/force the attribute `value` to be a string since the `value` in this case merely represents the first line of a component which specifies which component type is being used, i.e. *Sersic*, *Power*, *Sky*, etc.
 # 
-# This and the several below mostly function to set some defaults but are otherwise slight variations on the `BaseParameter` class.
+# This and the several below mostly function to set some defaults but are otherwise slight variations on the `GalfitParameter` class.
 
 # In[5]:
 
 
-class ComponentType(BaseParameter, str):
+class ComponentType(GalfitParameter, str):
     def __new__(cls, name, **kwargs):
         # I can't fully remember why but this is necessary to 
         # use the str built-in as the basis for the class, i.e.
@@ -158,7 +158,7 @@ class ComponentType(BaseParameter, str):
         return super(ComponentType, cls).__new__(cls, name)
     
     def __init__(self, name, **kwargs):
-        BaseParameter.__init__(
+        GalfitParameter.__init__(
             self, 
             name,
             fix              = "",
@@ -170,17 +170,17 @@ class ComponentType(BaseParameter, str):
 
 
 # ## HeaderParameter Class
-# `HeaderParameter` inherits the `BaseParameter` class and `str`. Like `ComponentType`, most of the header parameters are strings.
+# `HeaderParameter` inherits the `GalfitParameter` class and `str`. Like `ComponentType`, most of the header parameters are strings.
 
 # In[6]:
 
 
-class HeaderParameter(BaseParameter, str):
+class HeaderParameter(GalfitParameter, str):
     def __new__(cls, value = "", **kwargs):    
         return super(HeaderParameter, cls).__new__(cls, value)
     
     def __init__(self, value, **kwargs):
-        BaseParameter.__init__(
+        GalfitParameter.__init__(
             self, 
             value, 
             fix              = "",
@@ -190,18 +190,18 @@ class HeaderParameter(BaseParameter, str):
 
 
 # ## NumParameter Class
-# `NumParameter` inherits the `BaseParameter` class and `float`. The `NumParameter` generically holds valued parameters, like those found in the **GALFIT** components, but defaults to rounding to four decimal places as is convention in **GALFIT**.
+# `NumParameter` inherits the `GalfitParameter` class and `float`. The `NumParameter` generically holds valued parameters, like those found in the **GALFIT** components, but defaults to rounding to four decimal places as is convention in **GALFIT**.
 
 # In[7]:
 
 
-class NumParameter(BaseParameter, float):
+class NumParameter(GalfitParameter, float):
     def __new__(cls, value = 0, **kwargs):    
         return super(NumParameter, cls).__new__(cls, value)
     
     def __init__(self, value, **kwargs):
         
-        BaseParameter.__init__(
+        GalfitParameter.__init__(
             self, 
             float(round(value, 4)), 
             **kwargs
@@ -229,12 +229,12 @@ class NumParameter(BaseParameter, float):
 
 
 # ## Skip Class
-# `Skip` inherits the `BaseParameter` class and int. `Skip` is a special case of parameter in that it does not have a `fix` value and can only be 0 or 1.
+# `Skip` inherits the `GalfitParameter` class and int. `Skip` is a special case of parameter in that it does not have a `fix` value and can only be 0 or 1.
 
 # In[8]:
 
 
-class Skip(BaseParameter, int):
+class Skip(GalfitParameter, int):
     def __new__(cls, value = 0, **kwargs):    
         return super(Skip, cls).__new__(cls, value)
     
@@ -259,7 +259,7 @@ class Skip(BaseParameter, int):
         comment          = f"Skip this model in output image?  (yes=1, no=0)"
         fix              = ""
         
-        BaseParameter.__init__(
+        GalfitParameter.__init__(
             self, 
             value,
             name             = name,
@@ -302,7 +302,7 @@ class Skip(BaseParameter, int):
 # In[9]:
 
 
-#class BendingModes(BaseParameter, float):
+#class BendingModes(GalfitParameter, float):
 class BendingMode(NumParameter):
     def __init__(self, mode, amplitude, **kwargs):
         
@@ -365,10 +365,10 @@ class BendingMode(NumParameter):
 ntMultiParameter    = namedtuple("ntMultiParameter", "x y")
 ntMultiParameterFix = namedtuple("ntMultiParameterFix", "fix_x fix_y")
 
-class MultiParameter(BaseParameter):
+class MultiParameter(GalfitParameter):
     def __init__(self, value = (0,0), **kwargs):
         
-        BaseParameter.__init__(self, 0, **kwargs)
+        GalfitParameter.__init__(self, 0, **kwargs)
         
         # Generically use x and y
         
@@ -464,7 +464,7 @@ class MultiParameter(BaseParameter):
     def __repr__(self):
         return repr(self.value)
 
-    # Override BaseParameter
+    # Override GalfitParameter
     def __str__(self):
         """
         Return string representation of MultiParameter per GALFIT convention.

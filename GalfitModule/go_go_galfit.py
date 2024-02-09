@@ -81,6 +81,36 @@ def check_success(in_fits, previous_state = False):
     
     return (previous_state or False)
 
+def generate_model_for_sparcfire(gfits, base_galfit_cmd, tmp_fits_dir = ""):
+    gname  = os.path.basename(gfits).replace("_galfit_out.fits", "")
+    suffix = "for_sparcfire"
+    if not tmp_fits_dir:
+        tmp_fits_dir = os.path.split(gfits)[0]
+        
+    fits_file = OutputFits(gfits, load_default = False)
+    feedme = fits_file.feedme
+    
+    feedme.header.output_image.value = pj(tmp_fits_dir, f"{gname}_{suffix}.fits")
+    feedme.header.optimize.value     = 1
+    
+    if "power_0" in feedme.components: #or "arms" in feedme.components:
+        power_comp_number = feedme.power_0.component_number
+        
+        # Set all other sersic components to 0 to just keep the disk being rotated
+        # and the header and sky
+        for c_name, comp in feedme.components.items():
+            if "sky" in c_name or "header" in c_name:
+                continue
+                
+            if comp.component_number != power_comp_number:
+                comp.skip.value = 1
+        
+    filename = pj(tmp_fits_dir, f"{gname}_{suffix}.in")
+    feedme.to_file(filename = filename)
+    _ = sp(f"{base_galfit_cmd} {filename}", capture_output = True)
+    
+    return feedme.header.output_image.value
+
 async def async_sp(*args, **kwargs):
     
     # BIG thanks to these blogs
@@ -213,17 +243,25 @@ async def parameter_search_fit(
     # Make a deepcopy just in case
     initial_components = deepcopy(initial_feedme)
     
+    # Whether or not to load default components
+    # If arms are not used, we select False and let the code
+    # figure it out on reading in (this avoids some output/extra processing)
+    # WORK IN PROGRESS
+    # This may change if three (+1) components becomes the default
+    #load_default = True
+    load_default = False
+    #if len(initial_components.components) <= 4:
+    #    load_default = False
+    use_spiral = True
+    if len(initial_components.components) <= 4:
+        use_spiral = False
+    
     header = initial_components.header
     
     initial_components.bulge.magnitude.value = bulge_magnitude
     initial_components.disk.magnitude.value  = disk_magnitude
-
-    # Whether or not to load default components
-    # If arms are not used, we select False and let the code
-    # figure it out on reading in (this avoids some output/extra processing)
-    load_default = True
-    if len(initial_components.components) <= 4:
-        load_default = False
+    if use_spiral:
+        initial_components.disk_for_arms.magnitude.value  = disk_magnitude
 
     # ---------------------------------------------------------------------
     # Note to self, OutputContainer is *just* for handling output
@@ -254,8 +292,9 @@ async def parameter_search_fit(
     if num_steps == 1:
         run_galfit_cmd = f"{base_galfit_cmd} {tmp_feedme_in}"
 
-        if load_default:
-            initial_components.disk.axis_ratio.value = disk_axis_ratio
+        #if load_default:
+        if use_spiral:
+            initial_components.disk_for_arms.axis_ratio.value = disk_axis_ratio
             
         initial_components.to_file(filename = tmp_feedme_in)
 
@@ -299,6 +338,7 @@ async def parameter_search_fit(
         #     load_default   = load_default,
         #     **feedme_info[gname].components
         # )
+
         if use_async:
             galfit_output = OutputContainer(
                 await async_sp(run_galfit_cmd, timeout = timeout),
@@ -308,7 +348,7 @@ async def parameter_search_fit(
                 store_text     = True,
                 **initial_components.components
             )
-            
+
         else:
             galfit_output = OutputContainer(
                 sp(run_galfit_cmd), #, timeout = timeout), 
@@ -338,7 +378,8 @@ async def parameter_search_fit(
         #                                 )
 
         # load_default here because a three step fit is impossible with only two components
-        if num_steps == 3 and load_default:
+        if num_steps == 3 and use_spiral:
+            galfit_output = deepcopy(initial_components)
 
             # For fitting *just* the bulge + a few pixels
             # Trying Just disk, just bulge, then all together with arms
@@ -400,8 +441,9 @@ async def parameter_search_fit(
         #     print("Skipping Arms")
         #     galfit_output.to_file(galfit_output.bulge, galfit_output.disk, galfit_output.sky)
         # else:
-        if load_default:
-            galfit_output.disk.axis_ratio.value = disk_axis_ratio
+        #if load_default:
+        if use_spiral:
+            galfit_output.disk_for_arms.axis_ratio.value = disk_axis_ratio
 
             # After determining sky and initial component(s) with extended background,
             # shrink fitting region closer to the galaxy itself
@@ -427,7 +469,7 @@ async def parameter_search_fit(
         #print("Bulge + Disk + Arms (if applicable)")
         
         if use_async:
-            final_galfit_output = OutputContainer(
+            galfit_output = OutputContainer(
                 await async_sp(run_galfit_cmd, timeout = timeout), 
                 path_to_feedme  = tmp_feedme_in,
                 load_default    = load_default,
@@ -436,7 +478,7 @@ async def parameter_search_fit(
             )
             
         else:
-            final_galfit_output = OutputContainer(
+            galfit_output = OutputContainer(
                 sp(run_galfit_cmd), #, timeout = timeout), 
                 path_to_feedme  = tmp_feedme_in,
                 load_default    = load_default,
@@ -444,41 +486,45 @@ async def parameter_search_fit(
                 store_text      = True
             )
             
-        success = check_success(final_galfit_output, success)
+        success = check_success(galfit_output, success)
         
         if kwargs.get("verbose"):
-            print(str(final_galfit_output))
+            print(str(galfit_output))
         
         # ********************************************************************
         # Release holds on inner and outer spiral radius
         # does not seem to make a significant difference
         # ********************************************************************
-#         try:
-#             final_galfit_output.arms.inner_rad.fix = 1
-#             final_galfit_output.arms.outer_rad.fix = 1
+        if use_spiral:
+            galfit_output.arms.inner_rad.fix = 1
+            galfit_output.arms.outer_rad.fix = 1
 
-#             final_galfit_output.to_file(filename = tmp_feedme_in)
+            galfit_output.to_file(filename = tmp_feedme_in)
 
-#             if use_async:
-#                 final_galfit_output = OutputContainer(
-#                     await async_sp(run_galfit_cmd, timeout = timeout),
-#                     path_to_feedme = tmp_feedme_in,
-#                     store_text     = True,
-#                     **final_galfit_output.components
-#                 )
+            if use_async:
+                final_galfit_output = OutputContainer(
+                    await async_sp(run_galfit_cmd, timeout = timeout),
+                    path_to_feedme = tmp_feedme_in,
+                    store_text     = True,
+                    **galfit_output.components
+                )
 
-#             else:
-#                 final_galfit_output = OutputContainer(
-#                     sp(run_galfit_cmd), #, timeout = timeout),
-#                     path_to_feedme = tmp_feedme_in,
-#                     store_text     = True,
-#                     **final_galfit_output.components
-#                 )
+            else:
+                final_galfit_output = OutputContainer(
+                    sp(run_galfit_cmd), #, timeout = timeout),
+                    path_to_feedme = tmp_feedme_in,
+                    store_text     = True,
+                    **galfit_output.components
+                )
 
-#             success = check_success(final_galfit_output, success)
+            
+            success = check_success(final_galfit_output, success)
+            if kwargs.get("verbose"):
+                print(str(final_galfit_output))
+            
         # For when arms aren't present
-        # except AttributeError:
-        #     pass
+        #except AttributeError:
+        #    pass
         
     if success:
         
@@ -547,19 +593,17 @@ async def wrapper(
     
     # Convert list of dicts to single dict
     # gpath : nmr value
-    fitted_galaxies = dict(ChainMap(*fitted_galaxies[::-1]))
-    # finished, _ = loop.run_until_complete(
-    #     asyncio.wait(
-    #         tasks, 
-    #         return_when = asyncio.ALL_COMPLETED,
-    #         timeout = 60*3*kwargs.get("num_steps", 2) # seconds, 3 minutes per step
-    #     )
-    # )
+    try:
+        fitted_galaxies = dict(ChainMap(*fitted_galaxies[::-1]))
+    except (IndexError, AttributeError):
+        fitted_galaxies = {k:v for k,v in fitted_galaxies.items() 
+                           if v not in (IndexError, AttributeError)
+                          }
+        if fitted_galaxies:
+            fitted_galaxies = dict(ChainMap(*fitted_galaxies[::-1]))
+        else:
+            print(f"Something went wrong, {gname} errored out. Counting as a failure.")
         
-    #fitted_galaxies = finished.result()
-    
-    #loop.close()
- 
     return fitted_galaxies
     
 def main(**kwargs):
@@ -714,7 +758,7 @@ def main(**kwargs):
             
         print(gname)
         
-        disk_axis_ratio = 0.6
+        disk_axis_ratio = 0.7
         with fits.open(pj(in_dir, f"{gname}.fits")) as gf:
             try:
                 #SURVEY = SDSS-r  DR7
@@ -723,22 +767,22 @@ def main(**kwargs):
                 p_spirality = float(gf[0].header.get("spirality", 0))
                 # p_spirality, disk_axis_ratio
                 if p_spirality >= 0.9: 
-                    disk_axis_ratio = 0.4
-                elif p_spirality >= 0.75:
                     disk_axis_ratio = 0.5
+                elif p_spirality >= 0.75:
+                    disk_axis_ratio = 0.6
                     
             except KeyError:
                 print(f"There is no spirality keyword in the header for {gname}.")
         
         # ======================================== BEGIN GALFIT PARAMETER SEARCH LOOP ========================================    
         
-        use_async = True
+        #use_async = True
         #if parallel in (0, 1):
         #    use_async = True
         
         # Limiting our # of asynchronous processes
-        chunk = 20
-        if parallel == 1:
+        chunk = len(b_d_magnitudes)
+        if parallel in (1, 2):
             chunk = 5
             
         #if len(b_d_magnitudes) > chunk:
@@ -844,6 +888,10 @@ def main(**kwargs):
 
         shutil.copy2(tmp_fits_path_gname, pj(out_dir, gname, f"{gname}_galfit_out.fits"))
         
+        # Creating a version of the galaxy for SpArcFiRe to use
+        # Do this last just in case there's an issue
+        _ = generate_model_for_sparcfire(tmp_fits_path_gname, base_galfit_cmd)
+        
         print()
         
     if aggressive_clean:
@@ -876,13 +924,23 @@ def main(**kwargs):
                 
                 if num_steps == 3:
                     # Disk feedmes
+                    # to_del.extend([
+                    #     pj(tmp_fits_dir, f"{prefix}_{gname}_disk.in") for gname in galaxy_names
+                    # ])
+                    
+                    # Bulge+Disk feedmes
                     to_del.extend([
-                        pj(tmp_fits_dir, f"{prefix}_{gname}_disk.in") for gname in galaxy_names
+                        pj(tmp_fits_dir, f"{prefix}_{gname}_bulge+disk.in") for gname in galaxy_names
                     ])
 
         # Masks
         to_del.extend([
             pj(tmp_masks_dir, f"{gname}_star-rm.fits") for gname in galaxy_names
+        ])
+        
+        # For sparcfire inputs
+        to_del.extend([
+            pj(tmp_fits_dir, f"{gname}_for_sparcfire.in") for gname in galaxy_names
         ])
         
         # Use try except instead of checking existence to save time

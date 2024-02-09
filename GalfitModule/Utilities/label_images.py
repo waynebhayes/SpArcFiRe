@@ -38,7 +38,14 @@ def parse_folder(path):
 def load_image(path, window):
     try:
         image = Image.open(path)
-        image.thumbnail((600, 175))
+
+        # TODO: Detect if horizontal or vertical and choose accordingly
+        # Horizontal
+        #image.thumbnail((800, 375))
+
+        # Vertical
+        image.thumbnail((375, 800))
+
         photo_img = ImageTk.PhotoImage(image)
         window["image"].update(data=photo_img)
     except:
@@ -62,38 +69,43 @@ def main():
         ]
     ]
 
-    window = sg.Window("Image Viewer", elements, size=(700, 250))
+    # Horizontal
+    #window = sg.Window("Image Viewer", elements, size=(900, 400))
+    
+    # Vertical
+    window = sg.Window("Image Viewer", elements, size=(400, 900))
+    
     images = []
     location = 0
 
     basepath        = sys.argv[1]
     failure_path    = pj(basepath, sys.argv[2]) #pj(values["file"], "false_positive")
 #    non_spiral_path = pj(basepath, sys.argv[3]) #pj(values["file"], "false_positive")
-
-    while True:
+    images = parse_folder(basepath)#values["file"])
+    while images:
+        load_image(images[location], window)
         event, _ = window.read()
 
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
-
-        images = parse_folder(basepath)#values["file"])
-        if images:
-            load_image(images[location], window)
 
         if event == "Next" and images:
             if location == len(images) - 1:
                 break
             else:
                 location += 1
+            continue
 
-            load_image(images[location], window)
+            #load_image(images[location], window)
 
         if event == "Prev" and images:
             if location == 0:
-                location = len(images) - 1
+                #location = len(images) - 1
+                pass
             else:
                 location -= 1
-            load_image(images[location], window)
+            #load_image(images[location], window)
+            continue
 
         if event == "Mislabeled" and images:
             if exists(images[location]):
@@ -103,13 +115,12 @@ def main():
             else:
                 print("image has already been moved... continuing")
 
-            # -2 to account for recent pop
-            if location == len(images) - 2:
+            if location == len(images) - 1:
                 break
-            else:
-                location += 1
+            #else:
+            #    location += 1
 
-            load_image(images[location], window)
+            #load_image(images[location], window)
 
 #        if event == "Non-Spiral" and images:
 #            if exists(images[location]):

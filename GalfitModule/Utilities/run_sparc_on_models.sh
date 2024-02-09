@@ -8,25 +8,28 @@ if [[ ! $basename ]]; then
 fi
 
 in_dir=$2
-out_dir=$3
+tmp_dir=$3
+out_dir=$4
 
 default_in="$(pwd)"/"sparcfire-in"
 default_tmp="$(pwd)"/"sparcfire-tmp"
 default_out="$(pwd)"/"sparcfire-out"
 
-if [[ ! $in_dir || ! $out_dir ]]; then
-    echo "No input or output directories supplied as cmd line arguments."
-    echo "Using sparcfire-in and sparcfire-out..."
+if [[ ! $in_dir || ! $tmp_dir || ! $out_dir ]]; then
+    echo "No input, temp, or output directories supplied as cmd line arguments."
+    echo "Using sparcfire-in, sparcfire-tmp, and sparcfire-out..."
     in_dir=$default_in
+    tmp_dir=$default_tmp
     out_dir=$default_out
 
-    if [[ ! -d $in_dir || ! -d $out_dir ]]; then
-        echo "Cannot find either $in_dir and/or $out_dir. Quitting."
+    if [[ ! -d $in_dir || ! -d $tmp_dir ||  ! -d $out_dir ]]; then
+        echo "Cannot find any of: $in_dir, $tmp_dir, $out_dir. Quitting."
         exit
     fi
 fi
 
-pre_galfit_in="pre_galfit-in"
+# TODO: consider alternative name such as pre_sparcfire_rerun-in
+pre_galfit_in="pre_galfit-in" 
 pre_galfit_out="pre_galfit-out"
 
 post_galfit_in="post_galfit-in"
@@ -55,8 +58,12 @@ mkdir -p $default_in $default_tmp $default_out
 
 # Populate input folder with models
 # True indicates to flip u/d the models to keep consistent with SpArcFiRe's processing
-echo "Populating input folder with models. This may take awhile..."
-python3 "${SPARCFIRE_HOME}/GalfitModule/Utilities/extract_model_from_galfit_output.py" $pre_galfit_in $pre_galfit_out $default_in "true"
+#echo "Populating input folder with models. This may take awhile..."
+#python3 "${SPARCFIRE_HOME}/GalfitModule/Utilities/extract_model_from_galfit_output.py" $pre_galfit_in $pre_galfit_out $default_in "true"
+for gfits in "$tmp_dir"/"galfits"/*"_for_sparcfire.fits"; do   
+    gfits_base="${gfits##*/}"
+    cp $gfits $default_in/"${gfits_base/_for_sparcfire/}"
+done
 
 ext="*.fits"
 conv_fits="-convert-FITS "

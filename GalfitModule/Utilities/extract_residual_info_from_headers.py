@@ -52,7 +52,7 @@ def main(*args):
             output_df["gname"]   = gname
             output_df["NMR"]     = output_fits.model.header.get("NMR", None) 
             output_df["KS_P"]    = output_fits.model.header.get("KS_P", None)
-            output_df["KS_STAT"] = output_fits.model.header.get("KS_STAT", None)
+            #output_df["KS_STAT"] = output_fits.model.header.get("KS_STAT", None)
             
             all_df = pd.concat([all_df, output_df])
             # with fits.open(output_file) as hdul: 

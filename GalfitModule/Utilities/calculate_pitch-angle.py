@@ -378,9 +378,17 @@ def generate_galfit_model_no_inclination(gname, feedme, out_dir, model_dir = "tm
 def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, validation_plot = False, use_inner_outer_rad = False, model_dir = "tmp_galfit_models"):
     
     gname = os.path.basename(gpath)
-
     try:
-        fits_file = OutputFits(pj(gpath, f"{gname}_galfit_out.fits"))
+        fits_file = OutputFits(
+            pj(gpath, f"{gname}_galfit_out.fits"), 
+            #load_default = False,
+            # Telling the module that these are the components we're looking for
+            disk_for_arms = Sersic(3),
+            arms          = Power(3),
+            fourier       = Fourier(3),
+            sky           = Sky(4),
+            sersic_order  = ["bulge", "disk", "disk_for_arms"]
+        )
         print(gname) #, 'ok')
     except (AttributeError, FileNotFoundError, Exception):
         print(f"Something went wrong opening galaxy {gname}! Continuing...")
@@ -389,7 +397,14 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
                                                         
     fit_region = fits_file.feedme.header.region_to_fit
 
-    disk       = fits_file.feedme.disk
+    # Three(+1) component fit
+    try:
+        disk = fits_file.feedme.disk_for_arms
+        
+    # Two(+1) component fit
+    except AttributeError:
+        disk = fits_file.feedme.disk
+        
     q          = disk.axis_ratio.value
 
     arms       = fits_file.feedme.arms
@@ -573,6 +588,7 @@ def main(in_dir, out_dir, num_pts = 500, scatter_plot = True, validation_plot = 
                                             )
     
     pa_info_dict = dict(zip(gnames, pa_inner_outer))
+    #print(pa_info_dict)
     
     avg_constrained_pas = [np.mean(tup[0]) if tup else None for tup in pa_inner_outer]
     

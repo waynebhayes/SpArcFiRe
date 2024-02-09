@@ -143,11 +143,13 @@ def fill_objects(
     reloaded  = OutputFits(fits_filepath)
     output_df = reloaded.feedme.to_pandas()
     output_df["gname"]   = gname
-    output_df["NMR"]     = reloaded.model.header.get("NMR", None) 
+    output_df["NMR"]     = reloaded.model.header.get("NMR", None)
     output_df["KS_P"]    = reloaded.model.header.get("KS_P", None)
-    output_df["KS_STAT"] = reloaded.model.header.get("KS_STAT", None)
+    #output_df["KS_STAT"] = reloaded.model.header.get("KS_STAT", None)
+    output_df["W_NMR"]   = reloaded.model.header.get("W_NMR", None)
     
     output_df["nmr_x_1-p"] = (1 - output_df["KS_P"])*output_df["NMR"]
+    output_df["wayne_quality"] = output_df["KS_P"]/output_df["W_NMR"]
     
     return output_df
     

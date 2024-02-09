@@ -13,6 +13,8 @@ from copy import deepcopy
 from IPython import get_ipython
 from astropy.io import fits
 
+import itertools
+
 import numpy as np
 import pandas as pd
 
@@ -160,7 +162,7 @@ class ComponentContainer:
             if comp.component_type == "header":
                 continue
                 
-            elif comp.component_type not in ("power", "fourier", "bending"):
+            elif comp.component_type not in ("power", "fourier", "bending", "truncation"):
                 comp.component_number = count
                 count += 1
                 
@@ -177,7 +179,8 @@ class ComponentContainer:
                 for comp in self.to_list()
                 if comp.component_type != "header"
             ], 
-            axis = 1).drop(columns = ["index"])
+            axis = 1
+        ).drop(columns = ["index"])
     
     
     #TODO
@@ -244,11 +247,14 @@ class FeedmeContainer(ComponentContainer):
         # The path to the feedme that *generated* the components
         ComponentContainer.__init__(self, load_all = False, **kwargs)
         
+        #all_components = [None]*len(self.components)
+        
         self._path_to_feedme = path_to_feedme
         
         # Setdefault will fill in the full default component set if not specified via kwargs
         if load_default:
             self.load_default()
+            self.sort_components()
 
 # ==========================================================================================================
 
@@ -267,14 +273,39 @@ class FeedmeContainer(ComponentContainer):
         self.components.setdefault("header" , GalfitHeader())
         self.components.setdefault("bulge"  , Sersic(1))
         self.components.setdefault("disk"   , Sersic(2))
+        #self.components.setdefault("disk_for_arms"   , Sersic(3))
         self.components.setdefault("arms"   , Power(2))
         self.components.setdefault("fourier", Fourier(2))
         self.components.setdefault("sky"    , Sky(3))
         # This will set all the properties
         if self.components: pass
-        
+
 # ==========================================================================================================
 
+    def sort_components(self):
+        sort_order = ["sersic", "power", "fourier", "bending", "truncation"]
+        
+        sorted_components = {}
+        for c_name, comp in self.components.items():
+            c_num = comp.component_number
+            if comp.component_number in sorted_components:
+                sorted_components[c_num].append((comp.component_type, c_name))
+            else:
+                sorted_components[c_num]     = [(comp.component_type, c_name)]
+
+        sorted_components = dict(sorted(sorted_components.items()))
+
+        for c_num, doublet_list in sorted_components.items():
+            if len(doublet_list) > 1:
+                sorted_components[c_num] = sorted(doublet_list, key = lambda i: sort_order.index(i[0]))
+
+        self.components = {tup[-1] : self.components[tup[-1]]
+                           # Unpacking the inner list(s)
+                           for tup in itertools.chain.from_iterable(sorted_components.values())
+                          }
+# ==========================================================================================================
+
+    # TODO: Do I still need this if I use numbering now?
     def reset_keys(self):
         
         stripped_keys   = [key.strip("_") for key in self.components.keys()]      
@@ -406,6 +437,11 @@ class FeedmeContainer(ComponentContainer):
                          comp.component_type   == c_type
                 ]
 
+                # NOTE: This is designed for as such for reading from an OutputFits
+                # which may have an unknown component set. 
+                # If you are initializing a container directly, you *must* 
+                # initialize it with the known components as kwargs 
+                # otherwise you will get an error.
                 if len(matches) == 0:
                     #print(f"No matches found to {c_type} with component #{c_num} in component container. Proceeding...")
                     
@@ -413,8 +449,15 @@ class FeedmeContainer(ComponentContainer):
                     #component.component_number = len(self.components) + 1
                     # We don't want to overwrite anything in case there are multiple components
                     # of the same type that aren't initialized
-                    if c_type in self.components:
-                        c_type = "_" + c_type
+                    count = 0
+                    new_c_type = f"{c_type}_{count}"
+                    while new_c_type in self.components:
+                        count  += 1
+                        new_c_type = f"{c_type}_{count}"
+                        
+                    c_type = new_c_type
+                    #if c_type in self.components:
+                        #c_type = "_" + c_type
                         
                     self.components[c_type] = component
                     name = c_type
@@ -940,6 +983,55 @@ if __name__ == "__main__":
 # In[14]:
 
 
+# Testing extraction into FeedmeContainer attributes with non-default components
+if __name__ == "__main__":
+    output_example = """Iteration : 12    Chi2nu: 3.205e-01     dChi2/Chi2: 1.75e-08    alamda: 1e+04
+     sersic    : (  [67.38],  [67.77])  13.19     15.54    0.34    0.62   -19.23
+     sersic    : (  [67.38],  [67.77])  14.58      8.89    1.56    0.68    30.23
+     sersic    : (  [67.38],  [67.77])  5.55      8.88    1.11    6.66    30.30
+       power   :     [0.00]   [22.01]   78.86     -2.39     ---   39.74    22.52
+       fourier : (1:  0.15,   46.48)   (3:  0.10,  -33.06)
+     sky       : [ 67.00,  68.00]  1133.43  1.16e-02  -1.35e-02
+    COUNTDOWN = 0
+
+
+    Fit summary is now being saved into `fit.log'.
+
+    """   
+    
+    dummy_obj        = subprocess.CompletedProcess("", 0)
+    dummy_obj.stdout = output_example
+    good_output      = OutputContainer(
+        dummy_obj, 
+        store_text = True, 
+        #load_default = False,
+        # header        = GalfitHeader(galaxy_name = "tester"),
+        # bulge         = Sersic(1),
+        # disk          = Sersic(2),
+        disk_for_arms = Sersic(3),
+        # TODO: Check if changing power component number (to 2) will change its position
+        # in an output file
+        arms          = Power(3),
+        fourier       = Fourier(3),
+        sky           = Sky(4),
+        sersic_order  = ["bulge", "disk", "disk_for_arms"]
+    )
+    
+    _ = [print("Key:", k) for k in good_output.components.keys()]
+    print()
+    _ = [print(str(comp)) for comp in good_output.to_list()]
+    # print(good_output.bulge)
+    # print(good_output.disk)
+    # print(good_output.disk_for_arms)
+    # print(good_output.arms)
+    # print(good_output.fourier)
+    # print(good_output.sky)
+    
+
+
+# In[15]:
+
+
 # Testing OutputContainer
 if __name__ == "__main__":
     
@@ -1053,7 +1145,7 @@ if __name__ == "__main__":
     #good_output.header.to_file(output_filename, good_output.bulge, good_output.disk, good_output.arms, good_output.fourier, good_output.sky)
 
 
-# In[15]:
+# In[16]:
 
 
 if __name__ == "__main__":
