@@ -593,19 +593,17 @@ async def wrapper(
     
     # Convert list of dicts to single dict
     # gpath : nmr value
-    fitted_galaxies = dict(ChainMap(*fitted_galaxies[::-1]))
-    # finished, _ = loop.run_until_complete(
-    #     asyncio.wait(
-    #         tasks, 
-    #         return_when = asyncio.ALL_COMPLETED,
-    #         timeout = 60*3*kwargs.get("num_steps", 2) # seconds, 3 minutes per step
-    #     )
-    # )
+    try:
+        fitted_galaxies = dict(ChainMap(*fitted_galaxies[::-1]))
+    except (IndexError, AttributeError):
+        fitted_galaxies = {k:v for k,v in fitted_galaxies.items() 
+                           if v not in (IndexError, AttributeError)
+                          }
+        if fitted_galaxies:
+            fitted_galaxies = dict(ChainMap(*fitted_galaxies[::-1]))
+        else:
+            print(f"Something went wrong, {gname} errored out. Counting as a failure.")
         
-    #fitted_galaxies = finished.result()
-    
-    #loop.close()
- 
     return fitted_galaxies
     
 def main(**kwargs):
@@ -783,7 +781,7 @@ def main(**kwargs):
         #    use_async = True
         
         # Limiting our # of asynchronous processes
-        #chunk = 10
+        chunk = len(b_d_magnitudes)
         if parallel in (1, 2):
             chunk = 5
             
