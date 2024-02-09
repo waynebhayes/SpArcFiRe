@@ -493,22 +493,24 @@ class OutputFits(FitsFile):
             # compare to gaussian with same mean, std via kstest
             # if p value high, not that different
             
-            self.masked_residual = (self.observation.data - self.model.data)*crop_mask
+            self.masked_residual  = (self.observation.data - self.model.data)*crop_mask
             exclude_masked_pixels = self.masked_residual[np.abs(self.masked_residual) > 0]
-            mean = np.mean(exclude_masked_pixels)
-            std  = np.std(exclude_masked_pixels)
-            gaussian  = norm.rvs(size = len(exclude_masked_pixels), loc = mean, scale = std, random_state = 0)
-            self.kstest = kstest(gaussian, exclude_masked_pixels.flatten())
-            pvalue = self.kstest.pvalue
-            statistic = self.kstest.statistic
+            mean                  = np.mean(exclude_masked_pixels)
+            std                   = np.std(exclude_masked_pixels)
+            gaussian              = norm.rvs(size = len(exclude_masked_pixels), loc = mean, scale = std, random_state = 0)
+            self.kstest           = kstest(gaussian, exclude_masked_pixels.flatten())
+            pvalue                = self.kstest.pvalue
+            #statistic             = self.kstest.statistic
             # gaussian = norm.rvs(size = len(self.masked_residual)**2, loc = mean, scale = std, random_state = 0)
             # noised_masked_pixels = np.where(np.abs(self.masked_residual.flatten()) > 0, self.masked_residual.flatten(), gaussian)
             # self.kstest = kstest(gaussian, noised_masked_pixels)
 
-            self.norm_observation = slg.norm(crop_mask*self.observation.data)
-            self.norm_model = slg.norm(crop_mask*self.model.data)
-            self.norm_residual = slg.norm(crop_mask*self.residual.data)
+            self.norm_observation           = slg.norm(crop_mask*self.observation.data)
+            self.norm_model                 = slg.norm(crop_mask*self.model.data)
+            self.norm_residual              = slg.norm(crop_mask*self.residual.data)
             self.masked_residual_normalized = self.masked_residual/min(self.norm_observation, self.norm_model)
+            self.wayne_residual             = self.norm_residual/self.norm_observation
+            self.wayne_quality              = pvalue/self.wayne_residual # bigger is better
             
 #             obs_model = 1 - np.divide(
 #                                 crop_mask*self.observation.data/self.norm_observation, 
@@ -528,15 +530,17 @@ class OutputFits(FitsFile):
 
             if update_fits_header:
                 with fits.open(self.filepath, mode='update', output_verify='ignore') as hdul:
-                    hdul[2].header["NMR"] = (round(self.nmr, 8), "Norm of the masked residual")
+                    hdul[2].header["NMR"]   = (round(self.nmr, 8), "Norm of the masked residual")
+                    hdul[2].header["W_NMR"] = (round(self.wayne_residual, 8), "Wayne's residual")
+                    #hdul[2].header["W_Q"]   = (round(self.nmr, 8), "Wayne's quality measure")
 
                     # pvalue is sometimes none but round can't handle it
-                    if isinstance(pvalue, float) and isinstance(statistic, float):
+                    if isinstance(pvalue, float): # and isinstance(statistic, float):
                         hdul[2].header["KS_P"]    = (round(pvalue, 8), "p value of kstest vs noise")
-                        hdul[2].header["KS_STAT"] = (round(statistic, 8), "statistic value of kstest vs noise")
+                        #hdul[2].header["KS_STAT"] = (round(statistic, 8), "statistic value of kstest vs noise")
                     else:
                         hdul[2].header["KS_P"]    = (None, "p value of kstest vs noise")
-                        hdul[2].header["KS_STAT"] = (None, "statistic value of kstest vs noise")
+                        #hdul[2].header["KS_STAT"] = (None, "statistic value of kstest vs noise")
 
         except ValueError:
             print(f"There may be a broadcast issue, observation, model, crop mask: ", end = "")
@@ -637,7 +641,7 @@ if __name__ == "__main__":
     #print(np.min(test_model.observation.data))
 
 
-# In[10]:
+# In[11]:
 
 
 if __name__ == "__main__":
@@ -653,7 +657,7 @@ if __name__ == "__main__":
     print("Checking FITS header update with NMR")
     
     print("Does the updated FITS file contain NMR and KStest keys?")
-    keys_to_check = ("NMR", "KS_P", "KS_STAT")
+    keys_to_check = ("NMR", "KS_P", "W_NMR")
     
     # TODO: replace fits file with one without those header options
     print("Before... (expect False)", all(k in test_model.header for k in keys_to_check))
@@ -664,7 +668,7 @@ if __name__ == "__main__":
     print("After...", all(k in test_model.header for k in keys_to_check))
 
 
-# In[11]:
+# In[ ]:
 
 
 if __name__ == "__main__":
@@ -672,7 +676,7 @@ if __name__ == "__main__":
     print("Expect True:", not any("fits" in pof.path for pof in psutil.Process().open_files()))
 
 
-# In[12]:
+# In[ ]:
 
 
 if __name__ == "__main__":
