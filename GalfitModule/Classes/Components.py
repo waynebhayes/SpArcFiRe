@@ -572,9 +572,11 @@ class GalfitComponent:
                     fourier_index = comp_names.index("fourier")
 
                 for i, component in enumerate(args):
+                    # Skip means GALFIT will still optimize on these but not display them in the final fit
+                    # so commenting the below out.
                     # For skipped power and fourier
-                    if component.parameters.get("skip",0) == 1 and component.component_type in ("power", "fourier"):
-                        continue
+                    # if component.parameters.get("skip",0) == 1 and component.component_type in ("power", "fourier"):
+                    #     continue
                         
                     f.write(str(component))
                     if i != fourier_index - 1:
