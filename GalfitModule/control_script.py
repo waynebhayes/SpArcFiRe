@@ -149,11 +149,11 @@ if __name__ == "__main__":
                         action   = 'store',
                         type     = int,
                         choices  = range(1,4),
-                        default  = 3,
+                        default  = 2,
                         help     = 'Run GALFIT using step-by-step component selection (up to 3), i.e.\n\t\
                                     1: Bulge + Disk + Arms,\n\t\
-                                    2: Disk -> Bulge + Disk + Arms,\n\t\
-                                    3: Disk -> Bulge + Disk -> Bulge + Disk + Arms'
+                                    2: Bulge + Arms -> Bulge + Disk + Arms,\n\t\
+                                    3: Bulge -> Bulge + Arms -> Bulge + Disk + Arms'
                        )
     
     parser.add_argument('-r', '--restart',
@@ -578,10 +578,8 @@ if __name__ == "__main__":
             parallel_run_name = "GALFITTING"
             # Slurm needs different timeout limits
             # timeout = 2880 # Minutes
-            # TODO: Consider SLURM + CPU parallel
-            # --ntasks-per-node=1 and --ntasks=1 ensures processes will stay
-            # on the same node which is crucial for asyncio
-            parallel_options  = f"-M all --ntasks=1 --ntasks-per-node=1 -t {timeout}"
+            # TODO: Ask wayne about ntasks
+            parallel_options  = f"-M all --ntasks=1 --ntasks-per-node=4 -t {timeout}"
             parallel_verbose  = "-v" if verbose else ""
             #chunk_size = 1 if len(kwargs_main['galaxy_names']) < 50 else 10
             
