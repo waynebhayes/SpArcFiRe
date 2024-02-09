@@ -199,41 +199,14 @@ class ComponentContainer:
 
 # ==========================================================================================================
 
-    def smush_fourier(self, str_dict):
-        # Smush fourier against whatever it's modifying (arms in this case)
-        previous_k = list(str_dict.keys())[0]
-        for k, str_comp in deepcopy(str_dict).items():
-            if k == "fourier":
-                str_dict[previous_k] += str_comp
-                str_dict.pop(k)
-            
-            previous_k = k
-            
-        return str_dict
-
-# ==========================================================================================================
-
     def __str__(self):
-        
-        dict_o_str = self.smush_fourier({k : str(comp) for k, comp in self.components.items()})
-                    
-        out_str = "\n".join(
-            str_comp for str_comp in dict_o_str.values()
-            )
-        return out_str
+        return "\n".join(str(comp) for comp in self.to_list())
     
     def __repr__(self):
-        # Skipping the output of power and fourier if 'skipped'
-        # i.e. don't exist in this current implementation
-        out_str = "\n".join(
-            repr(comp) for comp in self.to_list()
-             # if comp.param_values.get("skip", 0) != 1 or
-             #    comp.component_type not in ("power", "fourier")
-            )
-        return out_str
+        return "\n".join(repr(comp) for comp in self.to_list())
 
 
-# In[5]:
+# In[26]:
 
 
 class FeedmeContainer(ComponentContainer):
@@ -270,20 +243,20 @@ class FeedmeContainer(ComponentContainer):
 
     def load_default(self):
         
-        self.components.setdefault("header" , GalfitHeader())
-        self.components.setdefault("bulge"  , Sersic(1))
-        self.components.setdefault("disk"   , Sersic(2))
-        #self.components.setdefault("disk_for_arms"   , Sersic(3))
-        self.components.setdefault("arms"   , Power(2))
-        self.components.setdefault("fourier", Fourier(2))
-        self.components.setdefault("sky"    , Sky(3))
+        self.components.setdefault("header"        , GalfitHeader())
+        self.components.setdefault("bulge"         , Sersic(1))
+        self.components.setdefault("disk"          , Sersic(2))
+        self.components.setdefault("disk_for_arms" , Sersic(3))
+        self.components.setdefault("arms"          , Power(3))
+        self.components.setdefault("fourier"       , Fourier(3))
+        self.components.setdefault("sky"           , Sky(4))
         # This will set all the properties
         if self.components: pass
 
 # ==========================================================================================================
 
     def sort_components(self):
-        sort_order = ["sersic", "power", "fourier", "bending", "truncation"]
+        sort_order = ["sersic", "power", "fourier", "bending", "truncation", "sky"]
         
         sorted_components = {}
         for c_name, comp in self.components.items():
@@ -291,7 +264,7 @@ class FeedmeContainer(ComponentContainer):
             if comp.component_number in sorted_components:
                 sorted_components[c_num].append((comp.component_type, c_name))
             else:
-                sorted_components[c_num]     = [(comp.component_type, c_name)]
+                sorted_components[c_num] = [(comp.component_type, c_name)]
 
         sorted_components = dict(sorted(sorted_components.items()))
 
@@ -306,31 +279,42 @@ class FeedmeContainer(ComponentContainer):
 # ==========================================================================================================
 
     # TODO: Do I still need this if I use numbering now?
-    def reset_keys(self):
+#     def reset_keys(self):
         
-        stripped_keys   = [key.strip("_") for key in self.components.keys()]      
+#         stripped_keys   = [key.strip("_") for key in self.components.keys()]      
             
-        # Basically check if there's a component AND a _component and if so
-        # leave them both alone
-        self.components = {k.strip("_") if stripped_keys.count(k.strip("_")) == 1 else k : comp 
-                           for k, comp in self.components.items()
-                          }
+#         # Basically check if there's a component AND a _component and if so
+#         # leave them both alone
+#         self.components = {k.strip("_") if stripped_keys.count(k.strip("_")) == 1 else k : comp 
+#                            for k, comp in self.components.items()
+#                           }  
     
 # ==========================================================================================================
 
 # For some reason header is printing last so I'll set it right here
     def __str__(self):
         
-        dict_o_str = self.smush_fourier({k : str(comp) for k, comp in self.components.items()})
+        # ==========================================================================================================
         
-        out_str = f"{str(self.header)}\n" + \
-                    "\n".join(
-                        str_comp for k, str_comp in dict_o_str.items()
-                        if k != "header"
-                        # if comp.param_values.get("skip", 0) != 1 or
-                        #    comp.component_type not in ("power", "fourier")
-                    )
-        return out_str
+        def smush_fourier(self): #, str_dict):
+            # Smush fourier against whatever it's modifying (arms usually)
+            str_components = [str(comp) for comp in self.to_list()]
+            to_remove = []
+            for i, comp in enumerate(self.to_list()):
+                if comp.component_type == "fourier":
+                    str_components[i - 1] += str(comp)
+                    to_remove.append(i)
+
+            return [
+                str_comp for i, str_comp in enumerate(str_components)
+                if i not in to_remove
+            ]
+    
+        # ==========================================================================================================
+        
+        # We *MUST* sort if we want to smush fourier correctly
+        self.sort_components()
+        return "\n".join(smush_fourier(self))
     
 # ==========================================================================================================
 
@@ -354,6 +338,9 @@ class FeedmeContainer(ComponentContainer):
 # ==========================================================================================================
 
     def to_file(self, *args, filename = ""):
+        # So that things are output in their correct order which can mess up GALFIT
+        self.sort_components()
+        
         if not filename:
             filename = self.path_to_feedme
             
@@ -437,11 +424,6 @@ class FeedmeContainer(ComponentContainer):
                          comp.component_type   == c_type
                 ]
 
-                # NOTE: This is designed for as such for reading from an OutputFits
-                # which may have an unknown component set. 
-                # If you are initializing a container directly, you *must* 
-                # initialize it with the known components as kwargs 
-                # otherwise you will get an error.
                 if len(matches) == 0:
                     #print(f"No matches found to {c_type} with component #{c_num} in component container. Proceeding...")
                     
@@ -663,11 +645,11 @@ class FeedmeContainer(ComponentContainer):
         self.reset_component_numbers()
         # For when there is a key with "_" in the case of the defaults 
         # not lining up with a file (say when it's bulge only)
-        self.reset_keys()
+        # self.reset_keys()
         
 
 
-# In[6]:
+# In[27]:
 
 
 class OutputContainer(FeedmeContainer):
@@ -682,6 +664,7 @@ class OutputContainer(FeedmeContainer):
         # and then updated by store_text
         
         store_text = kwargs.pop("store_text", False)
+        self._used_default = kwargs.get("load_default", False)
         
         FeedmeContainer.__init__(self, **kwargs)
         
@@ -742,7 +725,12 @@ class OutputContainer(FeedmeContainer):
             check_success(self, galfit_out_text)
 
         # For reading from galfit stdout to update classes
-        def update_components(self, galfit_out_text, **kwargs) -> None: #, bulge, disk, arms, fourier, sky):
+        def update_components(self, galfit_out_text, **kwargs) -> None: #, bulge, disk, disk_for_arms, arms, fourier, sky):
+            
+            # We MUST assume this is in the desired order
+            # We cannot use a dict here due to key uniqueness
+            comp_list  = self.to_list()
+            comp_types = [comp.component_type for comp in comp_list]
             
             #if not kwargs.get("galfit_out_text"):
             #    raise("Cannot update components, no output text provided.")
@@ -751,33 +739,50 @@ class OutputContainer(FeedmeContainer):
 
             s_count = 0
             by_line = last_it.splitlines()
+            # TODO: ADD OTHER MODES
             for line in by_line:
                 if line.strip().startswith("sersic"):
+                    # TODO: Do I still need this?
                     if kwargs.get("sersic_order"):
                         comp = eval("self." + kwargs.get("sersic_order")[s_count])
                         s_count += 1
+                        comp.update_from_log(line)
+                        continue
+                    else:
+                        comp_index = comp_types.index("sersic")
                         
-                    elif s_count == 0:
-                        comp = self.bulge
-                        s_count += 1 
+#                     elif s_count == 0:
+#                         comp = self.bulge
+#                         s_count += 1 
                         
-                    elif s_count == 1:
-                        comp = self.disk               
+#                     elif s_count == 1:
+#                         comp = self.disk
+#                         s_count += 1
+                        
+#                     elif s_count == 2:
+#                         comp = self.disk_for_arms
+#                         s_count += 1
 
                 elif line.strip().startswith("power"):
-                    comp = self.arms
+                    comp_index = comp_types.index("power")
+                    #comp = self.arms
 
                 elif line.strip().startswith("fourier"):
                     # Fourier never follows the rules...
                     # By how the class operates, we don't
                     # need to do this, but to be consistent...
-                    comp = self.fourier
+                    #comp = self.fourier
+                    comp_index = comp_types.index("fourier")
 
                 elif line.strip().startswith("sky"):
-                    comp = self.sky
+                    #comp = self.sky
+                    comp_index = comp_types.index("sky")
 
                 else:
                     continue
+                    
+                comp = comp_list.pop(comp_index)
+                comp_types.pop(comp_index)
 
                 comp.update_from_log(line)
                 # This is now done in Components
@@ -809,14 +814,14 @@ class OutputContainer(FeedmeContainer):
             return ""
 
 
-# In[7]:
+# In[28]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[8]:
+# In[29]:
 
 
 if __name__ == "__main__":
@@ -830,26 +835,28 @@ if __name__ == "__main__":
     print(container_df)
 
 
-# In[9]:
+# In[30]:
 
 
 # Testing FeedmeContainer kwargs and to_file
 if __name__ == "__main__":
     
     def new_container(): #load_default = True):
-        header = GalfitHeader(galaxy_name = "tester")
-        bulge = Sersic(1, position = (25,25))
-        disk  = Sersic(2, position = (25,25))
-        arms  = Power(2)
-        fourier = Fourier(2)
-        sky   = Sky(3)
+        header         = GalfitHeader(galaxy_name = "tester")
+        bulge          = Sersic(1, position = (25,25))
+        disk           = Sersic(2, position = (25,25))
+        disk_for_arms  = Sersic(3, position = (25,25))
+        arms           = Power(3)
+        fourier        = Fourier(3)
+        sky            = Sky(4)
 
-        container = FeedmeContainer(**{"header"  : header,
-                                       "bulge"   : bulge,
-                                       "disk"    : disk,
-                                       "arms"    : arms,
-                                       "fourier" : fourier,
-                                       "sky"     : sky}#,
+        container = FeedmeContainer(**{"header"           : header,
+                                       "bulge"            : bulge,
+                                       "disk"             : disk,
+                                       "disk_for_arms"    : disk_for_arms,
+                                       "arms"             : arms,
+                                       "fourier"          : fourier,
+                                       "sky"              : sky}#,
                                     #load_default = load_default
                                     )
         return container
@@ -866,10 +873,11 @@ if __name__ == "__main__":
     container.to_file()
 
 
-# In[10]:
+# In[31]:
 
 
 # Testing FeedmeContainer from_file
+# Note, this uses the old default being single disk rotated for the arms
 if __name__ == "__main__":
     
     container = new_container()
@@ -889,10 +897,9 @@ if __name__ == "__main__":
     container = new_container()
     container.from_file(example_fits)
     print(iff(str(container)))
-    
 
 
-# In[11]:
+# In[39]:
 
 
 # Testing FeedmeContainer from_file with just bulge
@@ -922,17 +929,19 @@ if __name__ == "__main__":
     print(iff(str(container)))
     
     print("Expect new components keys to *not* have disk or arms since they are not in the first file.")
+    print("Also expect sky to be _1 since the component number is +1 from the bulge and default is left on")
+    print("(these are old fits that don't conform to the new standard).")
     print(container.components.keys())
     print()
     
-    print("Reading in from file, after initializing a new container and checking the keys (expect disk, arms).")
+    print("Reading in from file, after initializing a new container and checking the keys (expect disk now).")
     container = new_container()
     container.from_file(example_fits)
     print(container.components.keys())
     print()
 
 
-# In[12]:
+# In[33]:
 
 
 # Testing FeedmeContainer from_file with no arms
@@ -959,36 +968,15 @@ if __name__ == "__main__":
     
 
 
-# In[13]:
+# In[34]:
 
 
-# Testing extraction into FeedmeContainer attributes
-if __name__ == "__main__":
-    container = new_container()
-    example_feedme = FeedmeContainer(path_to_feedme = "somewhere/out_there", 
-                                     header         = container.header, 
-                                     bulge          = container.bulge, 
-                                     disk           = container.disk, 
-                                     arms           = container.arms, 
-                                     fourier        = container.fourier, 
-                                     sky            = container.sky
-                                    )
-    
-    _ = [print("Key:", k) for k in example_feedme.components.keys()]
-    print()
-    print(iff(str(example_feedme)))
-    
-
-
-# In[14]:
-
-
-# Testing extraction into FeedmeContainer attributes with non-default components
+# Testing extraction into FeedmeContainer attributes with default components
 if __name__ == "__main__":
     output_example = """Iteration : 12    Chi2nu: 3.205e-01     dChi2/Chi2: 1.75e-08    alamda: 1e+04
      sersic    : (  [67.38],  [67.77])  13.19     15.54    0.34    0.62   -19.23
      sersic    : (  [67.38],  [67.77])  14.58      8.89    1.56    0.68    30.23
-     sersic    : (  [67.38],  [67.77])  5.55      8.88    1.11    6.66    30.30
+     sersic    : (  [67.38],  [67.77])  12.58      18.89   3.12    1.68    40.22
        power   :     [0.00]   [22.01]   78.86     -2.39     ---   39.74    22.52
        fourier : (1:  0.15,   46.48)   (3:  0.10,  -33.06)
      sky       : [ 67.00,  68.00]  1133.43  1.16e-02  -1.35e-02
@@ -1003,18 +991,19 @@ if __name__ == "__main__":
     dummy_obj.stdout = output_example
     good_output      = OutputContainer(
         dummy_obj, 
-        store_text = True, 
+        store_text  = True,
+        load_default = True
         #load_default = False,
         # header        = GalfitHeader(galaxy_name = "tester"),
         # bulge         = Sersic(1),
         # disk          = Sersic(2),
-        disk_for_arms = Sersic(3),
+        #disk_for_arms = Sersic(3),
         # TODO: Check if changing power component number (to 2) will change its position
         # in an output file
-        arms          = Power(3),
-        fourier       = Fourier(3),
-        sky           = Sky(4),
-        sersic_order  = ["bulge", "disk", "disk_for_arms"]
+        #arms          = Power(3),
+        #fourier       = Fourier(3),
+        #sky           = Sky(4),
+        #sersic_order  = ["bulge", "disk"]#, "disk_for_arms"]
     )
     
     _ = [print("Key:", k) for k in good_output.components.keys()]
@@ -1029,7 +1018,120 @@ if __name__ == "__main__":
     
 
 
-# In[15]:
+# In[35]:
+
+
+# Testing extraction into FeedmeContainer attributes with non-default components
+if __name__ == "__main__":
+    container = new_container()
+    example_feedme = FeedmeContainer(path_to_feedme = "somewhere/out_there", 
+                                     header         = container.header, 
+                                     bulge          = container.bulge, 
+                                     disk           = container.disk, 
+                                     arms           = container.arms, 
+                                     fourier        = container.fourier, 
+                                     sky            = container.sky,
+                                     load_default   = False
+                                    )
+    
+    _ = [print("Key:", k) for k in example_feedme.components.keys()]
+    print()
+    print(iff(str(example_feedme)))
+    
+
+
+# In[36]:
+
+
+# Testing extraction into OutputContainer with non-default components
+# Components *must* be specified for this to work
+if __name__ == "__main__":
+    output_example = """Iteration : 12    Chi2nu: 3.205e-01     dChi2/Chi2: 1.75e-08    alamda: 1e+04
+     sersic    : (  [67.38],  [67.77])  13.19     15.54    0.34    0.62   -19.23
+     sersic    : (  [67.38],  [67.77])  14.58      8.89    1.56    0.68    30.23
+       power   :     [0.00]   [22.01]   78.86     -2.39     ---   39.74    22.52
+       fourier : (1:  0.15,   46.48)   (3:  0.10,  -33.06)
+     sky       : [ 67.00,  68.00]  1133.43  1.16e-02  -1.35e-02
+    COUNTDOWN = 0
+
+
+    Fit summary is now being saved into `fit.log'.
+
+    """   
+    
+    dummy_obj        = subprocess.CompletedProcess("", 0)
+    dummy_obj.stdout = output_example
+    good_output      = OutputContainer(
+        dummy_obj, 
+        store_text  = True,
+        #load_default = True
+        load_default = False,
+        header        = GalfitHeader(galaxy_name = "tester"),
+        bulge         = Sersic(1),
+        disk          = Sersic(2),
+        #disk_for_arms = Sersic(3),
+        # TODO: Check if changing power component number (to 2) will change its position
+        # in an output file
+        arms          = Power(2),
+        fourier       = Fourier(2),
+        sky           = Sky(3),
+        #sersic_order  = ["bulge", "disk"]#, "disk_for_arms"]
+    )
+    
+    _ = [print("Key:", k) for k in good_output.components.keys()]
+    print()
+    _ = [print(str(comp)) for comp in good_output.to_list()]
+
+
+# In[37]:
+
+
+# Testing extraction into OutputContainer with non-default components
+# in conjunction with sersic_order
+if __name__ == "__main__":
+    output_example = """Iteration : 12    Chi2nu: 3.205e-01     dChi2/Chi2: 1.75e-08    alamda: 1e+04
+     sersic    : (  [67.38],  [67.77])  13.19     15.54    0.34    0.62   -19.23
+     sersic    : (  [67.38],  [67.77])  14.58      8.89    1.56    0.68    30.23
+       power   :     [0.00]   [22.01]   78.86     -2.39     ---   39.74    22.52
+       fourier : (1:  0.15,   46.48)   (3:  0.10,  -33.06)
+     sky       : [ 67.00,  68.00]  1133.43  1.16e-02  -1.35e-02
+    COUNTDOWN = 0
+
+
+    Fit summary is now being saved into `fit.log'.
+
+    """   
+    
+    dummy_obj        = subprocess.CompletedProcess("", 0)
+    dummy_obj.stdout = output_example
+    good_output      = OutputContainer(
+        dummy_obj, 
+        store_text  = True,
+        #load_default = True
+        load_default = False,
+        header        = GalfitHeader(galaxy_name = "tester"),
+        # TODO: Fix location of Power and whatnot if out of order and same component number
+        arms          = Power(2),
+        fourier       = Fourier(2),
+        sky           = Sky(3),
+        disk          = Sersic(2),
+        bulge         = Sersic(1),
+        sersic_order  = ["bulge", "disk"]#, "disk_for_arms"]
+    )
+    
+    _ = [print("Key:", k) for k in good_output.components.keys()]
+    print()
+    _ = [print(str(comp)) for comp in good_output.to_list()]
+    
+    print("*"*80)
+    print("*"*80)
+    
+    print("Post sort")
+    good_output.sort_components()
+    _ = [print(str(comp)) for comp in good_output.to_list()]
+
+
+# In[38]:
 
 
 # Testing OutputContainer
@@ -1038,6 +1140,7 @@ if __name__ == "__main__":
     good_example = """Iteration : 6     Chi2nu: 3.205e-01     dChi2/Chi2: -2.24e-08   alamda: 1e+02
      sersic    : (  [67.38],  [67.77])  13.19     15.54    0.34    0.62   -19.23
      sersic    : (  [67.38],  [67.77])  14.58      8.89    1.56    0.68    30.23
+     sersic    : (  [67.38],  [67.77])  12.58      18.89   3.12    1.68    40.22
        power   :     [0.00]   [22.01]   78.86     -2.39     ---   39.74    22.52
        fourier : (1:  0.15,   46.48)   (3:  0.10,  -33.06)
      sky       : [ 67.00,  68.00]  1133.43  1.16e-02  -1.35e-02
@@ -1046,6 +1149,7 @@ if __name__ == "__main__":
     Iteration : 7     Chi2nu: 3.205e-01     dChi2/Chi2: -2.24e-08   alamda: 1e+03
      sersic    : (  [67.38],  [67.77])  13.19     15.54    0.34    0.62   -19.23
      sersic    : (  [67.38],  [67.77])  14.58      8.89    1.56    0.68    30.23
+     sersic    : (  [67.38],  [67.77])  12.58      18.89   3.12    1.68    40.22
        power   :     [0.00]   [22.01]   78.86     -2.39     ---   39.74    22.52
        fourier : (1:  0.15,   46.48)   (3:  0.10,  -33.06)
      sky       : [ 67.00,  68.00]  1133.43  1.16e-02  -1.35e-02
@@ -1054,6 +1158,7 @@ if __name__ == "__main__":
     Iteration : 8     Chi2nu: 3.205e-01     dChi2/Chi2: -2.24e-08   alamda: 1e+04
      sersic    : (  [67.38],  [67.77])  13.19     15.54    0.34    0.62   -19.23
      sersic    : (  [67.38],  [67.77])  14.58      8.89    1.56    0.68    30.23
+     sersic    : (  [67.38],  [67.77])  12.58      18.89   3.12    1.68    40.22
        power   :     [0.00]   [22.01]   78.86     -2.39     ---   39.74    22.52
        fourier : (1:  0.15,   46.48)   (3:  0.10,  -33.06)
      sky       : [ 67.00,  68.00]  1133.43  1.16e-02  -1.35e-02
@@ -1062,6 +1167,7 @@ if __name__ == "__main__":
     Iteration : 9     Chi2nu: 3.205e-01     dChi2/Chi2: -3.33e-08   alamda: 1e+03
      sersic    : (  [67.38],  [67.77])  13.19     15.54    0.34    0.62   -19.23
      sersic    : (  [67.38],  [67.77])  14.58      8.89    1.56    0.68    30.23
+     sersic    : (  [67.38],  [67.77])  12.58      18.89   3.12    1.68    40.22
        power   :     [0.00]   [22.01]   78.86     -2.39     ---   39.74    22.52
        fourier : (1:  0.15,   46.48)   (3:  0.10,  -33.06)
      sky       : [ 67.00,  68.00]  1133.43  1.16e-02  -1.35e-02
@@ -1070,6 +1176,7 @@ if __name__ == "__main__":
     Iteration : 10    Chi2nu: 3.205e-01     dChi2/Chi2: -3.33e-08   alamda: 1e+04
      sersic    : (  [67.38],  [67.77])  13.19     15.54    0.34    0.62   -19.23
      sersic    : (  [67.38],  [67.77])  14.58      8.89    1.56    0.68    30.23
+     sersic    : (  [67.38],  [67.77])  12.58      18.89   3.12    1.68    40.22
        power   :     [0.00]   [22.01]   78.86     -2.39     ---   39.74    22.52
        fourier : (1:  0.15,   46.48)   (3:  0.10,  -33.06)
      sky       : [ 67.00,  68.00]  1133.43  1.16e-02  -1.35e-02
@@ -1078,6 +1185,7 @@ if __name__ == "__main__":
     Iteration : 11    Chi2nu: 3.205e-01     dChi2/Chi2: -8.01e-08   alamda: 1e+03
      sersic    : (  [67.38],  [67.77])  13.19     15.54    0.34    0.62   -19.23
      sersic    : (  [67.38],  [67.77])  14.58      8.89    1.56    0.68    30.23
+     sersic    : (  [67.38],  [67.77])  12.58      18.89   3.12    1.68    40.22
        power   :     [0.00]   [22.01]   78.86     -2.39     ---   39.74    22.52
        fourier : (1:  0.15,   46.48)   (3:  0.10,  -33.06)
      sky       : [ 67.00,  68.00]  1133.43  1.16e-02  -1.35e-02
@@ -1086,6 +1194,7 @@ if __name__ == "__main__":
     Iteration : 12    Chi2nu: 3.205e-01     dChi2/Chi2: 1.75e-08    alamda: 1e+04
      sersic    : (  [67.38],  [67.77])  13.19     15.54    0.34    0.62   -19.23
      sersic    : (  [67.38],  [67.77])  14.58      8.89    1.56    0.68    30.23
+     sersic    : (  [67.38],  [67.77])  12.58      18.89   3.12    1.68    40.22
        power   :     [0.00]   [22.01]   78.86     -2.39     ---   39.74    22.52
        fourier : (1:  0.15,   46.48)   (3:  0.10,  -33.06)
      sky       : [ 67.00,  68.00]  1133.43  1.16e-02  -1.35e-02
@@ -1106,6 +1215,7 @@ if __name__ == "__main__":
     bad_output  = OutputContainer(dummy_obj)
     print(bad_output.bulge)
     print(bad_output.disk)
+    print(bad_output.disk_for_arms)
     print(bad_output.arms)
     print(bad_output.fourier)
     print(bad_output.sky)
@@ -1130,6 +1240,7 @@ if __name__ == "__main__":
     
     print(good_output.bulge)
     print(good_output.disk)
+    print(good_output.disk_for_arms)
     print(good_output.arms)
     print(good_output.fourier)
     print(good_output.sky)
@@ -1145,7 +1256,7 @@ if __name__ == "__main__":
     #good_output.header.to_file(output_filename, good_output.bulge, good_output.disk, good_output.arms, good_output.fourier, good_output.sky)
 
 
-# In[16]:
+# In[18]:
 
 
 if __name__ == "__main__":
