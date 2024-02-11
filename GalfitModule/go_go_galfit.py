@@ -211,6 +211,7 @@ async def async_sp(*args, **kwargs):
 async def parameter_search_fit(
     bulge_magnitude, # loop variables
     disk_magnitude,  # loop variables
+    #bulge_sersic,
     gname,
     initial_feedme, 
     base_galfit_cmd,
@@ -259,9 +260,10 @@ async def parameter_search_fit(
     header = initial_components.header
     
     initial_components.bulge.magnitude.value = bulge_magnitude
-    initial_components.disk.magnitude.value  = disk_magnitude
-    if use_spiral:
-        initial_components.disk_for_arms.magnitude.value  = disk_magnitude
+    #initial_components.disk.magnitude.value  = disk_magnitude
+    
+    #if use_spiral:
+    #    initial_components.disk_for_arms.magnitude.value  = disk_magnitude
 
     # ---------------------------------------------------------------------
     # Note to self, OutputContainer is *just* for handling output
@@ -271,16 +273,19 @@ async def parameter_search_fit(
     
     bulge_str = f"m{bulge_magnitude}"
     disk_str  = f"m{disk_magnitude}"
+    #disk_str  = "m" + str(bulge_sersic).replace(".", "")
                 
     #print(f"Bulge magnitude {bulge_magnitude}, Disk magnitude {disk_magnitude}")
     
     basepath, basename = os.path.split(output_image)
     new_basename       = f"{bulge_str}{disk_str}_{basename}"
+    #new_basename       = f"{bulge_str}_{basename}"
     new_output_image   = pj(basepath, new_basename)
     initial_components.header.output_image.value = new_output_image
     
     feedme_name     = os.path.basename(initial_feedme.path_to_feedme)
     new_feedme_name = f"{bulge_str}{disk_str}_{feedme_name}"
+    #new_feedme_name = f"{bulge_str}_{feedme_name}"
     tmp_feedme_in   = pj(basepath, new_feedme_name)
 
     success = False
@@ -335,7 +340,6 @@ async def parameter_search_fit(
                 galfit_output = OutputContainer(
                     await async_sp(run_galfit_cmd, timeout = timeout),
                     #sersic_order   = ["bulge"], 
-                    #path_to_feedme = bulge_in,
                     path_to_feedme = bulge_in,
                     load_default   = load_default,
                     store_text     = True,
@@ -346,7 +350,6 @@ async def parameter_search_fit(
                 galfit_output = OutputContainer(
                     sp(run_galfit_cmd), #, timeout = timeout), 
                     #sersic_order   = ["bulge"], 
-                    #path_to_feedme = bulge_in,
                     path_to_feedme = bulge_in,
                     load_default   = load_default,
                     store_text     = True,
@@ -356,20 +359,23 @@ async def parameter_search_fit(
             success = check_success(galfit_output, success)
             
         # Back to 2 step
-            
-        bulge_arms_in = f"{tmp_feedme_in.replace('.in', '')}_bulge+arms.in"
-
         #header.to_file(disk_in, initial_components.disk, initial_components.sky)
         
         if use_spiral:
+            bulge_arms_in = f"{tmp_feedme_in.replace('.in', '')}_bulge+arms.in"
             galfit_output.disk_for_arms.axis_ratio.value = disk_axis_ratio
             
-        # We use galfit_output here since we deepcopied initial_components
-        # this allows us to use this code for both 2/3 step
-        header.to_file(bulge_arms_in, galfit_output.bulge, galfit_output.disk_for_arms, galfit_output.arms, galfit_output.fourier, galfit_output.sky)
-
-        #run_galfit_cmd = f"{base_galfit_cmd} {disk_in}"
-        run_galfit_cmd = f"{base_galfit_cmd} {bulge_arms_in}"
+            # We use galfit_output here since we deepcopied initial_components
+            # this allows us to use this code for both 2/3 step
+            header.to_file(bulge_arms_in, galfit_output.bulge, galfit_output.disk_for_arms, galfit_output.arms, galfit_output.fourier, galfit_output.sky)
+            run_galfit_cmd = f"{base_galfit_cmd} {bulge_arms_in}"
+            
+        else:
+            # If ns2, it'll just have to rerun to refine the fit since this makes more sense for ns3
+            # so it's worth putting the disk here
+            bulge_arms_in = f"{tmp_feedme_in.replace('.in', '')}_bulge+disk.in"
+            header.to_file(bulge_arms_in, galfit_output.bulge, galfit_output.disk, galfit_output.sky)
+            run_galfit_cmd = f"{base_galfit_cmd} {bulge_arms_in}"       
 
         #print("Disk")
         #print("Bulge")
@@ -535,7 +541,7 @@ async def parameter_search_fit(
     if success:
         
         fits_file = OutputFits(new_output_image)
-        use_bulge_mask = False
+        use_bulge_mask = False #True
         
         try:
             mask_fits_file = FitsFile(header.pixel_mask.value)
@@ -573,6 +579,7 @@ async def parameter_search_fit(
     
 async def wrapper(
     b_d_magnitudes,
+    #b_magnitudes,
     gname,
     initial_feedme, 
     base_galfit_cmd,
@@ -587,6 +594,7 @@ async def wrapper(
     fitted_galaxies = await asyncio.gather(*(parameter_search_fit(
         bulge_magnitude,
         disk_magnitude,
+        #bulge_sersic,
         gname,
         initial_feedme,
         base_galfit_cmd,
@@ -594,6 +602,7 @@ async def wrapper(
         use_async = use_async,
         **kwargs
     ) for (bulge_magnitude, disk_magnitude) in b_d_magnitudes
+    #) for (bulge_magnitude, bulge_sersic) in b_d_magnitudes
                           ), return_exceptions = True
                         )
     
@@ -601,10 +610,11 @@ async def wrapper(
     # gpath : nmr value
     try:
         fitted_galaxies = dict(ChainMap(*fitted_galaxies[::-1]))
-    except (IndexError, AttributeError):
-        fitted_galaxies = {k:v for k,v in fitted_galaxies.items() 
-                           if v not in (IndexError, AttributeError)
-                          }
+    except TypeError as te: #(IndexError, AttributeError):
+        if "IndexError" in str(te):
+            fitted_galaxies = {k:v for k,v in fitted_galaxies.items() 
+                               if v not in (IndexError, AttributeError)
+                              }
         if fitted_galaxies:
             fitted_galaxies = dict(ChainMap(*fitted_galaxies[::-1]))
         else:
@@ -743,9 +753,12 @@ def main(**kwargs):
     fitted_galaxies = []
     
     # Non-inclusive of end
-    b_d_magnitudes = [(b, d) for b in range(12, 17) for d in range(12, 16)]
-    # Used for testing
-    #b_d_magnitudes = [(b, d) for b in range(16, 17) for d in range(15, 16)]
+    # I keep b_d_magnitudes even though I fix the disk for ease of modification
+    # in the future
+    b_d_magnitudes = [(b, 15) for b in range(12, 17)] #for d in range(12, 16)]
+    #b_magnitudes = range(12, 17)
+    #b_d_magnitudes = [(b, d) for b in range(12, 17) for d in range(13, 17)]
+    #[(b, d*0.1) for b in range(12, 17) for d in range(5, 41, 5)]
     
     # Working on non-parallel for now
     print()
@@ -784,11 +797,13 @@ def main(**kwargs):
         
         # FOR DEBUGGING 
         # use_async = False
+        # b_d_magnitudes = [(16,16)]
         #if parallel in (0, 1):
         #    use_async = True
         
         # Limiting our # of asynchronous processes
         chunk = len(b_d_magnitudes)
+        #chunk = len(b_magnitudes)
         if parallel == 1: #in (1, 2):
             chunk = 5
             
@@ -823,6 +838,7 @@ def main(**kwargs):
             gpath : (1 - inner_dict["pvalue"])*inner_dict["nmr"] 
             for gpath, inner_dict in fitted_galaxies.items()
         }
+        #print(fitted_galaxies_nmr_x_1_p)
         
         try:
             best_fit_gpath = min(fitted_galaxies, key = fitted_galaxies_nmr_x_1_p.get)
@@ -911,7 +927,9 @@ def main(**kwargs):
         # Spell these out explicitly to avoid needing to glob anything... all that searching takes time!
         to_del = []
         for (b,d) in b_d_magnitudes:
+        #for b in b_magnitudes:
             prefix = f"m{b}m{d}"
+            #prefix = f"m{b}"
             
             # Parameter Search outputs
             to_del.extend([
@@ -929,16 +947,26 @@ def main(**kwargs):
                     pj(tmp_fits_dir, f"{prefix}_{gname}_bulge.in") for gname in galaxy_names
                 ])
                 
-                if num_steps == 3:
-                    # Disk feedmes
-                    # to_del.extend([
-                    #     pj(tmp_fits_dir, f"{prefix}_{gname}_disk.in") for gname in galaxy_names
-                    # ])
-                    
-                    # Bulge+Disk feedmes
-                    to_del.extend([
+                to_del.extend([
+                        pj(tmp_fits_dir, f"{prefix}_{gname}_bulge+arms.in") for gname in galaxy_names
+                ])
+                
+                to_del.extend([
                         pj(tmp_fits_dir, f"{prefix}_{gname}_bulge+disk.in") for gname in galaxy_names
-                    ])
+                ])
+                
+#                 if num_steps == 3:
+#                     # Disk feedmes
+#                     # to_del.extend([
+#                     #     pj(tmp_fits_dir, f"{prefix}_{gname}_disk.in") for gname in galaxy_names
+#                     # ])
+                    
+#                     # Bulge+Disk feedmes
+                    
+                    
+#                     to_del.extend([
+#                         pj(tmp_fits_dir, f"{prefix}_{gname}_bulge+disk.in") for gname in galaxy_names
+#                     ])
 
         # Masks
         to_del.extend([
