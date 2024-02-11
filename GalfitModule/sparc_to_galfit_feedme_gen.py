@@ -586,7 +586,7 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
                              )
         
         
-        petromag = 16 #float(petromags[i])
+        petromag = 15 #float(petromags[i])
         bulge_axis_ratio = float(galaxy_dict["bulge_axis_ratio"])
         # Take mag from SDSS and bulge_axis_ratio from SDSS
         with fits.open(pj(in_dir, f"{gname}.fits")) as gf:
@@ -604,7 +604,7 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
         bulge = Sersic(
             component_number = 1, 
             position         = (center_pos_x, center_pos_y),
-            magnitude        = float(petromag) - 2,
+            magnitude        = float(petromag) - 1,
             # Sometimes sparcfire messes this up
             effective_radius = min(max(galaxy_dict["bulge_maj_axs_len"], 2), 0.2*crop_rad),
             # According to other paper GALFIT usually doesn't have a problem with the index
@@ -616,7 +616,7 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
         disk  = Sersic(
             component_number = 2, 
             position         = (center_pos_x, center_pos_y),
-            magnitude        = float(petromag) - 2,
+            magnitude        = float(petromag), # - 1,
             effective_radius = 0.75*galaxy_dict["disk_maj_axs_len"],
             # According to comparison tests, this usually ends up much lower than classical probably due to the spiral.
             sersic_index     = 1,
@@ -624,11 +624,10 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
             position_angle   = galaxy_dict["disk_rot_angle"]
         )
             
-        # Setting *almost* everything to the same values as the disk
         disk_for_arms  = Sersic(
             component_number = 3, 
             position         = (center_pos_x, center_pos_y),
-            magnitude        = float(petromag) - 2,
+            magnitude        = float(petromag), # - 1,
             effective_radius = galaxy_dict["disk_maj_axs_len"],
             sersic_index     = 1,
             axis_ratio       = galaxy_dict["disk_axis_ratio"],
