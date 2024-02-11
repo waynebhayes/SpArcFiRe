@@ -375,6 +375,7 @@ class OutputFits(FitsFile):
             return bulge_mask
         
         if "rejected" in info[' fit_state']:
+            print(f"SpArcFiRe fit_state 'rejected'. Cannot determine the bulge mask for {self.gname}.")
             return bulge_mask
             
         try:
@@ -625,23 +626,26 @@ if __name__ == "__main__":
     print(f"Norm of the model: {test_model.norm_model:.4f}")
     print(f"Norm of the residual: {test_model.norm_residual:.4f}")
     print(f"Norm of the masked residual: {test_model.nmr:.4f}")
+    print(f"Wayne's residual: {test_model.wayne_residual:.4f}")
     #print(f"Norm of the masked residual ratio: {test_model.nmrr:.8f}")
     print(f"kstest p value: {test_model.kstest.pvalue:.4f}")
-    print(f"kstest statistic: {test_model.kstest.statistic:.4f}")
+    #print(f"kstest statistic: {test_model.kstest.statistic:.4f}")
     
     print("\nNow with bulge mask")
+    _ = test_model.generate_bulge_mask(pj(TEST_DATA_DIR, "test-out", gname, f"{gname}.csv"))
     _ = test_model.generate_masked_residual(test_mask, update_fits_header = False)
     print(f"Norm of the observation: {test_model.norm_observation:.4f}")
     print(f"Norm of the model: {test_model.norm_model:.4f}")
     print(f"Norm of the residual: {test_model.norm_residual:.4f}")
     print(f"Norm of the masked residual: {test_model.nmr:.4f}")
+    print(f"Wayne's residual: {test_model.wayne_residual:.4f}")
     #print(f"Norm of the masked residual ratio: {test_model.nmrr:.8f}")
     print(f"kstest p value: {test_model.kstest.pvalue:.4f}")
-    print(f"kstest statistic: {test_model.kstest.statistic:.4f}")
+    #print(f"kstest statistic: {test_model.kstest.statistic:.4f}")
     #print(np.min(test_model.observation.data))
 
 
-# In[11]:
+# In[10]:
 
 
 if __name__ == "__main__":
@@ -668,7 +672,7 @@ if __name__ == "__main__":
     print("After...", all(k in test_model.header for k in keys_to_check))
 
 
-# In[ ]:
+# In[11]:
 
 
 if __name__ == "__main__":
@@ -676,7 +680,7 @@ if __name__ == "__main__":
     print("Expect True:", not any("fits" in pof.path for pof in psutil.Process().open_files()))
 
 
-# In[ ]:
+# In[12]:
 
 
 if __name__ == "__main__":
