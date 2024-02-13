@@ -612,7 +612,7 @@ async def wrapper(
         fitted_galaxies = dict(ChainMap(*fitted_galaxies[::-1]))
     except TypeError as te: #(IndexError, AttributeError):
         if "IndexError" in str(te):
-            fitted_galaxies = {k:v for k,v in fitted_galaxies.items() 
+            fitted_galaxies = {k : v for k, v in fitted_galaxies.items() 
                                if v not in (IndexError, AttributeError)
                               }
         if fitted_galaxies:
