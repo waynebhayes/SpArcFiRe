@@ -72,17 +72,43 @@ class HDU:
     def __init__(self, 
                  name   = "observation",
                  header = {}, 
-                 data   = None):
-        self.name   = name
-        self.header = deepcopy(dict(header))
-        self.data   = deepcopy(data)
+                 data   = None
+                ):
         
-    def to_dict(self):
-        return {"name"   : name,
-                "header" : header,
-                "data"   : data
-               }
+        self._hdu_info = {
+            "name"   : name,
+            "header" : deepcopy(dict(header)),
+            "data"   : deepcopy(np.array(data))
+        }
+        
+# ==========================================================================================================
+
+    @property
+    def name(self):
+        return self._hdu_info.get("name", "")
     
+    @name.setter
+    def name(self, new_name):
+        self._hdu_info["name"] = new_name
+        
+    @property
+    def header(self):
+        return self._hdu_info.get("header", {})
+    
+    @header.setter
+    def header(self, new_header):
+        self._hdu_info["header"] = deepcopy(dict(new_header))
+        
+    @property
+    def data(self):
+        return self._hdu_info.get("data", "")
+    
+    @data.setter
+    def data(self, new_data):
+        self._hdu_info["data"] = deepcopy(np.array(new_data))
+        
+# ==========================================================================================================
+
     def __str__(self):
         header_str = ""
         for k,v in self.header.items():
@@ -98,23 +124,22 @@ class HDU:
 class FitsFile:
     def __init__(self,
                  filepath,
-                 name = "observation",
-                 wait = False,
+                 names       = ["observation"],
+                 from_galfit = False,
+                 wait        = False,
                  **kwargs
                 ):
         
-        self.name     = name
         self.filepath = filepath
+        self.all_hdu  = {}
         
         # Use split over rstrip in case a waveband designation is given
         # (rstrip will remove any character that matches in the substring)
         # i.e. 12345678910_g would lose the _g for "_galfit_out.fits"
         # TODO: Replace rstrip with split in the rest of these scripts...
         self.gname    = kwargs.get("gname", os.path.basename(filepath).split("_galfit_out.fits")[0])
-        # self.num_hdu  = 0
-        # self.num_imgs = 1
         
-        assert os.path.splitext(filepath)[-1] == ".fits", "File being passed into FitsHandler must be .fits!"
+        assert os.path.splitext(filepath)[-1].lower() == ".fits", "File being passed into FitsHandler must be .fits!"
         
         try:
             file_in = fits.open(filepath)
@@ -126,24 +151,36 @@ class FitsFile:
         except OSError as ose:
             print(f"Something went wrong! {ose}")
             raise(Exception())
-        
+            
         # FITS starts the index at 0 but GALFIT outputs the observation image at 1
         # Also converting the header to a dict to save some trouble
-        try:
-            self.header   = deepcopy(dict(file_in[1].header))
-            self.data     = deepcopy(file_in[1].data)
+        assert_str = f"Number of HDU names fed to object ({len(names)}) does not match number of HDUs in {filepath} ({len(file_in)})!"
+        if from_galfit:
+            assert len(names) + 1 == len(file_in), assert_str
             self.num_imgs = len(file_in) - 1
+        else:
+            assert len(names)     == len(file_in), assert_str
+            self.num_imgs = len(file_in)
+        
+        for i, name in enumerate(names):
             
-        except IndexError:
-            self.header   = deepcopy(dict(file_in[0].header))
-            self.data     = deepcopy(file_in[0].data)
-            self.num_imgs = 1       
-        
-        hdu = HDU(name = name, header = self.header, data = self.data)
-        
-        self.all_hdu  = {name : hdu}
-        #self.observation = hdu
-        self.file     = file_in
+            index = i
+            
+            if from_galfit:
+                index += 1
+
+            header   = deepcopy(dict(file_in[index].header))
+            data     = deepcopy(file_in[index].data)
+
+            hdu = HDU(name = name, header = header, data = data)
+
+            self.all_hdu[name] = hdu
+            
+        if self.num_imgs == 1:
+            self.header = self.all_hdu[names[0]].header
+            self.data   = self.all_hdu[names[0]].data
+            
+        self.file = file_in
         
         # Wait is for continuing to use the file in some other capacity
         # i.e. for outputfits below to grab more info
@@ -274,7 +311,7 @@ class FitsFile:
         _ = sp(montage_cmd, capture_output = capture_output)            
         
         if cleanup:
-            _ = sp(f"rm {im1} {im2} {im3}")
+            _ = rm_files(im1, im2, im3)
         else:
             self.observation_png = im1
             self.model_png       = im2
@@ -287,9 +324,19 @@ class FitsFile:
     def __sub__(self, other):
         
         names = self.all_hdu.keys()
+        
+        assert_str1 = "Cannot subtract the data from these two FITS files, they do not contain the same number of HDUs!"
+        assert len(self.all_hdu) == len(other.all_hdu), assert_str1
+        
+        assert_str2 = "Cannot subtract the data from these two FITS files, they do not have the same image dimensions!\n"
+        for i, (a, b) in enumerate(zip(self.all_hdu.values(), other.all_hdu.values())):
+            shape_a = np.shape(a.data)
+            shape_b = np.shape(b.data)
+            assert shape_a == shape_b, assert_str2 + f"At HDU {i}, the images have shapes {shape_a} & {shape_b}."
+            
         # Python doesn't care if they're different lengths but
         # (for instance in the residual) we don't want to compare one to one
-        result = {k : a[k].data - b[k].data for k, a, b in zip(names, self.all_hdu, other.all_hdu)}
+        result = {k : a.data - b.data for k, a, b in zip(names, self.all_hdu.values(), other.all_hdu.values())}
         
         return result
 
@@ -325,29 +372,27 @@ class FitsFile:
 
 class OutputFits(FitsFile):
 
-    def __init__(self, filepath, names = [], load_default = True, **kwargs):
-        
-        FitsFile.__init__(self, filepath = filepath, wait = True, **kwargs)
-        
-        # by initializing FitsFile we already have observation
-        if not names:
-            names = ["model", "residual"]
+    def __init__(
+        self, 
+        filepath, 
+        names = ["observation", "model", "residual"], 
+        load_default = True, 
+        **kwargs
+    ):
             
-        # Don't need these but for posterity
-        # self.hdu_num  = 4
-        # self.num_imgs = self.hdu_num - 1
-        
-        # Exclude observation and primary HDU (0)
-        for num, name in zip(range(2, 4), names):
-            hdu = HDU(name, self.file[num].header, self.file[num].data)
-            self.all_hdu[name] = hdu
-            
-        # For convenience, we usually use the model here
-        #self.update_params(**self.all_hdu) 
+        FitsFile.__init__(
+            self, 
+            filepath    = filepath,
+            names       = names,
+            wait        = True,
+            from_galfit = True,
+            **kwargs
+        )
         
         # Dict is very redundant here but just for funsies
         # FITS header not Feedme header
         self.header = deepcopy(dict(self.model.header))
+        
         # Can call the helper directly since we're just using the header dict
         #_header.from_file_helper_dict(self.header)
         self.feedme = FeedmeContainer(path_to_feedme = filepath, header = GalfitHeader(), load_default = load_default, **kwargs)
