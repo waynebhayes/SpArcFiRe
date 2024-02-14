@@ -324,7 +324,6 @@ class FitsFile:
 
 # ==========================================================================================================
 
-    # # Use str to display feedme(?)
     # def __str__(self):
     #     pass
         
@@ -332,7 +331,6 @@ class FitsFile:
         
 # ==========================================================================================================
 
-    # Use str to display feedme(?)
     def header_dict(self, name = ""):
         
         if name:
@@ -352,8 +350,7 @@ class OutputFits(FitsFile):
 
     def __init__(
         self, 
-        filepath, 
-        names = ["observation", "model", "residual"], 
+        filepath,  
         load_default = True, 
         **kwargs
     ):
@@ -361,7 +358,7 @@ class OutputFits(FitsFile):
         FitsFile.__init__(
             self, 
             filepath    = filepath,
-            names       = names,
+            names       = ["observation", "model", "residual"],
             wait        = True,
             from_galfit = True,
             **kwargs
@@ -597,7 +594,7 @@ class OutputFits(FitsFile):
         #self.close()
         
         return self.masked_residual_normalized
-    
+
 # ==========================================================================================================
 
 
