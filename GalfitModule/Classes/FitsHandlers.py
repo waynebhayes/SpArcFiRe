@@ -204,24 +204,6 @@ class FitsFile:
     def observation(self, new_hdu):
         self.check_hdu_type(new_hdu)
         self.all_hdu["observation"] = new_hdu
-        
-    @property
-    def model(self):
-        return self.all_hdu.get("model", None)
-    
-    @model.setter
-    def model(self, new_hdu):
-        self.check_hdu_type(new_hdu)
-        self.all_hdu["model"] = new_hdu
-        
-    @property
-    def residual(self):
-        return self.all_hdu.get("residual", None)
-    
-    @residual.setter
-    def residual(self, new_hdu):
-        self.check_hdu_type(new_hdu)
-        self.all_hdu["residual"] = new_hdu
 
 # ==========================================================================================================
 
@@ -359,12 +341,8 @@ class FitsFile:
             output_dict = {name : dict(hdu.header) for name, hdu in self.all_hdu.items()}
             
         return output_dict
-        
+    
 # ==========================================================================================================
-
-#     def update_params(self, **kwargs):
-#         for key, value in kwargs.items():
-#             setattr(self, key, value)
 
 
 # In[6]:
@@ -404,9 +382,27 @@ class OutputFits(FitsFile):
         
         self.close()
         
-        # self.observation = self.all_hdu.get("observation", None)
-        # self.model       = self.all_hdu.get("model", None)
-        # self.residual    = self.all_hdu.get("residual", None)
+# ==========================================================================================================
+
+    @property
+    def model(self):
+        return self.all_hdu.get("model", None)
+    
+    @model.setter
+    def model(self, new_hdu):
+        self.check_hdu_type(new_hdu)
+        self.all_hdu["model"] = new_hdu
+        
+    @property
+    def residual(self):
+        return self.all_hdu.get("residual", None)
+    
+    @residual.setter
+    def residual(self, new_hdu):
+        self.check_hdu_type(new_hdu)
+        self.all_hdu["residual"] = new_hdu
+        
+# ==========================================================================================================
         
     def generate_bulge_mask(self, sparcfire_csv):
         
@@ -474,7 +470,8 @@ class OutputFits(FitsFile):
 
         #self.close()
         return bulge_mask
-        
+    
+# ==========================================================================================================
         
     def generate_masked_residual(self, mask, use_bulge_mask = True, update_fits_header = True):
 
@@ -600,6 +597,8 @@ class OutputFits(FitsFile):
         #self.close()
         
         return self.masked_residual_normalized
+    
+# ==========================================================================================================
 
 
 # In[7]:
