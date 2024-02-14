@@ -58,8 +58,8 @@ mkdir -p $default_in $default_tmp $default_out
 
 # Populate input folder with models
 # True indicates to flip u/d the models to keep consistent with SpArcFiRe's processing
-#echo "Populating input folder with models. This may take awhile..."
 #python3 "${SPARCFIRE_HOME}/GalfitModule/Utilities/extract_model_from_galfit_output.py" $pre_galfit_in $pre_galfit_out $default_in "true"
+echo "Populating new input folder with arm-only models... (this may take awhile)"
 for gfits in "$tmp_dir"/"galfits"/*"_for_sparcfire.fits"; do   
     gfits_base="${gfits##*/}"
     cp $gfits $default_in/"${gfits_base/_for_sparcfire/}"
