@@ -777,7 +777,7 @@ def main(**kwargs):
             
         print(gname)
         
-        disk_axis_ratio = 0.7
+        disk_axis_ratio = 0.6
         with fits.open(pj(in_dir, f"{gname}.fits")) as gf:
             try:
                 #SURVEY = SDSS-r  DR7
@@ -786,9 +786,9 @@ def main(**kwargs):
                 p_spirality = float(gf[0].header.get("spirality", 0))
                 # p_spirality, disk_axis_ratio
                 if p_spirality >= 0.9: 
-                    disk_axis_ratio = 0.5
+                    disk_axis_ratio = 0.4
                 elif p_spirality >= 0.75:
-                    disk_axis_ratio = 0.6
+                    disk_axis_ratio = 0.5
                     
             except KeyError:
                 print(f"There is no spirality keyword in the header for {gname}.")
