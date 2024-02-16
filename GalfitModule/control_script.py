@@ -328,7 +328,8 @@ if __name__ == "__main__":
                 print("Continuing...")
                 break
         
-    out_png_dir     = pj(out_dir, "galfit_png")
+    basename_out_dir = pj(out_dir, basename) 
+    out_png_dir      = pj(out_dir, "galfit_png")
     
     # Minor changes to SpArcFiRe's version
     star_removal_path = pj(_MODULE_DIR, "star_removal")
@@ -357,7 +358,8 @@ if __name__ == "__main__":
                                tmp_masks_dir, 
                                #tmp_psf_dir, 
                                tmp_png_dir, 
-                               out_png_dir
+                               out_png_dir,
+                               basename_out_dir
                               )
          if not exists(i)
         ]
@@ -706,12 +708,12 @@ if __name__ == "__main__":
 # ==========================================================================================================
 if __name__ == "__main__":
     pkl_end_str = "output_results"
-    final_pkl_file = pj(out_dir, f"{basename}_{pkl_end_str}.pkl")
+    final_pkl_file = pj(basename_out_dir, f"{basename}_{pkl_end_str}.pkl")
     num = 1
     
     # Iterative naming for subsequent runs
     while exists(final_pkl_file) and num < 100:
-        final_pkl_file = pj(out_dir, f"{basename}_{pkl_end_str}{num}.pkl")
+        final_pkl_file = pj(basename_out_dir, f"{basename}_{pkl_end_str}{num}.pkl")
         num += 1
         
     if num == 100:
