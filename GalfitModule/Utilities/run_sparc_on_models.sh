@@ -28,6 +28,13 @@ if [[ ! $in_dir || ! $tmp_dir || ! $out_dir ]]; then
     fi
 fi
 
+basename_dir="$out_dir"/"$basename"
+
+if [[ ! -d $basename_dir; then
+    echo "Cannot find $basename_dir. Did you specify the right name? Quitting."
+    exit
+fi
+
 # TODO: consider alternative name such as pre_sparcfire_rerun-in
 pre_galfit_in="pre_galfit-in" 
 pre_galfit_out="pre_galfit-out"
@@ -166,12 +173,12 @@ cp $post_galfit_out/"galaxy_arcs.csv" $post_galfit_out/"${basename}_post_galfit_
 mv $pre_galfit_in $in_dir
 mv $pre_galfit_out $out_dir
 
-cp $post_galfit_out/"${basename}_post_galfit_galaxy.csv" $out_dir/$basename/"${basename}_post_galfit_galaxy.csv"
-cp $post_galfit_out/"${basename}_post_galfit_galaxy_arcs.csv" $out_dir/$basename/"${basename}_post_galfit_galaxy_arcs.csv"
+cp $post_galfit_out/"${basename}_post_galfit_galaxy.csv" "$basename_dir"/"${basename}_post_galfit_galaxy.csv"
+cp $post_galfit_out/"${basename}_post_galfit_galaxy_arcs.csv" "$basename_dir"/"${basename}_post_galfit_galaxy_arcs.csv"
 
 # Now that everything has run, let's populate the final results directory
-mv $tmp_dir/"galfits" $out_dir/$basename/"${basename}_galfits"
-mv $out_dir/"galfit_png" $out_dir/$basename/"${basename}_galfit_png"
+mv $tmp_dir/"galfits" "$basename_dir"/"${basename}_galfits"
+mv $out_dir/"galfit_png" "$basename_dir"/"${basename}_galfit_png"
 
 # Cleanup
 rm -rf "$parallel_file" "sparcfire-in_"*
