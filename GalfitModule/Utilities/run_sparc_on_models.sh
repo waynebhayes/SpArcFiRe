@@ -58,8 +58,8 @@ fi
 mv $in_dir $pre_galfit_in
 mv $out_dir $pre_galfit_out
 
-cp $pre_galfit_out/"galaxy.csv" $pre_galfit_out/"${basename}_pre_galfit_galaxy.csv"
-cp $pre_galfit_out/"galaxy_arcs.csv" $pre_galfit_out/"${basename}_pre_galfit_galaxy_arcs.csv"
+cp $pre_galfit_out/"galaxy.csv" $pre_galfit_out/"${basename}"/"${basename}_pre_galfit_galaxy.csv"
+cp $pre_galfit_out/"galaxy_arcs.csv" $pre_galfit_out/"${basename}"/"${basename}_pre_galfit_galaxy_arcs.csv"
 
 mkdir -p $default_in $default_tmp $default_out
 
@@ -177,8 +177,8 @@ cp $post_galfit_out/"${basename}_post_galfit_galaxy.csv" "$basename_dir"/"${base
 cp $post_galfit_out/"${basename}_post_galfit_galaxy_arcs.csv" "$basename_dir"/"${basename}_post_galfit_galaxy_arcs.csv"
 
 # Now that everything has run, let's populate the final results directory
-mv $tmp_dir/"galfits" "$basename_dir"/"${basename}_galfits"
-mv $out_dir/"galfit_png" "$basename_dir"/"${basename}_galfit_png"
+# mv $tmp_dir/"galfits" "$basename_dir"/"${basename}_galfits"
+# mv $out_dir/"galfit_png" "$basename_dir"/"${basename}_galfit_png"
 
 # Cleanup
 rm -rf "$parallel_file" "sparcfire-in_"*
