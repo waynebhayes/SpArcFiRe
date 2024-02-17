@@ -27,10 +27,6 @@ from copy import deepcopy
 
 from astropy.io import fits
 
-
-# In[ ]:
-
-
 # For debugging purposes
 from IPython import get_ipython
 def in_notebook():
@@ -40,10 +36,6 @@ def in_notebook():
         return True
     else:
         return False
-
-
-# In[ ]:
-
 
 import sys
 import os
@@ -73,9 +65,8 @@ from Classes.Components import *
 from Classes.Containers import FeedmeContainer
 from Functions.helper_functions import *
 
-
-# In[ ]:
-
+# *********************************************************************
+# *********************************************************************
 
 def get_galaxy_names_list(in_dir, tmp_dir, out_dir, galaxy_names = []):
 
@@ -93,19 +84,8 @@ def get_galaxy_names_list(in_dir, tmp_dir, out_dir, galaxy_names = []):
         
     return gnames_out, folders_out
 
-
-# In[ ]:
-
-
-def path_join(path='.', name='', file_ext=''):
-    
-    file_path = pj(path, name + file_ext)
-    
-    return file_path
-
-
-# In[ ]:
-
+# *********************************************************************
+# *********************************************************************
 
 def scale_var(x, scale = 1):
     # Scales
@@ -114,9 +94,8 @@ def scale_var(x, scale = 1):
     
     return float(x)*scale
 
-
-# In[ ]:
-
+# *********************************************************************
+# *********************************************************************
 
 def galaxy_information(galaxy_name, galaxy_path):
      
@@ -160,8 +139,8 @@ def galaxy_information(galaxy_name, galaxy_path):
     try:
         # Using this for the *big* runs because *somebody* (Wayne)
         # didn't validate and overwrite the original csv's to include CR (crop radius)
-        csv_CR = path_join(galaxy_path, galaxy_name, '.csv+CR')
-        csv_filename = path_join(galaxy_path, galaxy_name, '.csv')
+        csv_CR = pj(galaxy_path, f"{galaxy_name}.csv+CR")
+        csv_filename = pj(galaxy_path, f"{galaxy_name}.csv")
         if exists(csv_CR):
             csv_filename = csv_CR
             
@@ -172,9 +151,9 @@ def galaxy_information(galaxy_name, galaxy_path):
         print("Check Sparcfire output or directories. Proceeding with default values.")
         return kwargs_out
 
-    
     reader = csv.DictReader(csv_file, skipinitialspace = True)
     for row in reader:
+        
         # if sparcfire fails
         if row.get('fit_state', "") in failure_modes:
             return kwargs_out
@@ -309,9 +288,8 @@ def galaxy_information(galaxy_name, galaxy_path):
     kwargs_out.update({i: loc[i] for i in kwargs_out.keys() if i in loc})
     return kwargs_out
 
-
-# In[ ]:
-
+# *********************************************************************
+# *********************************************************************
 
 def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2, scale_fact_std = 1):
 
@@ -325,7 +303,7 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2, scale
     
     try:
         #arcs_filename = glob.glob(galaxy_path + '/' + '*_arcs.csv')
-        arcs_filename = path_join(galaxy_path, galaxy_name, '_arcs.csv')
+        arcs_filename = pj(galaxy_path, f"{galaxy_name}_arcs.csv")
         arcs_file = open(arcs_filename, 'r')
     except:
         print("Can't open to read arcs csv for: ", galaxy_name)
@@ -413,10 +391,6 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2, scale
     kwargs_out.update({i: loc[i] for i in kwargs_out.keys() if i in loc})
     return kwargs_out
 
-
-# In[ ]:
-
-
 # def csv_sdss_info(galaxy_names): # to grab petromag and also psf parameter things
     
 #     gname_info = {}
@@ -479,9 +453,8 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2, scale
         
 #     return gname_info
 
-
-# In[ ]:
-
+# *********************************************************************
+# *********************************************************************
 
 def write_starmask_ascii(starmask_filepath):
     with fits.open(starmask_filepath) as sm:
@@ -500,11 +473,10 @@ def write_starmask_ascii(starmask_filepath):
 
     return starmask_ascii_name
 
+# *********************************************************************
+# *********************************************************************
 
-# In[ ]:
-
-
-def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name = "", **kwargs):
+def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs):
     
     galaxy_names, gfolders = get_galaxy_names_list(in_dir, tmp_dir, out_dir, galaxy_names = kwargs.get("galaxy_names", []))
     
@@ -530,12 +502,6 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
             print(f"basename of {gfolder} != {gname}")
             continue
         
-        # From old implementation - 1/19/21
-        # ************
-        # x1crop, x2crop, y1crop, y2crop = autocrop_grab(gname, gfolder)
-        # scale = (float(x2crop)-float(x1crop))/256 - from old implementation
-        # ************
-        
         galaxy_dict    = galaxy_information(gname, gfolder)
         scale_fact_std = galaxy_dict["scale_fact_std"]
         
@@ -560,8 +526,8 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
                                   )
     
         if galaxy_dict["bar_candidate"].upper() == "FALSE": # According to Chien, if no bar, then r_in = 0 since r_in is more a mathematical construct relating to the bar
-            in_rad = 0 #unsure if I'll keep this...
-            #pass
+            in_rad = 0
+
         elif galaxy_dict["bar_candidate"].upper() == "TRUE":
             in_rad = min(galaxy_dict["bar_len"], arc_dict["inner_rad"])
         else:
@@ -613,19 +579,24 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
             position_angle   = galaxy_dict["bulge_rot_angle"]
         )
         
-        disk  = Sersic(
-            component_number = 2, 
-            position         = (center_pos_x, center_pos_y),
-            magnitude        = float(petromag), # - 1,
-            effective_radius = 0.75*galaxy_dict["disk_maj_axs_len"],
-            # According to comparison tests, this usually ends up much lower than classical probably due to the spiral.
-            sersic_index     = 1,
-            axis_ratio       = galaxy_dict["disk_axis_ratio"],
-            position_angle   = galaxy_dict["disk_rot_angle"]
-        )
+        disk_component_number = 2
+        num_components        = kwargs.get("num_components", 3)
+        
+        if num_components == 3:
+            disk  = Sersic(
+                component_number = disk_component_number, 
+                position         = (center_pos_x, center_pos_y),
+                magnitude        = 0.75*float(petromag), # - 1,
+                effective_radius = 0.75*galaxy_dict["disk_maj_axs_len"],
+                # According to comparison tests, this usually ends up much lower than classical probably due to the spiral.
+                sersic_index     = 1,
+                axis_ratio       = galaxy_dict["disk_axis_ratio"],
+                position_angle   = galaxy_dict["disk_rot_angle"]
+            )
+            disk_component_number += 1
             
         disk_for_arms  = Sersic(
-            component_number = 3, 
+            component_number = disk_component_number, 
             position         = (center_pos_x, center_pos_y),
             magnitude        = float(petromag), # - 1,
             effective_radius = galaxy_dict["disk_maj_axs_len"],
@@ -635,7 +606,7 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
         )
         
         arms  = Power(
-            component_number   = 3,
+            component_number   = disk_component_number,
             inner_rad          = in_rad, # Chosen based on where *detection* of arms usually start
             outer_rad          = arc_dict["outer_rad"],
             cumul_rot          = float(f"{galaxy_dict['spin_parity']}{arc_dict['cumul_rot']}"),
@@ -644,8 +615,8 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
             sky_position_angle = (galaxy_dict["pos_angle_power"] - galaxy_dict["disk_rot_angle"]) % 180 #90 
         )
         
-        fourier = Fourier(component_number = 3)
-        sky     = Sky(component_number = 4)
+        fourier = Fourier(component_number = disk_component_number)
+        sky     = Sky(component_number = disk_component_number + 1)
         
         # Take 90 pixels (in the 256x256 image) to be the cutoff for an arm
         # Use a simple cut off for now
@@ -654,16 +625,23 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
         container_to_feed = {
             "header"        : header,
             "bulge"         : bulge,
-            "disk"          : disk,
             "disk_for_arms" : disk_for_arms,
             "arms"          : arms,
             "fourier"       : fourier,
             "sky"           : sky
         }
         
+        if num_components == 3:
+            container_to_feed["disk"] = disk
+        
         if scale_var(galaxy_dict["max_arc_length"], 1/scale_fact_std) < 75:
             print("Skipping Arms, max arc len is", galaxy_dict["max_arc_length"]/scale_fact_std)
-            container_to_feed.pop("disk_for_arms")
+            if num_components == 2:
+                container_to_feed["disk"] = container_to_feed.pop("disk_for_arms")
+                
+            elif num_components == 3:
+                container_to_feed.pop("disk_for_arms")
+                
             container_to_feed.pop("arms")
             container_to_feed.pop("fourier")
             #arms.skip.value = 1
@@ -707,35 +685,28 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs): # single_galaxy_name =
         
     return feedme_info_out
 
-
-# In[ ]:
-
+# *********************************************************************
+# *********************************************************************
 
 if __name__ == "__main__":
     
-    if not in_notebook():
-        if len(sys.argv) == 4:
-            in_dir = sys.argv[1]
-            tmp_dir = sys.argv[2]
-            out_dir = sys.argv[3]
-        else:
-            cwd = os.getcwd()
-            in_dir = pj(cwd, "sparcfire-in")
-            tmp_dir = pj(cwd, "sparcfire-tmp")
-            out_dir = pj(cwd, "sparcfire-out")
+    if len(sys.argv) >= 4:
+        in_dir = sys.argv[1]
+        tmp_dir = sys.argv[2]
+        out_dir = sys.argv[3]
+        
+        if len(sys.argv) == 5:
+            num_components = sys.argv[4]
+    else:
+        cwd = os.getcwd()
+        in_dir = pj(cwd, "sparcfire-in")
+        tmp_dir = pj(cwd, "sparcfire-tmp")
+        out_dir = pj(cwd, "sparcfire-out")
 
-        print(f"Using: \n{in_dir}\n{tmp_dir}\n{out_dir}\nto generate feedme.")
-        _ = write_to_feedmes(
-            in_dir  = in_dir, 
-            tmp_dir = tmp_dir, 
-            out_dir = out_dir
-                        )
-
-
-# In[ ]:
-
-
-if __name__ == "__main__":
-    # in_notebook() is checked in the export function
-    export_to_py("sparc_to_galfit_feedme_gen_debug", output_filename = pj(_MODULE_DIR, "sparc_to_galfit_feedme_gen"))
-
+    print(f"Using: \n{in_dir}\n{tmp_dir}\n{out_dir}\nto generate feedme.")
+    _ = write_to_feedmes(
+        in_dir         = in_dir, 
+        tmp_dir        = tmp_dir, 
+        out_dir        = out_dir,
+        num_components = num_components
+                    )
