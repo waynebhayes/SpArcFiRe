@@ -30,7 +30,7 @@ fi
 
 basename_dir="$out_dir"/"$basename"
 
-if [[ ! -d $basename_dir; then
+if [[ ! -d $basename_dir ]]; then 
     echo "Cannot find $basename_dir. Did you specify the right name? Quitting."
     exit
 fi
