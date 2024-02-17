@@ -89,7 +89,8 @@ if __name__ == "__main__":
               [-drs | --dont-remove-slurm      ]
               [-t   | --tmp                    ]
               [-nac | --no-aggressive-clean    ]
-              [-NS  | --num-steps              ] 
+              [-NS  | --num-steps              ]
+              [-NC  | --num-components         ]
               [-r   | --restart                ]
               [-nsf | --no-simultaneous-fitting]
               [-v   | --verbose                ]
@@ -145,15 +146,26 @@ if __name__ == "__main__":
                        )
     
     parser.add_argument('-NS', '--num-steps',
-                        dest     = 'steps', 
+                        dest     = 'num_steps', 
                         action   = 'store',
                         type     = int,
                         choices  = range(1,4),
                         default  = 2,
                         help     = 'Run GALFIT using step-by-step component selection (up to 3), i.e.\n\t\
-                                    1: Bulge + Disk + Arms,\n\t\
-                                    2: Bulge + Arms -> Bulge + Disk + Arms,\n\t\
+                                    1: Bulge + Disk + Arms;\n\t\
+                                    2: Bulge + Arms -> Bulge + Disk + Arms;\n\t\
                                     3: Bulge -> Bulge + Arms -> Bulge + Disk + Arms'
+                       )
+    
+    parser.add_argument('-NC', '--num-components',
+                        dest     = 'num_components', 
+                        action   = 'store',
+                        type     = int,
+                        choices  = range(2,4),
+                        default  = 3,
+                        help     = 'Run GALFIT with n disk components (from 2 to 3), the last of which is rotated to form the arms, i.e.\n\t\
+                                    2: Bulge, Disk + Arms;\n\t\
+                                    3: Bulge, Disk, Disk + Arms'
                        )
     
     parser.add_argument('-r', '--restart',
@@ -197,7 +209,8 @@ if __name__ == "__main__":
     
     if not in_notebook():
         args              = parser.parse_args() # Using vars(args) will call produce the args as a dict
-        num_steps         = args.steps
+        num_steps         = args.num_steps
+        num_components    = args.num_components
         parallel          = args.parallel
         dont_remove_slurm = args.dont_remove_slurm
         run_from_tmp      = args.run_from_tmp
@@ -532,6 +545,7 @@ if __name__ == "__main__":
                    "tmp_dir"              : tmp_dir,
                    "out_dir"              : out_dir,
                    "num_steps"            : num_steps,
+                   "num_components"       : num_components,
                    #"rerun"                : rerun,
                    "parallel"             : parallel,
                    "verbose"              : verbose,
@@ -544,7 +558,7 @@ if __name__ == "__main__":
                    # "petromags"          : petromags,
                    # "bulge_axis_ratios"  : bulge_axis_ratios,
                    # Keep this last just in case
-                   "galaxy_names"       : galaxy_names
+                   "galaxy_names"         : galaxy_names
                   }
     
     # In case we're running back to back, this will reduce galaxy_names appropriately
@@ -817,6 +831,22 @@ if __name__ == "__main__":
 # Aggressively tidying up if necessary and moving back to original directory
 # ==========================================================================================================
 if __name__ == "__main__":
+    
+    print(f"Copying png (if generated) to {basename_out_dir}")
+    try:
+        shutil.rmtree(pj(basename_out_dir, f"{basename}_galfit_png"))
+    except OSError:
+        pass
+    
+    shutil.copytree(out_png_dir, pj(basename_out_dir, f"{basename}_{os.path.basename(out_png_dir)}"))
+    
+    # Without aggressive clean, this would take *forever*
+    if aggressive_clean:
+        tar_filename = pj(basename_out_dir, f"{basename}_{os.path.basename(tmp_fits_dir)}.tar.gz")
+        
+        print(f"Tarball+gzipping resultant fits to {tar_filename}.")
+        _ = sp(f"tar -czvf {tar_filename} {tmp_fits_dir}")
+    
     if aggressive_clean and run_from_tmp:
         print("Final tidying...")
         #_ = sp(f"rm -rf {out_dir}", capture_output = capture_output)
