@@ -843,9 +843,9 @@ if __name__ == "__main__":
     # Without aggressive clean, this would take *forever*
     if aggressive_clean:
         tar_filename = pj(basename_out_dir, f"{basename}_{os.path.basename(tmp_fits_dir)}.tar.gz")
-        
+        # Use the -C option to make the tarball relative to tmp dir
         print(f"Tarball+gzipping resultant fits to {tar_filename}.")
-        _ = sp(f"tar -czvf {tar_filename} {tmp_fits_dir}")
+        _ = sp(f"tar -czvf {tar_filename} -C {tmp_fits_dir} .")
     
     if aggressive_clean and run_from_tmp:
         print("Final tidying...")
