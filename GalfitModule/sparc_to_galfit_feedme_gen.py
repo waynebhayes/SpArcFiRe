@@ -586,7 +586,7 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs):
             disk  = Sersic(
                 component_number = disk_component_number, 
                 position         = (center_pos_x, center_pos_y),
-                magnitude        = 0.75*float(petromag), # - 1,
+                magnitude        = float(petromag), # - 1,
                 effective_radius = 0.75*galaxy_dict["disk_maj_axs_len"],
                 # According to comparison tests, this usually ends up much lower than classical probably due to the spiral.
                 sersic_index     = 1,
