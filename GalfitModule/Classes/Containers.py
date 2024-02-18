@@ -133,7 +133,17 @@ class ComponentContainer:
             assert isinstance(comp, GalfitComponent), f"The component fed into the ComponentContainer, {k}, is not a valid type."
             
 # ==========================================================================================================
-    
+
+    # This will allow us to add a new component and update the attributes of the object
+    # Without doing this, we run the danger of not updating the dict in time and causing
+    # an error.
+    def add_components(self, **new_components):
+        self.check_component_types(new_components)
+        self.components.update(new_components)
+        if self.components: pass
+
+# ==========================================================================================================
+
     def to_tuple(self):
         #self.header,
         # return (self.bulge,
@@ -728,6 +738,7 @@ class OutputContainer(FeedmeContainer):
             
             # We MUST assume this is in the desired order
             # We cannot use a dict here due to key uniqueness
+            # TODO: Do not require the component list to be known ahead of time(?)
             comp_list  = self.to_list()
             comp_types = [comp.component_type for comp in comp_list]
             
@@ -1042,6 +1053,40 @@ if __name__ == "__main__":
 # In[15]:
 
 
+# Testing extraction into OutputContainer with default components
+# but *without* updating one of the components (in this case, disk_for_arms)
+if __name__ == "__main__":
+    output_example = """Iteration : 12    Chi2nu: 3.205e-01     dChi2/Chi2: 1.75e-08    alamda: 1e+04
+     sersic    : (  [67.38],  [67.77])  13.19     15.54    0.34    0.62   -19.23
+     sersic    : (  [67.38],  [67.77])  14.58      8.89    1.56    0.68    30.23
+       power   :     [0.00]   [22.01]   78.86     -2.39     ---   39.74    22.52
+       fourier : (1:  0.15,   46.48)   (3:  0.10,  -33.06)
+     sky       : [ 67.00,  68.00]  1133.43  1.16e-02  -1.35e-02
+    COUNTDOWN = 0
+
+
+    Fit summary is now being saved into `fit.log'.
+
+    """   
+    
+    dummy_obj        = subprocess.CompletedProcess("", 0)
+    dummy_obj.stdout = output_example
+    good_output      = OutputContainer(
+        dummy_obj, 
+        store_text  = True,
+        load_default = True,
+        # Set the magnitude to 1 to verify that it didn't revert to default value somehow
+        disk_for_arms = Sersic(3, magnitude = 1)
+    )
+    
+    _ = [print("Key:", k) for k in good_output.components.keys()]
+    print()
+    _ = [print(str(comp)) for comp in good_output.to_list()]
+
+
+# In[16]:
+
+
 # Testing extraction into OutputContainer with non-default components
 # Components *must* be specified for this to work
 if __name__ == "__main__":
@@ -1082,7 +1127,7 @@ if __name__ == "__main__":
     _ = [print(str(comp)) for comp in good_output.to_list()]
 
 
-# In[16]:
+# In[17]:
 
 
 # Testing extraction into OutputContainer with non-default components
@@ -1130,7 +1175,7 @@ if __name__ == "__main__":
     _ = [print(str(comp)) for comp in good_output.to_list()]
 
 
-# In[17]:
+# In[18]:
 
 
 # Testing OutputContainer
@@ -1255,7 +1300,7 @@ if __name__ == "__main__":
     #good_output.header.to_file(output_filename, good_output.bulge, good_output.disk, good_output.arms, good_output.fourier, good_output.sky)
 
 
-# In[18]:
+# In[19]:
 
 
 if __name__ == "__main__":
