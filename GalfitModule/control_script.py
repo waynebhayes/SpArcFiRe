@@ -706,8 +706,11 @@ if __name__ == "__main__":
     rm_files(*glob(pj(cwd, "*.png")))
     rm_files(pj(cwd, "fit.log"))
     rm_files(pj(cwd, parallel_file))
-    #_ = sp("rm galfit.* fit.log", capture_output = capture_output)
-    #_ = sp("rm *.png", capture_output = capture_output)
+    
+    if not aggressive_clean:
+        rm_files(*glob(pj(tmp_fits_dir, "m*.fits")))
+        rm_files(*glob(pj(tmp_fits_dir, "m*.in")))
+    
     
     # We use the negative of remove slurm because we want cleanup to be the default
     if parallel == 2 and not dont_remove_slurm:
@@ -840,12 +843,10 @@ if __name__ == "__main__":
     
     shutil.copytree(out_png_dir, pj(basename_out_dir, f"{basename}_{os.path.basename(out_png_dir)}"))
     
-    # Without aggressive clean, this would take *forever*
-    if aggressive_clean:
-        tar_filename = pj(basename_out_dir, f"{basename}_{os.path.basename(tmp_fits_dir)}.tar.gz")
-        # Use the -C option to make the tarball relative to tmp dir
-        print(f"Tarball+gzipping resultant fits to {tar_filename}.")
-        _ = sp(f"tar -czvf {tar_filename} -C {tmp_fits_dir} .")
+    tar_filename = pj(basename_out_dir, f"{basename}_{os.path.basename(tmp_fits_dir)}.tar.gz")
+    # Use the -C option to make the tarball relative to tmp dir
+    print(f"Tarball+gzipping resultant fits to {tar_filename}.")
+    _ = sp(f"tar -czvf {tar_filename} -C {tmp_fits_dir} .")
     
     if aggressive_clean and run_from_tmp:
         print("Final tidying...")
