@@ -827,8 +827,8 @@ def main(**kwargs):
         # ======================================== BEGIN GALFIT PARAMETER SEARCH LOOP ========================================    
         
         # FOR DEBUGGING 
-        kwargs["use_async"] = False
-        use_async = False
+        # kwargs["use_async"] = False
+        # use_async = False
         # b_d_magnitudes = [(16,16)]
         #if parallel in (0, 1):
         #    use_async = True
