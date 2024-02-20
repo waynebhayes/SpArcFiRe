@@ -278,7 +278,7 @@ class FitsFile:
         
         # Adding 'magick' to use the portable version in the GalfitModule
         run_montage     = shutil.which("magick")
-        if not run_magick:
+        if not run_montage:
             run_montage = shutil.which("montage")
             if not run_montage:
                 print("Cannot find 'magick' or 'montage' via 'which'.")
@@ -733,7 +733,7 @@ if __name__ == "__main__":
     print("Expect True:", not any("fits" in pof.path for pof in psutil.Process().open_files()))
 
 
-# In[12]:
+# In[ ]:
 
 
 if __name__ == "__main__":
