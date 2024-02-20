@@ -78,10 +78,10 @@ def main():
     images = []
     location = 0
 
-    basepath        = sys.argv[1]
-    failure_path    = pj(basepath, sys.argv[2]) #pj(values["file"], "false_positive")
+    img_path        = sys.argv[1]
+    failure_path    = sys.argv[2] #pj(values["file"], "false_positive")
 #    non_spiral_path = pj(basepath, sys.argv[3]) #pj(values["file"], "false_positive")
-    images = parse_folder(basepath)#values["file"])
+    images = parse_folder(img_path)#values["file"])
     while images:
         load_image(images[location], window)
         event, _ = window.read()
