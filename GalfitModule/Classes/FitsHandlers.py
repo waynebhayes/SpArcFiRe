@@ -277,7 +277,19 @@ class FitsFile:
             combined = "_combined"
         
         # Adding 'magick' to use the portable version in the GalfitModule
-        montage_cmd = "magick montage " + \
+        run_montage     = shutil.which("magick")
+        if not run_magick:
+            run_montage = shutil.which("montage")
+            if not run_montage:
+                print("Cannot find 'magick' or 'montage' via 'which'.")
+                print("Proceeding to generate individual pngs without combining them.")
+                self.combined_png = ""
+                cleanup = False
+                
+        else:
+            run_montage += " montage"
+            
+        montage_cmd = run_montage + " " + \
                       " ".join(im_cmd for idx, im_cmd in enumerate([im1, im2, im3]) 
                                if idx <= self.num_imgs)
         
@@ -289,17 +301,17 @@ class FitsFile:
         # If this is a single image, it'll also resize for me so that's why I leave it in
         montage_cmd += f" -tile {tiling} -geometry \"175x175+2+2\" \
                         {pj(out_png_dir, gname)}{combined}.png"
-            
-        _ = sp(montage_cmd, capture_output = capture_output)            
+        
+        if run_montage:
+            _ = sp(montage_cmd, capture_output = capture_output)
+            self.combined_png    = f"{pj(out_png_dir, gname)}{combined}.png"
         
         if cleanup:
             _ = rm_files(im1, im2, im3)
         else:
             self.observation_png = im1
             self.model_png       = im2
-            self.residual_png    = im3            
-            
-        self.combined_png    = f"{pj(out_png_dir, gname)}{combined}.png"
+            self.residual_png    = im3
 
 # ==========================================================================================================
 
