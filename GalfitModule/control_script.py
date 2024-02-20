@@ -709,7 +709,7 @@ if __name__ == "__main__":
     
     if not aggressive_clean:
         rm_files(*glob(pj(tmp_fits_dir, "m*.fits")))
-        rm_files(*glob(pj(tmp_fits_dir, "m*.in")))
+        rm_files(*glob(pj(tmp_fits_dir, "*.in")))
     
     
     # We use the negative of remove slurm because we want cleanup to be the default
