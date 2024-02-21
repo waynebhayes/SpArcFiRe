@@ -1,12 +1,12 @@
 
-#  Input menu file: /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-out/1237671124296532233/1237671124296532233_bulge.in
+#  Input menu file: /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/m12m15_1237671124296532233_bulge.in
 
-#  Chi^2/nu = 1.044,  Chi^2 = 12329.280,  Ndof = 11815
+#  Chi^2/nu = 1.044,  Chi^2 = 12329.282,  Ndof = 11815
 
 ================================================================================
 # IMAGE and GALFIT CONTROL PARAMETERS
 A) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestData/test-in/1237671124296532233.fits      # Input data image (FITS file)
-B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/1237671124296532233_galfit_out.fits      # Output data image block
+B) /home/portmanm/sparcfire_matt/GalfitModule/RegTest/TestOutput/test-tmp/galfits/m12m15_1237671124296532233_galfit_out.fits      # Output data image block
 C) none                # Sigma image name (made from data if blank or "none") 
 D) ./test-out/1237671124296532233/1237671124296532233_psf.fits          # Input PSF image and (optional) diffusion kernel
 E) 1                   # PSF fine sampling factor relative to data 
@@ -46,7 +46,7 @@ P) 0                   # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
  7) 0.0000      0          #     ----- 
  8) 0.0000      0          #     ----- 
  9) 0.8370      1          #  Axis ratio (b/a)  
-10) -62.2547    1          #  Position angle (PA) [deg: Up=0, Left=90]
+10) -62.2549    1          #  Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                      #  Skip this model in output image?  (yes=1, no=0)
 
 # Component number: 2

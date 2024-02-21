@@ -11,7 +11,7 @@ def x(self):
 @x.setter
 def x(self, new_val):
     self._x1 = new_val
-    
+
 
 bye
 hi
@@ -765,7 +765,6 @@ F3) 0.1086 57.6034 1  1 # Azim. Fourier mode 3, amplitude, & phase angle
 These are feedme -> output
 ignoring filepaths for reg tests...
 
-From text: Extra components found in container. Removing them.
 G) none                 # File with parameter constraints (ASCII file)
 H) 7    79   8    80    # Image region to fit (xmin xmax ymin ymax)
 I) 52     52            # Size of the convolution box (x y)
@@ -812,7 +811,6 @@ dict_keys(['header', 'bulge', 'sky'])
 ********************************************************************************
 ********************************************************************************
 Reading in from file, WITHOUT initializing a new container.
-From FITS: Extra components found in container. Removing them.
 G) none                 # File with parameter constraints (ASCII file)
 H) 7    79   8    80    # Image region to fit (xmin xmax ymin ymax)
 I) 52     52            # Size of the convolution box (x y)
@@ -885,7 +883,6 @@ dict_keys(['header', 'bulge', 'disk', 'arms', 'fourier', 'sky'])
 These are feedme -> output
 ignoring filepaths for reg tests...
 
-From text: Extra components found in container. Removing them.
 G) none                 # File with parameter constraints (ASCII file)
 H) 17   81   18   82    # Image region to fit (xmin xmax ymin ymax)
 I) 52     52            # Size of the convolution box (x y)

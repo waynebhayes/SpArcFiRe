@@ -6,6 +6,7 @@
 
 import os
 import sys
+from glob import glob
 
 from os.path import join as pj
 from os.path import abspath as absp
@@ -85,14 +86,18 @@ def export_to_py(notebook_name, output_filename = ""):
 # In[5]:
 
 
-def sp(cmd_str, capture_output = True, timeout = None):
+def sp(cmd_str, capture_output = True, timeout = None, **kwargs):
     # Because it is a pain in the butt to call subprocess with all those commands every time
-    return subprocess.run(cmd_str, 
-                          capture_output = capture_output, 
-                          text = True, 
-                          shell = True,
-                          timeout = timeout,
-                          executable="/bin/bash")
+    return subprocess.run(
+        cmd_str, 
+        capture_output = capture_output, 
+        text           = True, 
+        shell          = True,
+        timeout        = timeout,
+        executable     = "/bin/bash",
+        #stdin          = subprocess.PIPE,
+        **kwargs
+     )
 
 
 # In[6]:
@@ -133,12 +138,37 @@ def find_files(search_dir = ".", search_pattern = "*", filetype = "f"):
     elif filetype in ("f", "file"):
         type_cmd = "f"
         
-    result = sp(f"find {pj(search_dir)} -maxdepth 1 -type {filetype} -name \"{search_pattern}\"")
+    result = sp(f"find -L {pj(search_dir)} -maxdepth 1 -type {filetype} -name \"{search_pattern}\"")
     
     return [os.path.basename(i) for i in result.stdout.split("\n") if i]
 
 
 # In[8]:
+
+
+# Writing this to do generic deletion without calling subprocess
+def rm_files(*args):
+    # Assume list/tuple given by accident
+    if not args:
+        print("Nothing was fed into rm_files...")
+        return
+
+    if isinstance(args[0], (tuple, list)):
+        print("Please expand your iterable(s) before feeding into rm_files, thanks!")
+        print("Assuming the first argument is the only thing that needs to be deleted.")
+        args = args[0]
+    # Thanks! https://stackoverflow.com/a/8915613
+    # May the list comp live on
+    def catch(func, *argss, handle=lambda e : e, **kwargs):
+        try:
+            return func(*argss, **kwargs)
+        except FileNotFoundError as e:
+            return handle(e)
+        
+    return [catch(os.remove, i) for i in args]
+
+
+# In[9]:
 
 
 # Writing this to replace os.path.exists since that's too slow
@@ -147,7 +177,7 @@ def exists(filename):
     return bool(int(result.stdout))
 
 
-# In[16]:
+# In[10]:
 
 
 def generate_get_set(input_dict): #, exclude = []):
@@ -160,19 +190,19 @@ def {key}(self):
 @{key}.setter
 def {key}(self, new_val):
     self.{v} = new_val
-    
+
 """
     return exec_str
 
 
-# In[17]:
+# In[11]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[18]:
+# In[12]:
 
 
 # Unit test for sp
@@ -185,7 +215,7 @@ if __name__ == "__main__":
     stdout_dest   = pj(TEST_OUTPUT_DIR, stdout_file)
     # writeout_dest = pj(_MODULE_DIR, "RegTest", "TestOutput", writeout_file)
     
-    touch_stdout   = sp(f"touch {stdout_dest}")
+    touch_stdout  = sp(f"touch {stdout_dest}")
     # touch_writeout = sp(f"touch {writeout_dest}")
     
     # if touch_stdout.stderr or touch_writeout.stderr:
@@ -196,7 +226,25 @@ if __name__ == "__main__":
         raise(Exception())
 
 
-# In[19]:
+# In[13]:
+
+
+# Unit test for rm files
+if __name__ == "__main__":
+    fake_files = [pj(TEST_OUTPUT_DIR, f"fake_{i}.fake") for i in range(10)]
+    
+    for fake in fake_files:
+        with open(fake, mode='a'): pass
+    
+    # Check try catch
+    fake_files.append(pj(TEST_OUTPUT_DIR, "fakest_of_them_all.fake"))
+    
+    # Check warning message
+    print(rm_files(fake_files)) #*fake_files
+    assert not glob(pj(TEST_OUTPUT_DIR, f"fake_*")), "Files were not deleted, something went wrong!!!"
+
+
+# In[14]:
 
 
 # Unit test for list_files
@@ -207,7 +255,7 @@ if __name__ == "__main__":
     print(sorted(find_files(pj(TEST_DATA_DIR, "test-out"), "123*", "d")))
 
 
-# In[20]:
+# In[15]:
 
 
 # Unit test for exists
@@ -217,7 +265,7 @@ if __name__ == "__main__":
     print("Does test-spout exist?", exists(pj(TEST_DATA_DIR, "test-spout")))
 
 
-# In[21]:
+# In[16]:
 
 
 if __name__ == "__main__":
@@ -235,7 +283,7 @@ if __name__ == "__main__":
     print(y._x1)
 
 
-# In[15]:
+# In[17]:
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@
 # Sets up the MCR environment for the current $ARCH and executes 
 # the specified command.
 #
-
+die(){ echo "$USAGE${NL}FATAL ERROR in $BASENAME:" "$@" >&2; exit 1; }
 # Variables you may need to change
 MCRROOT=$HOME/bin/ArcFinder/MCRlib
 exe_dir=$HOME/bin/ArcPNGcreator
@@ -30,6 +30,7 @@ else
     cd tmp.$$ # to mimic being in hash directory until we know the name of the hash directory
     galName=`echo $1 | sed 's,[^0-9], ,g' | newlines | grep '^[0-9][0-9]*$' | head -1`
     hashDir=`echo $galName | sed 's/.*\(..\)$/\1/'`
+    [ -d "$hashDir" ] || die "no hash dir <$hashDir>"
     outDir=${10}
     cd ../$outDir
     mkdir -p $hashDir
@@ -42,6 +43,7 @@ else
 	N=`expr $N - 1`
 	if [ $N -eq 0 ]; then break; fi; 
     done
+    [ -f "$hashDir/$galName.png" ] || die "no output galaxy"
     chgrp hayesgrp . $hashDir $hashDir/$galName.matlab.log $hashDir/$galName.png
     chmod g+rX . $hashDir $hashDir/$galName.matlab.log $hashDir/$galName.png
     mv $hashDir/$galName.matlab.log $hashDir/$galName`basename $3 .fits`.matlab.log

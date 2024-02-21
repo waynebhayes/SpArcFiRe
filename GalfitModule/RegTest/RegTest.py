@@ -262,7 +262,15 @@ if __name__ == "__main__":
     # Output may vary depending on compute differences b/t clusters (GALFIT issue)
     print("Performing diff check for Galfit input.")
     gnames = [os.path.basename(i).rstrip(".fits") for i in glob(pj(in_dir, "*.fits"))]
-    things_to_check = [".in", "_disk.in", "_galfit.01", "_galfit.02"] #"_bulge.in",
+    
+    # Exclude galfit.01 and 02 since we check the resulting output fits files now
+    # These were causing trouble when minor numerical differences in the parameters
+    # caused the diff to trigger. I anticipate this issue will show up on other machines
+    # as well so no point in continuing to check these. 
+    # 
+    # They were also causing trouble with the observation
+    # 1237655463239155886 since that observation is... not a galaxy.
+    things_to_check = [".in", "_disk.in"] #, "_galfit.01", "_galfit.02"] #"_bulge.in",
     
     for gname in gnames:
         data    = pj(TEST_DATA_DIR, "test-out", gname, gname)
@@ -281,13 +289,14 @@ if __name__ == "__main__":
                 print(result.stderr)
         
             if result.stdout:
-                # Deprecated choice
-                # Carve a special exception for 1237655463239155886 since we randomize the spin parity
-                #if result.stdout.split("\n")[0] == "60c60" and gname == "1237655463239155886":
-                #    continue
-                    
+                # Carve a special exception for 1237655463239155886 since that observation is bad and the one-step fit does not seem to do anything for the residual/two of the resulting output models are equivalent via NMR
+                # Carving another for 1237668589728366770_galfit.02 to account for very small differences in numeric values
+                # if f"{gname}{suffix}" in ("1237655463239155886_galfit.01", "1237655463239155886_galfit.02", "1237668589728366770_galfit.02"):
+                #     print(f"Exception for {data}{suffix}. Outputting diff to {error_file} anyway (just in case).")
+                # else:
                 print(f"Diff check for {gname}{suffix} failed!")
                 fail_count += 1
+                    
                 all_diff_error[f"{gname}{suffix}"] = f"{data}{suffix}\n{result.stdout}"
                 
         # Check _out_old FITS files using Astropy since this RegTest shouldn't call FitsHandler except to check it

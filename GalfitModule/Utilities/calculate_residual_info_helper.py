@@ -26,7 +26,7 @@ import sys
 # from Classes.FitsHandlers import *
 # from Functions.helper_functions import *
 
-from parallel_residual_calc import parallel_wrapper
+from calculate_residuals import parallel_wrapper
 
 if __name__ == "__main__":
     basename         = sys.argv[1]
@@ -50,3 +50,4 @@ if __name__ == "__main__":
     #pickle.dump(out_nmr, open(pickle_filename, 'wb'))
     out_df.set_index("gname", inplace = True)
     out_df.to_pickle(pickle_filename)
+

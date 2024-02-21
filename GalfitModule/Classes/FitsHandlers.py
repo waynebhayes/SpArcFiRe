@@ -13,6 +13,7 @@ from copy import deepcopy
 from IPython import get_ipython
 from astropy.io import fits
 import gc
+import psutil
 
 import numpy as np
 import scipy.linalg as slg
@@ -71,17 +72,43 @@ class HDU:
     def __init__(self, 
                  name   = "observation",
                  header = {}, 
-                 data   = None):
-        self.name   = name
-        self.header = dict(header)
-        self.data   = data
+                 data   = None
+                ):
         
-    def to_dict(self):
-        return {"name"   : name,
-                "header" : header,
-                "data"   : data
-               }
+        self._hdu_info = {
+            "name"   : name,
+            "header" : deepcopy(dict(header)),
+            "data"   : deepcopy(np.array(data))
+        }
+        
+# ==========================================================================================================
+
+    @property
+    def name(self):
+        return self._hdu_info.get("name", "")
     
+    @name.setter
+    def name(self, new_name):
+        self._hdu_info["name"] = new_name
+        
+    @property
+    def header(self):
+        return self._hdu_info.get("header", {})
+    
+    @header.setter
+    def header(self, new_header):
+        self._hdu_info["header"] = deepcopy(dict(new_header))
+        
+    @property
+    def data(self):
+        return self._hdu_info.get("data", "")
+    
+    @data.setter
+    def data(self, new_data):
+        self._hdu_info["data"] = deepcopy(np.array(new_data))
+        
+# ==========================================================================================================
+
     def __str__(self):
         header_str = ""
         for k,v in self.header.items():
@@ -97,23 +124,22 @@ class HDU:
 class FitsFile:
     def __init__(self,
                  filepath,
-                 name = "observation",
-                 wait = False,
+                 names       = ["observation"],
+                 from_galfit = False,
+                 wait        = False,
                  **kwargs
                 ):
         
-        self.name     = name
         self.filepath = filepath
+        self.all_hdu  = {}
         
         # Use split over rstrip in case a waveband designation is given
         # (rstrip will remove any character that matches in the substring)
         # i.e. 12345678910_g would lose the _g for "_galfit_out.fits"
         # TODO: Replace rstrip with split in the rest of these scripts...
         self.gname    = kwargs.get("gname", os.path.basename(filepath).split("_galfit_out.fits")[0])
-        # self.num_hdu  = 0
-        # self.num_imgs = 1
         
-        assert os.path.splitext(filepath)[-1] == ".fits", "File being passed into FitsHandler must be .fits!"
+        assert os.path.splitext(filepath)[-1].lower() == ".fits", "File being passed into FitsHandler must be .fits!"
         
         try:
             file_in = fits.open(filepath)
@@ -125,29 +151,42 @@ class FitsFile:
         except OSError as ose:
             print(f"Something went wrong! {ose}")
             raise(Exception())
-        
+            
         # FITS starts the index at 0 but GALFIT outputs the observation image at 1
         # Also converting the header to a dict to save some trouble
-        try:
-            self.header   = dict(file_in[1].header)
-            self.data     = file_in[1].data
+        assert_str = f"Number of HDU names fed to object ({len(names)}) does not match number of HDUs in {filepath} ({len(file_in)})!"
+        if from_galfit:
+            assert len(names) + 1 == len(file_in), assert_str
             self.num_imgs = len(file_in) - 1
+        else:
+            assert len(names)     == len(file_in), assert_str
+            self.num_imgs = len(file_in)
+        
+        for i, name in enumerate(names):
             
-        except IndexError:
-            self.header   = dict(file_in[0].header)
-            self.data     = file_in[0].data
-            self.num_imgs = 1       
-        
-        hdu = HDU(name = name, header = self.header, data = self.data)
-        
-        self.all_hdu  = {name : hdu}
-        #self.observation = hdu
-        self.file     = file_in
+            index = i
+            
+            if from_galfit:
+                index += 1
+
+            header   = deepcopy(dict(file_in[index].header))
+            data     = deepcopy(file_in[index].data)
+
+            hdu = HDU(name = name, header = header, data = data)
+
+            self.all_hdu[name] = hdu
+            
+        if self.num_imgs == 1:
+            self.header = self.all_hdu[names[0]].header
+            self.data   = self.all_hdu[names[0]].data
+            
+        self.file = file_in
         
         # Wait is for continuing to use the file in some other capacity
         # i.e. for outputfits below to grab more info
         if not wait:
-            file_in.close(verbose = True)
+            #file_in.close(verbose = True)
+            self.close()
         
         #print("Did it close?", file_in.closed)
         # assert hdu_num == 4, "File being passed into FitsHandler has too few output HDUs."
@@ -165,24 +204,6 @@ class FitsFile:
     def observation(self, new_hdu):
         self.check_hdu_type(new_hdu)
         self.all_hdu["observation"] = new_hdu
-        
-    @property
-    def model(self):
-        return self.all_hdu.get("model", None)
-    
-    @model.setter
-    def model(self, new_hdu):
-        self.check_hdu_type(new_hdu)
-        self.all_hdu["model"] = new_hdu
-        
-    @property
-    def residual(self):
-        return self.all_hdu.get("residual", None)
-    
-    @residual.setter
-    def residual(self, new_hdu):
-        self.check_hdu_type(new_hdu)
-        self.all_hdu["residual"] = new_hdu
 
 # ==========================================================================================================
 
@@ -256,40 +277,65 @@ class FitsFile:
             combined = "_combined"
         
         # Adding 'magick' to use the portable version in the GalfitModule
-        montage_cmd = "magick montage " + \
+        run_montage     = shutil.which("magick")
+        if not run_montage:
+            run_montage = shutil.which("montage")
+            if not run_montage:
+                print("Cannot find 'magick' or 'montage' via 'which'.")
+                print("Proceeding to generate individual pngs without combining them.")
+                self.combined_png = ""
+                cleanup = False
+                
+        else:
+            run_montage += " montage"
+            
+        montage_cmd = run_montage + " " + \
                       " ".join(im_cmd for idx, im_cmd in enumerate([im1, im2, im3]) 
                                if idx <= self.num_imgs)
         
+        tiling = f"1x{self.num_imgs}"
+        if kwargs.get("horizontal", None):
+            tiling = tiling = f"{self.num_imgs}x1"            
+            
         # Combining the images using ImageMagick
         # If this is a single image, it'll also resize for me so that's why I leave it in
-        montage_cmd += f" -tile {self.num_imgs}x1 -geometry \"175x175+2+0<\" \
+        montage_cmd += f" -tile {tiling} -geometry \"175x175+2+2\" \
                         {pj(out_png_dir, gname)}{combined}.png"
-            
-        _ = sp(montage_cmd, capture_output = capture_output)
+        
+        if run_montage:
+            _ = sp(montage_cmd, capture_output = capture_output)
+            self.combined_png    = f"{pj(out_png_dir, gname)}{combined}.png"
         
         if cleanup:
-            _ = sp(f"rm {im1} {im2} {im3}")
+            _ = rm_files(im1, im2, im3)
         else:
             self.observation_png = im1
             self.model_png       = im2
-            self.residual_png    = im3            
-            
-        self.combined_png    = f"{pj(out_png_dir, gname)}{combined}.png"
+            self.residual_png    = im3
 
 # ==========================================================================================================
 
     def __sub__(self, other):
         
         names = self.all_hdu.keys()
+        
+        assert_str1 = "Cannot subtract the data from these two FITS files, they do not contain the same number of HDUs!"
+        assert len(self.all_hdu) == len(other.all_hdu), assert_str1
+        
+        assert_str2 = "Cannot subtract the data from these two FITS files, they do not have the same image dimensions!\n"
+        for i, (a, b) in enumerate(zip(self.all_hdu.values(), other.all_hdu.values())):
+            shape_a = np.shape(a.data)
+            shape_b = np.shape(b.data)
+            assert shape_a == shape_b, assert_str2 + f"At HDU {i}, the images have shapes {shape_a} & {shape_b}."
+            
         # Python doesn't care if they're different lengths but
         # (for instance in the residual) we don't want to compare one to one
-        result = {k : a[k].data - b[k].data for k, a, b in zip(names, self.all_hdu, other.all_hdu)}
+        result = {k : a.data - b.data for k, a, b in zip(names, self.all_hdu.values(), other.all_hdu.values())}
         
         return result
 
 # ==========================================================================================================
 
-    # # Use str to display feedme(?)
     # def __str__(self):
     #     pass
         
@@ -297,7 +343,6 @@ class FitsFile:
         
 # ==========================================================================================================
 
-    # Use str to display feedme(?)
     def header_dict(self, name = ""):
         
         if name:
@@ -306,12 +351,8 @@ class FitsFile:
             output_dict = {name : dict(hdu.header) for name, hdu in self.all_hdu.items()}
             
         return output_dict
-        
+    
 # ==========================================================================================================
-
-#     def update_params(self, **kwargs):
-#         for key, value in kwargs.items():
-#             setattr(self, key, value)
 
 
 # In[6]:
@@ -319,43 +360,58 @@ class FitsFile:
 
 class OutputFits(FitsFile):
 
-    def __init__(self, filepath, names = [], load_default = True):
-        
-        FitsFile.__init__(self, filepath = filepath, wait = True)
-        
-        # by initializing FitsFile we already have observation
-        if not names:
-            names = ["model", "residual"]
+    def __init__(
+        self, 
+        filepath,  
+        load_default = True, 
+        **kwargs
+    ):
             
-        # Don't need these but for posterity
-        # self.hdu_num  = 4
-        # self.num_imgs = self.hdu_num - 1
-        
-        # Exclude observation and primary HDU (0)
-        for num, name in zip(range(2, 4), names):
-            hdu = HDU(name, self.file[num].header, self.file[num].data)
-            self.all_hdu[name] = hdu
-            
-        # For convenience, we usually use the model here
-        #self.update_params(**self.all_hdu) 
+        FitsFile.__init__(
+            self, 
+            filepath    = filepath,
+            names       = ["observation", "model", "residual"],
+            wait        = True,
+            from_galfit = True,
+            **kwargs
+        )
         
         # Dict is very redundant here but just for funsies
         # FITS header not Feedme header
-        self.header = dict(self.model.header)
+        self.header = deepcopy(dict(self.model.header))
+        
         # Can call the helper directly since we're just using the header dict
         #_header.from_file_helper_dict(self.header)
-        self.feedme = FeedmeContainer(path_to_feedme = filepath, header = GalfitHeader(), load_default = load_default)
+        self.feedme = FeedmeContainer(path_to_feedme = filepath, header = GalfitHeader(), load_default = load_default, **kwargs)
         self.feedme.from_file(self.header)
         
-        self.data = self.model.data
+        self.data = deepcopy(self.model.data)
         
-        self.bulge_mask = np.ones(np.shape(self.model.data))
+        self.bulge_mask = np.ones(np.shape(self.data))
         
         self.close()
         
-        # self.observation = self.all_hdu.get("observation", None)
-        # self.model       = self.all_hdu.get("model", None)
-        # self.residual    = self.all_hdu.get("residual", None)
+# ==========================================================================================================
+
+    @property
+    def model(self):
+        return self.all_hdu.get("model", None)
+    
+    @model.setter
+    def model(self, new_hdu):
+        self.check_hdu_type(new_hdu)
+        self.all_hdu["model"] = new_hdu
+        
+    @property
+    def residual(self):
+        return self.all_hdu.get("residual", None)
+    
+    @residual.setter
+    def residual(self, new_hdu):
+        self.check_hdu_type(new_hdu)
+        self.all_hdu["residual"] = new_hdu
+        
+# ==========================================================================================================
         
     def generate_bulge_mask(self, sparcfire_csv):
         
@@ -369,6 +425,7 @@ class OutputFits(FitsFile):
             return bulge_mask
         
         if "rejected" in info[' fit_state']:
+            print(f"SpArcFiRe fit_state 'rejected'. Cannot determine the bulge mask for {self.gname}.")
             return bulge_mask
             
         try:
@@ -419,9 +476,11 @@ class OutputFits(FitsFile):
 #         temp[xx, yy] = np.min(self.model.data[np.nonzero(self.model.data)])
 #         plt.imshow(temp, origin = "lower")
 #         plt.show()
-            
+
+        #self.close()
         return bulge_mask
-        
+    
+# ==========================================================================================================
         
     def generate_masked_residual(self, mask, use_bulge_mask = True, update_fits_header = True):
 
@@ -431,11 +490,42 @@ class OutputFits(FitsFile):
         # To adjust for python indexing
         # Also, reminder, non-inclusive of end
         xbox_min, xbox_max, ybox_min, ybox_max = crop_box[0] - 1, crop_box[1], crop_box[2] - 1, crop_box[3]
-
         # To invert the matrix since galfit keeps 0 valued areas
         crop_mask = 1
         if mask is not None and np.any(mask.data):
-            crop_mask = 1 - mask.data[xbox_min:xbox_max, ybox_min:ybox_max]
+            cropped_mask = mask.data[xbox_min:xbox_max, ybox_min:ybox_max]
+            mask_shape = np.shape(mask.data)
+            # Fixing two common issues, hence two if statements
+            if np.shape(cropped_mask) != np.shape(self.model.data):
+                # The issue seems to pop up at the max border when either the min or the max runs up
+                # against the original image size
+                print("Shape mismatch between crop mask and model. Likely an indexing issue due to crop mask running into image bounds. Attempting to fix.")
+                diff = np.array(np.shape(cropped_mask)) - np.array(np.shape(self.model.data))
+                # One or the other... No graceful way to do this
+                if xbox_min == 0:
+                    xbox_max -= diff[0]
+                else:
+                    xbox_min -= diff[0]
+                    
+                if ybox_min == 0:
+                    ybox_max -= diff[0]
+                else:
+                    ybox_min -= diff[0]
+                
+                cropped_mask = mask.data[xbox_min:xbox_max, ybox_min:ybox_max]
+                
+            # Now we're just trying to brute force it and hope for the best
+            if np.shape(cropped_mask) != np.shape(self.model.data):
+                print("Shape mismatch (again) between crop mask and model. Likely an indexing issue due to crop mask running into image bounds. Attempting to fix.")
+                diff = np.abs(np.array(np.shape(cropped_mask)) - np.array(np.shape(self.model.data)))
+                cropped_mask = np.pad(cropped_mask, ((diff[0],0), (diff[1],0)), 'constant')
+                
+            # Giving up and proceeding without
+            if np.shape(cropped_mask) != np.shape(self.model.data):
+                print("Shape mismatch. Proceeding without crop mask.")
+                cropped_mask = 0
+                
+            crop_mask = 1 - cropped_mask
             
         if use_bulge_mask:
             feedme_dir, feedme_file = os.path.split(self.feedme.path_to_feedme)
@@ -455,22 +545,24 @@ class OutputFits(FitsFile):
             # compare to gaussian with same mean, std via kstest
             # if p value high, not that different
             
-            self.masked_residual = (self.observation.data - self.model.data)*crop_mask
+            self.masked_residual  = (self.observation.data - self.model.data)*crop_mask
             exclude_masked_pixels = self.masked_residual[np.abs(self.masked_residual) > 0]
-            mean = np.mean(exclude_masked_pixels)
-            std  = np.std(exclude_masked_pixels)
-            gaussian  = norm.rvs(size = len(exclude_masked_pixels), loc = mean, scale = std, random_state = 0)
-            self.kstest = kstest(gaussian, exclude_masked_pixels.flatten())
-            pvalue = self.kstest.pvalue
-            statistic = self.kstest.statistic
+            mean                  = np.mean(exclude_masked_pixels)
+            std                   = np.std(exclude_masked_pixels)
+            gaussian              = norm.rvs(size = len(exclude_masked_pixels), loc = mean, scale = std, random_state = 0)
+            self.kstest           = kstest(gaussian, exclude_masked_pixels.flatten())
+            pvalue                = self.kstest.pvalue
+            #statistic             = self.kstest.statistic
             # gaussian = norm.rvs(size = len(self.masked_residual)**2, loc = mean, scale = std, random_state = 0)
             # noised_masked_pixels = np.where(np.abs(self.masked_residual.flatten()) > 0, self.masked_residual.flatten(), gaussian)
             # self.kstest = kstest(gaussian, noised_masked_pixels)
 
-            self.norm_observation = slg.norm(crop_mask*self.observation.data)
-            self.norm_model = slg.norm(crop_mask*self.model.data)
-            self.norm_residual = slg.norm(crop_mask*self.residual.data)
+            self.norm_observation           = slg.norm(crop_mask*self.observation.data)
+            self.norm_model                 = slg.norm(crop_mask*self.model.data)
+            self.norm_residual              = slg.norm(crop_mask*self.residual.data)
             self.masked_residual_normalized = self.masked_residual/min(self.norm_observation, self.norm_model)
+            self.wayne_residual             = self.norm_residual/self.norm_observation
+            self.wayne_quality              = pvalue/self.wayne_residual # bigger is better
             
 #             obs_model = 1 - np.divide(
 #                                 crop_mask*self.observation.data/self.norm_observation, 
@@ -490,15 +582,17 @@ class OutputFits(FitsFile):
 
             if update_fits_header:
                 with fits.open(self.filepath, mode='update', output_verify='ignore') as hdul:
-                    hdul[2].header["NMR"] = (round(self.nmr, 4), "Norm of the masked residual")
+                    hdul[2].header["NMR"]   = (round(self.nmr, 8), "Norm of the masked residual")
+                    hdul[2].header["W_NMR"] = (round(self.wayne_residual, 8), "Wayne's residual")
+                    #hdul[2].header["W_Q"]   = (round(self.nmr, 8), "Wayne's quality measure")
 
                     # pvalue is sometimes none but round can't handle it
-                    if pvalue and statistic:
-                        hdul[2].header["ks_p"]    = (round(pvalue, 4), "p value of kstest vs noise")
-                        hdul[2].header["ks_stat"] = (round(statistic, 4), "statistic value of kstest vs noise")
+                    if isinstance(pvalue, float): # and isinstance(statistic, float):
+                        hdul[2].header["KS_P"]    = (round(pvalue, 8), "p value of kstest vs noise")
+                        #hdul[2].header["KS_STAT"] = (round(statistic, 8), "statistic value of kstest vs noise")
                     else:
-                        hdul[2].header["ks_p"]    = (None, "p value of kstest vs noise")
-                        hdul[2].header["ks_stat"] = (None, "statistic value of kstest vs noise")
+                        hdul[2].header["KS_P"]    = (None, "p value of kstest vs noise")
+                        #hdul[2].header["KS_STAT"] = (None, "statistic value of kstest vs noise")
 
         except ValueError:
             print(f"There may be a broadcast issue, observation, model, crop mask: ", end = "")
@@ -506,9 +600,14 @@ class OutputFits(FitsFile):
             # print(np.shape(mask_fits_file.data))
             # print(np.shape(fits_file.data))
             # print(crop_box)
+            #self.close()
             return None
         
+        #self.close()
+        
         return self.masked_residual_normalized
+
+# ==========================================================================================================
 
 
 # In[7]:
@@ -580,19 +679,22 @@ if __name__ == "__main__":
     print(f"Norm of the model: {test_model.norm_model:.4f}")
     print(f"Norm of the residual: {test_model.norm_residual:.4f}")
     print(f"Norm of the masked residual: {test_model.nmr:.4f}")
+    print(f"Wayne's residual: {test_model.wayne_residual:.4f}")
     #print(f"Norm of the masked residual ratio: {test_model.nmrr:.8f}")
     print(f"kstest p value: {test_model.kstest.pvalue:.4f}")
-    print(f"kstest statistic: {test_model.kstest.statistic:.4f}")
+    #print(f"kstest statistic: {test_model.kstest.statistic:.4f}")
     
     print("\nNow with bulge mask")
+    _ = test_model.generate_bulge_mask(pj(TEST_DATA_DIR, "test-out", gname, f"{gname}.csv"))
     _ = test_model.generate_masked_residual(test_mask, update_fits_header = False)
     print(f"Norm of the observation: {test_model.norm_observation:.4f}")
     print(f"Norm of the model: {test_model.norm_model:.4f}")
     print(f"Norm of the residual: {test_model.norm_residual:.4f}")
     print(f"Norm of the masked residual: {test_model.nmr:.4f}")
+    print(f"Wayne's residual: {test_model.wayne_residual:.4f}")
     #print(f"Norm of the masked residual ratio: {test_model.nmrr:.8f}")
     print(f"kstest p value: {test_model.kstest.pvalue:.4f}")
-    print(f"kstest statistic: {test_model.kstest.statistic:.4f}")
+    #print(f"kstest statistic: {test_model.kstest.statistic:.4f}")
     #print(np.min(test_model.observation.data))
 
 
@@ -612,7 +714,7 @@ if __name__ == "__main__":
     print("Checking FITS header update with NMR")
     
     print("Does the updated FITS file contain NMR and KStest keys?")
-    keys_to_check = ("NMR", "KS_P", "KS_STAT")
+    keys_to_check = ("NMR", "KS_P", "W_NMR")
     
     # TODO: replace fits file with one without those header options
     print("Before... (expect False)", all(k in test_model.header for k in keys_to_check))
@@ -624,6 +726,14 @@ if __name__ == "__main__":
 
 
 # In[11]:
+
+
+if __name__ == "__main__":
+    print("Checking if all FITS files are closed...")
+    print("Expect True:", not any("fits" in pof.path for pof in psutil.Process().open_files()))
+
+
+# In[ ]:
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 
 import numpy as np
-import glob
+#import glob
 import csv
 import pandas as pd
 
@@ -40,6 +40,7 @@ else:
     
 sys.path.append(_MODULE_DIR)
 
+from Classes.Parameters import *
 from Classes.Components import *
 from Classes.Containers import *
 from Classes.FitsHandlers import *
@@ -50,13 +51,13 @@ def pitch_angle(*args):
     CDEF = 0.23
     
     #args = [float(arg) for arg in args]
-    r = args[0]
+    r         = args[0]
     theta_out = args[1]
-    r_out = args[2]
-    alpha = args[3]
-    r_in = np.zeros(np.shape(r))
+    r_out     = args[2]
+    alpha     = args[3]
+    r_in      = np.zeros(np.shape(r))
     if len(args) == 5:
-        r_in = args[4]
+        r_in  = args[4]
     
     theta_out = np.radians(theta_out) #+ sky_pa)
 
@@ -116,7 +117,13 @@ def sum_fourier_modes(fourier_dict, **kwargs):
     rotate = True
     
     fsum = np.zeros(np.shape(theta))
-    for Fstr, (amplitude, phi) in fourier_dict.items():
+    for Fstr, Fmode in fourier_dict.items():
+        if Fstr == "skip":
+            continue
+        
+        amplitude = Fmode.amplitude
+        phi       = Fmode.phase_angle
+        
         m = float(Fstr[-1])
         phi = np.radians(phi)
         
@@ -179,6 +186,7 @@ def plot_scatter(
     gname = str(galaxy_info.name[0])
     
     plt.clf()
+    plt.figure(figsize=(8, 6))
     plt.scatter(rgrid, pitch_angles)#, label='_nolegend_')
     plt.axvline(x = rgrid[inner_idx], color = 'mediumseagreen', alpha = 0.5)
     plt.axvline(x = rgrid[outer_idx], color = 'mediumseagreen', alpha = 0.5, label='_nolegend_')
@@ -223,7 +231,8 @@ def plot_validation(pitch_angles,
                     thetas, 
                     galaxy_info, 
                     arc_info, 
-                    fits_file_obj, 
+                    fits_file_obj,
+                    model_obj,
                     inner_idx = 0, 
                     outer_idx = -1, 
                     radial_steps = 5, 
@@ -238,13 +247,13 @@ def plot_validation(pitch_angles,
     num_pts = len(rgrid)
     
     fit_region = fits_file_obj.feedme.header.region_to_fit
-    xmax = fit_region[1] - fit_region[0]
-    ymax = fit_region[3] - fit_region[2]
+    xmax = fit_region.x2 - fit_region.x1
+    ymax = fit_region.y2 - fit_region.y1
     
     rval_max = np.max(rgrid)
     
-    x0 = kwargs.get("x0", fits_file_obj.feedme.disk.position[0] - fit_region[0]) #0.5*xmax
-    y0 = kwargs.get("y0", fits_file_obj.feedme.disk.position[1] - fit_region[2]) #0.5*ymax
+    x0 = kwargs.get("x0", fits_file_obj.feedme.disk.position.x - fit_region.x1) #0.5*xmax
+    y0 = kwargs.get("y0", fits_file_obj.feedme.disk.position.y - fit_region.y1) #0.5*ymax
     
     x_vals = rgrid*np.cos(thetas) + x0
     y_vals = rgrid*np.sin(thetas) + y0
@@ -276,7 +285,8 @@ def plot_validation(pitch_angles,
 
         ax = fig.add_axes(axes_coords)
 
-        im = ax.imshow(fits_file_obj.model.data, cmap='gray', alpha = 1, norm=colors.PowerNorm(0.3))
+        #im = ax.imshow(fits_file_obj.model.data, cmap='gray', alpha = 1, norm=colors.PowerNorm(0.3))
+        im = ax.imshow(model_obj.data, cmap='gray', alpha = 1, norm=colors.PowerNorm(0.3))
         #fig.colorbar(im, orientation='vertical')
         ax.plot(x_vals, y_vals, color='springgreen', alpha=0.3,  linewidth=2)
         # Re-enable this comment to plot the arm opposite (assuming symmetry)
@@ -321,7 +331,7 @@ def plot_validation(pitch_angles,
 
         # Validation
         circle_slope = np.gradient(tangent_to_circle1, xgrid1)[0]
-        diff_angle = np.degrees(np.arctan((closest_slope - circle_slope)/(1 + closest_slope*circle_slope)))
+        diff_angle   = np.degrees(np.arctan((closest_slope - circle_slope)/(1 + closest_slope*circle_slope)))
         #print(f"Difference in angle between spiral and circle: {180 - np.degrees(abs(angle_spiral - angle_circle)):.2f}")
         # Turn off to see difference in standard output
         #print(f"Difference in pitch angle measures (between tangents and differential) at radius {radius}: {abs(abs(diff_angle) - pitch_angles[closest_idx]):.2f}")
@@ -345,22 +355,57 @@ def plot_validation(pitch_angles,
         
     return filename
 
-# Recommend turning use_inner_outer_rad for pictures otherwise this is more informative
-def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, validation_plot = False, use_inner_outer_rad = False):
+def generate_galfit_model_no_inclination(gname, feedme, out_dir, model_dir = "tmp_galfit_models"):
     
-    gname = os.path.basename(gpath)   
+    #temp_dir    = pj(out_dir, "galfit_models")
+    if not exists(model_dir):
+        os.mkdir(model_dir)
+        
+    feedme_path = pj(model_dir, f"{gname}_model.in")
+    
+    feedme.header.output_image.value = pj(model_dir, f"{gname}_model_out.fits")
+    feedme.header.optimize.value     = 1
+    feedme.arms.inclination.value    = 0
+    feedme.path_to_feedme            = feedme_path
+    
+    feedme.to_file()
+    
+    _ = sp(f"{run_galfit} {feedme_path}")
+    
+    return feedme.header.output_image.value
+
+# Recommend turning use_inner_outer_rad on for pictures otherwise this is more informative
+def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, validation_plot = False, use_inner_outer_rad = False, model_dir = "tmp_galfit_models"):
+    
+    gname = os.path.basename(gpath)
     try:
-        fits_file = OutputFits(pj(gpath, f"{gname}_galfit_out.fits"))
+        fits_file = OutputFits(
+            pj(gpath, f"{gname}_galfit_out.fits"), 
+            #load_default = False,
+            # Telling the module that these are the components we're looking for
+            disk_for_arms = Sersic(3),
+            arms          = Power(3),
+            fourier       = Fourier(3),
+            sky           = Sky(4),
+            sersic_order  = ["bulge", "disk", "disk_for_arms"]
+        )
         print(gname) #, 'ok')
     except (AttributeError, FileNotFoundError, Exception):
         print(f"Something went wrong opening galaxy {gname}! Continuing...")
         #continue
         return None
-
+                                                        
     fit_region = fits_file.feedme.header.region_to_fit
 
-    disk = fits_file.feedme.disk
-    q    = disk.axis_ratio
+    # Three(+1) component fit
+    try:
+        disk = fits_file.feedme.disk_for_arms
+        
+    # Two(+1) component fit
+    except AttributeError:
+        disk = fits_file.feedme.disk
+        
+    q          = disk.axis_ratio.value
 
     arms       = fits_file.feedme.arms
     fourier    = fits_file.feedme.fourier
@@ -370,14 +415,14 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
 
     xmin = 0
     ymin = 0
-    xmax = fit_region[1] - fit_region[0] #outer_rad*np.cos(arms.cumul_rot)
-    ymax = fit_region[3] - fit_region[2] #outer_rad*np.sin(arms.cumul_rot)
+    xmax = fit_region.x2 - fit_region.x1 #outer_rad*np.cos(arms.cumul_rot)
+    ymax = fit_region.y2 - fit_region.y1 #outer_rad*np.sin(arms.cumul_rot)
     
     xgrid = np.linspace(xmin, xmax, num_pts)
-    x0    = disk.position[0] - fit_region[0] #0 #0.5*xmax
+    x0    = disk.position.x - fit_region.x1 #0 #0.5*xmax
     
     ygrid = np.linspace(ymin, ymax, num_pts)
-    y0    = disk.position[1] - fit_region[2] #0 #0.5*ymax
+    y0    = disk.position.y - fit_region.y1 #0 #0.5*ymax
     
     rvals_grid = np.sqrt((xgrid - x0)**2 + ((ygrid - y0)/q)**2)
     
@@ -435,12 +480,12 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
     rvals_grid = np.sqrt((xgrid - x0)**2 + ((ygrid - y0)/q)**2)
 
     # With Fourier Modes
-    if "skip" in fourier.param_values:
+    if fourier.parameters["skip"]:
         rgrid = rvals_grid
     else:
         rgrid = np.multiply(rvals_grid, 
                             sum_fourier_modes(
-                                fourier.param_values,
+                                fourier.parameters,
                                 #amplitudes = amplitudes,
                                 #phis  = phis,
                                 x0    = x0,
@@ -451,8 +496,6 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
                             )
                            )
     
-    
-    
     inner_idx = np.argmin(np.abs(np.abs(rgrid) - inner_rad))
     outer_idx = np.argmin(np.abs(np.abs(rgrid) - outer_rad))
 
@@ -460,10 +503,10 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
     #with_fourier = np.array(list(map(pitch_angle, rgrid, ones*arms.cumul_rot, ones*arms.outer_rad, ones*arms.powerlaw, ones*arms.inner_rad)))
     pitch_angles, thetas = pitch_angle(
         rgrid, 
-        ones*arms.cumul_rot, 
-        ones*arms.outer_rad, 
-        ones*arms.powerlaw, 
-        ones*arms.inner_rad
+        ones*arms.cumul_rot.value, 
+        ones*arms.outer_rad.value, 
+        ones*arms.powerlaw_index.value, 
+        ones*arms.inner_rad.value
     )
     
     #pitch_angles = pitch_angles[cond]
@@ -489,8 +532,17 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
             os.mkdir(pj(out_dir, "validation_plots"))
             
         #thetas_rot = thetas - np.radians(arms.sky_position_angle) + 0.5*np.pi #- np.radians(disk.position_angle)
-        thetas_rot = thetas + np.radians(arms.sky_position_angle) + 0.5*np.pi + np.radians(disk.position_angle)
+        thetas_rot = thetas + np.radians(arms.sky_position_angle.value) + 0.5*np.pi + np.radians(disk.position_angle.value)
         #rgrid_incl = rgrid*np.cos(np.radians(arms.inclination))
+        
+        model_output = generate_galfit_model_no_inclination(gname, fits_file.feedme, out_dir, model_dir = model_dir)
+        try:
+            model_only_fits_file = FitsFile(model_output)
+        except (AttributeError, FileNotFoundError, Exception):
+            print(f"Something went wrong opening galaxy model {gname}! Continuing with original output...")
+            model_only_fits_file = fits_file.model
+            #continue
+            #return None
         
         _ = plot_validation(
                             pitch_angles, 
@@ -499,6 +551,7 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
                             galaxy_info, 
                             arc_info,
                             fits_file_obj = fits_file,
+                            model_obj     = model_only_fits_file,
                             # inner_idx = inner_idx, 
                             # outer_idx = outer_idx, 
                             validation_dir = pj(out_dir, "validation_plots")
@@ -515,9 +568,9 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
     #return avg_constrained_pa, rvals_grid[inner_idx], rvals_grid[outer_idx]
     return pitch_angles, thetas, rgrid #, inner_idx, outer_idx #rgrid[inner_idx : outer_idx]
       
-def main(in_dir, out_dir, num_pts = 100, scatter_plot = True, validation_plot = False):
+def main(in_dir, out_dir, num_pts = 500, scatter_plot = True, validation_plot = False, model_dir = "tmp_galfit_models"):
     
-    gpaths = glob.glob(pj(out_dir, "123*"))
+    gpaths = glob(pj(out_dir, "123*"))
     gnames = [os.path.basename(i) for i in gpaths]
     
     pa_inner_outer = Parallel(n_jobs = -2)(
@@ -525,14 +578,17 @@ def main(in_dir, out_dir, num_pts = 100, scatter_plot = True, validation_plot = 
                                gpath,
                                in_dir,
                                out_dir,
-                               num_pts = num_pts,
-                               scatter_plot = scatter_plot,
-                               validation_plot = validation_plot
+                               num_pts             = num_pts,
+                               scatter_plot        = scatter_plot,
+                               validation_plot     = validation_plot,
+                               use_inner_outer_rad = True,
+                               model_dir           = model_dir
                                                 )
                            for gpath in gpaths
                                             )
     
     pa_info_dict = dict(zip(gnames, pa_inner_outer))
+    #print(pa_info_dict)
     
     avg_constrained_pas = [np.mean(tup[0]) if tup else None for tup in pa_inner_outer]
     
@@ -546,10 +602,12 @@ def main(in_dir, out_dir, num_pts = 100, scatter_plot = True, validation_plot = 
 if __name__ == "__main__":
     
     in_dir  = "sparcfire-in"
+    tmp_dir = "sparcfire-tmp"
     out_dir = "sparcfire-out"
     
     scatter_plot    = True
-    validation_plot = False
+    validation_plot = True
+    cleanup = True
     
     if len(sys.argv) == 3:
         in_dir = sys.argv[1]
@@ -570,10 +628,14 @@ if __name__ == "__main__":
         
     if not exists(in_dir) or not exists(out_dir):
         raise(f"Cannot find input/output directories {in_dir} {out_dir}.")
+        
+    model_dir = pj(out_dir, "tmp_galfit_models")
     
-    pitch_angle_info = main(in_dir, out_dir, scatter_plot = scatter_plot, validation_plot = validation_plot)
+    pitch_angle_info = main(in_dir, out_dir, scatter_plot = scatter_plot, validation_plot = validation_plot, model_dir = model_dir)
     
     filename = pj(out_dir, "pitch-angle_info.pkl")
     pitch_angle_info.to_pickle(filename)
     #pd.dump(pa_rgrid_theta, open(filename, 'wb'))
+    if cleanup:
+        sp(f"rm -rf {model_dir}")
     

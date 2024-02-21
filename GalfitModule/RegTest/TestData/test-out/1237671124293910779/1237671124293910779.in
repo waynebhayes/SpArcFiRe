@@ -38,12 +38,12 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 
 # Component number: 1
  0) sersic              # Component type
- 1) 59.1800 59.2000 0  0 # Position x, y
- 3) 12.76       1       # Integrated magnitude
- 4) 12.41       1       # R_e (effective radius)   [pix]
- 5) 1.24        1       # Sersic index n (de Vaucouleurs n=4)
- 9) 0.69        1       # Axis ratio (b/a)
- 10) -48.49     1       # Position angle (PA) [deg: Up=0, Left=90]
+ 1) 59.1797 59.2038 0  0 # Position x, y
+ 3) 14.0        1       # Integrated magnitude
+ 4) 3.7976      1       # R_e (effective radius)   [pix]
+ 5) 4.0         1       # Sersic index n (de Vaucouleurs n=4)
+ 9) 0.8768      1       # Axis ratio (b/a)
+ 10) 68.0313    1       # Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
 # Component number: 2
@@ -52,7 +52,7 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
  3) 14.0        1       # Integrated magnitude
  4) 19.067      1       # R_e (effective radius)   [pix]
  5) 1.0         1       # Sersic index n (de Vaucouleurs n=4)
- 9) 0.6         1       # Axis ratio (b/a)
+ 9) 0.7006      1       # Axis ratio (b/a)
  10) 134.0506   1       # Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
@@ -69,9 +69,9 @@ F3) 0.0500 25   1  1    # Azim. Fourier mode 3, amplitude, & phase angle
 
 # Component number: 3
  0) sky                 # Component type
- 1) 1084.18     1       # Sky background at center of fitting region [ADUs]
- 2) -0.0046     1       # dsky/dx (sky gradient in x)     [ADUs/pix]
- 3) 0.0168      1       # dsky/dy (sky gradient in y)     [ADUs/pix]
+ 1) 1000.0      1       # Sky background at center of fitting region [ADUs]
+ 2) 0.0         1       # dsky/dx (sky gradient in x)     [ADUs/pix]
+ 3) 0.0         1       # dsky/dy (sky gradient in y)     [ADUs/pix]
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
 ================================================================================
