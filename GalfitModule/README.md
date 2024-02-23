@@ -46,7 +46,7 @@ See the 'Current Directory Structure' section below for an example of what files
 to do most of the leg work, so it may be more of a rabbit hole than anything else. It is currently only somewhat documented but feel
 free to contact Matthew if something is unclear.
 
-![Flow chart for `go_go_galfit.py`](go_go_galfit_flowchart.png)
+![Flow chart for 3(+1) component version of `go_go_galfit.py`](go_go_galfit_flowchart_3+1.png)
 
 Most OOP implementation things can be found in the `Classes` directory in the module. We recommend taking a look at the 
 Jupyter Notebook version of these codes which can be found in the `Notebooks` dirs located inside each class folder in order
