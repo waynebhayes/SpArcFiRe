@@ -557,10 +557,11 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs):
         # Take mag from SDSS and bulge_axis_ratio from SDSS
         with fits.open(pj(in_dir, f"{gname}.fits"), "update") as gf:
             try:
-                # Add avg gain to header for GALFIT use in sigma image
+                # Add avg gain from SDSS to header 
+                # for GALFIT use in sigma image
                 # Save some I/O
-                if "GAIN" not in gf[0].header:
-                    gf[0].header["GAIN"] = 4.7
+                #if "GAIN" not in gf[0].header:
+                    #gf[0].header["GAIN"] = 4.7
                 #SURVEY = SDSS-r  DR7
                 color = gf[0].header["SURVEY"].split()[0][-1]
                 petromag_str = f"pMag_{color}"
