@@ -555,8 +555,12 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs):
         petromag = 15 #float(petromags[i])
         bulge_axis_ratio = float(galaxy_dict["bulge_axis_ratio"])
         # Take mag from SDSS and bulge_axis_ratio from SDSS
-        with fits.open(pj(in_dir, f"{gname}.fits")) as gf:
+        with fits.open(pj(in_dir, f"{gname}.fits"), "update") as gf:
             try:
+                # Add avg gain to header for GALFIT use in sigma image
+                # Save some I/O
+                if "GAIN" not in gf[0].header:
+                    gf[0].header["GAIN"] = 4.7
                 #SURVEY = SDSS-r  DR7
                 color = gf[0].header["SURVEY"].split()[0][-1]
                 petromag_str = f"pMag_{color}"
@@ -675,6 +679,8 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs):
                                    )
         #print(container.disk_for_arms)
         #sys.exit()
+        # This drops a .in file to the galaxy folder directory
+        # which can be used as reference for the starting parameters
         container.to_file()
         # skip = 1
         # if arms.parameters.skip.value:
@@ -690,6 +696,7 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs):
 
 if __name__ == "__main__":
     
+    num_components = 3
     if len(sys.argv) >= 4:
         in_dir = sys.argv[1]
         tmp_dir = sys.argv[2]
