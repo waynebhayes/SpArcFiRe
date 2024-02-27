@@ -50,7 +50,8 @@ if __name__ == "__main__":
     OLD_BASE_DIR = sys.argv[1] #"/extra/wayne_scratch0/preserve/portman/29k_galaxies" 
     NEW_BASE_DIR = sys.argv[2] #"/home/portmanm/29k_galaxies"
     #SDSS_filepath = "/home/wayne/research/drdavis/SDSS/FITS/2015/color/r"
-    DATA_DIR = "/extra/wayne1/research/drdavis/SDSS/SpArcFiRe/2016-09/r/"
+    COLOR    = sys.argv[3]
+    DATA_DIR = f"/extra/wayne1/research/drdavis/SDSS/SpArcFiRe/2016-09/{COLOR}/"
     OLD_SPARCIN  = pj(OLD_BASE_DIR, "sparcfire-in") #"/tmp/portmanm_galfitting/sparcfire-in"
 
     NEW_SPARCIN  = pj(NEW_BASE_DIR, "sparcfire-in") 
