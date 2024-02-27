@@ -240,7 +240,7 @@ def galaxy_information(galaxy_name, galaxy_path):
         #inclination = inclination
 
         # Grabbing chirality
-        chirality = row.get('chirality_maj', chirality)
+        chirality   = row.get('chirality_maj', chirality)
         chirality_2 = row.get('chirality_alenWtd', chirality_2)
         chirality_3 = row.get('chirality_longestArc', chirality_3)
 
@@ -537,23 +537,12 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs):
         
         tmp_dir_basename = os.path.basename(tmp_dir)
         out_dir_basename = os.path.basename(out_dir)
-        header = GalfitHeader(input_menu_file = gname,
-                              #extra_header_info = f"{run}{camcol}{field}; HDU: z{psf_row}{psf_col}",
-                              galaxy_name = gname,
-                              input_image = pj(in_dir, f"{gname}.fits"),
-                              output_image = pj(tmp_dir, "galfits", f"{gname}_galfit_out.fits"),
-                              # Unfortunately have to use a relative path here since GALFIT
-                              # breaks when the filename is too long
-                              #psf = pj("..", "..", tmp_dir_basename, "psf_files", f"{gname}_psf.fits"),
-                              psf = pj(".", out_dir_basename, gname, f"{gname}_psf.fits"),
-                              pixel_mask = pj(tmp_dir, "galfit_masks", f"{gname}_star-rm.fits"),
-                              region_to_fit = (x1crop, x2crop, y1crop, y2crop),
-                              optimize = 0
-                             )
-        
         
         petromag = 15 #float(petromags[i])
         bulge_axis_ratio = float(galaxy_dict["bulge_axis_ratio"])
+        # CHANGE THIS DEFAULT TO WHATEVER IS CURRENTLY BEING USED
+        # It should be caught in the header but just in case...
+        color = "g"
         # Take mag from SDSS and bulge_axis_ratio from SDSS
         with fits.open(pj(in_dir, f"{gname}.fits"), "update") as gf:
             try:
@@ -563,6 +552,7 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs):
                 #if "GAIN" not in gf[0].header:
                     #gf[0].header["GAIN"] = 4.7
                 #SURVEY = SDSS-r  DR7
+                # gf[0].header.pop("GAIN", None)
                 color = gf[0].header["SURVEY"].split()[0][-1]
                 petromag_str = f"pMag_{color}"
                 devab_str = f"devAB_{color}"
@@ -571,6 +561,29 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs):
                     bulge_axis_ratio = gf[0].header[devab_str]
             except KeyError:
                 print(f"There is something wrong with the header for {gname}.")
+                
+        # SDSS DR7
+        mag_zeropoints = {
+            "u" : 24.63,
+            "g" : 25.11,
+            "r" : 24.80,
+            "i" : 24.36,
+            "z" : 22.83
+        }
+        header = GalfitHeader(input_menu_file     = gname,
+                              #extra_header_info = f"{run}{camcol}{field}; HDU: z{psf_row}{psf_col}",
+                              galaxy_name         = gname,
+                              input_image         = pj(in_dir, f"{gname}.fits"),
+                              output_image        = pj(tmp_dir, "galfits", f"{gname}_galfit_out.fits"),
+                              # Unfortunately have to use a relative path here since GALFIT
+                              # breaks when the filename is too long
+                              #psf = pj("..", "..", tmp_dir_basename, "psf_files", f"{gname}_psf.fits"),
+                              psf                 = pj(".", out_dir_basename, gname, f"{gname}_psf.fits"),
+                              pixel_mask          = pj(tmp_dir, "galfit_masks", f"{gname}_star-rm.fits"),
+                              region_to_fit       = (x1crop, x2crop, y1crop, y2crop),
+                              mag_photo_zeropoint = mag_zeropoints[color],
+                              optimize            = 0
+                             )
         
         bulge = Sersic(
             component_number = 1, 
