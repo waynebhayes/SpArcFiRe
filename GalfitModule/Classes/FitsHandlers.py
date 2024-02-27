@@ -247,12 +247,13 @@ class FitsFile:
         
         capture_output = bool(kwargs.get("silent", False))
         
-        fitspng_param  = "0.25,1" #1,150"
+        fitspng_param       = "0.25,1" #1,150"
+        fitspng_param_model = "0.25,0.75"
         
         # run_fitspng from helper_functions, string path to fitspng program
         fitspng_cmd1   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}.png {fits_path}[1]"
         
-        fitspng_cmd2   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}_out.png {fits_path}[2]"
+        fitspng_cmd2   = f"{run_fitspng} -fr \"{fitspng_param_model}\" -o {tmp_png_path}_out.png {fits_path}[2]"
         
         fitspng_cmd3   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}_residual.png {fits_path}[3]"
         
@@ -733,7 +734,7 @@ if __name__ == "__main__":
     print("Expect True:", not any("fits" in pof.path for pof in psutil.Process().open_files()))
 
 
-# In[ ]:
+# In[12]:
 
 
 if __name__ == "__main__":
