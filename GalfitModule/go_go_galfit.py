@@ -979,7 +979,7 @@ def main(**kwargs):
         for (b,d) in b_d_magnitudes:
         #for b in b_magnitudes:
             #prefix = f"m{b}m{d}"
-            prefix = f"m{b}"
+            prefix = f"m{10*b:.0f}"
             
             # Parameter Search outputs
             to_del.extend([
