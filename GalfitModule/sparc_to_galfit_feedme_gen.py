@@ -148,19 +148,19 @@ def galaxy_information(galaxy_name, galaxy_path):
         
     except:
         print("Can't open to read: ", csv_filename)
-        print("Check Sparcfire output or directories. Proceeding with default values.")
-        return kwargs_out
+        print("Check Sparcfire output or directories. Kicking this galaxy out of the set.")
+        return None
 
     reader = csv.DictReader(csv_file, skipinitialspace = True)
     for row in reader:
         
         # if sparcfire fails
         if row.get('fit_state', "") in failure_modes:
-            return kwargs_out
+            return None
         
         elif row.get('fit_state', "") != "OK":
             print(f"fit state is: {row.get('fit_state', '')}")
-            return kwargs_out
+            return None
 
         try:
             # Already accounted for, no need to scale
@@ -171,8 +171,8 @@ def galaxy_information(galaxy_name, galaxy_path):
             scale_fact_std = 2*crop_rad/256
 
         except (ValueError, TypeError) as ve:
-            print(f"SpArcFiRe likely failed on this galaxy, {ve}. Proceeding with default values...")
-            return kwargs_out
+            print(f"SpArcFiRe likely failed on this galaxy, {ve}. Kicking it out of the set.")
+            return None
 
         # Anything with converting to float/int should go in here since there are a couple issues besides
         # fit state which still result in an empty csv
@@ -216,7 +216,7 @@ def galaxy_information(galaxy_name, galaxy_path):
 
         # Happens when row is empty... This is easier than messing with other conditionals for each scale factor/float conversion
         except ValueError as ve:
-            return kwargs_out
+            return None
 
         if disk_rot_angle < 0: 
             inclination = np.degrees(np.arccos(disk_axis_ratio))
@@ -503,6 +503,11 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs):
             continue
         
         galaxy_dict    = galaxy_information(gname, gfolder)
+        if not galaxy_dict:
+            print("Uh oh can't make a feedme for this galaxy")
+            print("There is an issue with its 'galaxy.csv' file.")
+            continue
+            
         scale_fact_std = galaxy_dict["scale_fact_std"]
         
         center_pos_x = float(galaxy_dict["center_pos_x"])
