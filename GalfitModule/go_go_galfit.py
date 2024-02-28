@@ -322,7 +322,7 @@ async def parameter_search_fit(
         use_spiral = False
     
     header = initial_components.header
-       
+    
     initial_components.bulge.magnitude.value += bulge_magnitude
     #initial_components.bulge.magnitude.value = bulge_magnitude
     #initial_components.disk.magnitude.value  = disk_magnitude
@@ -336,7 +336,7 @@ async def parameter_search_fit(
     # And the input dict is *before* output but will be updated *by* output
     # ---------------------------------------------------------------------
     
-    bulge_str = f"m{bulge_magnitude}"
+    bulge_str = f"m{10*bulge_magnitude:.0f}"
     #disk_str  = f"m{disk_magnitude}"
     #disk_str  = "m" + str(bulge_sersic).replace(".", "")
                 
@@ -787,7 +787,7 @@ def main(**kwargs):
     # Non-inclusive of end
     # I keep b_d_magnitudes even though I fix the disk for ease of modification
     # in the future
-    b_d_magnitudes = [(b, 15) for b in np.linspace(-2, 2, num = 10)]
+    b_d_magnitudes = [(b, 15) for b in np.linspace(-2, 2, num = 5)]
     # b_d_magnitudes = [(b, 15) for b in range(12, 17)]
     #b_magnitudes = range(12, 17)
     #b_d_magnitudes = [(b, d) for b in range(12, 17) for d in range(13, 17)]
