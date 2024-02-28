@@ -296,7 +296,8 @@ class FitsFile:
         
         tiling = f"1x{self.num_imgs}"
         if kwargs.get("horizontal", None):
-            tiling = tiling = f"{self.num_imgs}x1"            
+            tiling    = tiling = f"{self.num_imgs}x1"
+            combined += "_horizontal"
             
         # Combining the images using ImageMagick
         # If this is a single image, it'll also resize for me so that's why I leave it in
