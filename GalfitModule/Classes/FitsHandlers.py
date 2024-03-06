@@ -19,6 +19,9 @@ import numpy as np
 import scipy.linalg as slg
 from scipy.stats import norm, kstest
 from skimage.draw import disk, ellipse
+
+import imageio.v3 as iio
+
 import matplotlib.pyplot as plt
 
 
@@ -357,7 +360,7 @@ class FitsFile:
 # ==========================================================================================================
 
 
-# In[6]:
+# In[7]:
 
 
 class OutputFits(FitsFile):
@@ -484,7 +487,38 @@ class OutputFits(FitsFile):
     
 # ==========================================================================================================
         
-    def generate_masked_residual(self, mask, use_bulge_mask = True, update_fits_header = True):
+    def generate_cluster_mask(self, cluster_mask_png, crop_box):
+        # 1237668297135030610-D_clusMask.png
+
+        cluster_mask = None
+        try:
+            cluster_img = iio.imread(cluster_mask_png, mode = "L")
+        except FileNotFoundError as fe:
+            print(fe)
+            return cluster_mask
+
+        xbox_min, xbox_max, ybox_min, ybox_max = crop_box[0] - 1, crop_box[1], crop_box[2] - 1, crop_box[3]
+        cluster_img = cluster_img[xbox_min:xbox_max, ybox_min:ybox_max]
+        
+        cluster_mask = deepcopy(cluster_img)
+        # Mask non-clusters
+        cluster_mask[cluster_img == 0] = 1
+        # Leave clusters alone
+        cluster_mask[cluster_img != 0] = 0
+        
+        self.cluster_mask = cluster_mask
+        
+        return cluster_mask
+    
+# ==========================================================================================================
+        
+    def generate_masked_residual(
+        self, 
+        mask, 
+        use_bulge_mask = False,
+        use_cluster_mask = False,
+        update_fits_header = True
+    ):
 
         small_number = 1e-8
         
@@ -529,9 +563,8 @@ class OutputFits(FitsFile):
                 
             crop_mask = 1 - cropped_mask
             
+        feedme_dir, feedme_file = os.path.split(self.feedme.path_to_feedme)
         if use_bulge_mask:
-            feedme_dir, feedme_file = os.path.split(self.feedme.path_to_feedme)
-            
             if exists(pj(feedme_dir, f"{self.gname}.csv")):
                 crop_mask = self.generate_bulge_mask(pj(feedme_dir, f"{self.gname}.csv")) * crop_mask
             else:
@@ -543,6 +576,21 @@ class OutputFits(FitsFile):
                 except ValueError:
                     print(f"Could not generate bulge mask for {self.gname}. There may be an issue with sparcfire output (broadcast issue).")
         
+        if use_cluster_mask:
+            # Use reprojected mask
+            cmask_filename = pj(feedme_dir, f"{self.gname}-K_clusMask-reprojected.png")
+            
+            if exists(cmask_filename):
+                crop_mask = self.generate_cluster_mask(cmask_filename, crop_box) * crop_mask
+            else:
+                # REQUIRES GENERATE_CLUSTER_MASK TO BE RUN SEPARATE WITH CSV FILE SPECIFIED 
+                try:
+                    crop_mask = self.cluster_mask * crop_mask
+                except AttributeError:
+                    print(f"Could not generate cluster mask for {self.gname}. Check location of csv or run generate_bulge_mask with a specified csv file.")
+                except ValueError:
+                    print(f"Could not generate cluster mask for {self.gname}. There may be an issue with sparcfire output (broadcast issue).")
+            
         try:
             # compare to gaussian with same mean, std via kstest
             # if p value high, not that different
@@ -612,14 +660,14 @@ class OutputFits(FitsFile):
 # ==========================================================================================================
 
 
-# In[7]:
+# In[8]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[8]:
+# In[9]:
 
 
 # Testing from_file
@@ -668,7 +716,7 @@ if __name__ == "__main__":
     print(np.shape(test_obs.observation.data))
 
 
-# In[9]:
+# In[10]:
 
 
 # Unit test to check value of masked residual
@@ -700,7 +748,7 @@ if __name__ == "__main__":
     #print(np.min(test_model.observation.data))
 
 
-# In[10]:
+# In[11]:
 
 
 if __name__ == "__main__":
@@ -727,7 +775,7 @@ if __name__ == "__main__":
     print("After...", all(k in test_model.header for k in keys_to_check))
 
 
-# In[11]:
+# In[12]:
 
 
 if __name__ == "__main__":
@@ -735,7 +783,7 @@ if __name__ == "__main__":
     print("Expect True:", not any("fits" in pof.path for pof in psutil.Process().open_files()))
 
 
-# In[12]:
+# In[13]:
 
 
 if __name__ == "__main__":
