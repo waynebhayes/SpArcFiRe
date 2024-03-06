@@ -87,7 +87,7 @@ def check_success(in_fits, previous_state = False):
     
     return (previous_state or False)
 
-def generate_model_for_sparcfire(gfits, base_galfit_cmd, tmp_fits_dir = ""):
+def generate_model_for_sparcfire(gfits, base_galfit_cmd, in_dir, tmp_fits_dir = ""):
     gname  = os.path.basename(gfits).replace("_galfit_out.fits", "")
     suffix = "for_sparcfire"
     if not tmp_fits_dir:
@@ -96,8 +96,12 @@ def generate_model_for_sparcfire(gfits, base_galfit_cmd, tmp_fits_dir = ""):
     fits_file = OutputFits(gfits, load_default = False)
     feedme = fits_file.feedme
     
-    feedme.header.output_image.value = pj(tmp_fits_dir, f"{gname}_{suffix}.fits")
-    feedme.header.optimize.value     = 1
+    feedme.header.input_image.value   = pj(in_dir, f"{gname}.fits")
+    feedme.header.output_image.value  = pj(tmp_fits_dir, f"{gname}_{suffix}.fits")
+    # No crop to allow SpArcFiRe to use its autocrop routine 
+    # without issue
+    feedme.header.region_to_fit.value = (0, 256, 0, 256)
+    feedme.header.optimize.value      = 1
     
     if "power_0" in feedme.components: #or "arms" in feedme.components:
         power_comp_number = feedme.power_0.component_number
@@ -963,7 +967,7 @@ def main(**kwargs):
         
         # Creating a version of the galaxy for SpArcFiRe to use
         # Do this last just in case there's an issue
-        _ = generate_model_for_sparcfire(tmp_fits_path_gname, base_galfit_cmd)
+        _ = generate_model_for_sparcfire(tmp_fits_path_gname, base_galfit_cmd, in_dir)
         
         print()
         
