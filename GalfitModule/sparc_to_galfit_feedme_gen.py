@@ -97,6 +97,18 @@ def scale_var(x, scale = 1):
 # *********************************************************************
 # *********************************************************************
 
+def extract_crop_rad_from_elps(elps_filepath):
+    from re import search
+    
+    with open(elps_filepath, "r") as ef:
+        elps_str = ef.read()
+        
+    crop_rad_str = search("cropRad=[0-9]*", elps_str).group()
+    return crop_rad_str.split("=")[1]
+
+# *********************************************************************
+# *********************************************************************
+
 def galaxy_information(galaxy_name, galaxy_path):
      
     kwargs_out = {
@@ -139,19 +151,54 @@ def galaxy_information(galaxy_name, galaxy_path):
     try:
         # Using this for the *big* runs because *somebody* (Wayne)
         # didn't validate and overwrite the original csv's to include CR (crop radius)
-        csv_CR = pj(galaxy_path, f"{galaxy_name}.csv+CR")
-        csv_filename = pj(galaxy_path, f"{galaxy_name}.csv")
-        if exists(csv_CR):
-            csv_filename = csv_CR
-            
-        csv_file = open(csv_filename, 'r')
+        csv_CR    = pj(galaxy_path, f"{galaxy_name}.csv+CR")
+        csv_old   = pj(galaxy_path, f"{galaxy_name}.csv")
         
-    except:
-        print("Can't open to read: ", csv_filename)
+        tsv_CR    = pj(galaxy_path, f"{galaxy_name}.tsv+CR")
+        tsv_old   = pj(galaxy_path, f"{galaxy_name}.tsv")
+        
+        # No reason to prefer csv's except for my own personal bias
+        if exists(csv_CR):
+            galaxy_filename = csv_CR
+            delimiter       = ","
+        elif exists(tsv_CR):
+            galaxy_filename = tsv_CR
+            delimiter       = "\t"
+        elif exists(csv_old):
+            galaxy_filename = csv_old
+            delimiter       = ","
+        elif exists(tsv_old):
+            galaxy_filename = tsv_old
+            delimiter       = "\t"
+        else:
+            print("No CSVs or TSVs found in the galaxy directory. Kicking this galaxy out of the set.")
+            return None
+        
+        galaxy_file = open(galaxy_filename, 'r')
+        
+        # Just in case a file is given to me without a header
+        # Only read first 10 characters to save time if there's a too large file
+        fieldnames = None
+        if galaxy_file.read(20).split(delimiter)[0].strip() != "name":
+            
+            # PURPOSEFULLY TOOK CROPRAD OUT
+            # SET RESTKEY TO BE cropRad
+            fieldnames = """name, fit_state, warnings, star_mask_used, noise_mask_used, chirality_maj, chirality_alenWtd, chirality_wtdPangSum, chirality_longestArc, badBulgeFitFlag, bulgeAxisRatio, bulgeMajAxsLen, bulgeMajAxsAngle, bulgeAvgBrt, bulgeDiskBrtRatio, numElpsRefits, diskAxisRatio, diskMinAxsLen, diskMajAxsLen, diskMajAxsAngleRadians, inputCenterR, inputCenterC, iptSz, muDist, muDistProp, covarFit, wtdLik, likOfCtr, brtUnifScore, gaussLogLik, contourBrtRatio, standardizedCenterR, standardizedCenterC, hasDeletedCtrClus, failed2revDuringMergeCheck, failed2revDuringSecondaryMerging, failed2revInOutput, fitQualityF1, fitQualityPCC, cpu_time, wall_time, bar_candidate_available, bar_used, alenAt25pct, alenAt50pct, alenAt75pct, rankAt25pct, rankAt50pct, rankAt75pct, avgArcLength, minArcLength, lowerQuartileArcLength, medianArcLength, upperQuartileArcLength, maxArcLength, totalArcLength, totalNumArcs, chirality_votes_maj, chirality_votes_alenWtd, alenWtdPangSum, top2_chirality_agreement, pa_longest, pa_avg, pa_avg_abs, pa_avg_domChiralityOnly, pa_alenWtd_avg, paErr_alenWtd_stdev, pa_alenWtd_avg_abs, paErr_alenWtd_stdev_abs, pa_alenWtd_avg_domChiralityOnly, paErr_alenWtd_stdev_domChiralityOnly, pa_totBrtWtd, pa_avgBrtWtd, pa_alenWtd_median, pa_alenWtd_lowQuartile, pa_alenWtd_highQuartile, pa_alenWtd_lowDecile, pa_alenWtd_highDecile, pa_alenWtd_median_domChiralityOnly, pa_alenWtd_lowQuartile_domChiralityOnly, pa_alenWtd_highQuartile_domChiralityOnly, pa_alenWtd_lowDecile_domChiralityOnly, pa_alenWtd_highDecile_domChiralityOnly, sorted_agreeing_pangs, sorted_agreeing_arclengths, numArcs_largest_length_gap, numDcoArcs_largest_length_gap, numArcs_arclength_function_flattening, numDcoArcs_arclength_function_flattening, bar_score_img, bar_cand_score_orifld, bar_angle_input_img, bar_half_length_input_img, bar_angle_standardized_img, bar_half_length_standardized_img, numArcsGE000, numArcsGE010, numArcsGE020, numArcsGE040, numArcsGE050, numArcsGE055, numArcsGE060, numArcsGE065, numArcsGE070, numArcsGE075, numArcsGE080, numArcsGE085, numArcsGE090, numArcsGE095, numArcsGE100, numArcsGE120, numArcsGE140, numArcsGE160, numArcsGE180, numArcsGE200, numArcsGE220, numArcsGE240, numArcsGE260, numArcsGE280, numArcsGE300, numArcsGE350, numArcsGE400, numArcsGE450, numArcsGE500, numArcsGE550, numArcsGE600, numDcoArcsGE000, numDcoArcsGE010, numDcoArcsGE020, numDcoArcsGE040, numDcoArcsGE050, numDcoArcsGE055, numDcoArcsGE060, numDcoArcsGE065, numDcoArcsGE070, numDcoArcsGE075, numDcoArcsGE080, numDcoArcsGE085, numDcoArcsGE090, numDcoArcsGE095, numDcoArcsGE100, numDcoArcsGE120, numDcoArcsGE140, numDcoArcsGE160, numDcoArcsGE180, numDcoArcsGE200, numDcoArcsGE220, numDcoArcsGE240, numDcoArcsGE260, numDcoArcsGE280, numDcoArcsGE300, numDcoArcsGE350, numDcoArcsGE400, numDcoArcsGE450, numDcoArcsGE500, numDcoArcsGE550, numDcoArcsGE600,""".replace(" ", "").split(",")
+
+    except FileNotFoundError:
+        print("Can't open to read: ", galaxy_filename)
         print("Check Sparcfire output or directories. Kicking this galaxy out of the set.")
         return None
-
-    reader = csv.DictReader(csv_file, skipinitialspace = True)
+        
+    galaxy_file.seek(0)
+    
+    reader = csv.DictReader(
+        galaxy_file, 
+        skipinitialspace = True, 
+        delimiter        = delimiter,
+        fieldnames       = fieldnames,
+        restkey          = "cropRad"
+    )
     for row in reader:
         
         # if sparcfire fails
@@ -167,12 +214,22 @@ def galaxy_information(galaxy_name, galaxy_path):
             center_pos_x = float(row.get('inputCenterR'))
             center_pos_y = float(row.get('inputCenterC'))
 
-            crop_rad = float(row.get('cropRad'))
-            scale_fact_std = 2*crop_rad/256
-
         except (ValueError, TypeError) as ve:
             print(f"SpArcFiRe likely failed on this galaxy, {ve}. Kicking it out of the set.")
             return None
+        
+        try:
+            crop_rad = float(row.get('cropRad'))
+        except (ValueError, TypeError) as ve:
+            try:
+                elps_file = pj(galaxy_path, f"{galaxy_name}-elps-fit-params.txt")
+                crop_rad = float(extract_crop_rad_from_elps(elps_file))
+            except FileNotFoundError:
+                print(f"Could not find a cropping radius from either the galaxy csv or elps-fit-params.txt. Does the elps file exist?")
+                print("This is necessary for some scaling. Kicking this galaxy out of the set.")
+                return None
+                
+        scale_fact_std = 2*crop_rad/256
 
         # Anything with converting to float/int should go in here since there are a couple issues besides
         # fit state which still result in an empty csv
@@ -264,7 +321,7 @@ def galaxy_information(galaxy_name, galaxy_path):
         # anddd adjusted according to comparison results 
         alpha = max(0.07*pitch_angle - 0.3, 0.75)
 
-    csv_file.close()
+    galaxy_file.close()
  
     if chirality == chirality_2 or chirality == chirality_3:
         if chirality == 'Z-wise':
@@ -291,7 +348,13 @@ def galaxy_information(galaxy_name, galaxy_path):
 # *********************************************************************
 # *********************************************************************
 
-def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2, scale_fact_std = 1):
+def arc_information(
+    galaxy_name, 
+    galaxy_path, 
+    num_arms       = 2, 
+    bulge_rad      = 2, 
+    scale_fact_std = 1
+):
 
     kwargs_out = {
         "inner_rad"   : 0,
@@ -304,88 +367,107 @@ def arc_information(galaxy_name, galaxy_path, num_arms = 2, bulge_rad = 2, scale
     try:
         #arcs_filename = glob.glob(galaxy_path + '/' + '*_arcs.csv')
         arcs_filename = pj(galaxy_path, f"{galaxy_name}_arcs.csv")
-        arcs_file = open(arcs_filename, 'r')
-    except:
-        print("Can't open to read arcs csv for: ", galaxy_name)
-        print("Check Sparcfire output or directories. Proceeding with default values.")
-        return kwargs_out
-
-    else:
-        reader = csv.DictReader(arcs_file)
-        arcs_in = list(reader)
+        arcs_file     = open(arcs_filename, 'r')
+        delimiter     = ","
         
-        theta_sum   = 0
-        inner_rad   = 0
-        outer_rad   = 0
-        pitch_angle = 0
-
-        i = 0
-        count = 0
-        
-        try:
-            winding_dir = float(arcs_in[0]['pitch_angle']) > 0
-        except IndexError as ie:
-            # For when sparcfire fails
-            # TODO: figure out where to put a function that checks if sparcfire failed so I only output
-            # one message per galaxy instead of doing it for arcs and galaxy info
+    except FileNotFoundError:
+        try: 
+            arcs_filename = pj(galaxy_path, f"{galaxy_name}_arcs.tsv")
+            arcs_file     = open(arcs_filename, 'r')
+            delimiter     = "\t"
+            
+        except FileNotFoundError:
+            print("Can't open to read arcs csv or tsv for: ", galaxy_name)
+            print("Check Sparcfire output or directories. Proceeding with default values.")
             return kwargs_out
 
-        # Use i instead of count because est_arcs is usually way too high
-        while i < num_arms:
-            try:
-                _ = arcs_in[i]['pitch_angle']
-            except IndexError as ie:
-                return kwargs_out
+    # Just in case a file is given to me without a header
+    # Only read first 20 characters to save time if there's a too large file
+    fieldnames = None
+    if arcs_file.read(20).split(delimiter)[0].strip() != "gxyName":
+        fieldnames = """gxyName,alenRank,math_initial_theta,pitch_angle,math_initial_radius,relative_theta_start,relative_theta_end,r_start,r_end,used2rev,failed2rev,hasUndefinedEndpoints,arc_length,num_pixels,err_per_len,err_per_pixel,mean_intensity,brt_ratio_score,anovaF_score,clusOutputColor""".split(",")
             
-            if (float(arcs_in[i]['pitch_angle']) > 0) != winding_dir:
-                i += 1
-                continue
+    arcs_file.seek(0)
+    
+    reader = csv.DictReader(
+        arcs_file,
+        delimiter  = delimiter,
+        fieldnames = fieldnames
+    )
+    arcs_in = list(reader)
 
-            # Rudimentary weighting scheme
-            weight = (num_arms - i)/num_arms
-            weight_2 = weight
-            
-            try:
-                r_start = float(arcs_in[i]['r_start'])
-                # Punish sparcfire's bulge-related misgivings
-                if scale_var(r_start, scale_fact_std) <= bulge_rad:
-                    weight_2 = 0.25
-                    
-                theta_sum += (np.degrees(float(arcs_in[i]['math_initial_theta'])) % 270) * weight_2
-                theta_sum += (np.degrees(float(arcs_in[i]['relative_theta_end']))  % 270) * weight_2 #% 360
+    theta_sum   = 0
+    inner_rad   = 0
+    outer_rad   = 0
+    pitch_angle = 0
 
-                inner_rad += r_start * weight_2
-                outer_rad += float(arcs_in[i]['r_end']) * weight
-                
-                pitch_angle += float(arcs_in[i]['pitch_angle']) * weight
-                
-            except ValueError as ve:
-                break
+    i = 0
+    count = 0
 
-            i += 1
-            count += 1
-        
-        # How far the arm rotates in theta which approximates the point where sparcfire no longer traces the arm
-        # and hence where the cumulative rotation out point is. Note, this already takes into account the relative
-        # starting point of the arms which is the hard part... 
-        
-        # Averaging
-        # Galfit seems to like these values to be smaller
-        weight_div = 1/max(1, count + 2) #1/np.math.factorial(count)
-        cumul_rot = abs(theta_sum)*weight_div # NOT A STRING
+    try:
+        winding_dir = float(arcs_in[0]['pitch_angle']) > 0
+    except IndexError as ie:
+        # For when sparcfire fails
+        # TODO: figure out where to put a function that checks if sparcfire failed so I only output
+        # one message per galaxy instead of doing it for arcs and galaxy info
+        return kwargs_out
 
-        inner_rad *= weight_div # Averaging the inner distance to both arcs
-        outer_rad *= weight_div # Averaging outer distance
-        
-        pitch_angle /= max(1, count)
-        
-        arcs_file.close()
-        
+    # Use i instead of count because est_arcs is usually way too high
+    while i < num_arms:
         try:
-            inner_rad = scale_var(inner_rad, scale_fact_std)
-            outer_rad = scale_var(outer_rad, scale_fact_std)
+            _ = arcs_in[i]['pitch_angle']
+        except IndexError as ie:
+            return kwargs_out
+
+        if (float(arcs_in[i]['pitch_angle']) > 0) != winding_dir:
+            i += 1
+            continue
+
+        # Rudimentary weighting scheme
+        weight = (num_arms - i)/num_arms
+        weight_2 = weight
+
+        try:
+            r_start = float(arcs_in[i]['r_start'])
+            # Punish sparcfire's bulge-related misgivings
+            if scale_var(r_start, scale_fact_std) <= bulge_rad:
+                weight_2 = 0.25
+
+            theta_sum += (np.degrees(float(arcs_in[i]['math_initial_theta'])) % 270) * weight_2
+            theta_sum += (np.degrees(float(arcs_in[i]['relative_theta_end']))  % 270) * weight_2 #% 360
+
+            inner_rad += r_start * weight_2
+            outer_rad += float(arcs_in[i]['r_end']) * weight
+
+            pitch_angle += float(arcs_in[i]['pitch_angle']) * weight
+
         except ValueError as ve:
-            pass
+            break
+
+        i += 1
+        count += 1
+
+    # How far the arm rotates in theta which approximates the point where sparcfire no longer traces the arm
+    # and hence where the cumulative rotation out point is. Note, this already takes into account the relative
+    # starting point of the arms which is the hard part... 
+
+    # Averaging
+    # Galfit seems to like these values to be smaller
+    weight_div = 1/max(1, count + 2) #1/np.math.factorial(count)
+    cumul_rot = abs(theta_sum)*weight_div # NOT A STRING
+
+    inner_rad *= weight_div # Averaging the inner distance to both arcs
+    outer_rad *= weight_div # Averaging outer distance
+
+    pitch_angle /= max(1, count)
+
+    arcs_file.close()
+
+    try:
+        inner_rad = scale_var(inner_rad, scale_fact_std)
+        outer_rad = scale_var(outer_rad, scale_fact_std)
+    except ValueError as ve:
+        pass
 
     loc = locals()
     kwargs_out.update({i: loc[i] for i in kwargs_out.keys() if i in loc})
