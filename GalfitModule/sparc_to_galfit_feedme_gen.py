@@ -161,15 +161,27 @@ def galaxy_information(galaxy_name, galaxy_path):
         if exists(csv_CR):
             galaxy_filename = csv_CR
             delimiter       = ","
+            iptSz_split     = " "
+            chirality_split = "-"
+            
         elif exists(tsv_CR):
             galaxy_filename = tsv_CR
             delimiter       = "\t"
+            iptSz_split     = "_"
+            chirality_split = ""
+            
         elif exists(csv_old):
             galaxy_filename = csv_old
             delimiter       = ","
+            iptSz_split     = " "
+            chirality_split = "-"
+            
         elif exists(tsv_old):
             galaxy_filename = tsv_old
             delimiter       = "\t"
+            iptSz_split     = "_"
+            chirality_split = ""
+            
         else:
             print("No CSVs or TSVs found in the galaxy directory. Kicking this galaxy out of the set.")
             return None
@@ -200,7 +212,6 @@ def galaxy_information(galaxy_name, galaxy_path):
         restkey          = "cropRad"
     )
     for row in reader:
-        
         # if sparcfire fails
         if row.get('fit_state', "") in failure_modes:
             return None
@@ -225,7 +236,7 @@ def galaxy_information(galaxy_name, galaxy_path):
                 elps_file = pj(galaxy_path, f"{galaxy_name}-elps-fit-params.txt")
                 crop_rad = float(extract_crop_rad_from_elps(elps_file))
             except FileNotFoundError:
-                print(f"Could not find a cropping radius from either the galaxy csv or elps-fit-params.txt. Does the elps file exist?")
+                print(f"Could not find a cropping radius from either the galaxy c/tsv or elps-fit-params.txt. Does the elps file exist?")
                 print("This is necessary for some scaling. Kicking this galaxy out of the set.")
                 return None
                 
@@ -234,7 +245,7 @@ def galaxy_information(galaxy_name, galaxy_path):
         # Anything with converting to float/int should go in here since there are a couple issues besides
         # fit state which still result in an empty csv
         try:
-            input_size    = int(row.get('iptSz', "[256 256]").strip().split()[0][1:])
+            input_size    = int(row.get('iptSz', f"[256{iptSz_split}256]").strip().split(iptSz_split)[0][1:])
             #global scale_fact_ipt
             if input_size:
                 scale_fact_ipt = 2*crop_rad/input_size
@@ -273,6 +284,8 @@ def galaxy_information(galaxy_name, galaxy_path):
 
         # Happens when row is empty... This is easier than messing with other conditionals for each scale factor/float conversion
         except ValueError as ve:
+            print("There's a value error in here somewhere...")
+            print(ve)
             return None
 
         if disk_rot_angle < 0: 
@@ -324,16 +337,16 @@ def galaxy_information(galaxy_name, galaxy_path):
     galaxy_file.close()
  
     if chirality == chirality_2 or chirality == chirality_3:
-        if chirality == 'Z-wise':
+        if chirality == f'Z{chirality_split}wise':
             spin_parity = '-'
-        elif chirality == 'S-wise':
+        elif chirality == f'S{chirality_split}wise':
             spin_parity = ''
         else:
             print(f"Couldn't use chirality.") #Proceeding with coin flip.")
     elif chirality_2 == chirality_3:
-        if chirality_2 == 'Z-wise':
+        if chirality_2 == f'Z{chirality_split}wise':
             spin_parity = '-'
-        elif chirality_2 == 'S-wise':
+        elif chirality_2 == f'S{chirality_split}wise':
             spin_parity = ''
         else:
             print(f"Couldn't use chirality.") # Proceeding with coin flip.")
@@ -587,7 +600,7 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs):
         galaxy_dict    = galaxy_information(gname, gfolder)
         if not galaxy_dict:
             print("Uh oh can't make a feedme for this galaxy")
-            print("There is an issue with its 'galaxy.csv' file.")
+            print("There is an issue with its 'galaxy.c/tsv' file.")
             continue
             
         scale_fact_std = galaxy_dict["scale_fact_std"]
