@@ -152,7 +152,7 @@ for (( cpu_num=0; cpu_num<$cpu_count; ++cpu_num )); do
     # Pad images to even so that we can turn off image standardization
     # elps and conv_fits have spaces in them already
     if [[ $arr_start -lt $input_count ]]; then
-        echo "${SPARCFIRE_HOME}/scripts/SpArcFiRe ${conv_fits}-compute-starmask false -ignore-starmask ${elps}$new_dir $default_tmp $post_galfit_out -generateFitQuality 0 -allowArcBeyond2pi 0 -unsharpMaskAmt 8 -useDeProjectStretch 1 -fixToCenter 0 -medFiltRad 0 -useImageStandardization 1" # -errRatioThres 2.8"
+        echo "${SPARCFIRE_HOME}/scripts/SpArcFiRe ${conv_fits}-compute-starmask false -ignore-starmask ${elps}$new_dir $default_tmp $post_galfit_out -generateFitQuality 0 -allowArcBeyond2pi 0 -unsharpMaskAmt 0 -useDeProjectStretch 1 -fixToCenter 0 -medFiltRad 0 -useImageStandardization 1" # -errRatioThres 2.8"
     fi
     
     arr_start=$(( $cpu_num*$per_cpu  ))
@@ -174,6 +174,7 @@ parallel_script="${SPARCFIRE_HOME}/GalfitModule/ParallelDrivers/parallel"
 
 # RUN SPARCFIRE
 echo "Running SpArcFiRe (again) with $cpu_count nodes"
+#cat "$parallel_file" | "nice" "-19" "$parallel_script" "SPARCFIRE_ON_GALFIT" "-M" "all"
 cat "$parallel_file" | "nice" "-19" "$parallel_script" "$cpu_count"
 
 # Rename results to include basename
