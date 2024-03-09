@@ -105,6 +105,14 @@ def generate_model_for_sparcfire(gfits, base_galfit_cmd, in_dir, tmp_fits_dir = 
     
     if "power_0" in feedme.components: #or "arms" in feedme.components:
         power_comp_number = feedme.power_0.component_number
+        # Strongly detuning the arms to give SpArcFiRe the best chance of success
+        rot_comp = [
+            name for name, comp in feedme.components.items()
+            if  comp.component_number == power_comp_number
+            and comp.component_type   == "sersic"
+        ][0]
+        
+        feedme.components[rot_comp].axis_ratio.value = 0.2
         
         # Set all other sersic components to 0 to just keep the disk being rotated
         # and the header and sky
