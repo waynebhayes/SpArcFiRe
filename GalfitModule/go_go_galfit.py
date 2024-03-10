@@ -100,7 +100,18 @@ def generate_model_for_sparcfire(gfits, base_galfit_cmd, in_dir, tmp_fits_dir = 
     feedme.header.output_image.value  = pj(tmp_fits_dir, f"{gname}_{suffix}.fits")
     # No crop to allow SpArcFiRe to use its autocrop routine 
     # without issue
-    feedme.header.region_to_fit.value = (0, 256, 0, 256)
+    #feedme.header.region_to_fit.value = (0, 256, 0, 256)
+    with fits.open(pj(in_dir, f"{gname}.fits")) as in_fits:
+        input_file_shape = np.shape(in_fits[0].data)
+        rad_x, rad_y = input_file_shape[0] // 2, input_file_shape[1] // 2
+        
+    center = feedme.sersic_0.position
+    feedme.header.region_to_fit.value = (
+        center.x - rad_x, 
+        center.x + rad_x, 
+        center.y - rad_y, 
+        center.y + rad_y
+    )
     feedme.header.optimize.value      = 1
     
     if "power_0" in feedme.components: #or "arms" in feedme.components:
@@ -112,7 +123,7 @@ def generate_model_for_sparcfire(gfits, base_galfit_cmd, in_dir, tmp_fits_dir = 
             and comp.component_type   == "sersic"
         ][0]
         
-        feedme.components[rot_comp].axis_ratio.value = 0.2
+        feedme.components[rot_comp].axis_ratio.value = 0.15
         
         # Set all other sersic components to 0 to just keep the disk being rotated
         # and the header and sky
