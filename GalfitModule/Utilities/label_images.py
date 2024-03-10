@@ -21,7 +21,7 @@
 # image in the set, then 'prev' to view the first before proceeding onwards.
 # This is not a high priority but will be fixed eventually.
 
-import glob
+from glob import glob
 import PySimpleGUI as sg
 from shutil import move
 from os.path import exists
@@ -33,7 +33,7 @@ from PIL import Image, ImageTk
 
 
 def parse_folder(path):
-    images = glob.glob(f'{path}/*.jpg')# + glob.glob(f'{path}/*.png')
+    images = glob(f'{path}/*.jpg')# + glob.glob(f'{path}/*.png')
     return images
 
 def load_image(path, window):
@@ -78,9 +78,7 @@ def main():
     
     images   = []
     location = 0
-    
-    success      = []
-    not_success  = []
+    count    = 0
 
     basename     = sys.argv[1]
     img_path     = sys.argv[2]
@@ -88,8 +86,8 @@ def main():
 
     images = parse_folder(img_path)#values["file"])
     while images:
-        if not location % 100:
-            print(location)
+        if not count % 100:
+            print(count)
             
         gfile = images[location]
         
@@ -100,7 +98,7 @@ def main():
             break
 
         if event == "Success" and images:
-            success.append(gfile)
+            count += 1
             if location == len(images) - 1:
                 break
             else:
@@ -119,7 +117,7 @@ def main():
             continue
 
         if event == "Not Success" and images:
-            not_success.append(gfile)
+            count += 1
             
             if exists(gfile):
                 print(f"Moving {gfile} to {failure_path}")
@@ -133,11 +131,13 @@ def main():
 
     window.close()
     
+    print(f"Outputting success and not success text files with galaxy IDs only to current working directory.")
+    # Re-find galaxies in case a mistake was made and a galaxy had to be manually moved
     with open(f"{basename}_by-eye_success.txt", "w") as f:
-        f.write("\n".join([basename(i).replace("_combined.jpg", "") for i in success]))
+        f.write("\n".join([basename(i).replace("_combined.jpg", "") for i in parse_folder(img_path)]))
         
     with open(f"{basename}_by-eye_not_success.txt", "w") as f:
-        f.write("\n".join([basename(i).replace("_combined.jpg", "") for i in not_success]))
+        f.write("\n".join([basename(i).replace("_combined.jpg", "") for i in parse_folder(failure_path)]))
 
 
 if __name__ == "__main__":
