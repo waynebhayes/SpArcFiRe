@@ -88,8 +88,11 @@ def main():
     while images:
         if not count % 100:
             print(count)
-            
-        gfile = images[location]
+        
+        try:
+            gfile = images[location]
+        except:
+            break
         
         load_image(gfile, window)
         event, _ = window.read()
