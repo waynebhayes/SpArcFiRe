@@ -88,6 +88,9 @@ def main():
 
     images = parse_folder(img_path)#values["file"])
     while images:
+        if not location % 100:
+            print(location)
+            
         gfile = images[location]
         
         load_image(gfile, window)
