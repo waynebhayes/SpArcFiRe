@@ -25,6 +25,7 @@ import glob
 import PySimpleGUI as sg
 from shutil import move
 from os.path import exists
+from os.path import basename
 from os.path import join as pj
 import sys
 
@@ -63,8 +64,8 @@ def main():
         #],
         [
             sg.Button("Prev"),
-            sg.Button("Next"),
-            sg.Button("Mislabeled")
+            sg.Button("Success"),
+            sg.Button("Not Success")
             #sg.Button("Non-Spiral")
         ]
     ]
@@ -75,21 +76,28 @@ def main():
     # Vertical
     window = sg.Window("Image Viewer", elements, size=(400, 900))
     
-    images = []
+    images   = []
     location = 0
+    
+    success      = []
+    not_success  = []
 
-    img_path        = sys.argv[1]
-    failure_path    = sys.argv[2] #pj(values["file"], "false_positive")
-#    non_spiral_path = pj(basepath, sys.argv[3]) #pj(values["file"], "false_positive")
+    basename     = sys.argv[1]
+    img_path     = sys.argv[2]
+    failure_path = sys.argv[3]
+
     images = parse_folder(img_path)#values["file"])
     while images:
-        load_image(images[location], window)
+        gfile = images[location]
+        
+        load_image(gfile, window)
         event, _ = window.read()
 
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
 
-        if event == "Next" and images:
+        if event == "Success" and images:
+            success.append(gfile)
             if location == len(images) - 1:
                 break
             else:
@@ -107,37 +115,26 @@ def main():
             #load_image(images[location], window)
             continue
 
-        if event == "Mislabeled" and images:
-            if exists(images[location]):
-                print(f"Moving {images[location]} to {failure_path}")
-                move(images[location], failure_path)
+        if event == "Not Success" and images:
+            not_success.append(gfile)
+            
+            if exists(gfile):
+                print(f"Moving {gfile} to {failure_path}")
+                move(gfile, failure_path)
                 images.pop(location)
             else:
                 print("image has already been moved... continuing")
 
             if location == len(images) - 1:
                 break
-            #else:
-            #    location += 1
-
-            #load_image(images[location], window)
-
-#        if event == "Non-Spiral" and images:
-#            if exists(images[location]):
-#                print(f"Moving {images[location]} to {non_spiral_path}")
-#                move(images[location], non_spiral_path)
-#                images.pop(location)
-#            else:
-#                print("image has already been moved... continuing")
-
-#            if location == len(images) - 1:
-#                break
-#            else:
-#                location += 1
-
-#            load_image(images[location], window)
 
     window.close()
+    
+    with open(f"{basename}_by-eye_success.txt", "w") as f:
+        f.write("\n".join([basename(i).replace("_combined.jpg", "") for i in success]))
+        
+    with open(f"{basename}_by-eye_not_success.txt", "w") as f:
+        f.write("\n".join([basename(i).replace("_combined.jpg", "") for i in not_success]))
 
 
 if __name__ == "__main__":
