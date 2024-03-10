@@ -25,7 +25,7 @@ from glob import glob
 import PySimpleGUI as sg
 from shutil import move
 from os.path import exists
-from os.path import basename
+from os.path import basename as bn
 from os.path import join as pj
 import sys
 
@@ -137,10 +137,10 @@ def main():
     print(f"Outputting success and not success text files with galaxy IDs only to current working directory.")
     # Re-find galaxies in case a mistake was made and a galaxy had to be manually moved
     with open(f"{basename}_by-eye_success.txt", "w") as f:
-        f.write("\n".join([basename(i).replace("_combined.jpg", "") for i in parse_folder(img_path)]))
+        f.write("\n".join([bn(i).replace("_combined.jpg", "") for i in parse_folder(img_path)]))
         
     with open(f"{basename}_by-eye_not_success.txt", "w") as f:
-        f.write("\n".join([basename(i).replace("_combined.jpg", "") for i in parse_folder(failure_path)]))
+        f.write("\n".join([bn(i).replace("_combined.jpg", "") for i in parse_folder(failure_path)]))
 
 
 if __name__ == "__main__":
