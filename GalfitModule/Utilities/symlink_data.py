@@ -47,26 +47,27 @@ from Functions.helper_functions import *
 
 if __name__ == "__main__":
 
-    OLD_BASE_DIR = sys.argv[1] #"/extra/wayne_scratch0/preserve/portman/29k_galaxies" 
-    NEW_BASE_DIR = sys.argv[2] #"/home/portmanm/29k_galaxies"
+    # The file or base directory from which to gather a list of fits files
+    OLD_SPARC_IN = sys.argv[1]
+    gal_sparc_in = find_files(arg1, "123*.fits", "f")
+    assert gal_sparc_in, f"No fits files found in {OLD_SPARC_IN}."
+    
+    NEW_BASE_DIR = sys.argv[2] #/extra/wayne_scratch0/preserve/portman/29k_galaxies_gband
     #SDSS_filepath = "/home/wayne/research/drdavis/SDSS/FITS/2015/color/r"
     COLOR    = sys.argv[3]
     DATA_DIR = f"/extra/wayne1/research/drdavis/SDSS/SpArcFiRe/2016-09/{COLOR}/"
-    OLD_SPARCIN  = pj(OLD_BASE_DIR, "sparcfire-in") #"/tmp/portmanm_galfitting/sparcfire-in"
 
-    NEW_SPARCIN  = pj(NEW_BASE_DIR, "sparcfire-in") 
-    NEW_SPARCTMP = pj(NEW_BASE_DIR, "sparcfire-tmp") 
-    NEW_SPARCOUT = pj(NEW_BASE_DIR, "sparcfire-out") #"/extra/wayne1/preserve/portmanm/sparcfire-out"
+    NEW_SPARC_IN  = pj(NEW_BASE_DIR, "sparcfire-in") 
+    NEW_SPARC_TMP = pj(NEW_BASE_DIR, "sparcfire-tmp") 
+    NEW_SPARC_OUT = pj(NEW_BASE_DIR, "sparcfire-out") #"/extra/wayne1/preserve/portmanm/sparcfire-out"
 
     # Make sparcfire-in if not found
     # No need to do this for sparcfire-out, I use makedirs to cover that later
-    if not exists(NEW_SPARCIN):
-        os.mkdir(NEW_SPARCIN)
+    if not exists(NEW_SPARC_IN):
+        os.mkdir(NEW_SPARC_IN)
 
-    if not exists(NEW_SPARCTMP):
-        os.mkdir(NEW_SPARCTMP)
-    
-    gal_sparc_in = find_files(OLD_SPARCIN, "123*.fits", "f")
+    if not exists(NEW_SPARC_TMP):
+        os.mkdir(NEW_SPARC_TMP)
     
     copy_filename = f"{os.path.basename(NEW_BASE_DIR)}_copy_galaxy_folders.sh" #pj(NEW_BASE_DIR, f"slurm_copy_galaxy_folders")
     
@@ -82,17 +83,23 @@ if __name__ == "__main__":
             #for gname in gnames:
             for gname in gnames:
                 folder_path = pj(DATA_DIR, gname[-3:], gname)
-                new_folder  = pj(NEW_SPARCOUT, gname)
+                new_folder  = pj(NEW_SPARC_OUT, gname)
                 if exists(folder_path):
                     if not exists(new_folder):
                         os.makedirs(new_folder)
 
                     #_ = sp(f"rsync {folder_path}/*.csv {new_folder}")
                     #f.write(f"rsync -u {folder_path}/*.csv* {new_folder}\n")
-                    f.write(f"ln -sf {OLD_SPARCIN}/{gname}.fits {pj(NEW_SPARCIN, gname + '.fits')} && ")
+                    f.write(f"ln -sf {OLD_SPARC_IN}/{gname}.fits {pj(NEW_SPARC_IN, gname + '.fits')} && ")
                     f.write(f"ln -sf {folder_path}/{gname}.csv {pj(new_folder, gname + '.csv')} && ")
                     f.write(f"ln -sf {folder_path}/{gname}_arcs.csv {pj(new_folder, gname + '_arcs.csv')} && ")
                     f.write(f"ln -sf {folder_path}/{gname}.csv+CR {pj(new_folder, gname + '.csv+CR')}\n")
+                    # Include tsvs just in case no csvs are found
+                    f.write(f"ln -sf {folder_path}/{gname}.tsv {pj(new_folder, gname + '.tsv')} && ")
+                    f.write(f"ln -sf {folder_path}/{gname}_arcs.tsv {pj(new_folder, gname + '_arcs.tsv')} && ")
+                    f.write(f"ln -sf {folder_path}/{gname}.tsv+CR {pj(new_folder, gname + '.tsv+CR')}\n")
+                    # Include elps just in case no crop rad is in the csv or tsv file
+                    f.write(f"ln -sf {folder_path}/{gname}-elps-fit-params.txt {pj(new_folder, gname + '-elps-fit-params.txt')} && ")
                 else:
                     bad_gnames.append(gname)
 
