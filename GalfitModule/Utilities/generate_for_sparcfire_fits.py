@@ -28,7 +28,7 @@ if __name__ == "__main__":
     
     cleanup = True
     
-    if len(sys.argv) == 2:
+    if len(sys.argv) == 3:
         in_dir  = sys.argv[1]
         tmp_dir = sys.argv[2]
         #out_dir = sys.argv[3]
@@ -50,4 +50,3 @@ if __name__ == "__main__":
     
     if cleanup:
         rm_files(*glob(pj(galfits_dir, "*.in")))
-    
