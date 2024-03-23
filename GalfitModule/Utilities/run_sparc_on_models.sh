@@ -73,8 +73,8 @@ ext="*.fits"
 conv_fits="-convert-FITS "
 elps_dir="$(pwd)"/"elps-dir"
 elps=""
-if [[ -d $elps_dir ]]; then
-    elps="-elps_dir $elps_dir "
+# if [[ -d $elps_dir ]]; then
+#    elps="-elps_dir $elps_dir "
     
     # Since the GALFIT files are already cropped, we don't want 
     # SpArcFiRe to re-crop them.
@@ -82,7 +82,7 @@ if [[ -d $elps_dir ]]; then
     # for efile in "$elps_dir"/*"_elps.txt"; do
     #     sed -i s/"cropRad=[0-9]*"/"cropRad=0"/g "$efile"
     # done
-fi
+# fi
 #img_standardize="1"
 
 # if [ -x "`/bin/which fitspng 2>/dev/null`" ]; then
@@ -152,7 +152,7 @@ for (( cpu_num=0; cpu_num<$cpu_count; ++cpu_num )); do
     # Pad images to even so that we can turn off image standardization
     # elps and conv_fits have spaces in them already
     if [[ $arr_start -lt $input_count ]]; then
-        echo "${SPARCFIRE_HOME}/scripts/SpArcFiRe ${conv_fits}-compute-starmask false -ignore-starmask ${elps}$new_dir $default_tmp $post_galfit_out -generateFitQuality 0 -allowArcBeyond2pi 0 -unsharpMaskAmt 0 -unsharpMaskSigma 0 -useDeProjectStretch 1 -fixToCenter 0 -medFiltRad 0 -useImageStandardization 1" # -errRatioThres 2.8"
+        echo "${SPARCFIRE_HOME}/scripts/SpArcFiRe ${conv_fits}-compute-starmask false -ignore-starmask ${elps}$new_dir $default_tmp $post_galfit_out -generateFitQuality 0 -allowArcBeyond2pi 0 -unsharpMaskAmt 8 -unsharpMaskSigma 25 -useDeProjectStretch 0 -fixToCenter 1 -medFiltRad 0 -useImageStandardization 1 -errRatioThres 2.8"
     fi
     
     arr_start=$(( $cpu_num*$per_cpu  ))
