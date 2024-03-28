@@ -53,8 +53,9 @@ Jupyter Notebook version of these codes which can be found in the `Notebooks` di
 to familiarize yourself (until tutorials come along). 
 
 Several utility scripts can be found in the (aptly named) `Utilities` folder some of which are currently used by 
-`control_script.py` and `go_go_galfit.py`. There is also a Notebook which details a tentative analysis procedure
-entitled `residual_calc.ipynb`. We recommend starting there if you have results you'd like to look at or analyze.
+`control_script.py` and `go_go_galfit.py`. There is also a Notebook which details an analysis procedure for the results
+output from our pipeline entitled `results_analysis.ipynb`. We recommend starting there to get an idea of how the results may
+be used or processed.
 
 There is also a regression test which can be run from the `RegTest` directory as `python3 RegTest.py`.
 
