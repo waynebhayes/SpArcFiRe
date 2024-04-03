@@ -355,7 +355,7 @@ def plot_validation(pitch_angles,
         
     return filename
 
-def generate_galfit_model_no_inclination(gname, feedme, out_dir, model_dir = "tmp_galfit_models"):
+def generate_galfit_model_no_inclination(gname, feedme, model_dir = "tmp_galfit_models"):
     
     #temp_dir    = pj(out_dir, "galfit_models")
     if not exists(model_dir):
@@ -363,10 +363,11 @@ def generate_galfit_model_no_inclination(gname, feedme, out_dir, model_dir = "tm
         
     feedme_path = pj(model_dir, f"{gname}_model.in")
     
-    feedme.header.output_image.value = pj(model_dir, f"{gname}_model_out.fits")
+    feedme.header.output_image.value = pj(model_dir, f"{gname}_for_pitch_angle.fits")
     feedme.header.optimize.value     = 1
     feedme.arms.inclination.value    = 0
     feedme.path_to_feedme            = feedme_path
+    print(feedme.arms.inner_rad.value)
     
     feedme.to_file()
     
@@ -426,7 +427,7 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
     
     rvals_grid = np.sqrt((xgrid - x0)**2 + ((ygrid - y0)/q)**2)
     
-    galaxy_info = pd.read_csv(pj(out_dir, gname, f"{gname}.csv"))
+    galaxy_info = pd.read_csv(pj(out_dir, gname, f"{gname}.csv+CR"))
     crop_rad = float(galaxy_info[" cropRad"].iloc[0])
     scale_fact_std = 2*crop_rad/256
 
@@ -535,7 +536,7 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
         thetas_rot = thetas + np.radians(arms.sky_position_angle.value) + 0.5*np.pi + np.radians(disk.position_angle.value)
         #rgrid_incl = rgrid*np.cos(np.radians(arms.inclination))
         
-        model_output = generate_galfit_model_no_inclination(gname, fits_file.feedme, out_dir, model_dir = model_dir)
+        model_output = generate_galfit_model_no_inclination(gname, fits_file.feedme, model_dir = model_dir)
         try:
             model_only_fits_file = FitsFile(model_output)
         except (AttributeError, FileNotFoundError, Exception):
@@ -629,13 +630,13 @@ if __name__ == "__main__":
     if not exists(in_dir) or not exists(out_dir):
         raise(f"Cannot find input/output directories {in_dir} {out_dir}.")
         
-    model_dir = pj(out_dir, "tmp_galfit_models")
+    model_dir = pj(tmp_dir, "tmp_galfit_models")
     
     pitch_angle_info = main(in_dir, out_dir, scatter_plot = scatter_plot, validation_plot = validation_plot, model_dir = model_dir)
     
     filename = pj(out_dir, "pitch-angle_info.pkl")
     pitch_angle_info.to_pickle(filename)
     #pd.dump(pa_rgrid_theta, open(filename, 'wb'))
-    if cleanup:
-        sp(f"rm -rf {model_dir}")
+    #if cleanup:
+    #    sp(f"rm -rf {model_dir}")
     
