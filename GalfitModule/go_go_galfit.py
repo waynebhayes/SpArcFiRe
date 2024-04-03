@@ -92,6 +92,7 @@ def generate_model_for_sparcfire(
     base_galfit_cmd, 
     in_dir, 
     tmp_fits_dir = "",
+    output_dir   = "",
     rad          = (None, None)
 ):
     gname  = os.path.basename(gfits).replace("_galfit_out.fits", "")
@@ -104,6 +105,8 @@ def generate_model_for_sparcfire(
     
     feedme.header.input_image.value   = pj(in_dir, f"{gname}.fits")
     feedme.header.output_image.value  = pj(tmp_fits_dir, f"{gname}_{suffix}.fits")
+    if output_dir:
+        feedme.header.output_image.value  = pj(output_dir, f"{gname}_{suffix}.fits")
 
     center = feedme.sersic_0.position
     # In an attempt to avoid more I/O...
