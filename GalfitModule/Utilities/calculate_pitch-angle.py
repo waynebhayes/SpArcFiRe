@@ -12,6 +12,8 @@ import os
 from os.path import join as pj
 import shutil
 
+import argparse
+
 from joblib import Parallel, delayed
 
 # For debugging purposes
@@ -45,7 +47,7 @@ from Classes.Components import *
 from Classes.Containers import *
 from Classes.FitsHandlers import *
 from Functions.helper_functions import *
-from sparc_to_galfit_feedme_gen import arc_information, galaxy_information
+from sparc_to_galfit_feedme_gen import arc_information, galaxy_information, read_galaxy_csv_tsv, extract_crop_rad_from_elps
     
 def pitch_angle(*args):
     CDEF = 0.23
@@ -367,7 +369,6 @@ def generate_galfit_model_no_inclination(gname, feedme, model_dir = "tmp_galfit_
     feedme.header.optimize.value     = 1
     feedme.arms.inclination.value    = 0
     feedme.path_to_feedme            = feedme_path
-    print(feedme.arms.inner_rad.value)
     
     feedme.to_file()
     
@@ -376,7 +377,17 @@ def generate_galfit_model_no_inclination(gname, feedme, model_dir = "tmp_galfit_
     return feedme.header.output_image.value
 
 # Recommend turning use_inner_outer_rad on for pictures otherwise this is more informative
-def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, validation_plot = False, use_inner_outer_rad = False, model_dir = "tmp_galfit_models"):
+def calculate_pa(
+    gpath, 
+    in_dir,
+    out_dir,
+    num_pts = 500,
+    scatter_plot = True,
+    validation_plot = False,
+    use_inner_outer_rad = False,
+    model_dir = "tmp_galfit_models",
+    verbose = False
+):
     
     gname = os.path.basename(gpath)
     try:
@@ -390,7 +401,10 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
             sky           = Sky(4),
             sersic_order  = ["bulge", "disk", "disk_for_arms"]
         )
-        print(gname) #, 'ok')
+        
+        if verbose:
+            print(gname, 'ok')
+            
     except (AttributeError, FileNotFoundError, Exception):
         print(f"Something went wrong opening galaxy {gname}! Continuing...")
         #continue
@@ -406,10 +420,10 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
     except AttributeError:
         disk = fits_file.feedme.disk
         
-    q          = disk.axis_ratio.value
+    q       = disk.axis_ratio.value
 
-    arms       = fits_file.feedme.arms
-    fourier    = fits_file.feedme.fourier
+    arms    = fits_file.feedme.arms
+    fourier = fits_file.feedme.fourier
 
     #amplitudes = [v[0] for k,v in fourier.param_values.items() if k != "skip"] #fourier.amplitudes
     #phis       = [v[1] for k,v in fourier.param_values.items() if k != "skip"] #fourier.phase_angles
@@ -427,8 +441,22 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
     
     rvals_grid = np.sqrt((xgrid - x0)**2 + ((ygrid - y0)/q)**2)
     
-    galaxy_info = pd.read_csv(pj(out_dir, gname, f"{gname}.csv+CR"))
-    crop_rad = float(galaxy_info[" cropRad"].iloc[0])
+    _, iptSz_split, chirality_split, galaxy_file = read_galaxy_csv_tsv(gpath, gname)
+    
+    galaxy_info = pd.read_csv(galaxy_file)
+    galaxy_file.close()
+    
+    try:
+        crop_rad = float(galaxy_info[" cropRad"].iloc[0])
+    except (KeyError, ValueError, TypeError) as ve:
+        try:
+            elps_file = pj(gpath, f"{gname}-elps-fit-params.txt")
+            crop_rad = float(extract_crop_rad_from_elps(elps_file))
+        except FileNotFoundError:
+            print(f"Could not find a cropping radius from either the galaxy c/tsv or elps-fit-params.txt. Does the elps file exist?")
+            print("This is necessary for some scaling. Kicking this galaxy out of the set.")
+            return None
+
     scale_fact_std = 2*crop_rad/256
 
     try:
@@ -436,9 +464,17 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
         inner_rad = scale_fact_std*min(arc_info.loc[0, "r_start"], arc_info.loc[1, "r_start"])
         outer_rad = scale_fact_std*max(arc_info.loc[0, "r_end"], arc_info.loc[1, "r_end"])
     except:
-        print(f"Something went wrong reading arc info from {gname}_arcs.csv")
-        #continue
-        return None
+        try:
+            arc_info = pd.read_csv(
+                pj(out_dir, gname, f"{gname}_arcs.tsv"),
+                delimeter = "\t"
+            )
+            inner_rad = scale_fact_std*min(arc_info.loc[0, "r_start"], arc_info.loc[1, "r_start"])
+            outer_rad = scale_fact_std*max(arc_info.loc[0, "r_end"], arc_info.loc[1, "r_end"])
+        except:
+            print(f"Something went wrong reading arc info from {gname}_arcs.csv")
+            #continue
+            return None
         
     if use_inner_outer_rad:
         #cond  = (rvals_grid > inner_rad) & (rvals_grid <= outer_rad)
@@ -472,7 +508,7 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
         cond  = (rvals_grid > 0) & (rvals_grid <= outer_rad)
 
     if not np.any(cond):
-        print("There was an issue constraining the radial grid via inner and outer rad.")
+        print(f"There was an issue constraining the radial grid via inner and outer rad for galaxy {gname}.")
         return None
 
     xgrid = np.linspace(xgrid[cond][0], xgrid[cond][-1], num_pts)
@@ -540,7 +576,8 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
         try:
             model_only_fits_file = FitsFile(model_output)
         except (AttributeError, FileNotFoundError, Exception):
-            print(f"Something went wrong opening galaxy model {gname}! Continuing with original output...")
+            if verbose:
+                print(f"Something went wrong opening galaxy model {gname}! Continuing with original output...")
             model_only_fits_file = fits_file.model
             #continue
             #return None
@@ -569,7 +606,15 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
     #return avg_constrained_pa, rvals_grid[inner_idx], rvals_grid[outer_idx]
     return pitch_angles, thetas, rgrid #, inner_idx, outer_idx #rgrid[inner_idx : outer_idx]
       
-def main(in_dir, out_dir, num_pts = 500, scatter_plot = True, validation_plot = False, model_dir = "tmp_galfit_models"):
+def main(
+    in_dir, 
+    out_dir, 
+    num_pts = 500, 
+    scatter_plot = True, 
+    validation_plot = False, 
+    model_dir = "tmp_galfit_models",
+    verbose   = True
+):
     
     gpaths = glob(pj(out_dir, "123*"))
     gnames = [os.path.basename(i) for i in gpaths]
@@ -602,41 +647,152 @@ def main(in_dir, out_dir, num_pts = 500, scatter_plot = True, validation_plot = 
 
 if __name__ == "__main__":
     
-    in_dir  = "sparcfire-in"
-    tmp_dir = "sparcfire-tmp"
-    out_dir = "sparcfire-out"
+    cwd = absp(os.getcwd())
+    old_cwd = absp(cwd)
     
-    scatter_plot    = True
-    validation_plot = True
-    cleanup = True
+    USAGE = f"""USAGE:
+
+    python3 ./{sys.argv[0]} [OPTION] [[RUN-DIRECTORY] IN-DIRECTORY TMP-DIRECTORY OUT-DIRECTORY]
     
-    if len(sys.argv) == 3:
-        in_dir = sys.argv[1]
-        out_dir = sys.argv[2]
-        
-    elif len(sys.argv) >= 4:
-        in_dir = sys.argv[1]
-        # Not used but this is the usual command line input
-        tmp_dir = sys.argv[2]
-        out_dir = sys.argv[3]
-        
-        try:
-            true_tup = ("1", "true", "y")
-            scatter_plot    = True if sys.argv[4].lower() in true_tup else False
-            validation_plot = True if sys.argv[5].lower() in true_tup else False
-        except IndexError:
-            pass
+    OPTIONS =>[-s   | --scatter                ]
+              [-v   | --validation             ]
+              [-n   | --basename               ]
+              [-c   | --cleanup                ]
+              [-v   | --verbose                ]
+
+    This script is the wrapping script for running GALFIT using SpArcFiRe to inform 
+    the input. By default, it runs from the RUN (or current) directory and uses the
+    '-in' '-tmp' and '-out' directories as specified or otherwise defaults to 
+    'sparcfire-in', 'sparcfire-tmp', 'sparcfire-out'. 
+
+    Please do not specify symlinks for the above, they discomfort the programmer.
+    """
+    
+    parser = argparse.ArgumentParser(description = USAGE)
+    
+    # parser.add_argument('-p', '--parallel',
+    #                     dest     = 'parallel',
+    #                     action   = 'store',
+    #                     type     = int,
+    #                     choices  = range(0,3),
+    #                     default  = 1,
+    #                     help     = 'Run algorithm with/without intensive parallelization. Defaults to on machine parallel.\nOptions are:\n\t\
+    #                                 0: in serial,\n\t\
+    #                                 1: on machine parallel,\n\t\
+    #                                 2: cluster computing via SLURM'
+    #                    )
+
+    parser.add_argument('-s', '--scatter',
+                        dest     = 'scatter',
+                        action   = 'store_const',
+                        const    = True,
+                        default  = False,
+                        help     = 'Choose to create scatter plots for all galaxies.'
+                       )
+    
+    parser.add_argument('-o', '--overlay',
+                        dest     = 'overlay',
+                        action   = 'store_const',
+                        const    = True,
+                        default  = False,
+                        help     = 'Choose to create overlay (validation) plots for all galaxies.'
+                       )
+    
+    parser.add_argument('-c', '--cleanup',
+                        dest     = 'cleanup',
+                        action   = 'store_const',
+                        const    = True,
+                        default  = False,
+                        help     = 'Clean-up leftover junk (currently only removes the folder where we drop the de-inclined models).'
+                       )
+    
+    # parser.add_argument('-r', '--restart',
+    #                     dest     = 'restart',
+    #                     action   = 'store_const',
+    #                     const    = True,
+    #                     default  = False,
+    #                     help     = 'Restart control script on the premise that some have already run (likely in parallel).'
+    #                    )
+    
+    parser.add_argument('-n', '--basename',
+                        dest     = 'basename', 
+                        action   = 'store',
+                        type     = str,
+                        default  = "GALFIT",
+                        help     = 'Basename of the output results pkl file ([name]_output_results.pkl).'
+                       )
+    
+    parser.add_argument('-v', '--verbose',
+                        dest     = 'verbose', 
+                        action   = 'store_const',
+                        const    = True,
+                        default  = False,
+                        help     = 'Verbose output. Includes stdout.'
+                       )
+    
+    parser.add_argument(dest     = 'paths',
+                        nargs    = "*",
+                        type     = str,
+                        help     = "RUN-DIRECTORY [IN-DIRECTORY TMP-DIRECTORY OUT-DIRECTORY] from SpArcFiRe. \
+                                    SpArcFiRe directories should follow -in, -tmp, -out."
+                       )
+    
+    
+    args              = parser.parse_args() # Using vars(args) will call produce the args as a dict
+    #parallel          = args.parallel
+    basename          = args.basename
+    
+    scatter_plot      = args.scatter
+    validation_plot   = args.overlay
+    
+    cleanup           = args.cleanup
+    verbose           = args.verbose
+    #capture_output    = not args.verbose
+    
+    if len(args.paths) == 1:
+        cwd     = args.paths[0]
+        in_dir  = pj(cwd, "sparcfire-in")
+        tmp_dir = pj(cwd, "sparcfire-tmp")
+        out_dir = pj(cwd, "sparcfire-out")
+
+    elif len(args.paths) == 3:
+        in_dir, tmp_dir, out_dir = args.paths[0], args.paths[1], args.paths[2]
+        #print(f"Paths are, {in_dir}, {tmp_dir}, {out_dir}")
+
+    elif len(args.paths) == 4:
+        cwd, in_dir, tmp_dir, out_dir = args.paths[0], args.paths[1], args.paths[2], args.paths[3]
+        #print(f"Paths are, {in_dir}, {tmp_dir}, {out_dir}")
+
+    else:
+        in_dir = pj(cwd, "sparcfire-in")
+        tmp_dir = pj(cwd, "sparcfire-tmp")
+        out_dir = pj(cwd, "sparcfire-out")
+        print(f"Paths incorrectly specified, defaulting to {cwd} (-in, -tmp, -out)...")
+        print(f"{in_dir}\n{tmp_dir}\n{out_dir}")
+        print()
         
     if not exists(in_dir) or not exists(out_dir):
-        raise(f"Cannot find input/output directories {in_dir} {out_dir}.")
+        raise(f"Cannot find input/output directories: {in_dir} {out_dir}.")
+        
+    basename_dir = pj(out_dir, basename)
+    if not exists(basename_dir):
+        raise(f"Cannot find directory designated for output: {basename_dir}.")
         
     model_dir = pj(tmp_dir, "tmp_galfit_models")
     
-    pitch_angle_info = main(in_dir, out_dir, scatter_plot = scatter_plot, validation_plot = validation_plot, model_dir = model_dir)
+    pitch_angle_info = main(
+        in_dir, 
+        out_dir, 
+        scatter_plot = scatter_plot, 
+        validation_plot = validation_plot, 
+        model_dir = model_dir,
+        verbose   = verbose
+    )
     
-    filename = pj(out_dir, "pitch-angle_info.pkl")
+    filename = pj(basename_dir, f"{basename}_pitch_angle_info.pkl")
     pitch_angle_info.to_pickle(filename)
     #pd.dump(pa_rgrid_theta, open(filename, 'wb'))
-    #if cleanup:
+    if cleanup:
+        shutil.rmtree(model_dir)
     #    sp(f"rm -rf {model_dir}")
     
