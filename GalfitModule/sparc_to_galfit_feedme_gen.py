@@ -109,45 +109,7 @@ def extract_crop_rad_from_elps(elps_filepath):
 # *********************************************************************
 # *********************************************************************
 
-def galaxy_information(galaxy_name, galaxy_path):
-     
-    kwargs_out = {
-        "bulge_maj_axs_len" : 2,
-        "bulge_axis_ratio" : 0.5,
-        "bulge_rot_angle" : 30,
-        "crop_rad" : 1, 
-        "center_pos_x" : 30,
-        "center_pos_y" : 30,
-        "disk_maj_axs_len" : 30,
-        "disk_rot_angle" : 30,
-        #"pos_angle_sersic" : 1,
-        "pos_angle_power" : 30,
-        "disk_axis_ratio" : 0.5,
-        "avg_arc_length" : 30,
-        "max_arc_length" : 20,
-        "alpha" : 1,
-        "est_arcs" : 2,
-        "inclination" : 30,
-        "bar_candidate" : 'FALSE',
-        "bar_len"  : 5, 
-        # spin_parity handled by if 
-        "spin_parity" : '', #random.choice(['','-'])
-        "scale_fact_std" : 1,
-        "scale_fact_ipt" : 1,
-        "input_size"     : 256
-                    }
-        
-    chirality = 0
-    chirality_2 = 0
-    chirality_3 = 0
-    pitch_angle = 20
-    spin_parity = ""
-    
-    failure_modes = ["input rejected", 
-                     "Subscript indices must either be real positive integers or logicals.",
-                     "SIGMA must be a square  symmetric  positive definite matrix."
-                    ]
-    
+def read_galaxy_csv_tsv(galaxy_path, galaxy_name):
     try:
         # Using this for the *big* runs because *somebody* (Wayne)
         # didn't validate and overwrite the original csv's to include CR (crop radius)
@@ -211,6 +173,54 @@ def galaxy_information(galaxy_name, galaxy_path):
         fieldnames       = fieldnames,
         restkey          = "cropRad"
     )
+    
+    return reader, iptSz_split, chirality_split, galaxy_file
+    
+
+# *********************************************************************
+# *********************************************************************
+
+def galaxy_information(galaxy_name, galaxy_path):
+     
+    kwargs_out = {
+        "bulge_maj_axs_len" : 2,
+        "bulge_axis_ratio" : 0.5,
+        "bulge_rot_angle" : 30,
+        "crop_rad" : 1, 
+        "center_pos_x" : 30,
+        "center_pos_y" : 30,
+        "disk_maj_axs_len" : 30,
+        "disk_rot_angle" : 30,
+        #"pos_angle_sersic" : 1,
+        "pos_angle_power" : 30,
+        "disk_axis_ratio" : 0.5,
+        "avg_arc_length" : 30,
+        "max_arc_length" : 20,
+        "alpha" : 1,
+        "est_arcs" : 2,
+        "inclination" : 30,
+        "bar_candidate" : 'FALSE',
+        "bar_len"  : 5, 
+        # spin_parity handled by if 
+        "spin_parity" : '', #random.choice(['','-'])
+        "scale_fact_std" : 1,
+        "scale_fact_ipt" : 1,
+        "input_size"     : 256
+                    }
+        
+    chirality = 0
+    chirality_2 = 0
+    chirality_3 = 0
+    pitch_angle = 20
+    spin_parity = ""
+    
+    failure_modes = ["input rejected", 
+                     "Subscript indices must either be real positive integers or logicals.",
+                     "SIGMA must be a square  symmetric  positive definite matrix."
+                    ]
+    
+    reader, iptSz_split, chirality_split, galaxy_file = read_galaxy_csv_tsv(galaxy_path, galaxy_name)
+    
     for row in reader:
         # if sparcfire fails
         if row.get('fit_state', "") in failure_modes:
@@ -333,9 +343,9 @@ def galaxy_information(galaxy_name, galaxy_path):
         #0761 - 1.1330, 19.53474969
         # anddd adjusted according to comparison results 
         alpha = max(0.07*pitch_angle - 0.3, 0.75)
-
-    galaxy_file.close()
  
+    galaxy_file.close()
+    
     if chirality == chirality_2 or chirality == chirality_3:
         if chirality == f'Z{chirality_split}wise':
             spin_parity = '-'
