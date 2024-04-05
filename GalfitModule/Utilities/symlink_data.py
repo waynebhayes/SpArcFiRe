@@ -49,7 +49,7 @@ if __name__ == "__main__":
 
     # The file or base directory from which to gather a list of fits files
     OLD_SPARC_IN = sys.argv[1]
-    gal_sparc_in = find_files(arg1, "123*.fits", "f")
+    gal_sparc_in = find_files(OLD_SPARC_IN, "123*.fits", "f")
     assert gal_sparc_in, f"No fits files found in {OLD_SPARC_IN}."
     
     NEW_BASE_DIR = sys.argv[2] #/extra/wayne_scratch0/preserve/portman/29k_galaxies_gband
