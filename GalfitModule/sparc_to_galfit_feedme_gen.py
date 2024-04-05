@@ -654,11 +654,11 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs):
                     #gf[0].header["GAIN"] = 4.7
                 #SURVEY = SDSS-r  DR7
                 # gf[0].header.pop("GAIN", None)
-                color = gf[0].header["SURVEY"].split()[0][-1]
+                color        = gf[0].header["SURVEY"].split()[0][-1]
                 petromag_str = f"pMag_{color}"
-                devab_str = f"devAB_{color}"
+                devab_str    = f"devAB_{color}"
                 if petromag_str in gf[0].header and devab_str in gf[0].header:
-                    petromag = gf[0].header[petromag_str]
+                    petromag         = gf[0].header[petromag_str]
                     bulge_axis_ratio = gf[0].header[devab_str]
             except KeyError:
                 print(f"There is something wrong with the header for {gname}.")
