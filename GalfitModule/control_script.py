@@ -207,80 +207,64 @@ if __name__ == "__main__":
                                     SpArcFiRe directories should follow -in, -tmp, -out."
                        )
     
-    if not in_notebook():
-        args              = parser.parse_args() # Using vars(args) will call produce the args as a dict
-        num_steps         = args.num_steps
-        num_components    = args.num_components
-        parallel          = args.parallel
-        dont_remove_slurm = args.dont_remove_slurm
-        run_from_tmp      = args.run_from_tmp
-        # Invert
-        aggressive_clean  = not args.no_aggressive_clean
-        
-        restart           = args.restart
-        basename          = args.basename
-        
-        # TODO: This isn't working, forcing false for now
-        simultaneous_fitting = False #args.simultaneous_fitting
-        
-        verbose           = args.verbose
-        capture_output    = not args.verbose
+    
+    args              = parser.parse_args() # Using vars(args) will call produce the args as a dict
+    num_steps         = args.num_steps
+    num_components    = args.num_components
+    parallel          = args.parallel
+    dont_remove_slurm = args.dont_remove_slurm
+    run_from_tmp      = args.run_from_tmp
+    # Invert
+    aggressive_clean  = not args.no_aggressive_clean
 
-        print(f"Number of fitting steps: {num_steps}")
-        print(f"Parallel choice (0 - serial, 1 - CPU, 2 - SLURM): {parallel}")
-        print(f"Run from temporary directory? {run_from_tmp}")
-        print(f"Aggressively clean? {aggressive_clean}")
-        print(f"Verbosity? {verbose}")
-        if parallel == 2:
-            print(f"Don't remove SLURM dump files? {dont_remove_slurm}")
-        
-        # if num_steps not in range(1,4):
-        #     print("The number of steps you selected cannot be used!")
-        #     print("Using two.")
-        #     print()
-        #     num_steps = 2
+    restart           = args.restart
+    basename          = args.basename
 
-        if len(args.paths) == 1:
-            cwd = args.paths[0]
-            in_dir = pj(cwd, "sparcfire-in")
-            tmp_dir = pj(cwd, "sparcfire-tmp")
-            out_dir = pj(cwd, "sparcfire-out")
-            
-        elif len(args.paths) == 3:
-            in_dir, tmp_dir, out_dir = args.paths[0], args.paths[1], args.paths[2]
-            #print(f"Paths are, {in_dir}, {tmp_dir}, {out_dir}")
-            
-        elif len(args.paths) == 4:
-            cwd, in_dir, tmp_dir, out_dir = args.paths[0], args.paths[1], args.paths[2], args.paths[3]
-            #print(f"Paths are, {in_dir}, {tmp_dir}, {out_dir}")
-            
-        else:
-            in_dir = pj(cwd, "sparcfire-in")
-            tmp_dir = pj(cwd, "sparcfire-tmp")
-            out_dir = pj(cwd, "sparcfire-out")
-            print(f"Paths incorrectly specified, defaulting to {cwd} (-in, -tmp, -out)...")
-            print(f"{in_dir}\n{tmp_dir}\n{out_dir}")
-            print()
-            
-        check_dir_names = [1 for i in (in_dir, tmp_dir, out_dir) if "-" not in i ]
-        if check_dir_names:
-            raise Exception("Directory paths must end in '-in' '-tmp' and '-out'")
-            
-    else:
-        parallel = 0
-        #rerun = ""
-        num_steps = 2
-        # Avoid some... nasty surprises for when debugging
-        restart = True
-        verbose = False
-        capture_output = True
-        
-        cwd = cwd.replace("ics-home", username)
+    # TODO: This isn't working, forcing false for now
+    simultaneous_fitting = False #args.simultaneous_fitting
+
+    verbose           = args.verbose
+    capture_output    = not args.verbose
+
+    print(f"Number of fitting steps: {num_steps}")
+    print(f"Parallel choice (0 - serial, 1 - CPU, 2 - SLURM): {parallel}")
+    print(f"Run from temporary directory? {run_from_tmp}")
+    print(f"Aggressively clean? {aggressive_clean}")
+    print(f"Verbosity? {verbose}")
+    if parallel == 2:
+        print(f"Don't remove SLURM dump files? {dont_remove_slurm}")
+
+    # if num_steps not in range(1,4):
+    #     print("The number of steps you selected cannot be used!")
+    #     print("Using two.")
+    #     print()
+    #     num_steps = 2
+
+    if len(args.paths) == 1:
+        cwd = args.paths[0]
         in_dir = pj(cwd, "sparcfire-in")
         tmp_dir = pj(cwd, "sparcfire-tmp")
         out_dir = pj(cwd, "sparcfire-out")
-        
-        sys.path.append(pj(_HOME_DIR, ".local", "bin"))
+
+    elif len(args.paths) == 3:
+        in_dir, tmp_dir, out_dir = args.paths[0], args.paths[1], args.paths[2]
+        #print(f"Paths are, {in_dir}, {tmp_dir}, {out_dir}")
+
+    elif len(args.paths) == 4:
+        cwd, in_dir, tmp_dir, out_dir = args.paths[0], args.paths[1], args.paths[2], args.paths[3]
+        #print(f"Paths are, {in_dir}, {tmp_dir}, {out_dir}")
+
+    else:
+        in_dir = pj(cwd, "sparcfire-in")
+        tmp_dir = pj(cwd, "sparcfire-tmp")
+        out_dir = pj(cwd, "sparcfire-out")
+        print(f"Paths incorrectly specified, defaulting to {cwd} (-in, -tmp, -out)...")
+        print(f"{in_dir}\n{tmp_dir}\n{out_dir}")
+        print()
+
+    check_dir_names = [1 for i in (in_dir, tmp_dir, out_dir) if "-" not in i ]
+    if check_dir_names:
+        raise Exception("Directory paths must end in '-in' '-tmp' and '-out'")
         
     # Making these absolute paths
     cwd     = absp(cwd)
