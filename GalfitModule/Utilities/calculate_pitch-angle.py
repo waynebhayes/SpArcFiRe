@@ -443,6 +443,9 @@ def calculate_pa(
     
     _, iptSz_split, chirality_split, galaxy_file = read_galaxy_csv_tsv(gpath, gname)
     
+    if not galaxy_file:
+        return None
+    
     galaxy_info = pd.read_csv(galaxy_file)
     galaxy_file.close()
     
