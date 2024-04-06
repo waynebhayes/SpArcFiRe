@@ -146,7 +146,7 @@ def read_galaxy_csv_tsv(galaxy_path, galaxy_name):
             
         else:
             print("No CSVs or TSVs found in the galaxy directory. Kicking this galaxy out of the set.")
-            return None
+            return None, None, None, None
         
         galaxy_file = open(galaxy_filename, 'r')
         
@@ -158,11 +158,14 @@ def read_galaxy_csv_tsv(galaxy_path, galaxy_name):
             # PURPOSEFULLY TOOK CROPRAD OUT
             # SET RESTKEY TO BE cropRad
             fieldnames = """name, fit_state, warnings, star_mask_used, noise_mask_used, chirality_maj, chirality_alenWtd, chirality_wtdPangSum, chirality_longestArc, badBulgeFitFlag, bulgeAxisRatio, bulgeMajAxsLen, bulgeMajAxsAngle, bulgeAvgBrt, bulgeDiskBrtRatio, numElpsRefits, diskAxisRatio, diskMinAxsLen, diskMajAxsLen, diskMajAxsAngleRadians, inputCenterR, inputCenterC, iptSz, muDist, muDistProp, covarFit, wtdLik, likOfCtr, brtUnifScore, gaussLogLik, contourBrtRatio, standardizedCenterR, standardizedCenterC, hasDeletedCtrClus, failed2revDuringMergeCheck, failed2revDuringSecondaryMerging, failed2revInOutput, fitQualityF1, fitQualityPCC, cpu_time, wall_time, bar_candidate_available, bar_used, alenAt25pct, alenAt50pct, alenAt75pct, rankAt25pct, rankAt50pct, rankAt75pct, avgArcLength, minArcLength, lowerQuartileArcLength, medianArcLength, upperQuartileArcLength, maxArcLength, totalArcLength, totalNumArcs, chirality_votes_maj, chirality_votes_alenWtd, alenWtdPangSum, top2_chirality_agreement, pa_longest, pa_avg, pa_avg_abs, pa_avg_domChiralityOnly, pa_alenWtd_avg, paErr_alenWtd_stdev, pa_alenWtd_avg_abs, paErr_alenWtd_stdev_abs, pa_alenWtd_avg_domChiralityOnly, paErr_alenWtd_stdev_domChiralityOnly, pa_totBrtWtd, pa_avgBrtWtd, pa_alenWtd_median, pa_alenWtd_lowQuartile, pa_alenWtd_highQuartile, pa_alenWtd_lowDecile, pa_alenWtd_highDecile, pa_alenWtd_median_domChiralityOnly, pa_alenWtd_lowQuartile_domChiralityOnly, pa_alenWtd_highQuartile_domChiralityOnly, pa_alenWtd_lowDecile_domChiralityOnly, pa_alenWtd_highDecile_domChiralityOnly, sorted_agreeing_pangs, sorted_agreeing_arclengths, numArcs_largest_length_gap, numDcoArcs_largest_length_gap, numArcs_arclength_function_flattening, numDcoArcs_arclength_function_flattening, bar_score_img, bar_cand_score_orifld, bar_angle_input_img, bar_half_length_input_img, bar_angle_standardized_img, bar_half_length_standardized_img, numArcsGE000, numArcsGE010, numArcsGE020, numArcsGE040, numArcsGE050, numArcsGE055, numArcsGE060, numArcsGE065, numArcsGE070, numArcsGE075, numArcsGE080, numArcsGE085, numArcsGE090, numArcsGE095, numArcsGE100, numArcsGE120, numArcsGE140, numArcsGE160, numArcsGE180, numArcsGE200, numArcsGE220, numArcsGE240, numArcsGE260, numArcsGE280, numArcsGE300, numArcsGE350, numArcsGE400, numArcsGE450, numArcsGE500, numArcsGE550, numArcsGE600, numDcoArcsGE000, numDcoArcsGE010, numDcoArcsGE020, numDcoArcsGE040, numDcoArcsGE050, numDcoArcsGE055, numDcoArcsGE060, numDcoArcsGE065, numDcoArcsGE070, numDcoArcsGE075, numDcoArcsGE080, numDcoArcsGE085, numDcoArcsGE090, numDcoArcsGE095, numDcoArcsGE100, numDcoArcsGE120, numDcoArcsGE140, numDcoArcsGE160, numDcoArcsGE180, numDcoArcsGE200, numDcoArcsGE220, numDcoArcsGE240, numDcoArcsGE260, numDcoArcsGE280, numDcoArcsGE300, numDcoArcsGE350, numDcoArcsGE400, numDcoArcsGE450, numDcoArcsGE500, numDcoArcsGE550, numDcoArcsGE600,""".replace(" ", "").split(",")
+    
+            # FOR 2016 RUN, g BAND
+            fieldnames="""name, fit_state, warnings, star_mask_used, noise_mask_used, chirality_maj, chirality_alenWtd, chirality_wtdPangSum, chirality_longestArc, badBulgeFitFlag, bulgeAxisRatio, bulgeMajAxsLen, bulgeMajAxsAngle, bulgeAvgBrt, bulgeDiskBrtRatio, numElpsRefits, diskAxisRatio, diskMinAxsLen, diskMajAxsLen, diskMajAxsAngleRadians, inputCenterR, inputCenterC, iptSz, muDist, muDistProp, covarFit, wtdLik, likOfCtr, brtUnifScore, gaussLogLik, contourBrtRatio, standardizedCenterR, standardizedCenterC, hasDeletedCtrClus, failed2revDuringMergeCheck, failed2revDuringSecondaryMerging, failed2revInOutput, cpu_time, wall_time, bar_candidate_available, bar_used, alenAt25pct, alenAt50pct, alenAt75pct, rankAt25pct, rankAt50pct, rankAt75pct, avgArcLength, minArcLength, lowerQuartileArcLength, medianArcLength, upperQuartileArcLength, maxArcLength, totalArcLength, totalNumArcs, chirality_votes_maj, chirality_votes_alenWtd, alenWtdPangSum, top2_chirality_agreement, pa_longest, pa_avg, pa_avg_abs, pa_avg_domChiralityOnly, pa_alenWtd_avg, paErr_alenWtd_stdev, pa_alenWtd_avg_abs, paErr_alenWtd_stdev_abs, pa_alenWtd_avg_domChiralityOnly, paErr_alenWtd_stdev_domChiralityOnly, pa_totBrtWtd, pa_avgBrtWtd, pa_alenWtd_median, pa_alenWtd_lowQuartile, pa_alenWtd_highQuartile, pa_alenWtd_lowDecile, pa_alenWtd_highDecile, pa_alenWtd_median_domChiralityOnly, pa_alenWtd_lowQuartile_domChiralityOnly, pa_alenWtd_highQuartile_domChiralityOnly, pa_alenWtd_lowDecile_domChiralityOnly, pa_alenWtd_highDecile_domChiralityOnly, sorted_agreeing_pangs, sorted_agreeing_arclengths, numArcs_largest_length_gap, numDcoArcs_largest_length_gap, numArcs_arclength_function_flattening, numDcoArcs_arclength_function_flattening, bar_score_img, bar_cand_score_orifld, bar_angle_input_img, bar_half_length_input_img, bar_angle_standardized_img, bar_half_length_standardized_img, numArcsGE000, numArcsGE010, numArcsGE020, numArcsGE040, numArcsGE050, numArcsGE055, numArcsGE060, numArcsGE065, numArcsGE070, numArcsGE075, numArcsGE080, numArcsGE085, numArcsGE090, numArcsGE095, numArcsGE100, numArcsGE120, numArcsGE140, numArcsGE160, numArcsGE180, numArcsGE200, numArcsGE220, numArcsGE240, numArcsGE260, numArcsGE280, numArcsGE300, numArcsGE350, numArcsGE400, numArcsGE450, numArcsGE500, numArcsGE550, numArcsGE600, numDcoArcsGE000, numDcoArcsGE010, numDcoArcsGE020, numDcoArcsGE040, numDcoArcsGE050, numDcoArcsGE055, numDcoArcsGE060, numDcoArcsGE065, numDcoArcsGE070, numDcoArcsGE075, numDcoArcsGE080, numDcoArcsGE085, numDcoArcsGE090, numDcoArcsGE095, numDcoArcsGE100, numDcoArcsGE120, numDcoArcsGE140, numDcoArcsGE160, numDcoArcsGE180, numDcoArcsGE200, numDcoArcsGE220, numDcoArcsGE240, numDcoArcsGE260, numDcoArcsGE280, numDcoArcsGE300, numDcoArcsGE350, numDcoArcsGE400, numDcoArcsGE450, numDcoArcsGE500, numDcoArcsGE550, numDcoArcsGE600,""".replace(" ", "").split(",")
 
     except FileNotFoundError:
         print("Can't open to read: ", galaxy_filename)
         print("Check Sparcfire output or directories. Kicking this galaxy out of the set.")
-        return None
+        return None, None, None, None
         
     galaxy_file.seek(0)
     
@@ -221,7 +224,11 @@ def galaxy_information(galaxy_name, galaxy_path):
     
     reader, iptSz_split, chirality_split, galaxy_file = read_galaxy_csv_tsv(galaxy_path, galaxy_name)
     
+    if not reader:
+        return None
+    
     for row in reader:
+        #print(*row.items(), sep = "\n")
         # if sparcfire fails
         if row.get('fit_state', "") in failure_modes:
             return None
@@ -265,14 +272,19 @@ def galaxy_information(galaxy_name, galaxy_path):
             bulge_maj_axs_len = scale_var(row.get('bulgeMajAxsLen'), scale_fact_ipt)
             # TODO: Take bulge axis ratio from SDSS? deVAB_r
             bulge_axis_ratio = float(row.get('bulgeAxisRatio'))
-
-            # According to the dissertation this is given in terms of the input image not the standardized image
-            disk_maj_axs_len = scale_var(row.get('diskMajAxsLen'), scale_fact_ipt) 
-
+            
             # Angles don't need to scale
             # But sparcfire is flipped across the y-axis and uses mathematical convention
             # As opposed to astronomical (0 is vertical y axis, 90 is counter clockwise to x)
             bulge_rot_angle = 90 - np.degrees(float(row.get('bulgeMajAxsAngle')))
+        except ValueError as ve:
+            print("There is a value error somewhere in the bulge parameters...")
+            print(ve)
+            print("Using defaults.")
+
+        try:
+            # According to the dissertation this is given in terms of the input image not the standardized image
+            disk_maj_axs_len = scale_var(row.get('diskMajAxsLen'), scale_fact_ipt) 
             
             # Power angle is mathematical convention, disk angle is astronomical
             pos_angle_power = np.degrees(float(row.get('diskMajAxsAngleRadians')))
@@ -290,7 +302,7 @@ def galaxy_information(galaxy_name, galaxy_path):
 
             # For estimating number of real arcs to influence fourier modes
             # This seems to be a much better way to do it
-            est_arcs = int(row.get('rankAt75pct'))
+            est_arcs = int(float(row.get('rankAt75pct')))
 
         # Happens when row is empty... This is easier than messing with other conditionals for each scale factor/float conversion
         except ValueError as ve:
@@ -641,7 +653,7 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs):
         elif galaxy_dict["bar_candidate"].upper() == "TRUE":
             in_rad = min(galaxy_dict["bar_len"], arc_dict["inner_rad"])
         else:
-            print(bar_candidate)
+            print(galaxy_dict["bar_candidate"])
             print("bar_candidate is neither TRUE nor FALSE in the CSV. Check sparcfire output.")
             print("Defaulting the average inner distance to the arms.")
         
