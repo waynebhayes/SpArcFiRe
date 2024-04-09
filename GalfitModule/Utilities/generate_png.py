@@ -23,12 +23,17 @@ from Classes.Containers import *
 from Classes.FitsHandlers import *
 from Functions.helper_functions import *
 
-def wrapper(gfits, out_png_dir, hoirzontal = False):
+def wrapper(gfits, out_png_dir, single_image = False, hoirzontal = False):
     if os.stat(gfits).st_size == 0:
         print(f"{os.path.basename(gfits)} is empty!!!")
         return
 
-    output = OutputFits(gfits)
+    if not single_image:
+        output = OutputFits(gfits)
+    else:
+        output = FitsFile(gfits)
+        output.gname = os.path.basename(gfits).split(".fits")[0]
+        
     output.to_png(out_png_dir = out_png_dir, horizontal = horizontal)
 
 
@@ -39,6 +44,7 @@ if __name__ == "__main__":
     python3 ./{sys.argv[0]} [OPTION] PNG-OUT-DIRECTORY [FITS-DIRECTORY | SPACE SEPARATED FITS FILES]
     
     OPTIONS =>[-h  | --help]
+              [-s  | --single-image] 
               [-H  | --horizontal]
               [-v  | --verbose]
               [-ff | --from-file]
@@ -48,6 +54,14 @@ if __name__ == "__main__":
     """
     
     parser = argparse.ArgumentParser(description = USAGE)
+    
+    parser.add_argument('-s', '--single-image',
+                        dest     = 'single_image',
+                        action   = 'store_const',
+                        const    = True,
+                        default  = False,
+                        help     = 'Specify that the FITS files being read in are only a single image data block, i.e. model or observation only.'
+                       )
     
     parser.add_argument('-H', '--horizontal',
                         dest     = 'horizontal',
@@ -86,6 +100,7 @@ if __name__ == "__main__":
     out_png_dir    = args.out_png_dir
     list_o_fits    = args.list_o_fits
     
+    single_image   = args.single_image
     horizontal     = args.horizontal
     from_file      = args.from_file
     
@@ -115,8 +130,8 @@ if __name__ == "__main__":
             
     #if "bayonet" in sp(f"hostname").stdout.split(".")[0]:
     if len(list_o_fits) > 500:
-        Parallel(n_jobs = -2)(delayed(wrapper)(gfits, out_png_dir, horizontal) for gfits in list_o_fits)
+        Parallel(n_jobs = -2)(delayed(wrapper)(gfits, out_png_dir, single_image, horizontal) for gfits in list_o_fits)
     else:
-        _ = [wrapper(gfits, out_png_dir, horizontal) for gfits in list_o_fits]
+        _ = [wrapper(gfits, out_png_dir, single_image, horizontal) for gfits in list_o_fits]
     #else:
     #    print("Not on bayonet, can't generate galaxies.")
