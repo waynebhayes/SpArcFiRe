@@ -282,6 +282,10 @@ async def run_galfit(
         cname : galfit_output.components[cname] for cname, switch in component_switches.items() if switch[0]
     }
     
+    # This doesn't seem to help :(
+    # At least not on the set of 14
+    #comps_to_file["bulge"].sersic_index.value = 4
+    
     # to_file no arguments uses the feedme path attribute for location
     # and uses all the components in the container object (in whatever order they're in)
     header.to_file(filepath_in, *comps_to_file.values())
@@ -398,6 +402,7 @@ async def parameter_search_fit(
     
     # first number is switch for using bulge, disk_for_arms, arms, fourier, sky
     # second is switch for taking from original feedme or previous output... TODO: remove?
+
     # Starting choices
     if num_steps == 1:
         component_switches = {cname : [1,0] for cname in initial_components.components.keys()}
