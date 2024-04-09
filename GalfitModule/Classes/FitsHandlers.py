@@ -366,7 +366,7 @@ class FitsFile:
 # ==========================================================================================================
 
 
-# In[7]:
+# In[6]:
 
 
 class OutputFits(FitsFile):
@@ -666,14 +666,14 @@ class OutputFits(FitsFile):
 # ==========================================================================================================
 
 
-# In[8]:
+# In[7]:
 
 
 if __name__ == "__main__":
     from RegTest.RegTest import *
 
 
-# In[9]:
+# In[8]:
 
 
 # Testing from_file
@@ -722,7 +722,7 @@ if __name__ == "__main__":
     print(np.shape(test_obs.observation.data))
 
 
-# In[10]:
+# In[9]:
 
 
 # Unit test to check value of masked residual
@@ -754,7 +754,7 @@ if __name__ == "__main__":
     #print(np.min(test_model.observation.data))
 
 
-# In[11]:
+# In[13]:
 
 
 if __name__ == "__main__":
@@ -762,7 +762,8 @@ if __name__ == "__main__":
     model_to_update = pj(TEST_OUTPUT_DIR, f"temp_galfit_out.fits")
     
     if exists(model_to_update):
-        sp(f"rm -f {model_to_update}")
+        #sp(f"rm -f {model_to_update}")
+        rm_files(model_to_update)
         
     _ = sp(f"cp {model} {model_to_update}")
 
@@ -773,23 +774,28 @@ if __name__ == "__main__":
     keys_to_check = ("NMR", "KS_P", "W_NMR")
     
     # TODO: replace fits file with one without those header options
+    # Expect False
     print("Before... (expect False)", all(k in test_model.header for k in keys_to_check))
+    assert not all(k in test_model.header for k in keys_to_check), "Expected False."
+    
     
     _ = test_model.generate_masked_residual(test_mask)
     test_model = OutputFits(model_to_update)
 
     print("After...", all(k in test_model.header for k in keys_to_check))
+    assert all(k in test_model.header for k in keys_to_check), "Expected True."
 
 
-# In[12]:
+# In[11]:
 
 
 if __name__ == "__main__":
     print("Checking if all FITS files are closed...")
     print("Expect True:", not any("fits" in pof.path for pof in psutil.Process().open_files()))
+    assert not any("fits" in pof.path for pof in psutil.Process().open_files()), "Expected True."
 
 
-# In[13]:
+# In[12]:
 
 
 if __name__ == "__main__":
