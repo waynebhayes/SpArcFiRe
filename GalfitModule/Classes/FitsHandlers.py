@@ -253,8 +253,13 @@ class FitsFile:
         fitspng_param       = "0.25,1" #1,150"
         fitspng_param_model = "0.25,0.75"
         
+        # Different conventions... 0 is used for model/observation only
+        primary_img_num = "1"
+        if self.num_imgs == 1:
+            primary_img_num = "0"
+            
         # run_fitspng from helper_functions, string path to fitspng program
-        fitspng_cmd1   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}.png {fits_path}[1]"
+        fitspng_cmd1   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}_observation.png {fits_path}[{primary_img_num}]"
         
         fitspng_cmd2   = f"{run_fitspng} -fr \"{fitspng_param_model}\" -o {tmp_png_path}_out.png {fits_path}[2]"
         
@@ -267,12 +272,13 @@ class FitsFile:
             # We must capture this call to check if the conversion worked
             fitspng_out = sp(cmd, capture_output = True)
             
-            if "error" in fitspng_out.stderr:
+            if "error" in fitspng_out.stderr.lower():
                 print("Skipping fitspng conversion... there is likely a library (libcfitsio) issue.")
+                print(f"Error is:\n{fitspng_out.stderr}")
                 self.combined_png = ""
                 return
         
-        im1 = f"{tmp_png_path}.png"
+        im1 = f"{tmp_png_path}_observation.png"
         im2 = f"{tmp_png_path}_out.png"
         im3 = f"{tmp_png_path}_residual.png"
         
@@ -295,17 +301,17 @@ class FitsFile:
             
         montage_cmd = run_montage + " " + \
                       " ".join(im_cmd for idx, im_cmd in enumerate([im1, im2, im3]) 
-                               if idx <= self.num_imgs)
+                               if idx + 1 <= self.num_imgs)
         
         tiling = f"1x{self.num_imgs}"
         if kwargs.get("horizontal", None):
-            tiling    = tiling = f"{self.num_imgs}x1"
+            tiling    = f"{self.num_imgs}x1"
             combined += "_horizontal"
             
         # Combining the images using ImageMagick
         # If this is a single image, it'll also resize for me so that's why I leave it in
-        montage_cmd += f" -tile {tiling} -geometry \"175x175+2+2\" \
-                        {pj(out_png_dir, gname)}{combined}.png"
+        montage_cmd += f" -tile {tiling} -geometry \"175x175+2+2\" " \
+                       f"{pj(out_png_dir, gname)}{combined}.png"
         
         if run_montage:
             _ = sp(montage_cmd, capture_output = capture_output)
