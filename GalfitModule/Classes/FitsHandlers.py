@@ -250,22 +250,38 @@ class FitsFile:
         
         capture_output = bool(kwargs.get("silent", False))
         
+        combined_suffix   = kwargs.get("combined_suffix", "combined")
+        primary_img_num = kwargs.get("primary_img_num", 1)
+        
         fitspng_param       = "0.25,1" #1,150"
         fitspng_param_model = "0.25,0.75"
         
         # Different conventions... 0 is used for model/observation only
-        primary_img_num = "1"
         if self.num_imgs == 1:
-            primary_img_num = "0"
+            primary_img_num = 0
             
+        im1 = f"{tmp_png_path}_observation.png"
+        im2 = f"{tmp_png_path}_out.png"
+        im3 = f"{tmp_png_path}_residual.png"
+        
         # run_fitspng from helper_functions, string path to fitspng program
-        fitspng_cmd1   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}_observation.png {fits_path}[{primary_img_num}]"
+        fitspng_cmd1   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {im1} {fits_path}[{primary_img_num}]"
+        fitspng_cmd2   = f"{run_fitspng} -fr \"{fitspng_param_model}\" -o {im2} {fits_path}[{primary_img_num + 1}]"
+        fitspng_cmd3   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {im3} {fits_path}[{primary_img_num + 2}]"
         
-        fitspng_cmd2   = f"{run_fitspng} -fr \"{fitspng_param_model}\" -o {tmp_png_path}_out.png {fits_path}[2]"
+        cmds             = [fitspng_cmd1, fitspng_cmd2, fitspng_cmd3]
+        output_png_files = [im1, im2, im3]
         
-        fitspng_cmd3   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}_residual.png {fits_path}[3]"
-        
-        cmds = [fitspng_cmd1, fitspng_cmd2, fitspng_cmd3]
+        # for n-images
+        for i in range(primary_img_num + 3, self.num_imgs):
+            png_name = f"{tmp_png_path}_image{i}.png"
+            
+            output_png_files.append(png_name)
+            
+            cmds.append(
+                f"{run_fitspng} -fr \"{fitspng_param}\" -o {png_name} {fits_path}[{i}]"
+            )
+            
         
         # sp is from helper_functions, subprocess.run call
         for cmd in cmds[:self.num_imgs]:
@@ -278,13 +294,8 @@ class FitsFile:
                 self.combined_png = ""
                 return
         
-        im1 = f"{tmp_png_path}_observation.png"
-        im2 = f"{tmp_png_path}_out.png"
-        im3 = f"{tmp_png_path}_residual.png"
-        
-        combined = ""
-        if self.num_imgs > 1:
-            combined = "_combined"
+        if self.num_imgs == 1:
+            combined_suffix = ""
         
         # Adding 'magick' to use the portable version in the GalfitModule
         run_montage     = shutil.which("magick")
@@ -300,29 +311,30 @@ class FitsFile:
             run_montage += " montage"
             
         montage_cmd = run_montage + " " + \
-                      " ".join(im_cmd for idx, im_cmd in enumerate([im1, im2, im3]) 
+                      " ".join(im_cmd for idx, im_cmd in enumerate(output_png_files)
                                if idx + 1 <= self.num_imgs)
         
         tiling = f"1x{self.num_imgs}"
         if kwargs.get("horizontal", None):
-            tiling    = f"{self.num_imgs}x1"
-            combined += "_horizontal"
+            tiling           = f"{self.num_imgs}x1"
+            combined_suffix += "_horizontal"
             
         # Combining the images using ImageMagick
         # If this is a single image, it'll also resize for me so that's why I leave it in
         montage_cmd += f" -tile {tiling} -geometry \"175x175+2+2\" " \
-                       f"{pj(out_png_dir, gname)}{combined}.png"
+                       f"{pj(out_png_dir, gname)}_{combined_suffix}.png"
         
         if run_montage:
             _ = sp(montage_cmd, capture_output = capture_output)
-            self.combined_png    = f"{pj(out_png_dir, gname)}{combined}.png"
+            self.combined_png    = f"{pj(out_png_dir, gname)}_{combined_suffix}.png"
         
         if cleanup:
-            _ = rm_files(im1, im2, im3)
+            _ = rm_files(*output_png_files)
         else:
             self.observation_png = im1
             self.model_png       = im2
             self.residual_png    = im3
+            self.all_png         = output_png_files
 
 # ==========================================================================================================
 
@@ -754,7 +766,7 @@ if __name__ == "__main__":
     #print(np.min(test_model.observation.data))
 
 
-# In[13]:
+# In[10]:
 
 
 if __name__ == "__main__":
@@ -795,7 +807,7 @@ if __name__ == "__main__":
     assert not any("fits" in pof.path for pof in psutil.Process().open_files()), "Expected True."
 
 
-# In[12]:
+# In[ ]:
 
 
 if __name__ == "__main__":
