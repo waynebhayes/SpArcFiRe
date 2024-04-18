@@ -175,17 +175,20 @@ def sum_fourier_modes(fourier_dict, **kwargs):
 #     return rgrid
 
 def plot_scatter(
-                 pitch_angles, 
-                 rgrid, 
-                 galaxy_info, 
-                 arc_info, 
-                 inner_idx = 0, 
-                 outer_idx = -1, 
-                 scatter_dir = "./"
-                 ):
+    gname,
+    pitch_angles, 
+    rgrid,
+    #galaxy_info
+    galaxy_dict,
+    #arc_info
+    arc_dict, 
+    inner_idx = 0, 
+    outer_idx = -1, 
+    scatter_dir = "./"
+):
     
     ones = np.ones(len(rgrid))
-    gname = str(galaxy_info.name[0])
+    #gname = str(galaxy_info.name[0])
     
     plt.clf()
     plt.figure(figsize=(8, 6))
@@ -193,8 +196,15 @@ def plot_scatter(
     plt.axvline(x = rgrid[inner_idx], color = 'mediumseagreen', alpha = 0.5)
     plt.axvline(x = rgrid[outer_idx], color = 'mediumseagreen', alpha = 0.5, label='_nolegend_')
 
-    sparc_pa  = float(abs(galaxy_info[' pa_alenWtd_avg_domChiralityOnly'].iloc[0]))
-    sparc_unc = np.degrees(np.arctan2(float(arc_info.loc[0, 'num_pixels']),float(arc_info.loc[0, 'arc_length'])**2))
+    #sparc_pa  = float(abs(galaxy_info[' pa_alenWtd_avg_domChiralityOnly'].iloc[0]))
+    sparc_pa   = galaxy_dict["galaxy_pitch_angle"]
+    #sparc_unc = np.degrees(np.arctan2(float(arc_info.loc[0, 'num_pixels']),float(arc_info.loc[0, 'arc_length'])**2))
+    sparc_unc  = np.degrees(
+        np.arctan2(
+            arc_dict["num_pixels"], 
+            arc_dict["arc_length"]**2
+        )
+    )
 
     inner_rad = rgrid[inner_idx]
     outer_rad = rgrid[outer_idx]
@@ -228,24 +238,24 @@ def plot_scatter(
     plt.close()
     return filename
 
-def plot_validation(pitch_angles, 
-                    rgrid, 
-                    thetas, 
-                    galaxy_info, 
-                    arc_info, 
-                    fits_file_obj,
-                    model_obj,
-                    inner_idx = 0, 
-                    outer_idx = -1, 
-                    radial_steps = 5, 
-                    validation_dir = "./",
-                    **kwargs
-                   ):
+def plot_validation(
+    gname,
+    pitch_angles, 
+    rgrid, 
+    thetas,
+    fits_file_obj,
+    model_obj,
+    inner_idx = 0, 
+    outer_idx = -1, 
+    radial_steps = 5, 
+    validation_dir = "./",
+    **kwargs
+):
     
     filename = ""
     
     ones = np.ones(len(rgrid))
-    gname = str(galaxy_info.name[0])
+    #gname = str(galaxy_info.name[0])
     num_pts = len(rgrid)
     
     fit_region = fits_file_obj.feedme.header.region_to_fit
@@ -441,43 +451,76 @@ def calculate_pa(
     
     rvals_grid = np.sqrt((xgrid - x0)**2 + ((ygrid - y0)/q)**2)
     
-    _, iptSz_split, chirality_split, galaxy_file = read_galaxy_csv_tsv(gpath, gname)
+    galaxy_dict = galaxy_information(gname, gpath)
     
-    if not galaxy_file:
+    crop_rad       = galaxy_dict.get("crop_rad", 1)
+    scale_fact_std = galaxy_dict.get("scale_fact_std", 1)
+    
+    # Default values (in s2g code as well as above)
+    if crop_rad == 1 and scale_fact_std == 1:
+        print(f"Could not find a cropping radius from either the galaxy c/tsv or elps-fit-params.txt. Does the elps file exist?")
+        print("This is necessary for some scaling. Kicking this galaxy out of the set.")
         return None
     
-    galaxy_info = pd.read_csv(galaxy_file)
-    galaxy_file.close()
+#     _, iptSz_split, chirality_split, galaxy_file = read_galaxy_csv_tsv(gpath, gname)
     
-    try:
-        crop_rad = float(galaxy_info[" cropRad"].iloc[0])
-    except (KeyError, ValueError, TypeError) as ve:
-        try:
-            elps_file = pj(gpath, f"{gname}-elps-fit-params.txt")
-            crop_rad = float(extract_crop_rad_from_elps(elps_file))
-        except FileNotFoundError:
-            print(f"Could not find a cropping radius from either the galaxy c/tsv or elps-fit-params.txt. Does the elps file exist?")
-            print("This is necessary for some scaling. Kicking this galaxy out of the set.")
-            return None
+#     if not galaxy_file:
+#         return None
+    
+#     galaxy_info = pd.read_csv(galaxy_file)
+#     galaxy_file.close()
+    
+#     try:
+#         crop_rad = float(galaxy_info[" cropRad"].iloc[0])
+#     except (KeyError, ValueError, TypeError) as ve:
+#         try:
+#             elps_file = pj(gpath, f"{gname}-elps-fit-params.txt")
+#             crop_rad = float(extract_crop_rad_from_elps(elps_file))
+#         except FileNotFoundError:
+#             print(f"Could not find a cropping radius from either the galaxy c/tsv or elps-fit-params.txt. Does the elps file exist?")
+#             print("This is necessary for some scaling. Kicking this galaxy out of the set.")
+#             return None
 
-    scale_fact_std = 2*crop_rad/256
+    # scale_fact_std = 2*crop_rad/256
 
-    try:
-        arc_info = pd.read_csv(pj(out_dir, gname, f"{gname}_arcs.csv"))
-        inner_rad = scale_fact_std*min(arc_info.loc[0, "r_start"], arc_info.loc[1, "r_start"])
-        outer_rad = scale_fact_std*max(arc_info.loc[0, "r_end"], arc_info.loc[1, "r_end"])
-    except:
-        try:
-            arc_info = pd.read_csv(
-                pj(out_dir, gname, f"{gname}_arcs.tsv"),
-                delimeter = "\t"
-            )
-            inner_rad = scale_fact_std*min(arc_info.loc[0, "r_start"], arc_info.loc[1, "r_start"])
-            outer_rad = scale_fact_std*max(arc_info.loc[0, "r_end"], arc_info.loc[1, "r_end"])
-        except:
-            print(f"Something went wrong reading arc info from {gname}_arcs.csv")
-            #continue
-            return None
+    # try:
+    #     arc_info = pd.read_csv(pj(out_dir, gname, f"{gname}_arcs.csv"))
+    #     inner_rad = scale_fact_std*min(arc_info.loc[0, "r_start"], arc_info.loc[1, "r_start"])
+    #     outer_rad = scale_fact_std*max(arc_info.loc[0, "r_end"], arc_info.loc[1, "r_end"])
+    # except:
+    #     try:
+    #         arc_info = pd.read_csv(
+    #             pj(out_dir, gname, f"{gname}_arcs.tsv"),
+    #             delimeter = "\t"
+    #         )
+    #         inner_rad = scale_fact_std*min(arc_info.loc[0, "r_start"], arc_info.loc[1, "r_start"])
+    #         outer_rad = scale_fact_std*max(arc_info.loc[0, "r_end"], arc_info.loc[1, "r_end"])
+    #     except:
+    #         print(f"Something went wrong reading arc info from {gname}_arcs.csv")
+    #         #continue
+    #         return None
+    
+    # Error handling occurs inside here.
+    num_arms = galaxy_dict.get("est_arcs", 2)
+    arc_dict = arc_information(
+        gname, 
+        gpath,  
+        num_arms       = num_arms,
+        bulge_rad      = galaxy_dict.get("bulge_maj_axs_len", 2), 
+        scale_fact_std = scale_fact_std
+    )
+    
+    # Use min inner and max outer to give the widest breadth
+    # for our results, the inner/outer rad given by the arc_dict
+    # is modified for best-use for GALFIT and doesn't work as well here
+    inner_rad  = arc_dict.get("min_inner_rad", 0)
+    outer_rad  = arc_dict.get("max_outer_rad", 20)
+    
+    # Default values (in s2g code as well as above)
+    if inner_rad == 0 and outer_rad == 20:
+        print(f"Unable to calculate pitch angle values for galaxy {gname}.")
+        #continue
+        return None
         
     if use_inner_outer_rad:
         #cond  = (rvals_grid > inner_rad) & (rvals_grid <= outer_rad)
@@ -557,15 +600,18 @@ def calculate_pa(
             os.mkdir(pj(out_dir, "scatter_plots"))
         
         _ = plot_scatter(
-                        pitch_angles, 
-                        #rvals_grid[cond],
-                        rgrid,
-                        galaxy_info, 
-                        arc_info, 
-                        inner_idx = inner_idx, 
-                        outer_idx = outer_idx, 
-                        scatter_dir = pj(out_dir, "scatter_plots")
-                        )
+            gname,
+            pitch_angles, 
+            #rvals_grid[cond],
+            rgrid,
+            #galaxy_info,
+            galaxy_dict,
+            #arc_info, 
+            arc_dict,
+            inner_idx   = inner_idx, 
+            outer_idx   = outer_idx, 
+            scatter_dir = pj(out_dir, "scatter_plots")
+        )
         
     if validation_plot:
         if not exists(pj(out_dir, "validation_plots")):
@@ -586,17 +632,16 @@ def calculate_pa(
             #return None
         
         _ = plot_validation(
-                            pitch_angles, 
-                            rgrid,
-                            thetas_rot, 
-                            galaxy_info, 
-                            arc_info,
-                            fits_file_obj = fits_file,
-                            model_obj     = model_only_fits_file,
-                            # inner_idx = inner_idx, 
-                            # outer_idx = outer_idx, 
-                            validation_dir = pj(out_dir, "validation_plots")
-                            )
+            gname,
+            pitch_angles, 
+            rgrid,
+            thetas_rot, 
+            fits_file_obj = fits_file,
+            model_obj     = model_only_fits_file,
+            # inner_idx = inner_idx, 
+            # outer_idx = outer_idx, 
+            validation_dir = pj(out_dir, "validation_plots")
+        )
 
 #     inner_idx = np.argmin(np.abs(rvals_grid - inner_rad))
 #     outer_idx = np.argmin(np.abs(rvals_grid - outer_rad)) + 1

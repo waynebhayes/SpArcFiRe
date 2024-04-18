@@ -183,6 +183,8 @@ def read_galaxy_csv_tsv(galaxy_path, galaxy_name):
 # *********************************************************************
 # *********************************************************************
 
+# TODO: Re-orient these to make more logical sense, i.e. path first
+# as is done in the csv_tsv function above
 def galaxy_information(galaxy_name, galaxy_path):
      
     kwargs_out = {
@@ -202,8 +204,9 @@ def galaxy_information(galaxy_name, galaxy_path):
         "alpha" : 1,
         "est_arcs" : 2,
         "inclination" : 30,
+        "galaxy_pitch_angle" : 20,
         "bar_candidate" : 'FALSE',
-        "bar_len"  : 5, 
+        "bar_len"  : 5,
         # spin_parity handled by if 
         "spin_parity" : '', #random.choice(['','-'])
         "scale_fact_std" : 1,
@@ -298,7 +301,7 @@ def galaxy_information(galaxy_name, galaxy_path):
             max_arc_length = scale_var(row.get('maxArcLength'), scale_fact_std)
 
             # Grabbing PA absolute average from dominant chirality
-            pitch_angle = abs(float(row.get('pa_alenWtd_avg_domChiralityOnly')))
+            galaxy_pitch_angle = abs(float(row.get('pa_alenWtd_avg_domChiralityOnly')))
 
             # For estimating number of real arcs to influence fourier modes
             # This seems to be a much better way to do it
@@ -392,11 +395,16 @@ def arc_information(
 ):
 
     kwargs_out = {
-        "inner_rad"   : 0,
-        "outer_rad"   : 20,
+        "inner_rad"     : 0,
+        "min_inner_rad" : 0,
+        "outer_rad"     : 20,
+        "max_outer_rad" : 20,
+        #
         "cumul_rot"   : 60,
         "pitch_angle" : 0,
         "weight_div"  : 1, # For when I want to recover totals
+        "num_pixels"  : 0, # For pitch angle things
+        "arc_length"  : 0,
                  }
     
     try:
@@ -448,6 +456,7 @@ def arc_information(
         return kwargs_out
 
     # Use i instead of count because est_arcs is usually way too high
+    # Keep count to determine how many contributed to the total
     while i < num_arms:
         try:
             _ = arcs_in[i]['pitch_angle']
@@ -488,13 +497,33 @@ def arc_information(
 
     # Averaging
     # Galfit seems to like these values to be smaller
-    weight_div = 1/max(1, count + 2) #1/np.math.factorial(count)
+    weight_div = 1/(count + 2) #1/np.math.factorial(count)
     cumul_rot = abs(theta_sum)*weight_div # NOT A STRING
 
     inner_rad *= weight_div # Averaging the inner distance to both arcs
     outer_rad *= weight_div # Averaging outer distance
 
     pitch_angle /= max(1, count)
+    
+    # Grabbing for pitch angle calc
+    min_inner_rad = scale_var(
+        min(
+            float(arcs_in[0]['r_start']),
+            float(arcs_in[1]['r_start'])
+        ),
+        scale_fact_std
+    )
+    
+    max_outer_rad = scale_var(
+        max(
+            float(arcs_in[0]['r_end']),
+            float(arcs_in[1]['r_end'])
+        ),
+        scale_fact_std
+    )
+    
+    num_pixels = float(arcs_in[0]['num_pixels'])
+    arc_length = float(arcs_in[0]['arc_length'])
 
     arcs_file.close()
 
@@ -640,12 +669,12 @@ def write_to_feedmes(in_dir, tmp_dir, out_dir, **kwargs):
         y2crop = min(round(center_pos_y + 2*crop_rad), input_size)
     
         arc_dict = arc_information(
-                                   gname, 
-                                   gfolder, 
-                                   num_arms = galaxy_dict["est_arcs"], 
-                                   bulge_rad = galaxy_dict["bulge_maj_axs_len"], 
-                                   scale_fact_std = scale_fact_std
-                                  )
+            gname, 
+            gfolder, 
+            num_arms = galaxy_dict["est_arcs"], 
+            bulge_rad = galaxy_dict["bulge_maj_axs_len"], 
+            scale_fact_std = scale_fact_std
+        )
     
         if galaxy_dict["bar_candidate"].upper() == "FALSE": # According to Chien, if no bar, then r_in = 0 since r_in is more a mathematical construct relating to the bar
             in_rad = 0
