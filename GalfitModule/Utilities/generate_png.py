@@ -23,7 +23,15 @@ from Classes.Containers import *
 from Classes.FitsHandlers import *
 from Functions.helper_functions import *
 
-def wrapper(gfits, out_png_dir, single_image = False, hoirzontal = False):
+
+def wrapper(
+    gfits, 
+    out_png_dir, 
+    single_image = False, 
+    hoirzontal = False, 
+    cleanup = True
+):
+    
     if os.stat(gfits).st_size == 0:
         print(f"{os.path.basename(gfits)} is empty!!!")
         return
@@ -34,7 +42,11 @@ def wrapper(gfits, out_png_dir, single_image = False, hoirzontal = False):
         output = FitsFile(gfits)
         output.gname = os.path.basename(gfits).split(".fits")[0]
         
-    output.to_png(out_png_dir = out_png_dir, horizontal = horizontal)
+    output.to_png(
+        out_png_dir = out_png_dir, 
+        horizontal = horizontal, 
+        cleanup = cleanup
+    )
 
 
 if __name__ == "__main__":
@@ -44,7 +56,8 @@ if __name__ == "__main__":
     python3 ./{sys.argv[0]} [OPTION] PNG-OUT-DIRECTORY [FITS-DIRECTORY | SPACE SEPARATED FITS FILES]
     
     OPTIONS =>[-h  | --help]
-              [-s  | --single-image] 
+              [-s  | --single-image]
+              [-nc | --no-cleanup]
               [-H  | --horizontal]
               [-v  | --verbose]
               [-ff | --from-file]
@@ -69,6 +82,14 @@ if __name__ == "__main__":
                         const    = True,
                         default  = False,
                         help     = 'Choose to orient the output images from GALFIT horizontally as opposed to vertically (better for papers).'
+                       )
+    
+    parser.add_argument('-nc', '--no-cleanup',
+                        dest     = 'cleanup',
+                        action   = 'store_const',
+                        const    = False,
+                        default  = True,
+                        help     = 'Do not cleanup the individual pngs which are combined into the final montage\'d image.'
                        )
     
     parser.add_argument('-ff', '--from-file',
@@ -102,6 +123,8 @@ if __name__ == "__main__":
     
     single_image   = args.single_image
     horizontal     = args.horizontal
+    cleanup        = args.cleanup
+    
     from_file      = args.from_file
     
     verbose        = args.verbose
@@ -130,8 +153,8 @@ if __name__ == "__main__":
             
     #if "bayonet" in sp(f"hostname").stdout.split(".")[0]:
     if len(list_o_fits) > 500:
-        Parallel(n_jobs = -2)(delayed(wrapper)(gfits, out_png_dir, single_image, horizontal) for gfits in list_o_fits)
+        Parallel(n_jobs = -2)(delayed(wrapper)(gfits, out_png_dir, single_image, horizontal, cleanup) for gfits in list_o_fits)
     else:
-        _ = [wrapper(gfits, out_png_dir, single_image, horizontal) for gfits in list_o_fits]
+        _ = [wrapper(gfits, out_png_dir, single_image, horizontal, cleanup) for gfits in list_o_fits]
     #else:
     #    print("Not on bayonet, can't generate galaxies.")
