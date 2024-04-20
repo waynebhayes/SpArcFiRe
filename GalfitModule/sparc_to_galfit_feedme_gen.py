@@ -506,10 +506,18 @@ def arc_information(
     pitch_angle /= max(1, count)
     
     # Grabbing for pitch angle calc
+    # just in case there's only one arc
+    if num_arms == 1:
+        second_arm_start = 10000
+        second_arm_end   = 0
+    else:
+        second_arm_start = float(arcs_in[1]['r_start'])
+        second_arm_end   = float(arcs_in[1]['r_end'])
+        
     min_inner_rad = scale_var(
         min(
             float(arcs_in[0]['r_start']),
-            float(arcs_in[1]['r_start'])
+            second_arm_start
         ),
         scale_fact_std
     )
@@ -517,7 +525,7 @@ def arc_information(
     max_outer_rad = scale_var(
         max(
             float(arcs_in[0]['r_end']),
-            float(arcs_in[1]['r_end'])
+            second_arm_end
         ),
         scale_fact_std
     )
