@@ -32,7 +32,7 @@ from Classes.FitsHandlers import *
 from Functions.helper_functions import *
 #from Utilities.parallel_residual_calc import fill_objects #, parallel_wrapper
 
-import star_removal.no_log_remove_stars_with_sextractor as remove_stars_with_sextractor
+import StarRemoval.no_log_remove_stars_with_sextractor as remove_stars_with_sextractor
 
 # ns2_component_switches = nt("component_switches", ["bulge", "disk_for_arms", "arms", "fourier", "sky"])
 
