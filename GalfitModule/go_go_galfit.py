@@ -782,7 +782,7 @@ def main(**kwargs):
         
         if galaxies_to_mask:
             # I think we have to change path for source extractor
-            star_removal_path = pj(_MODULE_DIR, "star_removal")
+            star_removal_path = pj(_MODULE_DIR, "StarRemoval")
             os.chdir(star_removal_path)
             remove_stars_with_sextractor.main(in_dir, tmp_masks_dir, galaxies_to_mask)
             os.chdir(cwd)
@@ -804,7 +804,7 @@ def main(**kwargs):
         galaxies_to_mask = check_for_starmasks(galaxy_names, sf_masks_dir)
         
         if galaxies_to_mask:
-            star_removal_path = pj(_MODULE_DIR, "star_removal")
+            star_removal_path = pj(_MODULE_DIR, "StarRemoval")
             os.chdir(star_removal_path)
             remove_stars_with_sextractor.main(sf_in_dir, sf_masks_dir, galaxies_to_mask)
             os.chdir(cwd)
