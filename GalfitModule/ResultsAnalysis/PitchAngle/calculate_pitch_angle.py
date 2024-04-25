@@ -123,8 +123,13 @@ def sum_fourier_modes(fourier_dict, **kwargs):
         if Fstr == "skip":
             continue
         
-        amplitude = Fmode.amplitude
-        phi       = Fmode.phase_angle
+        if isinstance(Fmode, FourierMode):
+            amplitude = Fmode.amplitude
+            phi       = Fmode.phase_angle
+        else:
+            print(Fmode)
+            amplitdue = Fmode[0]
+            phi       = Fmode[1]
         
         m = float(Fstr[-1])
         phi = np.radians(phi)
@@ -140,39 +145,114 @@ def sum_fourier_modes(fourier_dict, **kwargs):
     rgrid = 1 + fsum #np.sum(np.array(fsum), axis = 0)
     return rgrid #, theta
 
-#     fsum = np.array([
-#                      amplitude*np.cos(float(Fstr[-1])*(theta + np.radians(phi)))
-#                          for Fstr, (amplitude, phi) in fourier_dict.items()
-#                    ])
-    
-#     rgrid = 1 + np.sum(fsum, axis = 0)
-#    return rgrid
 
-# def modify_grid(x_min,
-#                 y_min,
-#                 x_max, 
-#                 y_max,
-#                 amplitudes,
-#                 phis,
-#                 q,
-#                 grid_pts = 100):
+# From results dataframe, simpler
+def calculate_pitch_angle(
+    gname_row,
+    rmax    = 40,
+    num_pts = 500,
+    verbose = False,
+    **kwargs
+):
     
-#     xgrid = np.linspace(x_min, x_max, grid_pts)
-#     ygrid = np.linspace(y_min, y_max, grid_pts)
+    # Three(+1) component fit
+    if "inner_rad_power_3" in gname_row:
+        # Three(+1) component fit
+        q = gname_row.get("axis_ratio_sersic_3")
+        arm_component_number = 3
+        
+    elif "inner_rad_power_2" in gname_row:
+        # Two(+1) component fit
+        q = gname_row.get("axis_ratio_sersic_2")
+        arm_component_number = 2
     
-#     #xmatrix, ymatrix = np.meshgrid(xgrid, ygrid)
+    elif "inner_rad_power_1" in gname_row:
+        # One(+1) component fit (yikes)
+        q = gname_row.get("axis_ratio_sersic_1")
+        arm_component_number = 1
+        
+    else:
+        print(f"No spiral component found for {gname_row.name}")
+        return
     
-#     # Assume perfect centering
-#     rgrid = sum_fourier_modes(amplitudes = amplitudes,
-#                              phis  = phis,
-#                              xc    = x_max//2,
-#                              yc    = y_max//2,
-#                              q     = q,
-#                              xgrid = xgrid,
-#                              ygrid = ygrid
-#                             )
+    #xmin = 0
+    #ymin = 0
     
-#     return rgrid
+    x0 = gname_row.get("position_x_sersic_1") 
+    y0 = gname_row.get("position_y_sersic_1") 
+    
+    # Just so we don't make the x0, y0 negative... for convenience
+    #xrad = min(xpos, xrad)
+    #yrad = min(ypos, yrad)
+    
+    # Box size is therefore pos + rad
+    #xmax = xpos + xrad
+    #ymax = ypos + yrad
+    rad = rmax/np.sqrt(2)
+    
+    xmax = x0 + rad
+    ymax = y0 + rad
+    
+    # Centering on position
+    #x0 = xpos - xrad
+    #y0 = ypos - yrad
+    
+    xgrid = np.linspace(x0, xmax, num_pts)
+    ygrid = np.linspace(y0, ymax, num_pts)
+    
+    rvals_grid = np.sqrt((xgrid - x0)**2 + ((ygrid - y0)/q)**2)
+        
+    # With Fourier Modes
+    fourier_col = [key for key in gname_row.keys() if "fourier" in key]
+    fourier_dict = {}
+    for fcol in fourier_col:
+        fcol_split = fcol.split("_")
+        fmode      = fcol_split[0][-1]
+        
+        fourier_dict[fmode] = [0, 0]
+        
+        if fcol_split[1] == "amplitude":
+            fourier_dict[fmode][0] = gname_row.get(fcol, 0)
+            
+        if fcol_split[1] == "phase":
+            fourier_dict[fmode][1] = gname_row.get(fcol, 0)
+        
+    else:
+        fourier_dict = {}
+      
+    rgrid = np.multiply(rvals_grid, 
+                            sum_fourier_modes(
+                                fourier_dict,
+                                #amplitudes = amplitudes,
+                                #phis  = phis,
+                                x0    = x0,
+                                y0    = y0,
+                                q     = q,
+                                xgrid = xgrid,
+                                ygrid = ygrid
+                            )
+                       )
+
+    ones = np.ones(np.shape(rgrid))
+    #with_fourier = np.array(list(map(pitch_angle, rgrid, ones*arms.cumul_rot, ones*arms.outer_rad, ones*arms.powerlaw, ones*arms.inner_rad)))
+    pitch_angles, thetas = pitch_angle(
+        rgrid, 
+        ones*gname_row[f"cumul_rot_power_{arm_component_number}"], 
+        ones*gname_row[f"outer_rad_power_{arm_component_number}"], 
+        ones*gname_row[f"powerlaw_index_power_{arm_component_number}"], 
+        ones*gname_row[f"inner_rad_power_{arm_component_number}"]
+    )
+    
+    cond = rgrid <= rmax
+    
+    result_dict = {
+        "pitch_angles"  : pitch_angles[cond], 
+        "thetas"        : thetas[cond], 
+        "fourier_rgrid" : rgrid[cond]
+    }
+    
+    return pd.Series(result_dict)
+
 
 def plot_scatter(
     gname,
@@ -386,8 +466,9 @@ def generate_galfit_model_no_inclination(gname, feedme, model_dir = "tmp_galfit_
     
     return feedme.header.output_image.value
 
+
 # Recommend turning use_inner_outer_rad on for pictures otherwise this is more informative
-def calculate_pa(
+def calculate_pa_from_file(
     gpath, 
     in_dir,
     out_dir,
@@ -396,13 +477,16 @@ def calculate_pa(
     validation_plot = False,
     use_inner_outer_rad = False,
     model_dir = "tmp_galfit_models",
-    verbose = False
+    verbose = False,
+    **kwargs
 ):
     
     gname = os.path.basename(gpath)
     try:
         fits_file = OutputFits(
-            pj(gpath, f"{gname}_galfit_out.fits"), 
+            # TODO: revert to _galfit_out.fits once done
+            # Alternatively... make _galfit_out, _[basename]... yeah let's do that
+            pj(gpath, f"{gname}_NC3.fits"), 
             #load_default = False,
             # Telling the module that these are the components we're looking for
             disk_for_arms = Sersic(3),
@@ -438,6 +522,9 @@ def calculate_pa(
     #amplitudes = [v[0] for k,v in fourier.param_values.items() if k != "skip"] #fourier.amplitudes
     #phis       = [v[1] for k,v in fourier.param_values.items() if k != "skip"] #fourier.phase_angles
 
+    # TODO: No need to use fit_region, see calculate_pitch_angle above
+    # Definitely reduce the grid later using SpArcFiRe rather than all 
+    # this crazy stuff... I don't know why I overcomplicated it
     xmin = 0
     ymin = 0
     xmax = fit_region.x2 - fit_region.x1 #outer_rad*np.cos(arms.cumul_rot)
@@ -452,6 +539,9 @@ def calculate_pa(
     rvals_grid = np.sqrt((xgrid - x0)**2 + ((ygrid - y0)/q)**2)
     
     galaxy_dict = galaxy_information(gname, gpath)
+    
+    if not galaxy_dict:
+        return None
     
     crop_rad       = galaxy_dict.get("crop_rad", 1)
     scale_fact_std = galaxy_dict.get("scale_fact_std", 1)
@@ -668,7 +758,7 @@ def main(
     gnames = [os.path.basename(i) for i in gpaths]
     
     pa_inner_outer = Parallel(n_jobs = -2)(
-                           delayed(calculate_pa)( 
+                           delayed(calculate_pa_from_file)( 
                                gpath,
                                in_dir,
                                out_dir,
