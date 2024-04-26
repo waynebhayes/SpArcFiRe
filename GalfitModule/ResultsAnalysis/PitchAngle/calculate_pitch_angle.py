@@ -150,6 +150,8 @@ def sum_fourier_modes(fourier_dict, **kwargs):
 def calculate_pitch_angle(
     gname_row,
     rmax    = 40,
+    xmax    = 20,
+    ymax    = 20,
     num_pts = 500,
     verbose = False,
     **kwargs
@@ -178,28 +180,24 @@ def calculate_pitch_angle(
     #xmin = 0
     #ymin = 0
     
+    # As long as we're still starting at 0, we should be fine
+    # Basically the same as xgrid - x0
+    # rvals_grid = np.linspace(0, rmax, num_pts)
+    
+    # Note this throws off the grid spacing so 
+    # different fits can't be compared
+    #if xmax and ymax:
     x0 = gname_row.get("position_x_sersic_1") 
     y0 = gname_row.get("position_y_sersic_1") 
-    
-    # Just so we don't make the x0, y0 negative... for convenience
-    #xrad = min(xpos, xrad)
-    #yrad = min(ypos, yrad)
-    
-    # Box size is therefore pos + rad
-    #xmax = xpos + xrad
-    #ymax = ypos + yrad
+
     rad = rmax/np.sqrt(2)
-    
+
     xmax = x0 + rad
     ymax = y0 + rad
-    
-    # Centering on position
-    #x0 = xpos - xrad
-    #y0 = ypos - yrad
-    
+
     xgrid = np.linspace(x0, xmax, num_pts)
     ygrid = np.linspace(y0, ymax, num_pts)
-    
+
     rvals_grid = np.sqrt((xgrid - x0)**2 + ((ygrid - y0)/q)**2)
         
     # With Fourier Modes
@@ -220,35 +218,35 @@ def calculate_pitch_angle(
     else:
         fourier_dict = {}
       
-    rgrid = np.multiply(rvals_grid, 
+    fourier_rgrid = np.multiply(rvals_grid, 
                             sum_fourier_modes(
                                 fourier_dict,
                                 #amplitudes = amplitudes,
                                 #phis  = phis,
-                                x0    = x0,
-                                y0    = y0,
+                                #x0    = x0,
+                                #y0    = y0,
                                 q     = q,
                                 xgrid = xgrid,
                                 ygrid = ygrid
                             )
                        )
 
-    ones = np.ones(np.shape(rgrid))
-    #with_fourier = np.array(list(map(pitch_angle, rgrid, ones*arms.cumul_rot, ones*arms.outer_rad, ones*arms.powerlaw, ones*arms.inner_rad)))
+    ones = np.ones(np.shape(fourier_rgrid))
+    
     pitch_angles, thetas = pitch_angle(
-        rgrid, 
+        fourier_rgrid, 
         ones*gname_row[f"cumul_rot_power_{arm_component_number}"], 
         ones*gname_row[f"outer_rad_power_{arm_component_number}"], 
         ones*gname_row[f"powerlaw_index_power_{arm_component_number}"], 
         ones*gname_row[f"inner_rad_power_{arm_component_number}"]
     )
     
-    cond = rgrid <= rmax
+    #cond = rgrid <= rmax
     
     result_dict = {
-        "pitch_angles"  : pitch_angles[cond], 
-        "thetas"        : thetas[cond], 
-        "fourier_rgrid" : rgrid[cond]
+        "pitch_angles"  : pitch_angles, #[cond] 
+        "thetas"        : thetas,
+        "fourier_rgrid" : fourier_rgrid
     }
     
     return pd.Series(result_dict)
