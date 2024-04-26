@@ -25,7 +25,11 @@ def load_residual_df(
     verbose             = kwargs.get("verbose", True)
     residual_cutoff_val = kwargs.get("residual_cutoff_val", 0.007)
     
-    pickle_filename = pj(out_dir, basename, sorted(find_files(pj(out_dir, basename), f'{basename}_output_results*.pkl', "f"))[-1])
+    output_result_files = find_files(pj(out_dir, basename), f'{basename}_output_results*.pkl', "f")
+    if output_result_files:
+        pickle_filename = pj(out_dir, basename, sorted(output_result_files)[-1])
+    else:
+        raise(FileNotFoundError(f"Could not find any output results for {basename}_output_results*.pkl in {pj(out_dir, basename)}"))
     
     residual_df  = pd.read_pickle(pickle_filename)
     # temp_df = deepcopy(residual_df)
