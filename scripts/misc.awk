@@ -1,14 +1,26 @@
-BEGIN{PI=M_PI=3.14159265358979324}
+BEGIN{PI=M_PI=3.14159265358979324;BIGNUM=1*1e30; for(i=0;i<256;i++)ASCII[sprintf("%c",i)]=i}
+
+function ASSERT(cond,str){if(!cond){s=sprintf("ASSERTION failure, line %d of input file %s: %s\nInput line was:\n<%s>\n", FNR,FILENAME,str,$0); print s >"/dev/stderr"; exit 1}}
+function WARN(cond,str,verbose){if(!cond){s=sprintf("WARNING: line %d of input file %s: %s",FNR,FILENAME,str); if(verbose)s=s sprintf("\nInput line was:\n<%s>\n", $0); print s >"/dev/stderr"}}
+function ABS(x){return x<0?-x:x}
+function SIGN(x){return x==0?0:x/ABS(x)}
+function MAX(x,y){return x>y?x:y}
+function MIN(x,y){return x<y?x:y}
 
 function nul(s){} # do nothing; useful for holding temp strings in code on the command line.
-# The default srand() uses time-of-day, which only changes once per second. Not good enough for paraell runs.
-function Srand(){
-    srand(); # seed with time-of-day
-    srand(srand()+PROCINFO["uid"]) # add user ID.
-    srand(srand()+PROCINFO["ppid"]) # add user parent PID.
-    srand(srand()+PROCINFO["pid"]) # add process ID
-}
 
+# The default srand() uses time-of-day, which only changes once per second. Not good enough for paraell runs.
+function GetFancySeed(           seed,hostname,n,h,i){
+    seed=systime()+PROCINFO["gid"]+PROCINFO["uid"]+PROCINFO["pgrpid"]+PROCINFO["ppid"]+PROCINFO["pid"];
+    "hostname"|getline hostname; n=length(hostname); for(i=1;i<=n;i++) seed+=ASCII[substr(hostname,i,1)];
+    return seed;
+}
+function strip(s) { gsub("  *"," ",s); sub("  *$","",s); return s}
+function randsort(i1,v1,i2,v2) { return rand()-0.5 } # use this to have for loops go in random order
+function Srand() { return srand(GetFancySeed());}
+function RandInt(mean,radius) {return mean+2*radius*(rand()-0.5)}
+
+function ftos(f){f=sprintf("%.3g",f); gsub("e[+]0","e+",f); return f} # remove leading 0s from exponent
 function floor(x) {if(x>=0) return int(x); else return int(x)-1}
 function ceil(x) {if(x==int(x)) return x; else return floor(x)+1}
 function int2binary(i,l, _s){if(i<0)return "nan";_s="";while(i){_s=(i%2)""_s;i=int(i/2)};while(length(_s)<l)_s="0"_s;return _s}
@@ -52,7 +64,7 @@ function atand(x) { return atan(x)/PI*180 }
 function AccurateLog1(x,    absX,n,term,sum){
     #return log(1+x); # fuck it
     absX=ABS(x);
-    if(absX<1e-16) return x; # close to machine eps? it's just x
+    if(absX<1e-16) return x; # close to machine eps? it is just x
     if(absX>4e-6) return log(1+x); # built-in one is very good in this range
     ASSERT(x>=-0.5&&x<=1,"AccurateLog1("x") will not converge");
     if(x in _memAccLog1) return _memAccLog1[x];
@@ -64,7 +76,7 @@ function AccurateLog1(x,    absX,n,term,sum){
     # Now sum the terms smallest-to-largest, keeping the two signs separate
     for(i=n;i>0;i--)if(_log1Terms[i]<0)_log1Terms[-1]+=_log1Terms[i]; else _log1Terms[0]+=_log1Terms[i]
     sum = _log1Terms[0] + _log1Terms[-1];
-    sum -= sum*sum; # I'm not sure why, but this gives a MUCH better approximation???
+    sum -= sum*sum; # I am not sure why, but this gives a MUCH better approximation???
     if(n>_nMaxAccLog1){_nMaxAccLog1=n;
 	#printf "AccurateLog: memoize log(1+%.16g)=%.16g, nMax %d\n",x,sum,_nMaxAccLog1 >"/dev/fd/2"
     }
@@ -77,7 +89,7 @@ function LogSumLogs(log_a,log_b,    truth, approx) {
     M=MAX(log_a,log_b)
     ASSERT(M>=m,"BUG: M is not greater than m in LogSumLogs");
     #return M+log(1+Exp(m-M))
-    if(M-m > 37) return M; # m < M*machine_eps, so m won't change M.
+    if(M-m > 37) return M; # m < M*machine_eps, so m will not change M.
     # fuck it
     approx = M+AccurateLog1(Exp(m-M))
     if(ABS(log_a)<700 && ABS(log_b) < 700){
@@ -88,8 +100,8 @@ function LogSumLogs(log_a,log_b,    truth, approx) {
     return approx
 }
 
-# Given the logarithm of an arbitrarily large or small number, return a string looking
-# like printf "%.Ng" where N is total number of significant digits (just like printf).
+# Given the logarithm log(p) of an arbitrarily large or small number p, return a string
+# looking like printf("%.Ng", p) printing p with N significant digits (just like printf).
 function logPrint(logp,digits,   l10_p,intLog,offset,mantissa,fmt) {
     if(!digits)digits=6; # same as the default for printf
     if(ABS(logp)<100) {
@@ -107,11 +119,17 @@ function fact(k)    {if(k<=0)return 1; else return k*fact(k-1)}
 function logFact(k) { if(k in _memLogFact) return _memLogFact[k];
     if(k<=0)return 0; else return (_memLogFact[k]=log(k)+logFact(k-1));
 }
+function log2NumSimpleGraphs(n) { # log2(number of non-isomorphic graphs on n nodes), ie. number of bits needed to count them
+    # see https://oeis.org/A000088 for comparison for n=0,.. 19
+    return choose(n,2)-logFact(n)/log(2) # https://cw.fel.cvut.cz/b211/_media/courses/b4m33pal/lectures/isom_notes.pptx
+}
 function fact2(k)    {if(k<=1)return 1; else return k*fact2(k-2)}
 function logFact2(k) {if(k<=1)return 0; else return log(k)+logFact2(k-2)}
-function choose(n,k,     r,i) {ASSERT(0<=k&&k<=n,"choose error"); r=1;for(i=1;i<=k;i++)r*=(n-(k-i))/i; return r}
-function logChoose(n,k) {if(n in _memLogChoose && k in _memLogChoose[n]) return _memLogChoose[n][k];
-    ASSERT(0<=k && k <=n); return (_memLogChoose[n][k] = logFact(n)-logFact(k)-logFact(n-k));
+# see Reza expansion: (n k) = ((n-1) (k-1)) + ((n-1) k)
+function choose(n,k,     r,i) {if(0<=k&&k<=n){r=1;for(i=1;i<=k;i++)r*=(n-(k-i))/i;} else {r=0; Warn("choose: ("n" choose "k") may not make sense; returning 0")}; return r}
+function logChoose(n,k) {
+    if(n<k) return log(0); else ASSERT(0<=k && k <=n,"invalid logChoose("n","k")");
+    return logFact(n)-logFact(k)-logFact(n-k);
 }
 function logChooseClever(n,k,     r,i) {
     ASSERT(0<=k&&k<=n,"impossible parameters to logChoose "n" "k)
@@ -141,9 +159,9 @@ function logIncGamma(s,x){
     }
 }
 
-# Since gawk can't pass arrays as parameters, we usurp the global array _Chi2_bins[*][*]. The first index of this array
+# Since gawk cannot pass arrays as parameters, we usurp the global array _Chi2_bins[*][*]. The first index of this array
 # is NAME; for a fixed name, the second index is the bins, which are assumed to be equally probable.
-function Chi2_stat(name,   n, bin, X2, avg) { ASSERT(name in _Chi2_bins && isarray(_Chi2_bins[name]), "Chi2_Stat: _Chi2_bins["name"] must be an array of your bin counts");
+function Chi2_stat(name,   bin,X2,avg) { ASSERT(name in _Chi2_bins && isarray(_Chi2_bins[name]), "Chi2_Stat: _Chi2_bins["name"] must be an array of your bin counts");
     _Chi2_n[name]=0; for(bin in _Chi2_bins[name])_Chi2_n[name]+=_Chi2_bins[name][bin];
     avg=_Chi2_n[name]/length(_Chi2_bins[name]);
     X2=0; for(bin in _Chi2_bins[name]) X2+=(_Chi2_bins[name][bin]-avg)^2/avg;
@@ -153,7 +171,8 @@ function    Chi2_pair2(df,X2){ASSERT(df%2==0,"Chi2_pair2 df "df" must be even");
 function logChi2_pair2(df,X2){ASSERT(df%2==0,"Chi2_pair2 df "df" must be even"); return logIncGamma(df/2,X2/2)-logGamma(df/2)}
 function    Chi2_pair (df,X2){return df%2==0 ? Chi2_pair2(df,X2) : sqrt(Chi2_pair2(df-1, X2)*Chi2_pair2(df+1,X2))}
 function logChi2_pair (df,X2){return df%2==0 ? logChi2_pair2(df,X2) : (logChi2_pair2(df-1, X2)+logChi2_pair2(df+1,X2))/2}
-function    Chi2_tail(name){return    Chi2_pair(length(_Chi2_bins[name]),Chi2_stat(name))}
+function Chi2_tail_raw(df, x){return  Chi2_pair(df, x)}
+function    Chi2_tail(name)  {return  Chi2_pair(length(_Chi2_bins[name]),Chi2_stat(name))}
 function logChi2_tail(name){return logChi2_pair(length(_Chi2_bins[name]),Chi2_stat(name))}
 
 function NumBits(n,    b) {b=0;while(n>0){if(n%2==1)b++;n=int(n/2)}; return b}
@@ -169,24 +188,21 @@ function SetUnion(res2,T1,T2,
     g){delete res2;for(g in T1)res2[g]=1;for(g in T2)res2[g]=1}
 # cumulative add set T to res3
 function SetCumulativeUnion(res3,T, g){for(g in T)res3[g]=1}
+function SetCopy(dest,src,   g){delete dest;for(g in src)dest[g]=1}
+
+function Jaccard(T1,T2,   i,u){SetIntersect(i,T1,T2); SetUnion(u,T1,T2); return length(i)/length(u);}
 
 # And now counting the info in an edge list. One way to view the info is simply the number of edges.
-# Another is to view each node's adjacency list as having log(n) bits for each of its neighbors.
+# Another is to view each nodes adjacency list as having log(n) bits for each of its neighbors.
 # This then says that the amount of info is as follows: the end of each edge is listed twice (ie is in two neighbor lists),
 # but only one is strictly needed. And each entry is log2(n) bits. So the total info is just log2(n)*numEdges.
-# But this number is *way* bigger than the number of edges for all 2018 BioGRID networks, so clearly it's too high.
+# But this number is *way* bigger than the number of edges for all 2018 BioGRID networks, so clearly it is too high.
 function netbits(n1,n2,     i,bits){if(n2==0)n2=n1; bits=0;for(i=0;i<MIN(n1,n2);i++)bits+=log(MAX(n1,n2)-i)/log(2); return bits}
 
 function logb(b,x){return log(x)/log(b)}
 function dtob(n,   s,sgn) {n=1*n;if(!n)return "0";s=sgn="";if(n<0){sgn="-";n=-n};while(n){s=sprintf("%d%s",(n%2),s); n=int(n/2)}; return sgn s}
 function btod(n) {}
 
-function ASSERT(cond,str){if(!cond){s=sprintf("ASSERTION failure, line %d of input file %s: %s.\nInput line was:\n<%s>\n", FNR,FILENAME,str,$0); print s >"/dev/stderr"; exit 1}}
-function WARN(cond,str){if(!cond){s=sprintf("WARNING: line %d of input file %s: %s.\nInput line was:\n<%s>\n", FNR,FILENAME,str,$0); print s >"/dev/stderr"}}
-function ABS(x){return x<0?-x:x}
-function SIGN(x){return x==0?0:x/ABS(x)}
-function MAX(x,y){return x>y?x:y}
-function MIN(x,y){return x<y?x:y}
 function LSPredict(n, x, y, xIn,      SUMx,SUMy,SUMxy,SUMxx,i,slope,y_intercept,x_intercept) {
     SUMx=SUMy=SUMxy=SUMxx=0;
     for(i=0;i<n;i++)
@@ -199,24 +215,223 @@ function LSPredict(n, x, y, xIn,      SUMx,SUMy,SUMxy,SUMxx,i,slope,y_intercept,
     if(n>0 && (SUMx*SUMx - n*SUMxx) != 0) {
 	slope = ( SUMx*SUMy - n*SUMxy ) / ( SUMx*SUMx - n*SUMxx );
 	y_intercept = ( SUMy - slope*SUMx ) / n;
-	x_intercept = 1e30;
+	x_intercept = BIGNUM;
 	if(slope != 0) x_intercept = -y_intercept / slope;
 	return slope*xIn + y_intercept;
     }
 }
-function StatReset(name) {
-    _statN[name] = _statSum[name] = _statSum2[name] = 0;
-    _statMin[name]=1e30;_statMax[name]=-1e30;
-    _statmin[name]=1e30
+
+# Queue functions: call QueueAlloc(name) to allocate a queue with name "name"; then Add(name) and Next(name) do the obvious.
+function QueueAlloc(name) { _queueFirst[name]=1; _queueLast[name]=0; _queueVals[name][1]=1; delete _queueVals[name][1];}
+function QueueDelloc(name) { delete _queueFirst[name]; delete _queueLast[name]; delete _queueVals[name] }
+function QueueLength(name) {return _queueLast[name]-_queueFirst[name]+1;}
+function QueueAdd(name, val) {_queueVals[name][++_queueLast[name]]=val;}
+function QueueNext(name,	val) {
+    val =  _queueVals[name][_queueFirst[name]  ];
+    delete _queueVals[name][_queueFirst[name]++];
+    return val;
 }
+
+# if quantiles is true (anything nonzero or nonempty string), remember everyting so we can retrieve quantiles later.
+function StatReset(name, quantiles) {
+    _statQuantiles[name]=quantiles;
+    _statN[name] = _statSum[name] = _statSum2[name] = 0;
+    _statMin[name]=BIGNUM;_statMax[name]=-BIGNUM;
+    _statmin[name]=BIGNUM;
+}
+
+function StatHistReset(name) {
+    delete _statHist[name];
+    delete _statHistN[name];
+    delete _statHistMin[name];
+    delete _statHistCDF[name];
+    delete _statHistCDFix[name];
+}
+function StatHistAddSample(name, x) {
+    if(!(name in _statHistMin)) _statHistMin[name]=1*BIGNUM;
+    if(1*x < _statHistMin[name]) _statHistMin[name]=1*x;
+    ++_statHist[name][1*x];
+    ++_statHistN[name];
+}
+function StatHistMakeCDF(name,    n,x,prevX,PMF,prevSort) {
+    delete _statHistCDF[name];
+    delete _statHistCDFix[name];
+    prevX=-1*(BIGNUM); # very very negative number
+    n=0; _statHistCDFix[name][0] = prevX;
+    prevSort=PROCINFO["sorted_in"];
+    PROCINFO["sorted_in"]="@ind_num_asc"; # traverse the array in numerical ascending order by index (ie., x)
+    for(x in _statHist[name]) {
+	_statHistCDFix[name][++n] = 1*x;
+	ASSERT(1*x > 1*prevX, "oops, StatHistMakeCDF found non-incrementing x: "prevX" to "x);
+	PMF = _statHist[name][1*x]/(_statHistN[name]);
+	_statHistCDF[name][1*x] = _statHistCDF[name][1*prevX] + PMF;
+	#printf "_statHistCDF[%s][%g]=%g\n", name, x, _statHistCDF[name][x] >"/dev/stderr";
+	prevX = x;
+    }
+    PROCINFO["sorted_in"]=prevSort;
+    # _statHistCDF[name][prevX] may be above 1 due to numerical error; give it some leeway here.
+    ASSERT(_statHistCDF[name][prevX]<1+1e-6/_statHistN[name], "_statHistCDF["name"]["prevX"]-1="_statHistCDF[name][prevX]-1" which is too far above 1");
+    _statHistCDF[name][prevX]=1;
+    # remove the -infinity elements created above
+    delete _statHistCDF[name][-1*BIGNUM]; # remove the array element that was created in the first loop above.
+    delete _statHistCDFix[name][0];
+}
+
+# return the m with x closest to z with x<=z
+function StatHistBinarySearch(name,z,    i,n,L,R,m,x) {
+    n=length(_statHistCDFix[name]);
+    for(i=1;i<=n;i++) ASSERT(i in _statHistCDFix[name], i" is not in F_ix out of "n);
+    if(z < _statHistCDFix[name][1]) return 0;
+    if(z >= _statHistCDFix[name][n]) return n;
+    L=1; R=n;
+    while(L < R) {
+        m = int((L + R) / 2);
+	ASSERT(m>0 && m<=n, "m "m" is out of bounds for n "n" L "L" R "R);
+	ASSERT(m in _statHistCDFix[name],"oops, m is "m" out of n="n);
+	x=1*_statHistCDFix[name][m];
+	ASSERT(x==0|| (x in _statHistCDF[name]), "oops, x "x" is not in _statHistCDF["name"]");
+	if(x < z) L = m + 1
+        else if(x > z) R = m - 1
+        else return m
+    }
+    # At this point, the value was not found, so return the m just below z
+    m = int((L + R) / 2);
+    if(m>0 && m<=n) {
+	ASSERT(m in _statHistCDFix[name],"oops, m is "m" out of n="n);
+	x=_statHistCDFix[name][m];
+	ASSERT(x in _statHistCDF[name], "oops, x "x" is not in _statHistCDF["name"]");
+	while(m>0 && _statHistCDFix[name][m] > z) --m;
+    }
+    #printf "FOUND x %g at m %d from n %d L %d R %d\n", x,m,n,L,R
+    return m;
+}
+
+function StatHistInterpSearch(name,z,    frac,i,n,L,R,m,x) {
+    n=length(_statHistCDFix[name]);
+    for(i=1;i<=n;i++) ASSERT(i in _statHistCDFix[name], i" is not in F_ix out of "n);
+    if(z < _statHistCDFix[name][1]) return 0;
+    if(z >= _statHistCDFix[name][n]) return n;
+    L=1; R=n; frac=0.5;
+    while(L < R) {
+	ASSERT(0<=frac && frac<=1,"frac "frac" out of bounds");
+        m = int(frac*(L + R));
+	ASSERT(m>0 && m<=n, "m "m" is out of bounds for n "n" L "L" R "R);
+	ASSERT(m in _statHistCDFix[name],"oops, m is "m" out of n="n);
+	x=1*_statHistCDFix[name][m];
+	ASSERT(x==0|| (x in _statHistCDF[name]), "oops, x "x" is not in _statHistCDF["name"]");
+	if(x < z) L = m + 1
+        else if(x > z) R = m - 1
+        else return m
+	if(_statHistCDFix[name][R] == _statHistCDFix[name][L]) frac=0.5;
+	else frac=(x-_statHistCDFix[name][L])/(_statHistCDFix[name][R]-_statHistCDFix[name][L]);
+	if(frac<=0 || frac>=1) frac=0.5;
+    }
+    # At this point, the value was not found, so return the m just below z
+    m = int((L + R) / 2);
+    if(m>0 && m<=n) {
+	ASSERT(m in _statHistCDFix[name],"oops, m is "m" out of n="n);
+	x=_statHistCDFix[name][m];
+	ASSERT(x in _statHistCDF[name], "oops, x "x" is not in _statHistCDF["name"]");
+	while(m>0 && _statHistCDFix[name][m] > z) --m;
+    }
+    #printf "FOUND x %g at m %d from n %d L %d R %d\n", x,m,n,L,R
+    return m;
+}
+
+# Return the value in [0,1] of the empirical CDF of [name]
+function StatHistECDF(name,z,  n,x,prevX,frac,h1,h2,interp,prevSort,m) {
+    z=1*z;
+    ASSERT(name in _statHist, "StatHistECDF: no such histogram "name);
+    if(!(name in _statHistCDF)) StatHistMakeCDF(name);
+    if(z<=_statHistMin[name]) return 0;
+    n=length(_statHistCDFix[name]);
+    m=StatHistBinarySearch(name,z);
+    #printf "z %g i %d x %g\n", z, m, _statHistCDF[name][_statHistCDFix[name][m]]
+    # in the following, h1 and h2 are actually x values
+    if(m<1) h1=-BIGNUM; else h1=_statHistCDFix[name][m];
+    if(m>=n) h2=BIGNUM; else h2=_statHistCDFix[name][m+1];
+    frac=(z-h1)/(h2-h1);
+    # Now convert the x values to histogram values
+    interp=_statHistCDF[name][h1]+frac*(_statHistCDF[name][h2] - _statHistCDF[name][h1]);
+    return interp; ######### COMMENT OUT THIS LINE TO CHECK THIS VALUE AGAINST OLD CORRECT CODE BELOW
+    prevSort=PROCINFO["sorted_in"];
+    PROCINFO["sorted_in"]="@ind_num_asc";
+    for(x in _statHistCDF[name]){
+	if(1*x>z) {
+	    if(m>0) ASSERT(h1==prevX,"m is "m" with x1 "h1" but new is "prevX);
+	    if(m>1) ASSERT(h2==    x,"m is "m" with x2 "h2" but new is "x);
+	    if(m>0 && m<=n) ASSERT(frac==(z-prevX)/(x-prevX), "frac disagreement "frac" vs "(z-prevX)/(x-prevX));
+	    h1=_statHistCDF[name][prevX]; h2=_statHistCDF[name][x];
+	    PROCINFO["sorted_in"]=prevSort;
+	    ASSERT(interp == h1+frac*(h2-h1), "interp disagreement "interp" vs "h1+frac*(h2-h1));
+	    return h1+frac*(h2-h1);
+	}
+	prevX=x;
+    }
+    PROCINFO["sorted_in"]=prevSort;
+    return 1;
+}
+
+# Return the K-S (Kolmogorov-Smirnnov) statistic: the maximum distance between the empirical CDFs of name1 and name2
+# FIXME: time is O((n1+n2)^2) since we loop through every value of the histogram, calling ECDF which ALSO does the SAME loop
+# It can be done in time O(n1+n2) if we are a bit more clever.
+function KSstat(name1,name2,   x,maxD,diff,sign) {
+    ASSERT(isarray(_statHist[name1]) && isarray(_statHist[name2]), "KSstat needs stats with histograms");
+    maxD=0;
+    StatHistMakeCDF(name1);
+    StatHistMakeCDF(name2);
+    prevX=_statHistMin[name1];
+    prevSort=PROCINFO["sorted_in"];
+    PROCINFO["sorted_in"]="@ind_num_asc";
+    for(x in _statHistCDF[name1]) {
+	diff = _statHistCDF[name1][x] - StatHistECDF(name2, x);
+	if(ABS(diff) > ABS(maxD)) {sign=1; maxD = diff}
+    }
+    prevX=_statHistMin[name2];
+    for(x in _statHistCDF[name2]) {
+	diff = _statHistCDF[name2][x] - StatHistECDF(name1, x);
+	if(ABS(diff) > ABS(maxD)) {sign=-1; maxD = diff}
+    }
+    PROCINFO["sorted_in"]=prevSort;
+    return sign*maxD;
+}
+
+function KSpvalue(ks_stat,n1,n2, C) {
+    C=ks_stat/sqrt((n1+n2)/(n1*n2));
+    return 2*Exp(-2*C*C);
+}
+
+function KStest(name1, name2) { return KSpvalue(KSstat(name1,name2), _statHistN[name1], _statHistN[name2]); }
+
+function StatQuantile(name,q,   i,which,where,oldWhere,prevSort) {
+    ASSERT(_statQuantiles[name], "StatQuantile called on name "name", but _statQuantiles[name] is <"_statQuantiles[name]">");
+    ASSERT(0<= q && q<=1, "StatQuantile called with quantile q="q" which is not in [0,1]");
+    where=0;
+    which=int(q*_statN[name]+0.5);
+    #print "StatQuantile called with q="q" on "_statN[name]" elements; which is set to "which
+    prevSort=PROCINFO["sorted_in"];
+    PROCINFO["sorted_in"]="@ind_num_asc"; # traverse history in numerical order of the indices.
+    for(x in _statValue[name]){
+	oldWhere=where;
+	where += _statValue[name][x];
+	if(oldWhere <= which && which <=where) return x;
+    }
+    PROCINFO["sorted_in"]=prevSort;
+}
+
+function StatMedian(name) { return StatQuantile(name,0.5);}
+function StatLowerQuartile(name) { return StatQuantile(name,0.25);}
+function StatUpperQuartile(name) { return StatQuantile(name,0.75);}
+
 function StatAddSample(name, x) {
-    if(1*_statN[name]==0)StatReset(name);
+    if(1*_statN[name]==0 && !_statQuantiles[name])StatReset(name);
     _statN[name]++;
     _statSum[name]+=x;
     _statSum2[name]+=x*x;
     _statMin[name]=MIN(_statMin[name],x);
     if(x)_statmin[name]=MIN(_statmin[name],x);
     _statMax[name]=MAX(_statMax[name],x);
+    if(_statQuantiles[name]) ++_statValue[name][x];
 }
 function StatAddWeightedSample(name, x, w) {
     if(1*_statN[name]==0)StatReset(name);
@@ -270,7 +485,7 @@ function NormalPtoZ(quantile,    q,z1,n,d)
 }
 function Exp(x){
     if(x < -745) return 5e-324
-    else if(x > 707) return 1e307;
+    else if(x > 707) return BIGNUM7;
     else return exp(x);
 }
 function NormalPhi(x,    arg)
@@ -279,7 +494,7 @@ function NormalPhi(x,    arg)
     if(arg<-723) return 1e-314;
     return 0.39894228040143267794*Exp(arg)
 }
-function NormalDist(mu,sigma,x){E=(mu-x)^2/(2*sigma*sigma);return Exp(-E)/(sigma*2.506628274631000502415765284811)}
+function NormalDist(mu,sigma,x,  E){E=(mu-x)^2/(2*sigma*sigma);return Exp(-E)/(sigma*2.506628274631000502415765284811)}
 function NormalZ2P(x,    b0,b1,b2,b3,b4,b5,t,paren)
 {
     if(x<0) return 1-NormalZ2P(-x);
@@ -344,7 +559,7 @@ function logBinomialCDF(p,n,k, i,logSum) {
     else      {logSum=logBinomialPMF(1-p,n,n);for(i=1;i<=k;i++) logSum=LogSumLogs(logSum, logBinomialPMF(1-p,n,n-i))}
     return logSum
 }
-function Pearson2T(n,r){if(r==1)return 1e30; else return r*sqrt((n-2)/(1-r^2))}
+function Pearson2T(n,r){if(r==1)return BIGNUM; else return r*sqrt((n-2)/(1-r^2))}
 # The Poisson1_CDF is 1-CDF, and sums terms smallest to largest; near CDF=1 (ie., 1-CDF=0) it is accurate well below eps_mach.
 function PoissonCDF(l,k, sum, term, i){sum=term=1;for(i=1;i<=k;i++){term*=l/i;sum+=term}; return sum*Exp(-l)}
 function PoissonPMF(l,k, r,i){if(l>723)return NormalDist(l,sqrt(l),k);r=Exp(-l);for(i=k;i>0;i--)r*=l/i;return r} 
@@ -353,7 +568,7 @@ function Poisson1_CDF(l,k, i,sum,psum){psum=-1;sum=0;for(i=k;psum!=sum;i++){psum
     if(sum==0 && k<l) return 1; # this means the numbers are so big the sum got zero but we got less than expected.
     else return sum
 }
-function LogPoisson1_CDF(l,k, i,sum,pmax,max){pmax=2;max=-1e30;for(i=k;pmax!=max;i++){pmax=max;max=MAX(max,LogPoissonPMF(l,i))};
+function LogPoisson1_CDF(l,k, i,sum,pmax,max){pmax=2;max=-BIGNUM;for(i=k;pmax!=max;i++){pmax=max;max=MAX(max,LogPoissonPMF(l,i))};
     if(max==1 && k<l) return 0; # this means the numbers are so big the sum got zero but we got less than expected.
     else return max/.894
 }
@@ -418,65 +633,7 @@ function logHyperGeomTail(k,n,K,N, logSum,logTerm,i) {
     return logSum
 }
 
-# Exected number of aligned orthologs in a random alignment of G1 and G2 with n1,n2 nodes and h common ortholog pairs.
-function ExpectedPairedOrthologs(h,n1,n2, hg,k) {hg=0;for(k=0;k<h;k++)hg+=(h-k)/(n1*n2-k*(n1+n2-k));return hg}
-
-function logAlignSearchSpace(n1,n2, result){
-    if(n1 in _memLogAligSS && n2 in _memLogAligSS[n1]) return _memLogAligSS[n1][n2];
-    ASSERT(n1>=0&&n2>=0,"AligSearchSpace: (n1,n2)=("n1","n2") cannot be negative");
-    if(n1>n2) result=logAlignSearchSpace(n2,n1); else result = logFact(n2)-logFact(n2-n1);
-    return (_memLogAligSS[n1][n2] = result);
-}
-function AlignSearchSpace(n1,n2){return exp(logAlignSearchSpace(n1,n2))}
-
-function CountGOtermAlignments(n1,n2,l1,l2,k,      ll,M,U,mu,muMin,muMax) {
-    ASSERT(n1<=n2, "Sorry, shared probability of GO terms requires n1<=n2");
-    ASSERT(k>=0, k" must be greater than zero in CountGoTermAligs");
-    ll=MIN(l1,l2); # lower and upper lambdas
-    if(k>ll) return 0;
-    if(ll==0)return (k==0?AlignSearchSpace(n1,n2):0);
-    if(l2==n2)return (k==l1?AlignSearchSpace(n1,n2):0);
-    if(l1>n2-l2) # There are more annotated pegs than unannotated holes; at least l1-(n2-l2) anopegs *must* match
-	if (k < l1-(n2-l2)) return 0;
-    M=choose(l1,k) * choose(l2,k) * fact(k); # aligning the k matched pairs
-    U=0
-    muMin=MAX(0,(n1-k)-(n2-l2));
-    muMax=MIN(n1-l1,l2-k);
-    for(mu=muMin;mu<=muMax;mu++){ # sum over possible values for numAnnotatedPegs aligning to l2-k annotated holes.
-	AS1=AlignSearchSpace(mu,l2-k); # aligning annot. pegs to unannot. holes
-	AS2=AlignSearchSpace(n1-l1-mu,n2-l2-(l1-k)); # remaining unannot pegs aligned to unannot holes
-	choices = choose(n1-l1,mu) * choose(n2-l2,l1-k)
-	U += choices * AS1 * AS2
-    }
-    return M * fact(l1-k)*U;
-}
-
-# Below is just the logarithmic version of the above to handle much bigger numbers.
-function logCountGOtermAlignments(n1,n2,l1,l2,k,      ll,M,U,Utmp,mu,muMin,muMax) {
-    ASSERT(n1<=n2, "Sorry, shared probability of GO terms requires n1<=n2");
-    ASSERT(k>=0, k" must be greater than zero in logCountGoTermAligs");
-    ll=MIN(l1,l2); # lower and upper lambdas
-    if(k>ll) return log(0);
-    if(ll==0)return (k==0?logAlignSearchSpace(n1,n2):log(0));
-    if(l2==n2)return (k==l1?logAlignSearchSpace(n1,n2):log(0));
-    if(l1>n2-l2) # There are more annotated pegs than unannotated holes; at least l1-(n2-l2) anopegs *must* match
-	if (k < l1-(n2-l2)) return log(0);
-    M=logChoose(l1,k) + logChoose(l2,k) + logFact(k);
-    muMin=MAX(0,(n1-k)-(n2-l2));
-    muMax=MIN(n1-l1,l2-k);
-    U=0
-    for(mu=muMin;mu<=muMax;mu++){ # sum over possible values for numAnnotatedPegs aligning to l2-k annotated holes.
-	# do NOT try any memoization here; too many parameters means not enough repeats -> actually SLOWER
-	AS1=logAlignSearchSpace(mu,l2-k); # aligning annot. pegs to unannot. holes
-	AS2=logAlignSearchSpace(n1-l1-mu,n2-l2-(l1-k)); # remaining unannot pegs aligned to unannot holes
-	Utmp = AS1+AS2 + logChoose(n1-l1,mu)
-	U=LogSumLogs(U,Utmp);
-    }
-    U += logChoose(n2-l2,l1-k)
-    return  M + logFact(l1-k)+U;
-}
-
-function StdNormRV(){if(!_StatRV_which) { do { _StatRV_v1 = 2*rand()-1; _StatRV_v2 = 2*rand()-1; _StatRV_rsq = _StatRV_v1^2+_StatRV_v2^2; } while(_StatRV_rsq >= 1 || _StatRV_rsq == 0); _StatRV_fac=sqrt(-2*log(_StatRV_rsq)/_StatRV_rsq); _StatRV_next = _StatRV_v1*_StatRV_fac; _StatRV_which = 1; return _StatRV_v2*_StatRV_fac; } else { _StatRV_which = 0; return _StatRV_next; } }
+function StatRV_Normal(){if(!_StatRV_which) { do { _StatRV_v1 = 2*rand()-1; _StatRV_v2 = 2*rand()-1; _StatRV_rsq = _StatRV_v1^2+_StatRV_v2^2; } while(_StatRV_rsq >= 1 || _StatRV_rsq == 0); _StatRV_fac=sqrt(-2*log(_StatRV_rsq)/_StatRV_rsq); _StatRV_next = _StatRV_v1*_StatRV_fac; _StatRV_which = 1; return _StatRV_v2*_StatRV_fac; } else { _StatRV_which = 0; return _StatRV_next; } }
 function NormalRV(mu,sigma) { return mu+StdNormRV()*sigma }
 
 # The Spearman correlation is just the Pearson correlation of the rank. It measures monotonicity, not linearity.
@@ -507,6 +664,24 @@ function SpearmanCompute(name, i) {
 }
 function SpearmanPrint(name) { return SpearmanCompute(name) }
 
+function CovarReset(name) {
+    delete _Covar_sumX[name]
+    delete _Covar_sumY[name]
+    delete _Covar_sumXY[name]
+    delete _Covar_N[name]
+}
+function CovarAddSample(name,X,Y) {
+    _Covar_sumX[name]+=X
+    _Covar_sumY[name]+=Y
+    _Covar_sumXY[name]+=X*Y
+    _Covar_N[name]++;
+}
+
+function CovarCompute(name){
+    ASSERT(1*_Covar_N[name]>1, "CovarCompute requires N>=1 but it is "_Covar_N[name]);
+    return (_Covar_sumXY[name]-_Covar_sumX[name]*_Covar_sumY[name]/_Covar_N[name])/(_Covar_N[name]-1);
+}
+
 function PearsonReset(name) {
     delete _Pearson_sumX[name]
     delete _Pearson_sumY[name]
@@ -529,38 +704,40 @@ function PearsonAddSample(name,X,Y) {
 }
 
 function PearsonCompute(name,     numer,DX,DY,denom,z,zse,F){
-    if(!_Pearson_N[name])return;
-    if(_PearsonComputeValid[name]) return;
+    if(!_Pearson_N[name])return 0;
+    if(_PearsonComputeValid[name]) return 1;
     numer=_Pearson_sumXY[name]-_Pearson_sumX[name]*_Pearson_sumY[name]/_Pearson_N[name]
     DX=_Pearson_sumX2[name]-_Pearson_sumX[name]*_Pearson_sumX[name]/_Pearson_N[name]
     DY=_Pearson_sumY2[name]-_Pearson_sumY[name]*_Pearson_sumY[name]/_Pearson_N[name]
     #print DX,DY >"/dev/stderr"
-    denom=sqrt(DX*DY); _Pearson_rho[name]=0; if(denom)_Pearson_rho[name]=numer/denom;
+    denom=sqrt(ABS(DX*DY)); # ABS since sometimes it is very slightly negative due to rounding errors
+    _Pearson_rho[name]=0; if(denom)_Pearson_rho[name]=numer/denom;
     _Pearson_t[name]=Pearson2T(_Pearson_N[name],_Pearson_rho[name]);
     if(_Pearson_t[name]<0)_Pearson_t[name]=-_Pearson_t[name];
     # Fisher R-to-z
     z=0.5*log((1+_Pearson_rho[name])/(1-_Pearson_rho[name]))
-    zse=1/sqrt(_Pearson_N[name]-3)
+    zse=1/sqrt(ABS(_Pearson_N[name]-3))
     _Pearson_p[name]=F=2*MIN(NormalDist(0,zse,z),NormalDist(0,zse,-z))
     # We seem to be at least 100x too small according to Fisher
     if(_Pearson_p[name]>1)_Pearson_p[name]=1-1/_Pearson_p[name]
     _PearsonComputeValid[name]=1;
+    return 1
 }
 
 function PearsonPrint(name, logp){
-    #if(!_Pearson_N[name])return;
+    #if(!_Pearson_N[name]) return;
     PearsonCompute(name);
-    if(_Pearson_p[name]>1e-300)return sprintf("%d\t%.4g\t%.4g\t%.4g",
-	_Pearson_N[name], _Pearson_rho[name], _Pearson_p[name], _Pearson_t[name])
-    else { # p-value is getting too small to represent so use logarithm
-	logp = -logPhi(-_Pearson_t[name])/log(10)
-	logp = logp - 3.6 - (logp/150) # Empirical correction to get in line with Fisher for small p-values
-	return sprintf("%d\t%.4g\t%s\t%.4g (using log)", _Pearson_N[name], _Pearson_rho[name], logPrint(logp,4), _Pearson_t[name]);
+    TINY=1e-200; # using the fancy log algorithm if p-value is smaller than this
+    logp = -logPhi(-_Pearson_t[name]); # working with the negative log is easier (so log is positive)
+    if(logp < -log(TINY))
+	return sprintf("%d\t%.4g\t%.4g\t%.4f", _Pearson_N[name], _Pearson_rho[name], _Pearson_p[name], _Pearson_t[name])
+    else {
+	#printf "t %g p %g log10p %g logp %g", _Pearson_t[name], _Pearson_p[name], logp/log(10), logp > "/dev/stderr"
+	logp = (logp - 8.28931 - logp/65.1442)/0.992 # Empirical correction to get in line with Fisher for small p-values
+	#printf " (logp corrected %g %g)\n", logp/log(10), logp > "/dev/stderr"
+	return sprintf("%d\t%.4g\t%s\t%.4f (using log)", _Pearson_N[name], _Pearson_rho[name], logPrint(-logp,4), _Pearson_t[name]);
 	#p=10^-logp; print "log-over-Fisher", p/F # Sanity check
     }
-
-    # NR = number of samples, rho=Pearson correlation, p=p-value, t = number of standard deviations from random.
-    #return sprintf("%d %.3g %.3g %.3g", _Pearson_N[name], _Pearson_rho[name], _Pearson_p[name], _Pearson_t[name])
 }
 
 # Functions for computing the AUPR
@@ -621,3 +798,81 @@ function LeastSquaresMSR(  i) {
   return (SUMres2)/_LS_n;
   variance = (SUMres2 - SUMres*SUMres/_LS_n)/(_LS_n-1);
 }
+
+
+################# GRAPH ROUTINES ##################
+
+#Input: edgeList; a single node, u, to start the BFS; and an (optional) "searchNode" to stop at.
+#Output: array dist[] contains shortest paths from u to all nodes reachable from u within maxDist; includes dist[u]=0.
+#        Call with maxDist=n (size of network) to get the BFS distance to everybody
+function BFS(edgeList,u,searchNode,dist,   V,Q,m,M,x,y) {
+    ASSERT(isarray(edge), "BFS: edgeList must be binary symmetric 2D array");
+    delete V; # visited
+    delete Q; # queue
+    delete dist; # distance from u
+    dist[u]=0;
+    m=M=0;
+    Q[M++]=u; # the BFS queue runs from m [inclusive] to M-1, and we increment m as we dequeue elements
+    while(M>m) {
+	x = Q[m++];
+	ASSERT(x in dist, x" in Q but not in distance array");
+	if(!(x in V)) {
+	    V[x]=1;
+	    ASSERT(isarray(edge[x]), "edge["x"] is not an array");
+	    for(y in edge[x]) if(!(y in V)) {
+		if(y in dist) dist[y]=MIN(dist[y],dist[x]+1);
+		else dist[y]=dist[x]+1;
+		if(y==searchNode) return;
+		Q[M++]=y;
+	    }
+	}
+    }
+}
+function MakeEmptySet(S){delete S; S[0]=1; delete S[0]}
+function InducedEdges(edge,T,D,       u,v,m) { # note you can skip passing in D
+    MakeEmptySet(D);
+    for(u in T) for(v in T) if((u in edge) && (v in edge[u])) { ++D[u]; ++D[v]; ++m; }
+    for(u in T) { ASSERT(D[u]%2==0, "InducedEdges: D["u"]="D[u]); D[u]/=2; }
+    ASSERT(m%2==0, "m is not even");
+    return m/2;
+}
+function InducedWeightedEdges(edge,T,D,       u,v,m,all1) { # note you can skip passing in D
+    MakeEmptySet(D); all1=1;
+    for(u in T) for(v in T) if((u in edge) && (v in edge[u])) {
+	if(edge[u][v] != 1) all1 = 0;
+	D[u]+=edge[u][v]; D[v]+=edge[u][v]; m+=edge[u][v];
+    }
+    for(u in T) { if(all1) ASSERT(D[u]%2==0, "InducedEdges: D["u"]="D[u]); D[u]/=2; }
+    if(all1) ASSERT(m%2==0, "m is not even");
+    return m/2;
+}
+
+# Note: Possible sort orders are: "@unsorted",
+# "@ind_str_asc",	"@ind_num_asc",	 "@val_type_asc",  "@val_str_asc",  "@val_num_asc",
+# "@ind_str_desc",	"@ind_num_desc", "@val_type_desc", "@val_str_desc", "@val_num_desc",
+# This implementation allows multiple elements with the same priority... and even multiple [p][element] duplicates
+function PQpush(name, pri, element) { ++_PQ_[name][pri][element]; _PQ_size[name]++ }
+
+function PQpop(name,    prevSort, element, p) {
+    prevSort=PROCINFO["sorted_in"]; # remember sort order to restore it afterwards
+    PROCINFO["sorted_in"]="@ind_num_desc";
+    for(p in _PQ_[name]) {
+        # Note that if multiple elements have the same priority, we will return them in SORTED order not INSERTION order
+        for(element in _PQ_[name][p]) {
+            if(--_PQ_[name][p][element]==0) {
+                delete _PQ_[name][p][element];
+                if(length(_PQ_[name][p])==0) delete _PQ_[name][p];
+            }
+            break; # exit at first iteration
+        }
+        break; # exit at first iteration
+    }
+    PROCINFO["sorted_in"]=prevSort; # restore sort order
+    _PQ_size[name]--
+    return element;
+}
+
+function PQlength(name) { return _PQ_size[name]; }
+function PQalloc(name) { _PQ_size[name]=0;PQ_[name][0][0]=1; delete PQ_[name][0] }
+function PQdelloc(name) { delete PQ_size[name]; delete PQ_[name] }
+function PQfree(name) { PQdelloc(name); }
