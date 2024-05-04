@@ -303,12 +303,30 @@ def plot_scatter(
 
     plt.legend(["Pitch Angle", "Longest Arc Inner/Outer Rad", "SpArcFiRe PA +/- Uncertainty"], loc = "upper right")
 
-    plt.title(f'Galaxy {gname}')
+    # For set of 14
+    # title_dict = {
+    #     '1237648704595624148': '(1)',
+    #     '1237668297135030610': '(2)',
+    #     '1237661387614650383': '(3)',
+    #     '1237661387608359085': '(4)',
+    #     '1237665227305451703': '(5)',
+    #     '1237648720165273735': '(6)',
+    #     '1237661387610456252': '(7)',
+    #     '1237668298219127022': '(8)',
+    #     '1237662224625369287': '(9)',
+    #     '1237668296601239612': '(10)',
+    #     '1237648721232855215': '(11)',
+    #     '1237668313773244576': '(12)',
+    #     '1237661416067825676': '(13)',
+    #     '1237648705669103794': '(14)'
+    # }
+    
+    plt.title(f'Galaxy {title_dict.get(gname, gname)}')
     plt.xlabel(f'Radius')
     plt.ylabel('Pitch Angle (degrees)')
     
-    #plt.xlim([0, ])
-    #plt.ylim([0, ])
+    #plt.xlim([0, 90])
+    plt.ylim([0, 90])
     #plt.show()
 
     filename = pj(scatter_dir, f"{gname}_scatter.png")
@@ -900,7 +918,7 @@ if __name__ == "__main__":
         #print(f"Paths are, {in_dir}, {tmp_dir}, {out_dir}")
 
     else:
-        in_dir = pj(cwd, "sparcfire-in")
+        in_dir  = pj(cwd, "sparcfire-in")
         tmp_dir = pj(cwd, "sparcfire-tmp")
         out_dir = pj(cwd, "sparcfire-out")
         print(f"Paths incorrectly specified, defaulting to {cwd} (-in, -tmp, -out)...")
@@ -919,8 +937,8 @@ if __name__ == "__main__":
     pitch_angle_info = main(
         in_dir, 
         out_dir, 
-        scatter_plot = scatter_plot, 
-        validation_plot = validation_plot, 
+        scatter_plot    = scatter_plot, 
+        validation_plot = validation_plot,
         model_dir = model_dir,
         verbose   = verbose
     )
