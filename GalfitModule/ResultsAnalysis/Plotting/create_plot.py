@@ -247,9 +247,12 @@ def create_overlay_histogram(
             reversed_colors = reversed(colors[:len(df.columns)])
     
             for col_name, color in zip(reversed_cols, reversed_colors):
-                name     = col_name.split("_")
-                name[-1] = str(int(name[-1]) + 1) # since we index at 0
-                name     = " ".join(name)
+                try:
+                    name     = col_name.split("_")
+                    name[-1] = str(int(name[-1]) + 1) # since we index at 0
+                    name     = " ".join(name)
+                except ValueError: # For when not using with Serisc_#
+                    name = col_name
                 
                                     
                 fig.add_trace(
@@ -372,14 +375,14 @@ def create_plot(
     # This applies x to *all* facet cols
     if "_" in x:
         fig.update_xaxes(
-            title_text = " ".join(x.split("_")), row = row, col = col
+            title_text = " ".join(x.split("_")).title(), row = row, col = col
         )
     
     # Only have one axis title instead of multiple stacked since this updates all cols as well
     y = dict_o_kwargs.get("y")
     if y and "_" in y:
         fig.update_yaxes(
-            title_text = " ".join(y.split("_")), row = row, col = 1
+            title_text = " ".join(y.split("_")).title(), row = row, col = 1
         )
         
     if kwargs.get("xaxis_title"):
