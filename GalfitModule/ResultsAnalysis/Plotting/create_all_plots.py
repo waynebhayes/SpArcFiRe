@@ -309,7 +309,7 @@ def create_all_plots(
         df_or_dfs               = plot_df,
         output_image_dir        = output_image_dir,
         histnorm                = "probability",
-        multi                   = False,
+        #multi                   = False,
         facet_col               = fcol,
         nbins                   = kwargs.get("arm_flux_ratio_nbins"),
         #hist_offset             = kwargs.get("mag_hist_offset", 3),
@@ -354,7 +354,7 @@ def create_all_plots(
         df_or_dfs               = plot_df,
         output_image_dir        = output_image_dir,
         histnorm                = "probability",
-        multi                   = False,
+        #multi                   = False,
         facet_col               = fcol,
         #nbins                   = 40, #kwargs.get("mag_nbins"),
         #hist_offset             = kwargs.get("mag_hist_offset", 3),
@@ -447,7 +447,7 @@ def create_all_plots(
         df_or_dfs               = plot_df,
         output_image_dir        = output_image_dir,
         histnorm                = "probability",
-        multi                   = False,
+        #multi                   = False,
         # color                   = "component",
         # color_discrete_sequence = colors,
         facet_col               = fcol,
@@ -489,6 +489,92 @@ def create_all_plots(
         # title_y   = 0.85
         show             = show,
         write            = write
+    )
+    
+#=========================================================================
+# HISTOGRAMS OF PITCH ANGLE DIFFERENCES
+#=========================================================================
+    
+    x    = "min_arm_pa_diff"
+    fcol = "domain"
+    
+    plot_df       = df_container.full_df[x].copy().to_frame()
+    plot_df[fcol] = "all models"
+
+    plot_df1       = df_container.success_df[x].copy().to_frame()
+    plot_df1[fcol] = "success"
+    
+    to_concat = [plot_df, plot_df1]
+    runname   = f"{basename}_all-vs-success"
+    
+    if incl_by_eye:
+        plot_df2       = df_container.by_eye_success_df[x].copy().to_frame()
+        plot_df2[fcol] = "by-eye success"
+        to_concat.append(plot_df2)
+        runname   = f"{basename}_by-eye-vs-success-vs-all"
+
+    plot_df = pd.concat(to_concat, axis = 0)
+    
+    _ = create_plot(
+        x                       = x,
+        runname                 = runname,
+        plot_type               = "histogram",
+        df_or_dfs               = plot_df,
+        output_image_dir        = output_image_dir,
+        histnorm                = "probability",
+        #multi                   = False,
+        # color                   = "component",
+        # color_discrete_sequence = colors,
+        facet_col               = fcol,
+        xaxis_range             = kwargs.get("xaxis_range_pitch_angle_hist"), # [10, 20],
+        yaxis_range             = kwargs.get("yaxis_range_pitch_angle_hist"), # [0, 0.15],
+        # title       = f"{runname} galaxies: distribution of magnitudes for by-eye successful models"
+        # title_y     = 0.85
+        show                    = show,
+        interactive             = interactive,
+        write                   = write
+    )
+    
+#=========================================================================
+# OVERLAY HISTOGRAM OF PITCH ANGLE DIFFERENCES
+#=========================================================================
+    
+    x      = "min_arm_pa_diff"
+    rename = "minimum_arms_only_pitch_angle_difference"
+    
+    plot_df = pd.DataFrame()
+    plot_df["all models"] = df_container.full_df[x].copy()#.rename(rename)
+    plot_df["success"]    = df_container.success_df[x].copy()#.rename(rename)
+
+    runname   = f"{basename}_all-vs-success"
+
+    if True:
+        plot_df_by_eye = df_container.by_eye_success_df[x].copy()#.rename(rename)
+        plot_df["by-eye success"] = plot_df_by_eye
+        runname   = f"{basename}_all-vs-success-vs-by-eye"
+
+    to_plot = {"" : plot_df} # Title would go in here
+    
+    _ = create_plot(
+        x                       = rename,
+        runname                 = runname,
+        plot_type               = "overlay_histogram",
+        df_or_dfs               = to_plot,
+        output_image_dir        = output_image_dir,
+        histnorm                = "probability",
+        #marginal                = "rug",
+        #color                   = "component",
+        #color_discrete_sequence = colors,
+        nbins                   = kwargs.get("nbins", 100),
+        #facet_col               = fcol,
+        xaxis_range             = kwargs.get("xaxis_range_pitch_angle_overlay_hist", None),
+        yaxis_range             = kwargs.get("yaxis_range_pitch_angle_overlay_hist", None),
+        #reversed_order          = True,
+        # title       = f"{runname} galaxies: distribution of magnitudes for by-eye successful models"
+        # title_y     = 0.85
+        show                    = show,
+        interactive             = interactive,
+        write                   = write
     )
     
 #=========================================================================
