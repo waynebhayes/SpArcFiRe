@@ -264,8 +264,29 @@ def results_analysis(
         
     fprint("DONE!!!")
     
-    # combined_bool_df only if applicable
-    # {basename : namedtuple (fields below), "combined_bool_df" : combined_bool_df}
-    # full_df, success_df, not_success_df, by_eye_success_df, by_eye_not_success_df
+    output_format = """
+    combined things only if applicable
+    {
+         basename : results namedtuple (fields below), 
+         "[basename prefix]_combined" : combined results namedtuple,
+    }
+    (if the basename prefix isn't shared between the runs, the key is simply "combined")
+    
+    results namedtuple: 
+        full_df, 
+        success_df, 
+        not_success_df, 
+        by_eye_success_df, 
+        by_eye_not_success_df
+    
+    combined results namedtuple: 
+        bool_df,
+        full_df,
+        success_df, 
+        by_eye_success_df, 
+        
+    purposefully chosen to mimic results above for analysis flexibility
+    """
+    
     return all_results
     
