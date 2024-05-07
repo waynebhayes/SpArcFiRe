@@ -1,4 +1,7 @@
 import os
+from os.path import join as pj
+from os.path import exists
+
 import shutil
 from Functions.helper_functions import sp
 
@@ -19,12 +22,18 @@ def create_quantiles(
     runnames = list(set(df.runname))
     if len(runnames) > 1:
         prefixes = list(set([i.split("_")[0] for i in runnames]))
+        top_dir = prefixes[0]
+        
         if len(prefixes) == 1:
-            runname = f"{prefixes[0]}_combined"
+            runname = f"{top_dir}_combined"
         else:
             runname = "combined"
     else:
         runname = runnames[0]
+        top_dir = runname.split("_")[0]
+        
+    top_dir +=  "_galaxies"
+        
         
     success_dir = pj(out_dir, runname, f'{runname}_galfit_png')
     print_latex_file = pj(out_dir, runname, f"{runname}_for_latex.txt")
@@ -72,8 +81,8 @@ def create_quantiles(
             copy_rname  = df.loc[index, "runname"]
             
             # Use runname here for combined runs
-            temp_str    = f"images/{runname}/{runname}_all_quantile/quantile_"
-            initial_str = f"    \includegraphics[height=0.18\\textheight]{{{temp_str}{q}/"
+            temp_str    = f"images/{top_dir}/{runname}/{runname}_all_quantile/quantile_"
+            initial_str = f"    \includegraphics[height=0.17\\textheight]{{{temp_str}{q}/"
             
             end_str = "} &"
             if count == 7 or count == len(interp_df) - 1:
