@@ -27,21 +27,24 @@ def create_ecdf(
 
     cutoff_val = dict_o_kwargs.get("cutoff_val")
     if dict_o_kwargs.get("add_vline"):
-        fig.add_vline(x = cutoff_val, 
-                      row = 1,
-                      line_color = "cyan",
-                      annotation_text= f"{cutoff_val}", 
-                      annotation_position="bottom")
+        fig.add_vline(
+            x = cutoff_val, 
+            row = 1,
+            line_color = "cyan",
+            #annotation_text= f"{cutoff_val}", 
+            #annotation_position="bottom"
+         )
 
     if dict_o_kwargs.get("add_hline"):
         yval = sum(df.loc[:, x] < cutoff_val)
-        fig.add_hline(y = yval, 
-                      row = 1,
-                      col = 1,
-                      line_color = "magenta",
-                      annotation_text=f"{yval}",
-                      annotation_position="bottom left"
-                     )
+        fig.add_hline(
+            y = yval, 
+            row = 1,
+            col = 1,
+            line_color = "magenta",
+            #annotation_text=f"{yval}",
+            #annotation_position="bottom left"
+         )
         
     return fig
 
@@ -72,7 +75,11 @@ def create_scatter(
     )
     
     if dict_o_kwargs.get("facet_col") or dict_o_kwargs.get("facet_row"):
-        fig.for_each_annotation(lambda a: a.update(text = a.text.split("=")[-1]))
+        fig.for_each_annotation(
+            lambda a: a.update(
+                text = a.text.split("=")[-1].title()
+            )
+        )
         
     return fig
 
@@ -171,7 +178,19 @@ def create_histogram(
     )
     
     if dict_o_kwargs.get("facet_col") or dict_o_kwargs.get("facet_row"):
-        fig.for_each_annotation(lambda a: a.update(text = a.text.split("=")[-1]))
+        fig.for_each_annotation(
+            lambda a: a.update(
+                text = a.text.split("=")[-1].title(),
+                #size = dict_o_kwargs.get("font_size")
+            )
+        )
+        
+    # Need this because of subplots
+    # fig.update_annotations(
+    #     font = dict(
+    #         size = dict_o_kwargs.get("font_size") + 5
+    #     )
+    # )
 
     # if multi:
     #     fig.update_layout(barmode = "overlay")
@@ -264,11 +283,11 @@ def create_overlay_histogram(
                         nbinsx            = nbinsx,
                         xbins             = xbins,
                         showlegend        = showlegend,
-                        bingroup          = 1
+                        bingroup          = 1,
                         #marginal          = dict_o_kwargs.get("marginal"),
-                        #hover_data = {'Galaxy ID': (":c", full_df.index)},
+                        #hover_data = {'Galaxy ID': (":c", full_df.index)},  
                     ),
-                    row = row + 1, col = col + 1
+                    row = row + 1, col = col + 1,
                 )
             # Turning this off after one go-round
             showlegend = False
@@ -295,6 +314,11 @@ def create_overlay_histogram(
         #minor_ticks = "outside",
     )
     
+    # Need this because of subplots
+    # fig.update_annotations(
+    #     font_size = dict_o_kwargs.get("font_size") + 5
+    # )
+    
     # fig.update_yaxes(
     #     minor_ticks = "outside",
     # )
@@ -312,6 +336,8 @@ def create_plot(
     output_image_dir = "for_paper_images", 
     **kwargs
 ):
+    
+    default_font_size = 18
         
     dict_o_kwargs = {
         "y"               : None,
@@ -326,6 +352,8 @@ def create_plot(
         "color_discrete_map"        : None,
         "range_color"               : None,
         #"color_continuous_midpoint" : None,
+        "font_size"       : default_font_size, # For some reason, histogram isn't applying
+                                               # the fit size elsewhere.
         
         "hist_offset"     : 0,
         "histnorm"        : "",
@@ -360,14 +388,7 @@ def create_plot(
         fig = create_overlay_histogram(x, df_or_dfs, dict_o_kwargs)
     else:
         return
-    
-    if kwargs.get("title"):
-        fig.update_layout(
-            title_text = kwargs.get("title"), 
-            title_x    = kwargs.get("title_x"), 
-            title_y    = kwargs.get("title_y")
-        )
-    
+        
     row, col = 1, None    
 #     if plot_type != "overlay_histogram":
 #         row, col = 1, 1
@@ -404,6 +425,27 @@ def create_plot(
         
     fig.update_xaxes(minor_ticks = "outside", row = row, col = col)
     fig.update_yaxes(minor_ticks = "outside", row = row, col = col)
+    
+    if kwargs.get("title"):
+        fig.update_layout(
+            title_text = kwargs.get("title").title(), 
+            title_x    = kwargs.get("title_x"), 
+            title_y    = kwargs.get("title_y")
+        )
+    
+    font_size = dict_o_kwargs.get("font_size")
+    
+    # Need this for subplot titles
+    fig.update_annotations(
+        font_size = font_size + 5
+    )
+    
+    fig.update_layout(
+        font = dict(
+            family = "Computer Modern Typewriter",
+            size   = font_size
+        ),
+    )
     
     height            = kwargs.get("height", 800)
     height_multiplier = kwargs.get("height_multiplier", 1.5) #1200
