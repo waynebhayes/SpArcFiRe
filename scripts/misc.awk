@@ -444,6 +444,7 @@ function StatAddWeightedSample(name, x, w) {
     _statMax[name]=MAX(_statMax[name],x);
 }
 function StatMean(name) {
+    ASSERT(_statN[name]>0, "StatMean: name \""name"\" has no samples");
     return _statSum[name]/_statN[name];
 }
 function StatMin(name) {
@@ -465,6 +466,12 @@ function StatStdDev(name,     x) {
 }
 function StatN(name) {
     return _statN[name];
+}
+function FmtLtr(v) { return (v==int(v) ? "d" : "g");}
+function StatPrint(name,  n,mu,m,M,s,v,fmt){
+    n=_statN[name]; mu=StatMean(name); m=StatMin(name); M=StatMax(name); s=StatStdDev(name); v=StatVar(name);
+    fmt="# %6d\tmean %9" FmtLtr(mu) "\tmin %9" FmtLtr(m) "\tmax %9" FmtLtr(M) "\tstdDev %9" FmtLtr(s) "\tvar %9" FmtLtr(v);
+    return sprintf(fmt, _statN[name], StatMean(name), StatMin(name), StatMax(name), StatStdDev(name), StatVar(name));
 }
 function Norm2(n,vec,      i,sum2)
 {
@@ -638,6 +645,15 @@ function NormalRV(mu,sigma) { return mu+StdNormRV()*sigma }
 
 # The Spearman correlation is just the Pearson correlation of the rank. It measures monotonicity, not linearity.
 # Unfortunately it means we need to store every sample, and sort them into rank order when we want the coefficient.
+function SpearmanReset(name) {
+    delete _SpComputeResult[name];
+    delete _Spearman_N[name];
+    delete _SpearmanSampleX[name];
+    delete _SpearmanSampleY[name];
+    delete _Spearman_rho[name];
+    delete _Spearman_p[name];
+    delete _Spearman_t[name];
+}
 function SpearmanAddSample(name,X,Y) {
     delete _SpComputeResult[name];
     _SpN=(_Spearman_N[name]++) # 1-indexed, not zero.
@@ -876,3 +892,5 @@ function PQlength(name) { return _PQ_size[name]; }
 function PQalloc(name) { _PQ_size[name]=0;PQ_[name][0][0]=1; delete PQ_[name][0] }
 function PQdelloc(name) { delete PQ_size[name]; delete PQ_[name] }
 function PQfree(name) { PQdelloc(name); }
+
+{ASSERT(!gsub("",""), "Sorry, we cannot accept DOS text files. Please remove the carriage returns from the file.");}
