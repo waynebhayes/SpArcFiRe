@@ -1,4 +1,4 @@
-#/bin/sh
+#!/bin/bash
 ################## SKELETON: DO NOT TOUCH THESE 2 LINES
 BASENAME=`basename "$0" .sh`; TAB='	'; NL='
 '
@@ -40,20 +40,23 @@ TMPDIR=`mktemp -d /tmp/$BASENAME.XXXXXX`
 [ $# = 0 ] && tty --silent && warn "reading stdin from tty; press ^D to finish, or ^C to exit"
 
 VERBOSE=0
+ALLOW_EXE=true
 while true; do
     case "$1" in
     -h) die "<printing help message only>" ;;
     -[Vv]*) VERBOSE=1; shift;;
+    -noexe) ALLOW_EXE=false; shift;;
     -*) die "option '$1' not supported";;
     *) break;;
     esac
 done
 
+export VERBOSE
 DIRNAME=`dirname "$0"`
 EBM_EXE=`(/bin/which ebm || /usr/bin/which ebm) 2>/dev/null | head -1`
-if false && [ -x "$EBM_EXE" ] && "$EBM_EXE" <"$DIRNAME/ebm.test.in" | cmp - "$DIRNAME/ebm.test.out" >/dev/null 2>&1; then
+if $ALLOW_EXE && [ -x "$EBM_EXE" ] && VERBOSE=1 "$EBM_EXE" <"$DIRNAME/ebm.test.in" 2>/dev/null | cmp - "$DIRNAME/ebm.test.out" >/dev/null 2>&1; then
     if [ "$EBM_SH_TRYING_EXECUTABLE" = "" ]; then
-	[ "$VERBOSE" -ge 0 ] && echo "exec'ing $EBM_EXE" >&2
+	[ "$VERBOSE" -gt 1 ] && echo "exec'ing $EBM_EXE" >&2
 	EBM_SH_TRYING_EXECUTABLE=true; export EBM_SH_TRYING_EXECUTABLE
 	exec "$EBM_EXE" "$@"
     fi
@@ -61,9 +64,12 @@ fi
 
 tail -n +2 "$@" > $TMPDIR/input
 
-hawk 'function TransformData(n,     j) {
+hawk 'function TransformData(n,     j,cdf) {
 	for(j=1;j<=n;j++) {
-	    data[NR][j] = -2*log(StatHistECDF(NR, data[NR][j]));
+	    cdf=StatHistECDF(NR, data[NR][j]);
+	    ASSERT((NR in _statN) && _statN[NR], "TransformData: \""NR"\" has no samples");
+	    if(cdf==0) cdf = 1.0/(_statN[NR]*_statN[NR]); # really small but not zero
+	    data[NR][j] = -2*log(cdf);
 	}
     }
 	NR==1{n=NF-2}
@@ -85,48 +91,48 @@ hawk 'function TransformData(n,     j) {
 	    TransformData(n); # note it always works on the current line (NR)
 	    #printf "-LOG[%d]",NR>"/dev/stderr";for(i=1;i<=n;i++)printf " %g",data[NR][i]>"/dev/stderr";print "">"/dev/stderr";
 	}
-    END{
-	#printf "last line has pval[%d]=%g\n", NR,pVal[NR] > "/dev/stderr";
-	m=NR
-	ASSERT(m>0, "need at least one variable");
-	# Compute covariances across all samples of all input variables.
-	for(i=1;i<=m;i++) for(j=i+1;j<=m;j++)for(k=1;k<=n;k++) CovarAddSample(i" "j, data[i][k], data[j][k]);
-	# Now perform Empirical Browns Method
-	df_fisher = Expected = 2.0*m;
-	cov_sum = 0;
-	for(i=1;i<=m;i++) { 
-	    #printf "row %4d", i > "/dev/stderr"
-	    for(j=i+1;j<=m;j++) {
-		covar=CovarCompute(i" "j);
-		#printf " %.5f", covar > "/dev/stderr";
-		cov_sum += covar;
-	    }
-	    #print "" > "/dev/stderr"
+END{
+    #printf "last line has pval[%d]=%g\n", NR,pVal[NR] > "/dev/stderr";
+    m=NR
+    ASSERT(m>0, "need at least one variable");
+    # Compute covariances across all samples of all input variables.
+    for(i=1;i<=m;i++) for(j=i+1;j<=m;j++) for(k=1;k<=n;k++) CovarAddSample(i" "j, data[i][k], data[j][k]);
+    # Now perform Empirical Browns Method
+    df_fisher = Expected = 2.0*m;
+    cov_sum = 0;
+    for(i=1;i<=m;i++) { 
+	#printf "row %4d", i > "/dev/stderr"
+	for(j=i+1;j<=m;j++) {
+	    covar=CovarCompute(i" "j);
+	    #printf "\t[%d,%d] %.5f", i,j, covar > "/dev/stderr";
+	    cov_sum += covar;
 	}
-	#printf "cov_sum %g\n",cov_sum > "/dev/stderr";
-	Var = 4.0*m+2*cov_sum;
-	c = Var/(2.0*Expected);
-	df_brown = 2.0*Expected**2/Var;
-	if(df_brown > df_fisher) {
-	    df_brown = df_fisher
-	    c = 1.0
+	#print "" > "/dev/stderr"
+    }
+    #printf "cov_sum.sh %s %g\n", FILENAME, cov_sum > "/dev/stderr";
+    Var = 4.0*m+2*cov_sum;
+    c = Var/(2.0*Expected);
+    df_brown = 2.0*Expected**2/Var;
+    if(df_brown > df_fisher) {
+	df_brown = df_fisher
+	c = 1.0
+    }
+    #printf "c = %g\n", c > "/dev/stderr"
+    pProd=1; log_pProd=0;
+    x=0; # twice the sum of logs of p-values
+    for(i=1;i<=m;i++)
+	if(1*pVal[i]>0) {
+	    x += -log(pVal[i]); log_pProd+=log(pVal[i]); pProd *= pVal[i]; #printf "x[%d]=%g\n",i,x
 	}
-	#printf "c = %g\n", c > "/dev/stderr"
-	pProd=1; log_pProd=0;
-	x=0; # twice the sum of logs of p-values
-	for(i=1;i<=m;i++)
-	    if(1*pVal[i]>0) {
-		x += -log(pVal[i]); log_pProd+=log(pVal[i]); pProd *= pVal[i]; #printf "x[%d]=%g\n",i,x
-	    }
-	    else if('$VERBOSE') Warn(sprintf("skipping pVal[%d]=%g",i,pVal[i]));
-	x *= 2;
-	#printf("x = %g\n", x) > "/dev/stderr";
-	log_p_brown = logChi2_pair(int(df_brown+0.5), 1.0*x/c)
-	p_brown = Exp(log_p_brown)
+	else if('$VERBOSE') Warn(sprintf("skipping pVal[%d]=%g",i,pVal[i]));
+    x *= 2;
+    #printf("x = %g\n", x) > "/dev/stderr";
+    log_p_brown = logChi2_pair(int(df_brown+0.5), 1.0*x/c)
+    p_brown = Exp(log_p_brown)
 
-	ASSERT(p_brown >= pProd,
-	    "Oops, something wrong: p_brown should be < product(pVals), but p_brown ="p_brown" product ="pProd);
-	if('$VERBOSE') fmt="p-value < %g = bitscore %g (product gives %g ; bitscore %g )\n"
-	else fmt="%g %g %g %g\n";
-	printf(fmt, p_brown, -log_p_brown/log(2), pProd, -log_pProd/log(2));
-    }' $TMPDIR/input
+    ASSERT(p_brown >= pProd,
+	"Oops, something wrong: p_brown should be < product(pVals), but p_brown ="p_brown" product ="pProd);
+    if('$VERBOSE') fmt="p-value < %g = bitscore %g (product gives %g ; bitscore %g )\n"
+    else fmt="%g %g %g %g\n";
+    printf(fmt, p_brown, -log_p_brown/log(2), pProd, -log_pProd/log(2));
+}' $TMPDIR/input

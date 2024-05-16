@@ -348,8 +348,11 @@ function StatHistECDF(name,z,  n,x,prevX,frac,h1,h2,interp,prevSort,m) {
     m=StatHistBinarySearch(name,z);
     #printf "z %g i %d x %g\n", z, m, _statHistCDF[name][_statHistCDFix[name][m]]
     # in the following, h1 and h2 are actually x values
-    if(m<1) h1=-BIGNUM; else h1=_statHistCDFix[name][m];
-    if(m>=n) h2=BIGNUM; else h2=_statHistCDFix[name][m+1];
+    ASSERT(_statN[name], "StatHistECDF: name \""name"\" has no samples");
+    if(m<1) return 1/(_statN[name]*_statN[name]); #h1=-BIGNUM;
+    else h1=_statHistCDFix[name][m];
+    if(m>=n) return 1-1/(_statN[name]*_statN[name]); # h2=BIGNUM;
+    else h2=_statHistCDFix[name][m+1];
     frac=(z-h1)/(h2-h1);
     # Now convert the x values to histogram values
     interp=_statHistCDF[name][h1]+frac*(_statHistCDF[name][h2] - _statHistCDF[name][h1]);
@@ -687,10 +690,10 @@ function CovarReset(name) {
     delete _Covar_N[name]
 }
 function CovarAddSample(name,X,Y) {
+    _Covar_N[name]++;
     _Covar_sumX[name]+=X
     _Covar_sumY[name]+=Y
     _Covar_sumXY[name]+=X*Y
-    _Covar_N[name]++;
 }
 
 function CovarCompute(name){
