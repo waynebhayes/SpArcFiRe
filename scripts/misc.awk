@@ -348,8 +348,11 @@ function StatHistECDF(name,z,  n,x,prevX,frac,h1,h2,interp,prevSort,m) {
     m=StatHistBinarySearch(name,z);
     #printf "z %g i %d x %g\n", z, m, _statHistCDF[name][_statHistCDFix[name][m]]
     # in the following, h1 and h2 are actually x values
-    if(m<1) h1=-BIGNUM; else h1=_statHistCDFix[name][m];
-    if(m>=n) h2=BIGNUM; else h2=_statHistCDFix[name][m+1];
+    ASSERT(_statN[name], "StatHistECDF: name \""name"\" has no samples");
+    if(m<1) return 1/(_statN[name]*_statN[name]); #h1=-BIGNUM;
+    else h1=_statHistCDFix[name][m];
+    if(m>=n) return 1-1/(_statN[name]*_statN[name]); # h2=BIGNUM;
+    else h2=_statHistCDFix[name][m+1];
     frac=(z-h1)/(h2-h1);
     # Now convert the x values to histogram values
     interp=_statHistCDF[name][h1]+frac*(_statHistCDF[name][h2] - _statHistCDF[name][h1]);
@@ -444,6 +447,7 @@ function StatAddWeightedSample(name, x, w) {
     _statMax[name]=MAX(_statMax[name],x);
 }
 function StatMean(name) {
+    ASSERT(_statN[name]>0, "StatMean: name \""name"\" has no samples");
     return _statSum[name]/_statN[name];
 }
 function StatMin(name) {
@@ -465,6 +469,12 @@ function StatStdDev(name,     x) {
 }
 function StatN(name) {
     return _statN[name];
+}
+function FmtLtr(v) { return (v==int(v) ? "d" : "g");}
+function StatPrint(name,  n,mu,m,M,s,v,fmt){
+    n=_statN[name]; mu=StatMean(name); m=StatMin(name); M=StatMax(name); s=StatStdDev(name); v=StatVar(name);
+    fmt="# %6d\tmean %9" FmtLtr(mu) "\tmin %9" FmtLtr(m) "\tmax %9" FmtLtr(M) "\tstdDev %9" FmtLtr(s) "\tvar %9" FmtLtr(v);
+    return sprintf(fmt, _statN[name], StatMean(name), StatMin(name), StatMax(name), StatStdDev(name), StatVar(name));
 }
 function Norm2(n,vec,      i,sum2)
 {
@@ -638,6 +648,15 @@ function NormalRV(mu,sigma) { return mu+StdNormRV()*sigma }
 
 # The Spearman correlation is just the Pearson correlation of the rank. It measures monotonicity, not linearity.
 # Unfortunately it means we need to store every sample, and sort them into rank order when we want the coefficient.
+function SpearmanReset(name) {
+    delete _SpComputeResult[name];
+    delete _Spearman_N[name];
+    delete _SpearmanSampleX[name];
+    delete _SpearmanSampleY[name];
+    delete _Spearman_rho[name];
+    delete _Spearman_p[name];
+    delete _Spearman_t[name];
+}
 function SpearmanAddSample(name,X,Y) {
     delete _SpComputeResult[name];
     _SpN=(_Spearman_N[name]++) # 1-indexed, not zero.
@@ -671,10 +690,10 @@ function CovarReset(name) {
     delete _Covar_N[name]
 }
 function CovarAddSample(name,X,Y) {
+    _Covar_N[name]++;
     _Covar_sumX[name]+=X
     _Covar_sumY[name]+=Y
     _Covar_sumXY[name]+=X*Y
-    _Covar_N[name]++;
 }
 
 function CovarCompute(name){
@@ -876,3 +895,5 @@ function PQlength(name) { return _PQ_size[name]; }
 function PQalloc(name) { _PQ_size[name]=0;PQ_[name][0][0]=1; delete PQ_[name][0] }
 function PQdelloc(name) { delete PQ_size[name]; delete PQ_[name] }
 function PQfree(name) { PQdelloc(name); }
+
+{ASSERT(!gsub("",""), "Sorry, we cannot accept DOS text files. Please remove the carriage returns from the file.");}

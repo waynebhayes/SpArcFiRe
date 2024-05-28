@@ -31,10 +31,15 @@ TMPDIR=`mktemp -d $MYTMP/$BASENAME.XXXXXX`
 
 [ $# -gt 0 ] || die "expecting at least one argument"
 
+echo TMPDIR is $TMPDIR >&2
+
 EBM=0
+EBM_NOEXE=""
+
 case "$1" in
 -h) die "help displayed";;
--ebm) EBM=1; shift ;;
+-ebm-noexe) EBM=1; EBM_NOEXE="-noexe"; shift;;
+-ebm) EBM=1; shift;;
 esac
 
 for i
@@ -83,10 +88,12 @@ do
 	    printf "WINNER side%d with log10(p)=%g, loser log10(p)=%g LOG10 DIFF %g\n", winner, sumLog[winner], sumLog[1-winner],
 		sumLog[winner]-sumLog[1-winner]
 	}' "$i"
+    [ "$EBM" -ne 1 ] && continue
+    #set -x
     for vote in 0 1; do
 	echo -n "side $vote: "
 	if [ `wc -l < $TMPDIR/EBM.in$vote` -gt 1 ]; then
-	    ebm.sh < $TMPDIR/EBM.in$vote
+	    ebm.sh -v $EBM_NOEXE < $TMPDIR/EBM.in$vote
 	else
 	    echo "no votes"
 	fi
