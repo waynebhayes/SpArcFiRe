@@ -225,9 +225,13 @@ PNGs are then deleted and all that is left is the combined/paneled image in a se
 
 ------------------------------------------------------------------------------------
 GalfitModule is developed and maintained by Dr. Matthew Portman, (formerly) under the tutelage of Dr. Wayne Hayes, UCI.
+
 Email: <portmanm@uci.edu>
 
 Big thanks to: 
+
 Chien Peng for all his help with GALFIT.
+
 Darren Davis who wrote SpArcFiRe.
+
 Wayne for his guidance, patience, and support.
