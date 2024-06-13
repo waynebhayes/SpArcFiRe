@@ -26,10 +26,11 @@ from Functions.helper_functions import *
 
 def wrapper(
     gfits, 
-    out_png_dir, 
+    out_png_dir,
+    starmask_dir = "./",
     single_image = False, 
-    hoirzontal = False, 
-    cleanup = True
+    hoirzontal   = False, 
+    cleanup      = True
 ):
     
     if os.stat(gfits).st_size == 0:
@@ -43,9 +44,10 @@ def wrapper(
         output.gname = os.path.basename(gfits).split(".fits")[0]
         
     output.to_png(
-        out_png_dir = out_png_dir, 
-        horizontal = horizontal, 
-        cleanup = cleanup
+        out_png_dir   = out_png_dir,
+        starmask_dir  = starmask_dir,
+        horizontal    = horizontal, 
+        cleanup       = cleanup
     )
 
 
@@ -55,18 +57,26 @@ if __name__ == "__main__":
 
     python3 ./{sys.argv[0]} [OPTION] PNG-OUT-DIRECTORY [FITS-DIRECTORY | SPACE SEPARATED FITS FILES]
     
-    OPTIONS =>[-h  | --help]
-              [-s  | --single-image]
-              [-nc | --no-cleanup]
-              [-H  | --horizontal]
-              [-v  | --verbose]
-              [-ff | --from-file]
+    OPTIONS =>[-h   | --help]
+              [-smd | --starmask-directory]
+              [-s   | --single-image]
+              [-nc  | --no-cleanup]
+              [-H   | --horizontal]
+              [-v   | --verbose]
+              [-ff  | --from-file]
 
     This script is a utility to generate images from output GALFIT FITS files using the to_png 
     functionality of the OutputFits class.
     """
     
     parser = argparse.ArgumentParser(description = USAGE)
+    
+    parser.add_argument('-smd', '--starmask-directory',
+                        dest     = 'starmask_dir',
+                        action   = 'store',
+                        default  = "./",
+                        help     = 'Specify the directory which contains the starmasks to be used to generated masked residuals.'
+                       )
     
     parser.add_argument('-s', '--single-image',
                         dest     = 'single_image',
@@ -121,6 +131,7 @@ if __name__ == "__main__":
     out_png_dir    = args.out_png_dir
     list_o_fits    = args.list_o_fits
     
+    starmask_dir   = args.starmask_dir
     single_image   = args.single_image
     horizontal     = args.horizontal
     cleanup        = args.cleanup
@@ -153,8 +164,8 @@ if __name__ == "__main__":
             
     #if "bayonet" in sp(f"hostname").stdout.split(".")[0]:
     if len(list_o_fits) > 500:
-        Parallel(n_jobs = -2)(delayed(wrapper)(gfits, out_png_dir, single_image, horizontal, cleanup) for gfits in list_o_fits)
+        Parallel(n_jobs = -2)(delayed(wrapper)(gfits, out_png_dir, starmask_dir, single_image, horizontal, cleanup) for gfits in list_o_fits)
     else:
-        _ = [wrapper(gfits, out_png_dir, single_image, horizontal, cleanup) for gfits in list_o_fits]
+        _ = [wrapper(gfits, out_png_dir, starmask_dir, single_image, horizontal, cleanup) for gfits in list_o_fits]
     #else:
     #    print("Not on bayonet, can't generate galaxies.")

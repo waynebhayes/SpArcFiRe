@@ -246,27 +246,64 @@ class FitsFile:
         tmp_png_path   = pj(tmp_png_dir, gname)
         tmp_png_path   = kwargs.get("tmp_png_path", tmp_png_path)
         
-        out_png_dir    = kwargs.get("out_png_dir", "./")
+        # TODO: Add starmask into output fits file as an image block
+#         with fits.open(starmask_path) as sm:
+#                 starmask_HDU = fits.ImageHDU(data = sm.data, header = sm.header, name = "STARMASK")
+                
+#         with fits.open(fits_path, mode='update', output_verify='ignore') as fits_hdu:
+#             fits_hdu.append(starmask_HDU)
+            
+        starmask_dir  = kwargs.get("starmask_dir", "./")
+        # Temporarily hardcoding the suffix here
+        starmask_path = pj(starmask_dir, f"{gname}_star-rm.fits")
+                           
+        out_png_dir   = kwargs.get("out_png_dir", "./")
         
         capture_output = bool(kwargs.get("silent", False))
         
-        combined_suffix   = kwargs.get("combined_suffix", "combined")
+        combined_suffix = kwargs.get("combined_suffix", "combined")
         primary_img_num = kwargs.get("primary_img_num", 1)
         
         fitspng_param       = "0.25,1" #1,150"
         fitspng_param_model = "0.25,0.75"
-        
+            
         # Different conventions... 0 is used for model/observation only
         if self.num_imgs == 1:
             primary_img_num = 0
             
+        else:
+            if exists(starmask_path):
+                # copied from below
+                # ASSUME (for now) that this is doable
+                # TODO: remove this when starmask is incorporated into fits files
+                feedme = FeedmeContainer(path_to_feedme = fits_path, header = GalfitHeader())
+                feedme.from_file(list(self.all_hdu.values())[1].header)
+                
+                crop_box = feedme.header.region_to_fit.value
+                # To adjust for python indexing
+                # Also, reminder, non-inclusive of end
+                xbox_min, xbox_max, ybox_min, ybox_max = crop_box[0] - 1, crop_box[1], crop_box[2] - 1, crop_box[3]
+                
+                with fits.open(starmask_path) as fits_starmask:
+                    # masked pixels have value 1, other pixels 0
+                    # so invert those with a bit of quick math
+                    starmask_data = np.abs(fits_starmask[0].data - 1)
+                    starmask_data = starmask_data[xbox_min : xbox_max, ybox_min : ybox_max]
+
+                with fits.open(fits_path, mode='update', output_verify='ignore') as fits_hdu:
+                    try:
+                        fits_hdu[primary_img_num + 2].data *= starmask_data
+                    except ValueError:
+                        print("Broadcasting issue when attempting to mask the residual array.")
+                        print("Leaving it alone")
+                
         im1 = f"{tmp_png_path}_observation.png"
         im2 = f"{tmp_png_path}_out.png"
         im3 = f"{tmp_png_path}_residual.png"
         
         # run_fitspng from helper_functions, string path to fitspng program
         fitspng_cmd1   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {im1} {fits_path}[{primary_img_num}]"
-        fitspng_cmd2   = f"{run_fitspng} -fr \"{fitspng_param_model}\" -o {im2} {fits_path}[{primary_img_num + 1}]"
+        fitspng_cmd2   = f"{run_fitspng} -fr \"{fitspng_param_model}\" -o {im2} {fits_path}[{primary_img_num + 1}]"            
         fitspng_cmd3   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {im3} {fits_path}[{primary_img_num + 2}]"
         
         cmds             = [fitspng_cmd1, fitspng_cmd2, fitspng_cmd3]
@@ -807,7 +844,7 @@ if __name__ == "__main__":
     assert not any("fits" in pof.path for pof in psutil.Process().open_files()), "Expected True."
 
 
-# In[ ]:
+# In[12]:
 
 
 if __name__ == "__main__":
