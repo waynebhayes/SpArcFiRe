@@ -70,12 +70,14 @@ There is also a regression test which can be run from the `RegTest` directory as
 *[TMP-DIRECTORY] -- <- *galfits      -- Output FITS models (and empty files to indicate failure)
                        *galfit_png   -- PNG files generated from output FITS
 
-*[OUT-DIRECTORY] -- <- *galfit_png   -- FITS models converted to PNG
-
                                         Output 'combined' PNG (observation, model, residual)
-                       *galaxy_dirs  <- Output FITS model
+*[OUT-DIRECTORY] -- <- *galaxy_dirs  <- Output FITS model
                                         File(s) used for input to GALFIT
                                         (PSFs go here as galaxyname_psf.fits)
+
+                                        *galfit_png -- All FITS models converted to PNG
+                       *runname_dir  <- Output tar.gz file containing all FITS models
+                                        Output pkl file containing a pandas dataframe of the parameterization for all models
 
 ```
 
