@@ -62,6 +62,7 @@ def create_quantiles(
         print_latex_all.append(f"{q} &")
         
         if copy_png:
+            #print("Preparing to copy pngs to specified directory.")
             quantile_dir = pj(success_dir, f"{runname}_all_quantile", f"quantile_{q}")
             if exists(quantile_dir):
                 shutil.rmtree(quantile_dir)
@@ -91,8 +92,10 @@ def create_quantiles(
             print_latex_all.append(f"{initial_str}{gname + '_combined.png'}{end_str}")
 
             if copy_png:
+                #print("Copying pngs to quantile directories.")
                 png_dir = pj(out_dir, copy_rname, f'{copy_rname}_galfit_png')
                 shutil.copy(pj(png_dir, f"{gname}_combined.png"), quantile_dir)
+                #print(pj(png_dir, f"{gname}_combined.png"), quantile_dir)
 
             quantiled_galaxies.append(gname)
                 
