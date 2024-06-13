@@ -3,11 +3,11 @@
 The scripts in this folder are written to automatically generate GALFIT input files from SpArcFiRe output.
 
 Please note, this module is still a work-in-progress and relies on some assumptions having to do with SpArcFiRe's conventions.
-These will be fixed in a future update, likely after Matthew finishes his Ph.D.
+These will be fixed in a future update.
 
 Also, when the module is split from SpArcFiRe, the README will be updated with more module specific details.
 
-Developed by Matthew Portman, <portmanm@uci.edu>
+Developed by Matthew Portman, Ph.D. <portmanm@uci.edu>
 
 <h2> INTRODUCTION </h2>
 
