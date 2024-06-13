@@ -303,6 +303,7 @@ def plot_scatter(
 
     plt.legend(["Pitch Angle", "Longest Arc Inner/Outer Rad", "SpArcFiRe PA +/- Uncertainty"], loc = "upper right")
 
+    title_dict = {}
     # For set of 14
     # title_dict = {
     #     '1237648704595624148': '(1)',
