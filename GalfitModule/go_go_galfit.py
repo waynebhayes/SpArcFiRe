@@ -986,8 +986,12 @@ def main(**kwargs):
                                 out_png_dir   = out_png_dir
                                 #cleanup = False # TEMPORARY UNTIL IMAGEMAGICK WORKS AGAIN
                                )
-
-            shutil.copy2(f"{pj(out_png_dir, gname)}_combined.png", pj(out_dir, gname))
+            try:
+                shutil.copy2(f"{pj(out_png_dir, gname)}_combined.png", pj(out_dir, gname))
+                
+            except Exception as e:
+                print(f"Something went wrong copying the final combined png to the output galaxy directory for {gname}...")
+                print(e)
 
         # No point in doing this in parallel because race conditions
         if not parallel and not use_async:
