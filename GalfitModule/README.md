@@ -7,8 +7,6 @@ These will be fixed in a future update.
 
 Also, when the module is split from SpArcFiRe, the README will be updated with more module specific details.
 
-Developed by Matthew Portman, Ph.D. <portmanm@uci.edu>
-
 <h2> INTRODUCTION </h2>
 
 The previous version of the GALFIT processing was simply a few scripts, `s2g.py` and others, 
@@ -226,7 +224,7 @@ PNGs are then deleted and all that is left is the combined/paneled image in a se
 
 
 ------------------------------------------------------------------------------------
-GalfitModule is developed and maintained by Matthew Portman under the tutelage of Dr. Wayne Hayes, UCI.
+GalfitModule is developed and maintained by Dr. Matthew Portman, (formerly) under the tutelage of Dr. Wayne Hayes, UCI.
 Email: <portmanm@uci.edu>
 
 Big thanks to: 
