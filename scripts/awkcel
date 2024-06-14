@@ -2,9 +2,9 @@
 USAGE="USAGE: $0 [OPTIONS] {awkcel script} [ file1.tsv file2.tsv ...]
 PURPOSE: given input file[s] with a constant number of tab-separated columns (called 'TSV' files), the first line
     contains the names of the columns, and each successive line contains the same number of tab-separated columns
-    containing values. The names of the columns on the first line must be 'awk' l-values (syntactically valid, assignable
+    containing values. The names of the columns on the first line must be 'gawk' l-values (syntactically valid, assignable
     variable names--ie., matching the regular expression [_A-Za-z][_A-Za-z0-9]*).
-    'awkcel script' is any normal awk script (including given in a file via -f) except it can use the names that are
+    'awkcel script' is any normal gawk script (including given in a file via -f) except it can use the names that are
     in the header line as if they were normal variables; these variables are re-assigned with each line of the TSV file.
     Comments are allowed in TSV files only ABOVE the header line, and # must be the FIRST character of the line.
     All variables are remembered between files given on the same awkcel command-line (though if the same column name
@@ -26,7 +26,10 @@ not(){ if eval "$@"; then return 1; else return 0; fi; }
 newlines(){ awk '{for(i=1; i<=NF;i++)print $i}' "$@"; }
 parse(){ awk "BEGIN{print $@}" </dev/null; }
 
-GAWK=`which 'gawk4*' | head -1 | sed 's/\*//g'`
+TestGawk(){ echo hello | gawk '{++array[$1][$1]}' || die "Upgrade to a [g]awk that supports multi-dimensional arrays"; }
+TestGawk
+
+GAWK=`which 'gawk*' | head -1 | sed 's/\*//g'`
 [ -x "$GAWK" ] || GAWK=gawk
 
 [ $# -eq 0 ] && die "Expecting arguments"

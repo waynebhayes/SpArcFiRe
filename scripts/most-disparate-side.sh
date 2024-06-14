@@ -21,6 +21,9 @@ not(){ if eval "$@"; then return 1; else return 0; fi; }
 newlines(){ awk '{for(i=1; i<=NF;i++)print $i}' "$@"; }
 parse(){ awk "BEGIN{print $*}" </dev/null; }
 
+TestGawk(){ echo hello | gawk '{++array[$1][$1]}' || die "Upgrade to a [g]awk that supports multi-dimensional arrays"; }
+TestGawk
+
 # Temporary Filename + Directory (both, you can use either, note they'll have different random stuff in the XXXXXX part)
 BIGTMP=`for i in /var/tmp/SF$$ /tmp/SF$$; do mkdir -p "$i" && (df $i | awk 'NR==1{for(av=1;av<=NF;av++)if(match($av,"[Aa]vail"))break;}NR>1{print $av,"'"$i"'"}'); done 2>/dev/null | sort -nr | awk 'NR==1{print $2}'`
 [ "$MYTMP" ] || MYTMP="$BIGTMP"
