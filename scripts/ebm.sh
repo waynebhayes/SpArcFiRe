@@ -31,6 +31,9 @@ not(){ if eval "$@"; then return 1; else return 0; fi; }
 newlines(){ awk '{for(i=1; i<=NF;i++)print $i}' "$@"; }
 parse(){ awk "BEGIN{print $*}" </dev/null; }
 
+TestGawk(){ echo hello | gawk '{++array[$1][$1]}' || die "Upgrade to a [g]awk that supports multi-dimensional arrays"; }
+TestGawk
+
 # Temporary Filename + Directory (both, you can use either, note they'll have different random stuff in the XXXXXX part)
 TMPDIR=`mktemp -d /tmp/$BASENAME.XXXXXX`
  trap "/bin/rm -rf $TMPDIR; exit" 0 1 2 3 15 # call trap "" N to remove the trap for signal N

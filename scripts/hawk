@@ -8,6 +8,9 @@ not(){ if eval "$@"; then return 1; else return 0; fi; }
 newlines(){ awk '{for(i=1; i<=NF;i++)print $i}' "$@"; }
 parse(){ awk "BEGIN{print $@}" </dev/null; }
 
+TestGawk(){ echo hello | gawk '{++array[$1][$1]}' || die "Upgrade to a [g]awk that supports multi-dimensional arrays"; }
+TestGawk
+
 # generally useful Variables
 NL='
 '
