@@ -1,40 +1,40 @@
 --- IC1151n.tsv ---
-g-r	0 (gap 0.0106208, CI 0.00317077, success)	1.05235e-16
-g-i	0 (gap 0.0154743, CI 0.00427818, success)	2.34223e-17
-g-z	0 (gap 0.0276965, CI 0.00555897, success)	2.48145e-27
-r-i	0 (gap 0.00485344, CI 0.00224602, success)	4.62954e-07
-r-z	0 (gap 0.0170757, CI 0.00396742, success)	1.09358e-18
-i-z	0 (gap 0.0122222, CI 0.00334778, success)	4.55711e-11
+g-r     0 (gap 0.0106208, CI 0.00317077, success)       1.05235e-16
+g-i     0 (gap 0.0154743, CI 0.00427818, success)       2.34223e-17
+g-z     0 (gap 0.0276965, CI 0.00555897, success)       2.48145e-27
+r-i     0 (gap 0.00485344, CI 0.00224602, success)      4.62954e-07
+r-z     0 (gap 0.0170757, CI 0.00396742, success)       1.09358e-18
+i-z     0 (gap 0.0122222, CI 0.00334778, success)       4.55711e-11
 WINNER side0 with log10(p)=-93.8504, loser log10(p)=0 LOG10 DIFF -93.8504
-side 0: 5.67244e-85 279.86 1.41115e-94 311.764
+side 0: p-value < 7.05933e-26 = bitscore 83.5506 (product gives 1.41115e-94 ; bitscore 311.764 )
 side 1: no votes
 --- NGC2775n.tsv ---
-g-r	1 (gap 0.000427364, CI 0.00263959,    fail)	0.923577
-g-i	0 (gap 0.000646606, CI 0.00233796,    fail)	0.87446
-g-z	1 (gap 0.00237251, CI 0.00151078, success)	0.000816141
-r-i	0 (gap 0.00107397, CI 0.000519254, success)	0.000146012
-r-z	1 (gap 0.00194515, CI 0.00165334, success)	9.48785e-05
-i-z	1 (gap 0.00301912, CI 0.00160379, success)	7.90493e-07
+g-r     1 (gap 0.000427364, CI 0.00263959,    fail)     0.923577
+g-i     0 (gap 0.000646606, CI 0.00233796,    fail)     0.87446
+g-z     1 (gap 0.00237251, CI 0.00151078, success)      0.000816141
+r-i     0 (gap 0.00107397, CI 0.000519254, success)     0.000146012
+r-z     1 (gap 0.00194515, CI 0.00165334, success)      9.48785e-05
+i-z     1 (gap 0.00301912, CI 0.00160379, success)      7.90493e-07
 WINNER side1 with log10(p)=-13.2132, loser log10(p)=-3.83561 LOG10 DIFF -9.37756
-side 0: 0.00127247 9.61815 0.000127682 12.9352
-side 1: 2.9552e-10 31.656 5.65333e-14 44.0079
+side 0: p-value < 0.00127247 = bitscore 9.61815 (product gives 0.000127682 ; bitscore 12.9352 )
+side 1: p-value < 1.24758e-08 = bitscore 26.2563 (product gives 5.65333e-14 ; bitscore 44.0079 )
 --- NGC157n.tsv ---
-g-r	1 (gap 0.0294312, CI 0.00376318, success)	4.46463e-75
-g-i	1 (gap 0.0422998, CI 0.0049833, success)	1.05023e-84
-g-z	1 (gap 0.0603838, CI 0.00661339, success)	2.31783e-92
-r-i	1 (gap 0.0128686, CI 0.0013053, success)	9.68509e-83
-r-z	1 (gap 0.0309525, CI 0.00300811, success)	1.70276e-95
-i-z	1 (gap 0.018084, CI 0.00187224, success)	2.40311e-78
+g-r     1 (gap 0.0294312, CI 0.00376318, success)       4.46463e-75
+g-i     1 (gap 0.0422998, CI 0.0049833, success)        1.05023e-84
+g-z     1 (gap 0.0603838, CI 0.00661339, success)       2.31783e-92
+r-i     1 (gap 0.0128686, CI 0.0013053, success)        9.68509e-83
+r-z     1 (gap 0.0309525, CI 0.00300811, success)       1.70276e-95
+i-z     1 (gap 0.018084, CI 0.00187224, success)        2.40311e-78
 WINNER side1 with log10(p)=-504.366, loser log10(p)=0 LOG10 DIFF -504.366
 side 0: no votes
-side 1: 4.94066e-324 1631.46 0 1675.47
+side 1: p-value < 2.70791e-100 = bitscore 330.756 (product gives 0 ; bitscore 1675.47 )
 --- NGC2841n.tsv ---
-g-r	0 (gap 0.00147807, CI 0.00172563,    fail)	0.00952065
-g-i	0 (gap 0.000446778, CI 0.00204221,    fail)	0.0806917
-g-z	0 (gap 0.000197029, CI 0.0027454,    fail)	0.0891266
-r-i	1 (gap 0.00103129, CI 0.000488414, success)	0.000144936
-r-z	1 (gap 0.00128104, CI 0.00122982, success)	0.252359
-i-z	1 (gap 0.000249749, CI 0.000949498,    fail)	0.379968
-WINNER side1 with log10(p)=-4.4368, loser log10(p)=0 LOG10 DIFF -4.4368
-side 0: 0.003873 8.01233 6.84704e-05 13.8342
-side 1: 0.00103847 9.91133 1.38977e-05 16.1348
+g-r     0 (gap 0.00147807, CI 0.00172563,    fail)      0.00952049
+g-i     0 (gap 0.000446778, CI 0.00204221,    fail)     0.0806915
+g-z     0 (gap 0.000197029, CI 0.0027454,    fail)      0.0891268
+r-i     1 (gap 0.00103129, CI 0.000488414, success)     0.000144924
+r-z     1 (gap 0.00128104, CI 0.00122982, success)      0.252364
+i-z     1 (gap 0.000249749, CI 0.000949498,    fail)    0.379967
+WINNER side1 with log10(p)=-4.43683, loser log10(p)=0 LOG10 DIFF -4.43683
+side 0: p-value < 0.0426876 = bitscore 4.55004 (product gives 6.84692e-05 ; bitscore 13.8342 )
+side 1: p-value < 0.0115663 = bitscore 6.43392 (product gives 1.38968e-05 ; bitscore 16.1349 )
