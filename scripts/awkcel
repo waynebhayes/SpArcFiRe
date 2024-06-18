@@ -56,7 +56,7 @@ Darwin) GSED=gsed;; # we need a sed that takes the "nu" option
 Linux)GSED=sed;;
 *)GSED=sed;; # fingers crossed...
 esac
-GSED=`(which $GSED || echo sed) | sed 's/\*$//' | head -1`
+GSED=`(which $GSED | fgrep sed >/dev/null || echo sed) | sed 's/\*$//' | head -1`
 $GSED -nu "{ p$NL q$NL}" </dev/null || die "we need a sed that takes the '-nu' options, but $GSED doesn't"
 
 EXEDIR="`dirname $0`"
