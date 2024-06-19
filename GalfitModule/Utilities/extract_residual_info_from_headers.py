@@ -35,8 +35,6 @@ from Classes.Containers import *
 from Classes.FitsHandlers import *
 from Functions.helper_functions import *
 
-#from parallel_residual_calc import parallel_wrapper
-
 def main(*args):
     basename         = args[0]
     pkl_end_str      = args[1]
@@ -54,7 +52,7 @@ def main(*args):
             output_df["gname"]   = gname
             output_df["NMR"]     = output_fits.model.header.get("NMR", None) 
             output_df["KS_P"]    = output_fits.model.header.get("KS_P", None)
-            output_df["KS_STAT"] = output_fits.model.header.get("KS_STAT", None)
+            #output_df["KS_STAT"] = output_fits.model.header.get("KS_STAT", None)
             
             all_df = pd.concat([all_df, output_df])
             # with fits.open(output_file) as hdul: 
@@ -85,3 +83,4 @@ if __name__ == "__main__":
     galaxy_names     = sys.argv[4] #.split(",")
     
     main(basename, pkl_end_str, out_dir, galaxy_names)
+

@@ -62,8 +62,10 @@ import go_go_galfit
 #from Classes.Components import *
 from Classes.Containers import *
 from Functions.helper_functions import *
-import Utilities.parallel_residual_calc as parallel_residual_calc
-import Utilities.combine_via_parallel as combine_via_parallel
+#import Utilities.parallel_residual_calc as parallel_residual_calc
+#import Utilities.combine_via_parallel as combine_via_parallel
+# import Utilities.calculate_residual_info as calculate_residual_info
+import Utilities.extract_residual_info_from_headers as extract_residual_info_from_headers
 
 # Separations were previously code blocks in jupyter notebook
 # ==========================================================================================================
@@ -83,15 +85,16 @@ if __name__ == "__main__":
 
     python3 ./{sys.argv[0]} [OPTION] [[RUN-DIRECTORY] IN-DIRECTORY TMP-DIRECTORY OUT-DIRECTORY]
     
-    OPTIONS =>[-p | --parallel]
-              [-drs | --dont-remove-slurm]
-              [-t  | --tmp]
-              [-ac | --aggressive-clean]
-              [-NS | --num-steps] 
-              [-r | --restart]
+    OPTIONS =>[-p   | --parallel               ]
+              [-drs | --dont-remove-slurm      ]
+              [-t   | --tmp                    ]
+              [-nac | --no-aggressive-clean    ]
+              [-NS  | --num-steps              ]
+              [-NC  | --num-components         ]
+              [-r   | --restart                ]
               [-nsf | --no-simultaneous-fitting]
-              [-v | --verbose]
-              [-n | --basename]
+              [-v   | --verbose                ]
+              [-n   | --basename               ]
 
     This script is the wrapping script for running GALFIT using SpArcFiRe to inform 
     the input. By default, it runs from the RUN (or current) directory and uses the
@@ -133,24 +136,36 @@ if __name__ == "__main__":
                                     under the assumption that tmp will be wiped at some point in the near future.'
                        )
     
-    parser.add_argument('-ac', '--aggressive-clean',
-                        dest     = 'aggressive_clean',
+    parser.add_argument('-nac', '--no-aggressive-clean',
+                        dest     = 'no_aggressive_clean',
                         action   = 'store_const',
                         const    = True,
                         default  = False,
-                        help     = 'Aggressively clean-up directories, removing -in, temp output, psf, and mask files after galfit runs'
+                        #help     = 'Aggressively clean-up directories, removing -in, parameter search output, psf, and mask files after galfit runs'
+                        help     = '*Do not* aggressively clean-up directories, leaving temp inputs, parameter search outputs, and mask files after galfit runs'
                        )
     
     parser.add_argument('-NS', '--num-steps',
-                        dest     = 'steps', 
+                        dest     = 'num_steps', 
                         action   = 'store',
                         type     = int,
                         choices  = range(1,4),
                         default  = 2,
                         help     = 'Run GALFIT using step-by-step component selection (up to 3), i.e.\n\t\
-                                    1: Bulge + Disk + Arms,\n\t\
-                                    2: Disk -> Bulge + Disk + Arms,\n\t\
-                                    3: Disk -> Bulge + Disk -> Bulge + Disk + Arms'
+                                    1: Bulge + Disk + Arms;\n\t\
+                                    2: Bulge + Arms -> Bulge + Disk + Arms;\n\t\
+                                    3: Bulge -> Bulge + Arms -> Bulge + Disk + Arms'
+                       )
+    
+    parser.add_argument('-NC', '--num-components',
+                        dest     = 'num_components', 
+                        action   = 'store',
+                        type     = int,
+                        choices  = range(2,4),
+                        default  = 3,
+                        help     = 'Run GALFIT with n disk components (from 2 to 3), the last of which is rotated to form the arms, i.e.\n\t\
+                                    2: Bulge, Disk + Arms;\n\t\
+                                    3: Bulge, Disk, Disk + Arms'
                        )
     
     parser.add_argument('-r', '--restart',
@@ -192,70 +207,64 @@ if __name__ == "__main__":
                                     SpArcFiRe directories should follow -in, -tmp, -out."
                        )
     
-    if not in_notebook():
-        args              = parser.parse_args() # Using vars(args) will call produce the args as a dict
-        num_steps         = args.steps
-        parallel          = args.parallel
-        dont_remove_slurm = args.dont_remove_slurm
-        run_from_tmp      = args.run_from_tmp
-        aggressive_clean  = args.aggressive_clean
-        
-        restart           = args.restart
-        basename          = args.basename
-        
-        # TODO: This isn't working, forcing false for now
-        simultaneous_fitting = False #args.simultaneous_fitting
-        
-        verbose           = args.verbose
-        capture_output    = not args.verbose
-        
-        # if num_steps not in range(1,4):
-        #     print("The number of steps you selected cannot be used!")
-        #     print("Using two.")
-        #     print()
-        #     num_steps = 2
+    
+    args              = parser.parse_args() # Using vars(args) will call produce the args as a dict
+    num_steps         = args.num_steps
+    num_components    = args.num_components
+    parallel          = args.parallel
+    dont_remove_slurm = args.dont_remove_slurm
+    run_from_tmp      = args.run_from_tmp
+    # Invert
+    aggressive_clean  = not args.no_aggressive_clean
 
-        if len(args.paths) == 1:
-            cwd = args.paths[0]
-            in_dir = pj(cwd, "sparcfire-in")
-            tmp_dir = pj(cwd, "sparcfire-tmp")
-            out_dir = pj(cwd, "sparcfire-out")
-            
-        elif len(args.paths) == 3:
-            in_dir, tmp_dir, out_dir = args.paths[0], args.paths[1], args.paths[2]
-            #print(f"Paths are, {in_dir}, {tmp_dir}, {out_dir}")
-            
-        elif len(args.paths) == 4:
-            cwd, in_dir, tmp_dir, out_dir = args.paths[0], args.paths[1], args.paths[2], args.paths[3]
-            #print(f"Paths are, {in_dir}, {tmp_dir}, {out_dir}")
-            
-        else:
-            in_dir = pj(cwd, "sparcfire-in")
-            tmp_dir = pj(cwd, "sparcfire-tmp")
-            out_dir = pj(cwd, "sparcfire-out")
-            print(f"Paths incorrectly specified, defaulting to {cwd} (-in, -tmp, -out)...")
-            print(f"{in_dir}\n{tmp_dir}\n{out_dir}")
-            print()
-            
-        check_dir_names = [1 for i in (in_dir, tmp_dir, out_dir) if "-" not in i ]
-        if check_dir_names:
-            raise Exception("Directory paths must end in '-in' '-tmp' and '-out'")
-            
-    else:
-        parallel = 0
-        #rerun = ""
-        num_steps = 2
-        # Avoid some... nasty surprises for when debugging
-        restart = True
-        verbose = False
-        capture_output = True
-        
-        cwd = cwd.replace("ics-home", username)
+    restart           = args.restart
+    basename          = args.basename
+
+    # TODO: This isn't working, forcing false for now
+    simultaneous_fitting = False #args.simultaneous_fitting
+
+    verbose           = args.verbose
+    capture_output    = not args.verbose
+
+    print(f"Number of fitting steps: {num_steps}")
+    print(f"Parallel choice (0 - serial, 1 - CPU, 2 - SLURM): {parallel}")
+    print(f"Run from temporary directory? {run_from_tmp}")
+    print(f"Aggressively clean? {aggressive_clean}")
+    print(f"Verbosity? {verbose}")
+    if parallel == 2:
+        print(f"Don't remove SLURM dump files? {dont_remove_slurm}")
+
+    # if num_steps not in range(1,4):
+    #     print("The number of steps you selected cannot be used!")
+    #     print("Using two.")
+    #     print()
+    #     num_steps = 2
+
+    if len(args.paths) == 1:
+        cwd = args.paths[0]
         in_dir = pj(cwd, "sparcfire-in")
         tmp_dir = pj(cwd, "sparcfire-tmp")
         out_dir = pj(cwd, "sparcfire-out")
-        
-        sys.path.append(pj(_HOME_DIR, ".local", "bin"))
+
+    elif len(args.paths) == 3:
+        in_dir, tmp_dir, out_dir = args.paths[0], args.paths[1], args.paths[2]
+        #print(f"Paths are, {in_dir}, {tmp_dir}, {out_dir}")
+
+    elif len(args.paths) == 4:
+        cwd, in_dir, tmp_dir, out_dir = args.paths[0], args.paths[1], args.paths[2], args.paths[3]
+        #print(f"Paths are, {in_dir}, {tmp_dir}, {out_dir}")
+
+    else:
+        in_dir = pj(cwd, "sparcfire-in")
+        tmp_dir = pj(cwd, "sparcfire-tmp")
+        out_dir = pj(cwd, "sparcfire-out")
+        print(f"Paths incorrectly specified, defaulting to {cwd} (-in, -tmp, -out)...")
+        print(f"{in_dir}\n{tmp_dir}\n{out_dir}")
+        print()
+
+    check_dir_names = [1 for i in (in_dir, tmp_dir, out_dir) if "-" not in i ]
+    if check_dir_names:
+        raise Exception("Directory paths must end in '-in' '-tmp' and '-out'")
         
     # Making these absolute paths
     cwd     = absp(cwd)
@@ -316,7 +325,8 @@ if __name__ == "__main__":
                 print("Continuing...")
                 break
         
-    out_png_dir     = pj(out_dir, "galfit_png")
+    basename_out_dir = pj(out_dir, basename) 
+    out_png_dir      = pj(out_dir, "galfit_png")
     
     # Minor changes to SpArcFiRe's version
     star_removal_path = pj(_MODULE_DIR, "star_removal")
@@ -332,11 +342,11 @@ if __name__ == "__main__":
     if not restart:
         # Remove old
         print("Removing old results in tmp folder (if they exist).")
-        _ = sp(f"rm -rf {tmp_fits_dir}", capture_output = capture_output)
-        # try:
-        #     shutil.rmtree(tmp_fits_dir)
-        # except OSError as e:
-        #     pass
+        #_ = sp(f"rm -rf {tmp_fits_dir}", capture_output = capture_output)
+        try:
+            shutil.rmtree(tmp_fits_dir)
+        except OSError as e:
+            pass
     else:
         print("Restarting the run (still have to find everything).")
 
@@ -345,7 +355,8 @@ if __name__ == "__main__":
                                tmp_masks_dir, 
                                #tmp_psf_dir, 
                                tmp_png_dir, 
-                               out_png_dir
+                               out_png_dir,
+                               basename_out_dir
                               )
          if not exists(i)
         ]
@@ -379,7 +390,8 @@ if __name__ == "__main__":
        
     # Sparcfire plops them into tmp so I just move them to where I need them
     if star_masks and not restart:
-        sp(f"mv {pj(tmp_dir,'*_star-rm.fits')} {tmp_masks_dir}", capture_output = capture_output)
+        #sp(f"mv {pj(tmp_dir,'*_star-rm.fits')} {tmp_masks_dir}", capture_output = capture_output)
+        _ = [shutil.move(i, tmp_masks_dir) for i in glob(pj(tmp_dir,'*_star-rm.fits'))]
 
 # ==========================================================================================================
 # Getting setup to generate starmasks
@@ -389,13 +401,15 @@ if __name__ == "__main__":
     generate_starmasks = True
     if not restart:
         #generate_starmasks = True
-        if not exists(pj(tmp_masks_dir, 'remove_stars_with_sextractor.log')):
+        #if not exists(pj(tmp_masks_dir, 'remove_stars_with_sextractor.log')):
             # remove_stars_with_sextractor needs this available before it can log
-            _ = sp(f"touch {pj(tmp_masks_dir, 'remove_stars_with_sextractor.log')}", capture_output = capture_output)
+            #_ = sp(f"touch {pj(tmp_masks_dir, 'remove_stars_with_sextractor.log')}", capture_output = capture_output)
+        with open(pj(tmp_masks_dir, 'remove_stars_with_sextractor.log'), mode='a'): pass
             
-        if simultaneous_fitting and not exists(pj(sf_masks_dir, 'remove_stars_with_sextractor.log')):
+        if simultaneous_fitting: # and not exists(pj(sf_masks_dir, 'remove_stars_with_sextractor.log')):
+            with open(pj(sf_masks_dir, 'remove_stars_with_sextractor.log'), mode='a'): pass
             # remove_stars_with_sextractor needs this available before it can log
-            _ = sp(f"touch {pj(sf_masks_dir, 'remove_stars_with_sextractor.log')}", capture_output = capture_output)
+            #_ = sp(f"touch {pj(sf_masks_dir, 'remove_stars_with_sextractor.log')}", capture_output = capture_output)
 
 # ==========================================================================================================
 # write_to_parallel function sets up a text file for piping to parallel scripts
@@ -515,6 +529,7 @@ if __name__ == "__main__":
                    "tmp_dir"              : tmp_dir,
                    "out_dir"              : out_dir,
                    "num_steps"            : num_steps,
+                   "num_components"       : num_components,
                    #"rerun"                : rerun,
                    "parallel"             : parallel,
                    "verbose"              : verbose,
@@ -527,13 +542,14 @@ if __name__ == "__main__":
                    # "petromags"          : petromags,
                    # "bulge_axis_ratios"  : bulge_axis_ratios,
                    # Keep this last just in case
-                   "galaxy_names"       : galaxy_names
+                   "galaxy_names"         : galaxy_names
                   }
     
     # In case we're running back to back, this will reduce galaxy_names appropriately
     kwargs_main = check_galfit_out_hangups(tmp_fits_dir, out_dir, kwargs_main)
     parallel_file = "parallel_cmd_file"
     
+    start_time = time.time()
     # Getting read for parallelizing
     if parallel:
         if not kwargs_main["galaxy_names"] and not restart:
@@ -543,26 +559,29 @@ if __name__ == "__main__":
         #print("Piping to parallel")
         print(f"{len(kwargs_main['galaxy_names'])} galaxies")
         
-        chunk_size = 5
+        chunk_size = 1 if len(kwargs_main['galaxy_names']) < 50 else 10
+        
+        # Timeout DOES NOT properly kill the parallelized process via sp
+        timeout = 2880 # Minutes
         if parallel == 1:
             # For CPU parallel
             parallel_run_name = ""#"GALFITTING"
             parallel_options  = joblib.cpu_count()
             parallel_verbose  = ""
-            chunk_size = len(kwargs_main["galaxy_names"])//joblib.cpu_count() + 1
+            #chunk_size = len(kwargs_main["galaxy_names"])//joblib.cpu_count() + 1
+            #chunk_size = 1 if len(kwargs_main['galaxy_names']) < 50 else 10
             # Two whole days for big runs
-            timeout = 2880 # Minutes
+            # timeout = 2880 # Minutes
             
         elif parallel == 2:
             # For SLURM/Cluster Computing
             parallel_run_name = "GALFITTING"
             # Slurm needs different timeout limits
-            timeout = 480 # Minutes
-            # TODO: Consider SLURM + CPU parallel
-            parallel_options  = f"-M all --ntasks-per-node=1 -t {timeout}"
+            # timeout = 2880 # Minutes
+            # TODO: Ask wayne about ntasks
+            parallel_options  = f"-M all --ntasks=1 --ntasks-per-node=4 -t {timeout}"
             parallel_verbose  = "-v" if verbose else ""
-            chunk_size = 20
-
+            #chunk_size = 1 if len(kwargs_main['galaxy_names']) < 50 else 10
             
         # Running things via distributed computing           
         parallel_run_cmd = f"cat {parallel_file} | nice -19 {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
@@ -571,7 +590,7 @@ if __name__ == "__main__":
             write_to_parallel(cwd, kwargs_main, parallel_file = parallel_file, chunk_size = chunk_size)
             print("Galfitting via parallelization...")
             try:
-                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout = (timeout + 1) * 60)
+                sp(f"{parallel_run_cmd}", capture_output = capture_output) #, timeout = (timeout + 1) * 60)
             except subprocess.TimeoutExpired:
                 print("Timed out.")
                 pass
@@ -593,7 +612,7 @@ if __name__ == "__main__":
             
             try:
                 print("Piping to parallel")
-                sp(f"{parallel_run_cmd}", capture_output = capture_output, timeout = (timeout + 1)* 60)
+                sp(f"{parallel_run_cmd}", capture_output = capture_output) #, timeout = (timeout + 1)* 60)
             except subprocess.TimeoutExpired:
                 pass
             
@@ -615,6 +634,17 @@ if __name__ == "__main__":
                                     )
         
         write_failed(out_dir, failures)
+        
+    end_time = time.time()
+    run_time = (end_time - start_time)/60
+    time_str = "min"
+    
+    if run_time >= 60:
+        run_time /= 60
+        time_str = "hrs"
+        
+    print(f"Total GALFITting run time: {run_time:.2f} {time_str}")
+    print()
 
 # ==========================================================================================================
 # Unused but here for a good time
@@ -656,13 +686,21 @@ gaussj: Singular Matrix-1
 
 if __name__ == "__main__":
     print("Cleaning up...")
-    _ = sp("rm galfit.* fit.log", capture_output = capture_output)
-    _ = sp("rm *.png", capture_output = capture_output)
+    rm_files(*glob(pj(cwd, "galfit.*")))
+    rm_files(*glob(pj(cwd, "*.png")))
+    rm_files(pj(cwd, "fit.log"))
+    rm_files(pj(cwd, parallel_file))
+    
+    if not aggressive_clean:
+        rm_files(*glob(pj(tmp_fits_dir, "m*.fits")))
+        rm_files(*glob(pj(tmp_fits_dir, "*.in")))
+    
     
     # We use the negative of remove slurm because we want cleanup to be the default
-    if parallel and not dont_remove_slurm:
-        _ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
-        _ = sp(f"rm {parallel_file}", capture_output = capture_output)
+    if parallel == 2 and not dont_remove_slurm:
+        #_ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
+        #_ = sp(f"rm {parallel_file}", capture_output = capture_output)
+        shutil.rmtree(pj(_HOME_DIR, "SLURM_turds", parallel_run_name))
         #_ = sp(f"rm {parallel_copy_input}", capture_output = capture_output)
 
 
@@ -671,12 +709,12 @@ if __name__ == "__main__":
 # ==========================================================================================================
 if __name__ == "__main__":
     pkl_end_str = "output_results"
-    final_pkl_file = pj(out_dir, f"{basename}_{pkl_end_str}.pkl")
+    final_pkl_file = pj(basename_out_dir, f"{basename}_{pkl_end_str}.pkl")
     num = 1
     
     # Iterative naming for subsequent runs
     while exists(final_pkl_file) and num < 100:
-        final_pkl_file = pj(out_dir, f"{basename}_{pkl_end_str}{num}.pkl")
+        final_pkl_file = pj(basename_out_dir, f"{basename}_{pkl_end_str}{num}.pkl")
         num += 1
         
     if num == 100:
@@ -690,10 +728,12 @@ if __name__ == "__main__":
     
     # Piping to parallel again because we're already setup to do so
     if parallel:
-        python_parallel   = pj(_MODULE_DIR, "Utilities", "combine_via_parallel.py")
+        python_parallel   = pj(_MODULE_DIR, "Utilities", "extract_residual_info_from_headers.py") #"combine_via_parallel.py")
         parallel_file     = "parallel_combine_residual"
-        if exists(parallel_file):
-            _ = sp(f"rm -f {parallel_file}", capture_output = capture_output)
+        #if exists(parallel_file):
+            #_ = sp(f"rm -f {parallel_file}", capture_output = capture_output)
+        
+        rm_files(pj(cwd, parallel_file))
         
         if parallel == 1:
             # For CPU parallel
@@ -708,10 +748,12 @@ if __name__ == "__main__":
         finished_pkl_num = 0
         # Performing a similar check to that above for failures/success
         if restart:
-            check_output_pkl = [int(os.path.basename(i).split("_")[0].replace(basename, "")) 
-                                for i in find_files(tmp_dir, f'{basename}*_{pkl_end_str}.pkl', "f")
-                                if os.path.basename(i).split("_")[0].replace(basename, "")
-                                ]
+            check_output_pkl = [
+                int(os.path.basename(i).split(f"_{pkl_end_str}")[0].replace(basename, "")) 
+                for i in find_files(tmp_dir, f'{basename}*_{pkl_end_str}.pkl', "f")
+                if os.path.basename(i).split(f"_{pkl_end_str}")[0].replace(basename, "")
+            ]
+            
             if check_output_pkl:
                 finished_pkl_num = max(check_output_pkl)
 
@@ -731,7 +773,7 @@ if __name__ == "__main__":
 
         if count:
             print("parallelizing to combine residuals")
-            parallel_run_cmd = f"cat {parallel_file} | nice -19 {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
+            parallel_run_cmd = f"cat {parallel_file} | {pipe_to_parallel_cmd} {parallel_run_name} {parallel_options} {parallel_verbose}"
             _ = sp(parallel_run_cmd, capture_output = capture_output)
 
         all_output_pkl = [pj(tmp_dir, fname) 
@@ -747,9 +789,9 @@ if __name__ == "__main__":
                           ) 
     # Serial
     else:
-        
         # In this case it's not parallel but I'm just saving some hassle here
-        out_df = combine_via_parallel.main("", pkl_end_str, out_dir, ",".join(galaxy_names))
+        #out_df = combine_via_parallel.main("", pkl_end_str, out_dir, ",".join(galaxy_names))
+        out_df = extract_residual_info_from_headers.main("", pkl_end_str, out_dir, ",".join(galaxy_names))
 
     # Could split this into the above if/else but this keeps everything output
     # related in one place
@@ -762,20 +804,40 @@ if __name__ == "__main__":
     #pickle.dump(all_nmr, open(final_pkl_file, 'wb'))
     out_df.to_pickle(final_pkl_file)
     
-    if not dont_remove_slurm and parallel:
-        _ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
-        _ = sp(f"rm -f {pj(tmp_dir, basename)}*_{pkl_end_str}.pkl", capture_output = capture_output)
-        _ = sp(f"rm -f {parallel_file}", capture_output = capture_output)
-        
+    if parallel:
+        if parallel == 2 and not dont_remove_slurm:
+            #_ = sp(f"rm -r \"$HOME/SLURM_turds/{parallel_run_name}\"", capture_output = capture_output)
+            shutil.rmtree(pj(_HOME_DIR, "SLURM_turds", parallel_run_name))
+            
+        #_ = sp(f"rm -f {pj(tmp_dir, basename)}*_{pkl_end_str}.pkl", capture_output = capture_output)
+        rm_files(*glob(f"{pj(tmp_dir, basename)}*_{pkl_end_str}.pkl"))
+        #_ = sp(f"rm -f {parallel_file}", capture_output = capture_output)
+        rm_files(parallel_file)
         
 # ==========================================================================================================
 # Aggressively tidying up if necessary and moving back to original directory
 # ==========================================================================================================
 if __name__ == "__main__":
-    if aggressive_clean:
+    
+    print(f"Copying png (if generated) to {basename_out_dir}")
+    try:
+        shutil.rmtree(pj(basename_out_dir, f"{basename}_galfit_png"))
+    except OSError:
+        pass
+    
+    shutil.copytree(out_png_dir, pj(basename_out_dir, f"{basename}_{os.path.basename(out_png_dir)}"))
+    
+    tar_filename = pj(basename_out_dir, f"{basename}_{os.path.basename(tmp_fits_dir)}.tar.gz")
+    # Use the -C option to make the tarball relative to tmp dir
+    print(f"Tarball+gzipping resultant fits to {tar_filename}.")
+    _ = sp(f"tar -czvf {tar_filename} -C {tmp_fits_dir} .")
+    
+    if aggressive_clean and run_from_tmp:
         print("Final tidying...")
-        _ = sp(f"rm -rf {out_dir}", capture_output = capture_output)
-        _ = sp(f"mkdir -p {out_dir}", capture_output = capture_output)
+        #_ = sp(f"rm -rf {out_dir}", capture_output = capture_output)
+        shutil.rmtree(out_dir)
+        #_ = sp(f"mkdir -p {out_dir}", capture_output = capture_output)
+        os.mkdir(out_dir)
         
     print("All done!")
     # Moving back to original directory

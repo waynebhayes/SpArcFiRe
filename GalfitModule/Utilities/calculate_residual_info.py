@@ -13,7 +13,7 @@ from math import ceil
 # import matplotlib.pyplot as plt
 # import matplotlib.colors as colors
 # from matplotlib.colors import LinearSegmentedColormap
-import glob
+#import glob
 import os
 import argparse
 
@@ -54,10 +54,10 @@ def fill_objects(
     out_dir = "", 
     to_png = True, 
     parallel = True,
-    use_bulge_mask = True
+    use_bulge_mask = False,
+    use_cluster_mask = False
 ):
     
-    use_bulge_mask = False
     output_df = pd.DataFrame()
     
     report_num = 1000
@@ -81,9 +81,6 @@ def fill_objects(
         #return gname, None, None, None
         return None
     
-    #last_feedme_file = pj(out_dir, gname, f"{gname}.in")
-    #if not exists(last_feedme_file):
-    #feedme_files = glob.glob(pj(out_dir, gname, f"*.in"))
     if galfit_mask_path.endswith(".fits"):
         mask_fits_name = galfit_mask_path
     else:
@@ -116,15 +113,30 @@ def fill_objects(
     
     # If skip is enabled then arms are not fit so bulge masking doesn't make sense
     c_types = [comp.component_type for comp in fits_file.feedme.components.values()]
+    
+    # BULGE MASK
     if use_bulge_mask and out_dir and ("power" in c_types):
-    #if out_dir and "power" in c_types:
-        _ = fits_file.generate_bulge_mask(pj(out_dir, gname, f"{gname}.csv"))
-        #use_bulge_mask = True
+        _ = fits_file.generate_bulge_mask(
+            pj(out_dir, gname, f"{gname}.csv")
+        )
     else:
         use_bulge_mask = False
         
-    #masked_residual_normalized = fits_file.generate_masked_residual(mask_fits_file, use_bulge_mask = use_bulge_mask)
-    masked_residual_normalized = fits_file.generate_masked_residual(mask_fits_file, use_bulge_mask = use_bulge_mask)
+    # CLUSTER MASK
+    if use_cluster_mask and out_dir and ("power" in c_types):
+        crop_box = fits_file.feedme.header.region_to_fit.value
+        _ = fits_file.generate_cluster_mask(
+            pj(out_dir, gname, f"{gname}-K_clusMask-reprojected.png"), crop_box
+        )
+    else:
+        use_cluster_mask = False
+        
+    masked_residual_normalized = fits_file.generate_masked_residual(
+        mask_fits_file, 
+        use_bulge_mask = use_bulge_mask, 
+        use_cluster_mask = use_cluster_mask
+        #update_fits_header = True
+    )
     if masked_residual_normalized is None:
         print(f"Could not calculate nmr for galaxy {gname}. Continuing...")
         #return gname, None, None, None
@@ -143,11 +155,13 @@ def fill_objects(
     reloaded  = OutputFits(fits_filepath)
     output_df = reloaded.feedme.to_pandas()
     output_df["gname"]   = gname
-    output_df["NMR"]     = reloaded.model.header.get("NMR", None) 
+    output_df["NMR"]     = reloaded.model.header.get("NMR", None)
     output_df["KS_P"]    = reloaded.model.header.get("KS_P", None)
-    output_df["KS_STAT"] = reloaded.model.header.get("KS_STAT", None)
+    #output_df["KS_STAT"] = reloaded.model.header.get("KS_STAT", None)
+    output_df["W_NMR"]   = reloaded.model.header.get("W_NMR", None)
     
     output_df["nmr_x_1-p"] = (1 - output_df["KS_P"])*output_df["NMR"]
+    output_df["wayne_quality"] = output_df["KS_P"]/output_df["W_NMR"]
     
     return output_df
     
@@ -195,7 +209,12 @@ def main(**kwargs):
     verbose        = kwargs.get("verbose", False)
     capture_output = kwargs.get("capture_output", True)
     
-    final_pkl_file = f'{pj(out_dir, basename)}_{pkl_end_str}.pkl'
+    basename_dir = pj(out_dir, basename)
+    if not exists(basename_dir):
+        os.mkdir(basename_dir)
+        
+    final_pkl_file = f'{pj(basename_dir, basename)}_{pkl_end_str}.pkl'
+    
     if not parallel and exists(final_pkl_file):
         ans = input(f"Do you wish to delete the current final output nmr pickle file? Y/N\n{final_pkl_file}\n")
         if ans.upper() == "Y":
@@ -210,7 +229,7 @@ def main(**kwargs):
     #sf_mask_path = pj(tmp_dir, "sim_fitting", "sparcfire-tmp", "galfit_masks")
     out_png_dir = pj(out_dir, "galfit_png")
     
-    all_gname_tmp_out = [os.path.basename(i).replace("_galfit_out.fits","") for i in glob.glob(pj(galfit_tmp_path, "*_galfit_out.fits"))]
+    all_gname_tmp_out = [os.path.basename(i).replace("_galfit_out.fits","") for i in glob(pj(galfit_tmp_path, "*_galfit_out.fits"))]
     
     #out_nmr = {}
     out_df = pd.DataFrame()
@@ -229,7 +248,7 @@ def main(**kwargs):
         
     elif parallel:
         _, _, run_python = check_programs()
-        python_parallel   = pj(_MODULE_DIR, "Utilities", "residual_via_parallel.py")
+        python_parallel   = pj(_MODULE_DIR, "Utilities", f"{os.path.basename(__file__)}_helper.py")
         parallel_file     = "parallel_combine_residual"
         
         if exists(parallel_file):
@@ -250,10 +269,11 @@ def main(**kwargs):
         
         finished_pkl_num = 0
         if restart:
-            check_output_pkl = [int(os.path.basename(i).split("_")[0].replace(basename, "")) 
-                                for i in find_files(tmp_dir, f'{basename}*_{pkl_end_str}.pkl', "f")
-                                if os.path.basename(i).split("_")[0].replace(basename, "")
-                                ]
+            check_output_pkl = [
+                int(os.path.basename(i).split(f"_{pkl_end_str}")[0].replace(basename, "")) 
+                for i in find_files(tmp_dir, f'{basename}*_{pkl_end_str}.pkl', "f")
+                if os.path.basename(i).split(f"_{pkl_end_str}")[0].replace(basename, "")
+            ]
             if check_output_pkl:
                 finished_pkl_num = max(check_output_pkl)
         
@@ -267,7 +287,7 @@ def main(**kwargs):
                 
                 gal_to_parallel = all_gname_tmp_out[chunk - chunk_size:][:chunk_size]
                 #num_str = f"{i:0>3}"
-                sf.write(f"{run_python} {python_parallel} {pj(tmp_dir, basename + str(i))} {galfit_tmp_path} {galfit_mask_path} {out_dir} {out_png_dir} {','.join(gal_to_parallel)}\n")
+                sf.write(f"{run_python} {python_parallel} {pj(tmp_dir, basename + str(i))} {pkl_end_str} {galfit_tmp_path} {galfit_mask_path} {out_dir} {out_png_dir} {','.join(gal_to_parallel)}\n")
                 count += 1
         
         if count:
@@ -280,7 +300,7 @@ def main(**kwargs):
                 # Rerun out_nmr
         
         #else:
-        all_output_pkl = glob.glob(pj(tmp_dir, f'{basename}*_{pkl_end_str}.pkl'))
+        all_output_pkl = glob(pj(tmp_dir, f'{basename}*_{pkl_end_str}.pkl'))
         #_ = [out_nmr.update(pickle.load(open(file, 'rb'))) for file in all_output_pkl if os.path.basename(file) != f"{basename}_output_nmr.pkl"]
         out_df = pd.concat(
                            [pd.read_pickle(file) for file in all_output_pkl 

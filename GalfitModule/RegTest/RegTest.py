@@ -6,6 +6,7 @@ from glob import glob
 import argparse
 import numpy as np
 import pandas as pd
+import tarfile
 
 from os.path import join as pj
 from os.path import exists
@@ -51,11 +52,27 @@ out_str = """\t Python3.7 or greater required! Exitting without generating feedm
             if feedmes have already been generated, galfit will run with those.\n"""
 assert sys.version_info >= (3, 7), out_str
 
+def vprint(*args, **kwargs) -> None:
+    if VERBOSE:
+        print(*args, **kwargs)
+        
 # ignore feedme filepaths
-def iff(feedme_str):
+def iff(feedme_str: str) -> str:
     out_str = feedme_str.split("\n")
     G_idx = [idx for idx,i in enumerate(out_str) if i.startswith("G)")][0]
     return "\n".join(out_str[G_idx:])
+
+def update_total_fail_count(
+    input_count:          int, 
+    description_str:      str
+) -> int:
+    
+    if input_count:
+        if VERBOSE:
+            print(f"{input_count} {description_str} failed.")
+        return 1
+    
+    return 0
 
 if __name__ == "__main__":
     
@@ -89,7 +106,8 @@ if __name__ == "__main__":
     
     args    = parser.parse_args()
     # cleanup = args.cleanup
-    verbose = args.verbose
+    global VERBOSE
+    VERBOSE = args.verbose
     
     total_fail_count = 0
     
@@ -102,14 +120,16 @@ if __name__ == "__main__":
 
     def sp(cmd_str, capture_output = True, timeout = None):
         # Because it is a pain in the butt to call subprocess with all those commands every time
-        return subprocess.run(cmd_str, 
-                              capture_output = capture_output, 
-                              text = True, 
-                              shell = True,
-                              timeout = timeout,
-                              executable="/bin/bash")
+        return subprocess.run(
+            cmd_str, 
+            capture_output = capture_output, 
+            text           = True, 
+            shell          = True,
+            timeout        = timeout,
+            executable     = "/bin/bash"
+        )
 
-    def run_unit_tests(things_to_test, PyDir = ""):
+    def run_unit_tests(things_to_test: [str], PyDir = ""):
         fail_count  = 0
         error_list  = []
         stdout_list = []
@@ -119,29 +139,47 @@ if __name__ == "__main__":
             result = sp(f"python3 {path_to_thing}.py")
             stdout_list.append(result.stdout)
             
-            if verbose:
-                print(result.stdout)
-                print(result.stderr)
+            vprint(
+                result.stdout, 
+                result.stderr, 
+                sep = "\n"
+            )
             
             if result.stderr:
-                print(f"The unit test(s) for {thing_name} failed to run! Storing stderr.")
+                vprint(f"The unit test(s) for {thing_name} failed to run! Storing stderr.")
+                
                 error_list.append(result.stderr)
                 fail_count += 1
 
-        print(f"{fail_count} unit tests for {PyDir} failed to run.")
+        vprint(f"{fail_count} unit tests for {PyDir} failed to run.")
         return stdout_list, error_list, fail_count
 
     # Run all unit tests
-    list_of_classes = ["Components", "Containers", "FitsHandlers"]
+    list_of_classes = ["Parameters", "Components", "Containers", "FitsHandlers"]
     list_of_helpers = ["helper_functions"]
     
     all_stdout     = {}
     all_unit_error = {}
     
-    all_stdout["Helpers"], all_unit_error["Helpers"], fail_helpers = run_unit_tests(list_of_helpers, PyDir = "Functions")
-    all_stdout["Classes"], all_unit_error["Classes"], fail_classes = run_unit_tests(list_of_classes, PyDir = "Classes")
+    all_stdout["Helpers"], all_unit_error["Helpers"], fail_helpers_count = run_unit_tests(
+        list_of_helpers, 
+        PyDir = "Functions"
+    )
     
-    total_fail_count += fail_helpers + fail_classes
+    total_fail_count += update_total_fail_count(
+        fail_helpers_count,
+        "helper unit tests"
+    )
+    
+    all_stdout["Classes"], all_unit_error["Classes"], fail_classes_count = run_unit_tests(
+        list_of_classes, 
+        PyDir = "Classes"
+    )
+    
+    total_fail_count += update_total_fail_count(
+        fail_classes_count,
+        "class unit tests"
+    )
 
     error_file = "OutputError.txt"
     error_path = pj(TEST_OUTPUT_DIR, error_file)
@@ -155,8 +193,8 @@ if __name__ == "__main__":
 
     stdout_path = pj(TEST_OUTPUT_DIR, "UnitTestStdOutput.txt")
     if not exists(stdout_path):
-        print("Function helper must have failed! Adding to failure count and creating file.")
-        total_fail_count += 1
+        print("Function helper must have failed! Creating file.")
+        #total_fail_count += 1
     
     # As output by helper_functions script per its own unit test
     with open(stdout_path, "a") as f:
@@ -191,9 +229,11 @@ if __name__ == "__main__":
     print("Running GALFIT with single-step fitting (capturing output)...")
     result = sp(f"python3 {ctrl_script} -p 0 -NS 1 -n {base_run_name}_{steps[0]} {in_dir} {tmp_dir} {out_dir}")
     
-    if verbose:
-        print(result.stdout)
-        print(result.stderr)
+    vprint(
+        result.stdout, 
+        result.stderr, 
+        sep = "\n"
+    )
     
     print("Running GALFIT with default two-step fitting (capturing output)...")
     result = sp(f"python3 {ctrl_script} -p 0 -n {base_run_name}_{steps[1]} {in_dir} {tmp_dir} {out_dir}")
@@ -203,9 +243,11 @@ if __name__ == "__main__":
     # except FileNotFoundError:
     #     pass
     
-    if verbose:
-        print(result.stdout)
-        print(result.stderr)
+    vprint(
+        result.stdout, 
+        result.stderr, 
+        sep = "\n"
+    )
         
     # As output by helper_functions script per its own unit test
     # Will have a filepath issue at the end of this as well as potentially an ordering
@@ -214,7 +256,7 @@ if __name__ == "__main__":
     #     f.write(result.stdout)
     
     # DIFF CHECKS
-    print("Performing diff check for unit tests.")
+    print("Performing diff check for unit tests...")
     
     # Starting with unit test output
     # Validate these are the same length
@@ -234,7 +276,7 @@ if __name__ == "__main__":
         print("Diff check will fail so skipping the following...")
         print("\n".join(compared))
         
-    fail_count = 0
+    unit_test_diff_check_fail_count = 0
     all_diff_error = {}
     
     if not compared:
@@ -244,23 +286,31 @@ if __name__ == "__main__":
 
             result = sp(f"diff {data} {output}")
 
-            if verbose:
-                print(result.stdout)
-                print(result.stderr)
+            vprint(
+                result.stdout, 
+                result.stderr, 
+                sep = "\n"
+            )
 
             if result.stdout:
                 #print(result.stdout)
-                print(f"Diff check for {filename} failed!")
-                if filename == "UnitTestStdOutput.txt":
-                    print(f"Since {filename} contains the standard output for several tests")
-                    print(f"the number of unit tests which actually failed may be higher than the final count.")
+                vprint(f"Diff test for {filename} failed!")
                 
-                fail_count += 1
+                if filename == "UnitTestStdOutput.txt":
+                    vprint(f"Since {filename} contains the standard output for several tests")
+                    vprint(f"the number of unit tests which actually failed may be higher than the final count.")
+                
+                unit_test_diff_check_fail_count += 1
                 all_diff_error[filename] = f"{filename}\n{result.stdout}"
-            
+        
+        total_fail_count += update_total_fail_count(
+            unit_test_diff_check_fail_count,
+            "unit test diff checks"
+        )
+        
     # Diff checking GALFIT input 
     # Output may vary depending on compute differences b/t clusters (GALFIT issue)
-    print("Performing diff check for Galfit input.")
+    print("Performing diff checks for Galfit input...")
     gnames = [os.path.basename(i).rstrip(".fits") for i in glob(pj(in_dir, "*.fits"))]
     
     # Exclude galfit.01 and 02 since we check the resulting output fits files now
@@ -272,6 +322,8 @@ if __name__ == "__main__":
     # 1237655463239155886 since that observation is... not a galaxy.
     things_to_check = [".in", "_disk.in"] #, "_galfit.01", "_galfit.02"] #"_bulge.in",
     
+    input_files_diff_check_fail_count  = 0
+    output_files_fail_count            = 0
     for gname in gnames:
         data    = pj(TEST_DATA_DIR, "test-out", gname, gname)
         output  = pj(TEST_OUTPUT_DIR, "test-out", gname, gname)
@@ -284,9 +336,11 @@ if __name__ == "__main__":
             # for input/output/star mask/etc.
             result = sp(f"diff <(tail -n +15 {data}{suffix}) <(tail -n +15 {output}{suffix})")
             
-            if verbose:
-                print(result.stdout)
-                print(result.stderr)
+            vprint(
+                result.stdout, 
+                result.stderr, 
+                sep = "\n"
+            )
         
             if result.stdout:
                 # Carve a special exception for 1237655463239155886 since that observation is bad and the one-step fit does not seem to do anything for the residual/two of the resulting output models are equivalent via NMR
@@ -294,8 +348,8 @@ if __name__ == "__main__":
                 # if f"{gname}{suffix}" in ("1237655463239155886_galfit.01", "1237655463239155886_galfit.02", "1237668589728366770_galfit.02"):
                 #     print(f"Exception for {data}{suffix}. Outputting diff to {error_file} anyway (just in case).")
                 # else:
-                print(f"Diff check for {gname}{suffix} failed!")
-                fail_count += 1
+                vprint(f"Diff check for {gname}{suffix} failed!")
+                input_files_diff_check_fail_count += 1
                     
                 all_diff_error[f"{gname}{suffix}"] = f"{data}{suffix}\n{result.stdout}"
                 
@@ -303,50 +357,96 @@ if __name__ == "__main__":
         suffixes = ["galfit_out.fits", "galfit_out_old.fits"]
         for suffix in suffixes:
             if exists(f"{data}_{suffix}"):
-                data_fits   = fits.open(f"{data}_{suffix}")[2].data
+                data_fits = fits.open(f"{data}_{suffix}")[2].data
                 
                 try:
                     output_fits = fits.open(f"{output}_{suffix}")[2].data
                 except FileNotFoundError as fnfe:
-                    fail_count += 1 
+                    output_files_fail_count += 1 
                     all_diff_error[f"{gname}_{suffix}"] = f"{gname} did not successfully fit, something went wrong."
                     continue
 
                 # The tolerance can be quite high because when GALFIT is off, it will differ significantly
                 # I set a tolerance in the first place for machine error/differences under the hood across clusters
                 if not np.allclose(data_fits, output_fits, atol = 10):
-                    fail_count += 1
+                    output_files_fail_count += 1
                     all_diff_error[f"{gname}_{suffix}"] = f"Single Component Fit differs for {gname}!"
 
             elif exists(f"{output}_{suffix}"):
-                fail_count += 1
+                output_files_fail_count += 1
                 all_diff_error[f"{gname}_{suffix}"] = f"{gname} should not have successfully fit, something went... wrong (right?)."
-          
+    
+    total_fail_count += update_total_fail_count(
+        input_files_diff_check_fail_count,
+        "input file diff checks"
+    )
+    
+    total_fail_count += update_total_fail_count(
+        output_files_fail_count,
+        "output file (general) tests"
+    )
+    
     with open(error_path, "a") as ef:
         for name, err_str in all_diff_error.items():
             #err_str = "\n".join(err_list)
             ef.write(f"{name}\n{err_str}\n")
-            
-    print(f"{fail_count} unit tests failed.")
-    if fail_count:
-        print(f"See {error_path} for more information.")
-        total_fail_count += fail_count
         
-    print("Checking existence and readability of output pkl files.")
-    for s in steps:
-        filename = pj(out_dir, f"{base_run_name}_{s}_output_results.pkl")
+    print("Checking existence and readability of output pkl files...")
+    pkl_fail_count = 0
+    for i, s in enumerate(steps):
+        filename = pj(out_dir, f"{base_run_name}_{s}", f"{base_run_name}_{s}_output_results.pkl")
+        
         if not exists(filename):
-            print(f"{filename} does not exist!")
-            total_fail_count += 1
+            vprint(f"{filename} does not exist!")
+            pkl_fail_count += 1
         else:
             try:
                 _ = pd.read_pickle(filename)
                 
             except Exception as e:
-                print(f"Something went wrong reading {filename} via pandas.")
-                total_fail_count += 1
+                vprint(f"Something went wrong reading {filename} via pandas.")
+                pkl_fail_count += 1
                 
-                if verbose:
-                    print(e)
-            
+                vprint(e)
+                    
+    total_fail_count += update_total_fail_count(
+        pkl_fail_count,
+        "pkl file existence and readability tests"
+    )
+    
+    print("Checking existence and readability of output tar.gz files...")
+    tarball_fail_count = 0
+    for s in steps:
+        filename = pj(out_dir, f"{base_run_name}_{s}", f"{base_run_name}_{s}_galfits.tar.gz")
+        if not exists(filename):
+            vprint(f"{filename} does not exist!")
+            tarball_fail_count += 1
+            continue
+        
+        try:
+            t = tarfile.open(filename, "r")
+
+        except Exception as e:
+            tarball_fail_count += 1
+
+            vprint(f"Something went wrong reading {filename} via tarfile module.", e, sep = "\n")
+
+        else:
+            for individual_filename in t.getnames():
+                try:
+                    _ = t.extractfile(individual_filename)
+
+                except Exception as e:
+                    tarball_fail_count += 1
+
+                    vprint(f"Failed to extract {individual_filename} from {os.path.basename(filename)} archive.", e, sep = "\n")
+                        
+    total_fail_count += update_total_fail_count(
+        tarball_fail_count,
+        "tarball file existence and readability tests"
+    )
+    
     print(f"Total number of tests failed: {total_fail_count}")
+    
+    if total_fail_count:
+        print(f"See {error_path} for more information.")
