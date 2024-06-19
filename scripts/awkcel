@@ -19,16 +19,20 @@ OPTIONS:
     -q: QUIET mode (suppress warnings)
     -v: VERBOSE"
 
+# generally useful Variables
 NL='
 '
+TAB='	'
+
 # Functions
 die(){ (echo "$USAGE"; echo "FATAL ERROR: $@")>&2; exit 1; }
 warn(){ (echo "WARNING: $@")>&2; }
 not(){ if eval "$@"; then return 1; else return 0; fi; }
 newlines(){ awk '{for(i=1; i<=NF;i++)print $i}' "$@"; }
 parse(){ awk "BEGIN{print $@}" </dev/null; }
-which(){ echo "$PATH" | tr : "$NL" | awk '!seen[$0]{print}{++seen[$0]}' | while read d; do eval /bin/ls $d/$N; done 2>/dev/null | newlines | grep .; }
+which(){ for i in "$@"; do echo "$PATH" | tr : "$NL" | awk '!seen[$0]{print}{++seen[$0]}' | while read d; do eval /bin/ls $d/$i; done 2>/dev/null | newlines; done | grep .; }
 
+# Ensure gawk can handle multi-dimensional arrays.
 TestGawk(){ echo hello | gawk '{++array[$1][$1]}' || die "Upgrade to a [g]awk that supports multi-dimensional arrays"; }
 TestGawk
 
@@ -37,10 +41,6 @@ GAWK=`which 'gawk*' | head -1 | sed 's/\*//g'`
 
 [ $# -eq 0 ] && die "Expecting arguments"
 
-# generally useful Variables
-NL='
-'
-TAB='	'
 BASENAME=`basename "$0" .sh`
 [ "$BASENAME" = skel ] && die "$0 is a skeleton Bourne Shell script; your scripts should source it, not run it"
 USAGE=${USAGE:?"$0 should have a USAGE message before sourcing skel.sh"}
@@ -51,13 +51,8 @@ echo "$BASENAME" | grep "[ $TAB]" && die "Shell script names really REALLY shoul
 TMPDIR=`mktemp -d /tmp/$BASENAME.XXXXXX`
  trap "/bin/rm -rf $TMPDIR; exit" 0 1 2 3 15 # call trap "" N to remove the trap for signal N
 
-case `uname` in
-Darwin) GSED=gsed;; # we need a sed that takes the "nu" option
-Linux)GSED=sed;;
-*)GSED=sed;; # fingers crossed...
-esac
-GSED=`(which $GSED | fgrep sed || echo sed) | sed 's/\*$//' | head -1`
-$GSED -nu "{ p$NL q$NL}" </dev/null || die "we need a sed that takes the '-nu' options, but $GSED doesn't"
+GSED=`(which 'gsed*'; which 'sed*') | while read GSED; do "$GSED" -nu "{ p$NL q$NL}" </dev/null && echo $GSED && break; done`
+"$GSED" -nu "{ p$NL q$NL}" </dev/null || die "we need a sed that takes the '-nu' options, but $GSED doesn't"
 
 EXEDIR="`dirname $0`"
 FIELD_SEP="$TAB"
@@ -86,7 +81,7 @@ do
     # Automatically create awk code to assign the appropriate variables from the header.  This is tricky if the input is a pipe:
     # we need to avoid eating *anything* other than the header; thus the weird "sed -nu" command, which removes leading
     # comment lines, prints the header line for the later pipe, and leaves the rest of the input untouched.
-    (echo 'if(ARGIND=='$argi'){if(_awkcelStarted[ARGIND] && !(ARGIND in HEADER)){HEADER[ARGIND]=$0;next}'; $GSED -nu "/^[^#]/{ p$NL q $NL}" "$i" | sed "s/$FIELD_SEP/ /g" | newlines | tr '$%' 'DP' | sed -e 's/[^_A-Za-z0-9]/_/g' | tee $TMPDIR/varNames.$argi | $GAWK '{printf "%s=$%d\n", $1,NR}' | sed 's/^\([0-9]\)/_\1/'; echo '}') >> $TMPDIR/ASSIGN
+    (echo 'if(ARGIND=='$argi'){if(_awkcelStarted[ARGIND] && !(ARGIND in HEADER)){HEADER[ARGIND]=$0;next}'; sed 's///g' "$i" | $GSED -nu "/^[^#]/{ p$NL q $NL}" | sed "s/$FIELD_SEP/ /g" | newlines | tr '$%' 'DP' | sed -e 's/[^_A-Za-z0-9]/_/g' | tee $TMPDIR/varNames.$argi | $GAWK '{printf "%s=$%d\n", $1,NR}' | sed 's/^\([0-9]\)/_\1/'; echo '}') >> $TMPDIR/ASSIGN
     # In the following, the FNR and FILENAME check is because when the TSV is on stdin, the header line is *gone* and the
     # first line is actual data; otherwise the input is a real file and we *see* the header line--so we should skip it by
     # initializing FNR=-1 so the header becomes line 0.
