@@ -30,7 +30,7 @@ TMPDIR=`mktemp -d $MYTMP/$BASENAME.XXXXXX`
 
 [ $# -eq 2 -a -e "$1" -a -e "$2" ] || die "expecting exactly 2 filenames"
 
-awk 'BEGIN{thresh='$THRESH'; relative=1}
+gawk 'BEGIN{thresh='$THRESH'; relative=1}
     {
 	line[ARGIND][FNR]=$0;
 	for(i=1;i<=NF;i++){
