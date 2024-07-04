@@ -3,11 +3,13 @@
 EXEDIR=`dirname "$0"`; BASENAME=`basename "$0" .sh`; TAB='	'; NL='
 '
 #################### ADD YOUR USAGE MESSAGE HERE, and the rest of your code after END OF SKELETON ##################
-USAGE="USAGE: $BASENAME [-ebm] normed-ellipse-flux.tsv
+PSF=4
+USAGE="USAGE: $BASENAME [-ebm] [-psf VAL ] normed-ellipse-flux.tsv
 PURPOSE: given a file (from Cora Schallock) with fluxes-per-pixel (normalized separately per-waveband inside the
     chosen ellipse of the bulge), compute the K-S test p-value, for each waveband pair, that they are different distributions.
     If given the -ebm argument, use Empirical Brown's Method to compute the combined p-value across all waveband pairs for
-    each side."
+    each side. The PSF is needed in order to properly account for the PSF being bigger than one pixel; the default is $PSF,
+    which is on the pessimistic side (about 75th percentile) for the PSF in pixels for both PAN-STARRS and SDSS."
 
 ################## SKELETON: DO NOT TOUCH CODE HERE
 # check that you really did add a usage message above
@@ -39,11 +41,16 @@ echo TMPDIR is $TMPDIR >&2
 EBM=0
 EBM_NOEXE=""
 
-case "$1" in
--h) die "help displayed";;
--ebm-noexe) EBM=1; EBM_NOEXE="-noexe"; shift;;
--ebm) EBM=1; shift;;
-esac
+while [ $# -gt 0 ]; do
+    case "$1" in
+    -h) die "help displayed";;
+    -ebm-noexe) EBM=1; EBM_NOEXE="-noexe"; shift;;
+    -ebm) EBM=1; shift;;
+    -psf) PSF="$2"; shift 2;;
+    -*) die "unknown option '$1'";;
+    *) break;
+    esac
+done
 
 for i
 do
@@ -71,14 +78,16 @@ do
 		M1=StatMean(n1); SD1=StatStdDev(n1); V1=StatVar(n1);
 		vote=M0 < M1;
 		gap=ABS(M0-M1);
-		ks=KStest(n0, n1)/1.3;
+		# We need to account for the PSF to reduce the n used, so for PAN-STARRS
+		ks = KSpvalue(KSstat(n0,n1), _statHistN[n0]/'$PSF', _statHistN[n1]/'$PSF');
 
 		# See if the confidence intervals overlap, tuned to failure rate fR
 		fR = 1e-2; # failure rate, eg 1e-2=99% confidence, 1e-3 = 99.9% confidence
 		ci0 = StatConfidenceInterval(n0,1-fR);
 		ci1 = StatConfidenceInterval(n1,1-fR);
 		good = (gap > MAX(ci0,ci1));
-		if(good) sumLog[vote]+=log10(ks);
+		#if(good) # actually always add it since borderline p-values are still useful when combined
+		    sumLog[vote]+=log10(ks);
 		status = good ? "success" : "fail";
 		if(EBM) {
 		    printf "%s_%s\t%g", colName[i], colName[j], ks > outFile vote
