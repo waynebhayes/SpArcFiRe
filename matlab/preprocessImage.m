@@ -301,18 +301,30 @@ else %using elps file
     gxyParams.gaussLogLik = prevFitParams.gaussLogLik;
     gxyParams.contourBrtRatio = prevFitParams.contourBrtRatio;
     %WARNING: the prevFitParams might not have the following if it is old. The 2016 run will not have these
-    gxyParams.diskMinAxsLen = prevFitParams.diskMinAxsLen;
-    gxyParams.badBulgeFitFlag = prevFitParams.badBulgeFitFlag;
-    gxyParams.bulgeAxisRatio = prevFitParams.bulgeAxisRatio;
-    gxyParams.bulgeMajAxsLen = prevFitParams.bulgeMajAxsLen;
-    gxyParams.bulgeMajAxsAngle = prevFitParams.bulgeMajAxsAngle;
-    gxyParams.bulgeAvgBrt = prevFitParams.bulgeAvgBrt;
-    gxyParams.bulgeDiskBrtRatio = prevFitParams.bulgeDiskBrtRatio;
-    gxyParams.numElpsRefits = prevFitParams.numElpsRefits;
-    gxyParams.bulgeMajAxsLen = prevFitParams.bulgeMajAxsLen;
-    gxyParams.diskMajAxsAngleRadians = prevFitParams.diskMajAxsAngleRadians;
-    gxyParams.starMaskUsed = prevFitParams.starMaskUsed;
-    gxyParams.noiseMaskUsed = prevFitParams.noiseMaskUsed;
+    try
+        gxyParams.diskMinAxsLen = prevFitParams.diskMinAxsLen;
+        gxyParams.badBulgeFitFlag = prevFitParams.badBulgeFitFlag;
+        gxyParams.bulgeAxisRatio = prevFitParams.bulgeAxisRatio;
+        gxyParams.bulgeMajAxsLen = prevFitParams.bulgeMajAxsLen;
+        gxyParams.bulgeMajAxsAngle = prevFitParams.bulgeMajAxsAngle;
+        gxyParams.bulgeAvgBrt = prevFitParams.bulgeAvgBrt;
+        gxyParams.bulgeDiskBrtRatio = prevFitParams.bulgeDiskBrtRatio;
+        gxyParams.numElpsRefits = prevFitParams.numElpsRefits;
+        gxyParams.diskMajAxsAngleRadians = prevFitParams.diskMajAxsAngleRadians;
+        gxyParams.starMaskUsed = prevFitParams.starMaskUsed;
+        gxyParams.noiseMaskUsed = prevFitParams.noiseMaskUsed;
+    catch
+        warning('Parameters missing from elps file (likely from an old version of SpArcFiRe... using the ones that are there.');
+        gxyParams.badBulgeFitFlag        = [];
+        gxyParams.bulgeAxisRatio         = [];
+        gxyParams.bulgeMajAxsLen         = [];
+        gxyParams.bulgeMajAxsAngle       = [];
+        gxyParams.bulgeAvgBrt            = [];
+        gxyParams.bulgeDiskBrtRatio      = [];
+        gxyParams.numElpsRefits          = [];
+        gxyParams.starMaskUsed           = 'unavailable';
+        gxyParams.noiseMaskUsed          = 'unavailable';
+    end
 end
 fitParams.diskMajAxsLen = majAxsLen;
 fitParams.diskMajAxsAngle = majAxsAngle;
@@ -362,7 +374,7 @@ end
 
 fromOrigImg = ones(size(img));
 imgForUsm = img;
-
+    
 if useDeProjectStretch
     cropRad = ceil(semiMajAxsLen);
 % otherwise...

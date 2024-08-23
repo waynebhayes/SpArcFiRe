@@ -12,6 +12,8 @@ import os
 from os.path import join as pj
 import shutil
 
+import argparse
+
 from joblib import Parallel, delayed
 
 # For debugging purposes
@@ -45,7 +47,7 @@ from Classes.Components import *
 from Classes.Containers import *
 from Classes.FitsHandlers import *
 from Functions.helper_functions import *
-from sparc_to_galfit_feedme_gen import arc_information, galaxy_information
+from sparc_to_galfit_feedme_gen import arc_information, galaxy_information, read_galaxy_csv_tsv, extract_crop_rad_from_elps
     
 def pitch_angle(*args):
     CDEF = 0.23
@@ -121,8 +123,13 @@ def sum_fourier_modes(fourier_dict, **kwargs):
         if Fstr == "skip":
             continue
         
-        amplitude = Fmode.amplitude
-        phi       = Fmode.phase_angle
+        if isinstance(Fmode, FourierMode):
+            amplitude = Fmode.amplitude
+            phi       = Fmode.phase_angle
+        else:
+            print(Fmode)
+            amplitdue = Fmode[0]
+            phi       = Fmode[1]
         
         m = float(Fstr[-1])
         phi = np.radians(phi)
@@ -138,52 +145,128 @@ def sum_fourier_modes(fourier_dict, **kwargs):
     rgrid = 1 + fsum #np.sum(np.array(fsum), axis = 0)
     return rgrid #, theta
 
-#     fsum = np.array([
-#                      amplitude*np.cos(float(Fstr[-1])*(theta + np.radians(phi)))
-#                          for Fstr, (amplitude, phi) in fourier_dict.items()
-#                    ])
-    
-#     rgrid = 1 + np.sum(fsum, axis = 0)
-#    return rgrid
 
-# def modify_grid(x_min,
-#                 y_min,
-#                 x_max, 
-#                 y_max,
-#                 amplitudes,
-#                 phis,
-#                 q,
-#                 grid_pts = 100):
+# From results dataframe, simpler
+def calculate_pitch_angle(
+    gname_row,
+    rmax    = 40,
+    xmax    = 20,
+    ymax    = 20,
+    num_pts = 500,
+    verbose = False,
+    **kwargs
+):
     
-#     xgrid = np.linspace(x_min, x_max, grid_pts)
-#     ygrid = np.linspace(y_min, y_max, grid_pts)
+    # Three(+1) component fit
+    if "inner_rad_power_3" in gname_row:
+        # Three(+1) component fit
+        q = gname_row.get("axis_ratio_sersic_3")
+        arm_component_number = 3
+        
+    elif "inner_rad_power_2" in gname_row:
+        # Two(+1) component fit
+        q = gname_row.get("axis_ratio_sersic_2")
+        arm_component_number = 2
     
-#     #xmatrix, ymatrix = np.meshgrid(xgrid, ygrid)
+    elif "inner_rad_power_1" in gname_row:
+        # One(+1) component fit (yikes)
+        q = gname_row.get("axis_ratio_sersic_1")
+        arm_component_number = 1
+        
+    else:
+        print(f"No spiral component found for {gname_row.name}")
+        return
     
-#     # Assume perfect centering
-#     rgrid = sum_fourier_modes(amplitudes = amplitudes,
-#                              phis  = phis,
-#                              xc    = x_max//2,
-#                              yc    = y_max//2,
-#                              q     = q,
-#                              xgrid = xgrid,
-#                              ygrid = ygrid
-#                             )
+    #xmin = 0
+    #ymin = 0
     
-#     return rgrid
+    # As long as we're still starting at 0, we should be fine
+    # Basically the same as xgrid - x0
+    # rvals_grid = np.linspace(0, rmax, num_pts)
+    
+    # Note this throws off the grid spacing so 
+    # different fits can't be compared
+    #if xmax and ymax:
+    x0 = gname_row.get("position_x_sersic_1") 
+    y0 = gname_row.get("position_y_sersic_1") 
+
+    rad = rmax/np.sqrt(2)
+
+    xmax = x0 + rad
+    ymax = y0 + rad
+
+    xgrid = np.linspace(x0, xmax, num_pts)
+    ygrid = np.linspace(y0, ymax, num_pts)
+
+    rvals_grid = np.sqrt((xgrid - x0)**2 + ((ygrid - y0)/q)**2)
+        
+    # With Fourier Modes
+    fourier_col = [key for key in gname_row.keys() if "fourier" in key]
+    fourier_dict = {}
+    for fcol in fourier_col:
+        fcol_split = fcol.split("_")
+        fmode      = fcol_split[0][-1]
+        
+        fourier_dict[fmode] = [0, 0]
+        
+        if fcol_split[1] == "amplitude":
+            fourier_dict[fmode][0] = gname_row.get(fcol, 0)
+            
+        if fcol_split[1] == "phase":
+            fourier_dict[fmode][1] = gname_row.get(fcol, 0)
+        
+    else:
+        fourier_dict = {}
+      
+    fourier_rgrid = np.multiply(rvals_grid, 
+                            sum_fourier_modes(
+                                fourier_dict,
+                                #amplitudes = amplitudes,
+                                #phis  = phis,
+                                #x0    = x0,
+                                #y0    = y0,
+                                q     = q,
+                                xgrid = xgrid,
+                                ygrid = ygrid
+                            )
+                       )
+
+    ones = np.ones(np.shape(fourier_rgrid))
+    
+    pitch_angles, thetas = pitch_angle(
+        fourier_rgrid, 
+        ones*gname_row[f"cumul_rot_power_{arm_component_number}"], 
+        ones*gname_row[f"outer_rad_power_{arm_component_number}"], 
+        ones*gname_row[f"powerlaw_index_power_{arm_component_number}"], 
+        ones*gname_row[f"inner_rad_power_{arm_component_number}"]
+    )
+    
+    #cond = rgrid <= rmax
+    
+    result_dict = {
+        "pitch_angles"  : pitch_angles, #[cond] 
+        "thetas"        : thetas,
+        "fourier_rgrid" : fourier_rgrid
+    }
+    
+    return pd.Series(result_dict)
+
 
 def plot_scatter(
-                 pitch_angles, 
-                 rgrid, 
-                 galaxy_info, 
-                 arc_info, 
-                 inner_idx = 0, 
-                 outer_idx = -1, 
-                 scatter_dir = "./"
-                 ):
+    gname,
+    pitch_angles, 
+    rgrid,
+    #galaxy_info
+    galaxy_dict,
+    #arc_info
+    arc_dict, 
+    inner_idx = 0, 
+    outer_idx = -1, 
+    scatter_dir = "./"
+):
     
     ones = np.ones(len(rgrid))
-    gname = str(galaxy_info.name[0])
+    #gname = str(galaxy_info.name[0])
     
     plt.clf()
     plt.figure(figsize=(8, 6))
@@ -191,8 +274,15 @@ def plot_scatter(
     plt.axvline(x = rgrid[inner_idx], color = 'mediumseagreen', alpha = 0.5)
     plt.axvline(x = rgrid[outer_idx], color = 'mediumseagreen', alpha = 0.5, label='_nolegend_')
 
-    sparc_pa  = float(abs(galaxy_info[' pa_alenWtd_avg_domChiralityOnly'].iloc[0]))
-    sparc_unc = np.degrees(np.arctan2(float(arc_info.loc[0, 'num_pixels']),float(arc_info.loc[0, 'arc_length'])**2))
+    #sparc_pa  = float(abs(galaxy_info[' pa_alenWtd_avg_domChiralityOnly'].iloc[0]))
+    sparc_pa   = galaxy_dict["galaxy_pitch_angle"]
+    #sparc_unc = np.degrees(np.arctan2(float(arc_info.loc[0, 'num_pixels']),float(arc_info.loc[0, 'arc_length'])**2))
+    sparc_unc  = np.degrees(
+        np.arctan2(
+            arc_dict["num_pixels"], 
+            arc_dict["arc_length"]**2
+        )
+    )
 
     inner_rad = rgrid[inner_idx]
     outer_rad = rgrid[outer_idx]
@@ -213,12 +303,31 @@ def plot_scatter(
 
     plt.legend(["Pitch Angle", "Longest Arc Inner/Outer Rad", "SpArcFiRe PA +/- Uncertainty"], loc = "upper right")
 
-    plt.title(f'Galaxy {gname}')
+    title_dict = {}
+    # For set of 14
+    # title_dict = {
+    #     '1237648704595624148': '(1)',
+    #     '1237668297135030610': '(2)',
+    #     '1237661387614650383': '(3)',
+    #     '1237661387608359085': '(4)',
+    #     '1237665227305451703': '(5)',
+    #     '1237648720165273735': '(6)',
+    #     '1237661387610456252': '(7)',
+    #     '1237668298219127022': '(8)',
+    #     '1237662224625369287': '(9)',
+    #     '1237668296601239612': '(10)',
+    #     '1237648721232855215': '(11)',
+    #     '1237668313773244576': '(12)',
+    #     '1237661416067825676': '(13)',
+    #     '1237648705669103794': '(14)'
+    # }
+    
+    plt.title(f'Galaxy {title_dict.get(gname, gname)}')
     plt.xlabel(f'Radius')
     plt.ylabel('Pitch Angle (degrees)')
     
-    #plt.xlim([0, ])
-    #plt.ylim([0, ])
+    #plt.xlim([0, 90])
+    plt.ylim([0, 90])
     #plt.show()
 
     filename = pj(scatter_dir, f"{gname}_scatter.png")
@@ -226,24 +335,24 @@ def plot_scatter(
     plt.close()
     return filename
 
-def plot_validation(pitch_angles, 
-                    rgrid, 
-                    thetas, 
-                    galaxy_info, 
-                    arc_info, 
-                    fits_file_obj,
-                    model_obj,
-                    inner_idx = 0, 
-                    outer_idx = -1, 
-                    radial_steps = 5, 
-                    validation_dir = "./",
-                    **kwargs
-                   ):
+def plot_validation(
+    gname,
+    pitch_angles, 
+    rgrid, 
+    thetas,
+    fits_file_obj,
+    model_obj,
+    inner_idx = 0, 
+    outer_idx = -1, 
+    radial_steps = 5, 
+    validation_dir = "./",
+    **kwargs
+):
     
     filename = ""
     
     ones = np.ones(len(rgrid))
-    gname = str(galaxy_info.name[0])
+    #gname = str(galaxy_info.name[0])
     num_pts = len(rgrid)
     
     fit_region = fits_file_obj.feedme.header.region_to_fit
@@ -355,7 +464,7 @@ def plot_validation(pitch_angles,
         
     return filename
 
-def generate_galfit_model_no_inclination(gname, feedme, out_dir, model_dir = "tmp_galfit_models"):
+def generate_galfit_model_no_inclination(gname, feedme, model_dir = "tmp_galfit_models"):
     
     #temp_dir    = pj(out_dir, "galfit_models")
     if not exists(model_dir):
@@ -363,7 +472,7 @@ def generate_galfit_model_no_inclination(gname, feedme, out_dir, model_dir = "tm
         
     feedme_path = pj(model_dir, f"{gname}_model.in")
     
-    feedme.header.output_image.value = pj(model_dir, f"{gname}_model_out.fits")
+    feedme.header.output_image.value = pj(model_dir, f"{gname}_for_pitch_angle.fits")
     feedme.header.optimize.value     = 1
     feedme.arms.inclination.value    = 0
     feedme.path_to_feedme            = feedme_path
@@ -374,13 +483,27 @@ def generate_galfit_model_no_inclination(gname, feedme, out_dir, model_dir = "tm
     
     return feedme.header.output_image.value
 
+
 # Recommend turning use_inner_outer_rad on for pictures otherwise this is more informative
-def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, validation_plot = False, use_inner_outer_rad = False, model_dir = "tmp_galfit_models"):
+def calculate_pa_from_file(
+    gpath, 
+    in_dir,
+    out_dir,
+    num_pts = 500,
+    scatter_plot = True,
+    validation_plot = False,
+    use_inner_outer_rad = False,
+    model_dir = "tmp_galfit_models",
+    verbose = False,
+    **kwargs
+):
     
     gname = os.path.basename(gpath)
     try:
         fits_file = OutputFits(
-            pj(gpath, f"{gname}_galfit_out.fits"), 
+            # TODO: revert to _galfit_out.fits once done
+            # Alternatively... make _galfit_out, _[basename]... yeah let's do that
+            pj(gpath, f"{gname}_NC3.fits"), 
             #load_default = False,
             # Telling the module that these are the components we're looking for
             disk_for_arms = Sersic(3),
@@ -389,7 +512,10 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
             sky           = Sky(4),
             sersic_order  = ["bulge", "disk", "disk_for_arms"]
         )
-        print(gname) #, 'ok')
+        
+        if verbose:
+            print(gname, 'ok')
+            
     except (AttributeError, FileNotFoundError, Exception):
         print(f"Something went wrong opening galaxy {gname}! Continuing...")
         #continue
@@ -405,14 +531,17 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
     except AttributeError:
         disk = fits_file.feedme.disk
         
-    q          = disk.axis_ratio.value
+    q       = disk.axis_ratio.value
 
-    arms       = fits_file.feedme.arms
-    fourier    = fits_file.feedme.fourier
+    arms    = fits_file.feedme.arms
+    fourier = fits_file.feedme.fourier
 
     #amplitudes = [v[0] for k,v in fourier.param_values.items() if k != "skip"] #fourier.amplitudes
     #phis       = [v[1] for k,v in fourier.param_values.items() if k != "skip"] #fourier.phase_angles
 
+    # TODO: No need to use fit_region, see calculate_pitch_angle above
+    # Definitely reduce the grid later using SpArcFiRe rather than all 
+    # this crazy stuff... I don't know why I overcomplicated it
     xmin = 0
     ymin = 0
     xmax = fit_region.x2 - fit_region.x1 #outer_rad*np.cos(arms.cumul_rot)
@@ -426,16 +555,77 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
     
     rvals_grid = np.sqrt((xgrid - x0)**2 + ((ygrid - y0)/q)**2)
     
-    galaxy_info = pd.read_csv(pj(out_dir, gname, f"{gname}.csv"))
-    crop_rad = float(galaxy_info[" cropRad"].iloc[0])
-    scale_fact_std = 2*crop_rad/256
+    galaxy_dict = galaxy_information(gname, gpath)
+    
+    if not galaxy_dict:
+        return None
+    
+    crop_rad       = galaxy_dict.get("crop_rad", 1)
+    scale_fact_std = galaxy_dict.get("scale_fact_std", 1)
+    
+    # Default values (in s2g code as well as above)
+    if crop_rad == 1 and scale_fact_std == 1:
+        print(f"Could not find a cropping radius from either the galaxy c/tsv or elps-fit-params.txt. Does the elps file exist?")
+        print("This is necessary for some scaling. Kicking this galaxy out of the set.")
+        return None
+    
+#     _, iptSz_split, chirality_split, galaxy_file = read_galaxy_csv_tsv(gpath, gname)
+    
+#     if not galaxy_file:
+#         return None
+    
+#     galaxy_info = pd.read_csv(galaxy_file)
+#     galaxy_file.close()
+    
+#     try:
+#         crop_rad = float(galaxy_info[" cropRad"].iloc[0])
+#     except (KeyError, ValueError, TypeError) as ve:
+#         try:
+#             elps_file = pj(gpath, f"{gname}-elps-fit-params.txt")
+#             crop_rad = float(extract_crop_rad_from_elps(elps_file))
+#         except FileNotFoundError:
+#             print(f"Could not find a cropping radius from either the galaxy c/tsv or elps-fit-params.txt. Does the elps file exist?")
+#             print("This is necessary for some scaling. Kicking this galaxy out of the set.")
+#             return None
 
-    try:
-        arc_info = pd.read_csv(pj(out_dir, gname, f"{gname}_arcs.csv"))
-        inner_rad = scale_fact_std*min(arc_info.loc[0, "r_start"], arc_info.loc[1, "r_start"])
-        outer_rad = scale_fact_std*max(arc_info.loc[0, "r_end"], arc_info.loc[1, "r_end"])
-    except:
-        print(f"Something went wrong reading arc info from {gname}_arcs.csv")
+    # scale_fact_std = 2*crop_rad/256
+
+    # try:
+    #     arc_info = pd.read_csv(pj(out_dir, gname, f"{gname}_arcs.csv"))
+    #     inner_rad = scale_fact_std*min(arc_info.loc[0, "r_start"], arc_info.loc[1, "r_start"])
+    #     outer_rad = scale_fact_std*max(arc_info.loc[0, "r_end"], arc_info.loc[1, "r_end"])
+    # except:
+    #     try:
+    #         arc_info = pd.read_csv(
+    #             pj(out_dir, gname, f"{gname}_arcs.tsv"),
+    #             delimeter = "\t"
+    #         )
+    #         inner_rad = scale_fact_std*min(arc_info.loc[0, "r_start"], arc_info.loc[1, "r_start"])
+    #         outer_rad = scale_fact_std*max(arc_info.loc[0, "r_end"], arc_info.loc[1, "r_end"])
+    #     except:
+    #         print(f"Something went wrong reading arc info from {gname}_arcs.csv")
+    #         #continue
+    #         return None
+    
+    # Error handling occurs inside here.
+    num_arms = galaxy_dict.get("est_arcs", 2)
+    arc_dict = arc_information(
+        gname, 
+        gpath,  
+        num_arms       = num_arms,
+        bulge_rad      = galaxy_dict.get("bulge_maj_axs_len", 2), 
+        scale_fact_std = scale_fact_std
+    )
+    
+    # Use min inner and max outer to give the widest breadth
+    # for our results, the inner/outer rad given by the arc_dict
+    # is modified for best-use for GALFIT and doesn't work as well here
+    inner_rad  = arc_dict.get("min_inner_rad", 0)
+    outer_rad  = arc_dict.get("max_outer_rad", 20)
+    
+    # Default values (in s2g code as well as above)
+    if inner_rad == 0 and outer_rad == 20:
+        print(f"Unable to calculate pitch angle values for galaxy {gname}.")
         #continue
         return None
         
@@ -471,7 +661,7 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
         cond  = (rvals_grid > 0) & (rvals_grid <= outer_rad)
 
     if not np.any(cond):
-        print("There was an issue constraining the radial grid via inner and outer rad.")
+        print(f"There was an issue constraining the radial grid via inner and outer rad for galaxy {gname}.")
         return None
 
     xgrid = np.linspace(xgrid[cond][0], xgrid[cond][-1], num_pts)
@@ -517,15 +707,18 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
             os.mkdir(pj(out_dir, "scatter_plots"))
         
         _ = plot_scatter(
-                        pitch_angles, 
-                        #rvals_grid[cond],
-                        rgrid,
-                        galaxy_info, 
-                        arc_info, 
-                        inner_idx = inner_idx, 
-                        outer_idx = outer_idx, 
-                        scatter_dir = pj(out_dir, "scatter_plots")
-                        )
+            gname,
+            pitch_angles, 
+            #rvals_grid[cond],
+            rgrid,
+            #galaxy_info,
+            galaxy_dict,
+            #arc_info, 
+            arc_dict,
+            inner_idx   = inner_idx, 
+            outer_idx   = outer_idx, 
+            scatter_dir = pj(out_dir, "scatter_plots")
+        )
         
     if validation_plot:
         if not exists(pj(out_dir, "validation_plots")):
@@ -535,27 +728,27 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
         thetas_rot = thetas + np.radians(arms.sky_position_angle.value) + 0.5*np.pi + np.radians(disk.position_angle.value)
         #rgrid_incl = rgrid*np.cos(np.radians(arms.inclination))
         
-        model_output = generate_galfit_model_no_inclination(gname, fits_file.feedme, out_dir, model_dir = model_dir)
+        model_output = generate_galfit_model_no_inclination(gname, fits_file.feedme, model_dir = model_dir)
         try:
             model_only_fits_file = FitsFile(model_output)
         except (AttributeError, FileNotFoundError, Exception):
-            print(f"Something went wrong opening galaxy model {gname}! Continuing with original output...")
+            if verbose:
+                print(f"Something went wrong opening galaxy model {gname}! Continuing with original output...")
             model_only_fits_file = fits_file.model
             #continue
             #return None
         
         _ = plot_validation(
-                            pitch_angles, 
-                            rgrid,
-                            thetas_rot, 
-                            galaxy_info, 
-                            arc_info,
-                            fits_file_obj = fits_file,
-                            model_obj     = model_only_fits_file,
-                            # inner_idx = inner_idx, 
-                            # outer_idx = outer_idx, 
-                            validation_dir = pj(out_dir, "validation_plots")
-                            )
+            gname,
+            pitch_angles, 
+            rgrid,
+            thetas_rot, 
+            fits_file_obj = fits_file,
+            model_obj     = model_only_fits_file,
+            # inner_idx = inner_idx, 
+            # outer_idx = outer_idx, 
+            validation_dir = pj(out_dir, "validation_plots")
+        )
 
 #     inner_idx = np.argmin(np.abs(rvals_grid - inner_rad))
 #     outer_idx = np.argmin(np.abs(rvals_grid - outer_rad)) + 1
@@ -568,13 +761,21 @@ def calculate_pa(gpath, in_dir, out_dir, num_pts = 500, scatter_plot = True, val
     #return avg_constrained_pa, rvals_grid[inner_idx], rvals_grid[outer_idx]
     return pitch_angles, thetas, rgrid #, inner_idx, outer_idx #rgrid[inner_idx : outer_idx]
       
-def main(in_dir, out_dir, num_pts = 500, scatter_plot = True, validation_plot = False, model_dir = "tmp_galfit_models"):
+def main(
+    in_dir, 
+    out_dir, 
+    num_pts = 500, 
+    scatter_plot = True, 
+    validation_plot = False, 
+    model_dir = "tmp_galfit_models",
+    verbose   = True
+):
     
     gpaths = glob(pj(out_dir, "123*"))
     gnames = [os.path.basename(i) for i in gpaths]
     
     pa_inner_outer = Parallel(n_jobs = -2)(
-                           delayed(calculate_pa)( 
+                           delayed(calculate_pa_from_file)( 
                                gpath,
                                in_dir,
                                out_dir,
@@ -601,41 +802,152 @@ def main(in_dir, out_dir, num_pts = 500, scatter_plot = True, validation_plot = 
 
 if __name__ == "__main__":
     
-    in_dir  = "sparcfire-in"
-    tmp_dir = "sparcfire-tmp"
-    out_dir = "sparcfire-out"
+    cwd = absp(os.getcwd())
+    old_cwd = absp(cwd)
     
-    scatter_plot    = True
-    validation_plot = True
-    cleanup = True
+    USAGE = f"""USAGE:
+
+    python3 ./{sys.argv[0]} [OPTION] [[RUN-DIRECTORY] IN-DIRECTORY TMP-DIRECTORY OUT-DIRECTORY]
     
-    if len(sys.argv) == 3:
-        in_dir = sys.argv[1]
-        out_dir = sys.argv[2]
-        
-    elif len(sys.argv) >= 4:
-        in_dir = sys.argv[1]
-        # Not used but this is the usual command line input
-        tmp_dir = sys.argv[2]
-        out_dir = sys.argv[3]
-        
-        try:
-            true_tup = ("1", "true", "y")
-            scatter_plot    = True if sys.argv[4].lower() in true_tup else False
-            validation_plot = True if sys.argv[5].lower() in true_tup else False
-        except IndexError:
-            pass
+    OPTIONS =>[-s   | --scatter                ]
+              [-v   | --validation             ]
+              [-n   | --basename               ]
+              [-c   | --cleanup                ]
+              [-v   | --verbose                ]
+
+    This script is the wrapping script for running GALFIT using SpArcFiRe to inform 
+    the input. By default, it runs from the RUN (or current) directory and uses the
+    '-in' '-tmp' and '-out' directories as specified or otherwise defaults to 
+    'sparcfire-in', 'sparcfire-tmp', 'sparcfire-out'. 
+
+    Please do not specify symlinks for the above, they discomfort the programmer.
+    """
+    
+    parser = argparse.ArgumentParser(description = USAGE)
+    
+    # parser.add_argument('-p', '--parallel',
+    #                     dest     = 'parallel',
+    #                     action   = 'store',
+    #                     type     = int,
+    #                     choices  = range(0,3),
+    #                     default  = 1,
+    #                     help     = 'Run algorithm with/without intensive parallelization. Defaults to on machine parallel.\nOptions are:\n\t\
+    #                                 0: in serial,\n\t\
+    #                                 1: on machine parallel,\n\t\
+    #                                 2: cluster computing via SLURM'
+    #                    )
+
+    parser.add_argument('-s', '--scatter',
+                        dest     = 'scatter',
+                        action   = 'store_const',
+                        const    = True,
+                        default  = False,
+                        help     = 'Choose to create scatter plots for all galaxies.'
+                       )
+    
+    parser.add_argument('-o', '--overlay',
+                        dest     = 'overlay',
+                        action   = 'store_const',
+                        const    = True,
+                        default  = False,
+                        help     = 'Choose to create overlay (validation) plots for all galaxies.'
+                       )
+    
+    parser.add_argument('-c', '--cleanup',
+                        dest     = 'cleanup',
+                        action   = 'store_const',
+                        const    = True,
+                        default  = False,
+                        help     = 'Clean-up leftover junk (currently only removes the folder where we drop the de-inclined models).'
+                       )
+    
+    # parser.add_argument('-r', '--restart',
+    #                     dest     = 'restart',
+    #                     action   = 'store_const',
+    #                     const    = True,
+    #                     default  = False,
+    #                     help     = 'Restart control script on the premise that some have already run (likely in parallel).'
+    #                    )
+    
+    parser.add_argument('-n', '--basename',
+                        dest     = 'basename', 
+                        action   = 'store',
+                        type     = str,
+                        default  = "GALFIT",
+                        help     = 'Basename of the output results pkl file ([name]_output_results.pkl).'
+                       )
+    
+    parser.add_argument('-v', '--verbose',
+                        dest     = 'verbose', 
+                        action   = 'store_const',
+                        const    = True,
+                        default  = False,
+                        help     = 'Verbose output. Includes stdout.'
+                       )
+    
+    parser.add_argument(dest     = 'paths',
+                        nargs    = "*",
+                        type     = str,
+                        help     = "RUN-DIRECTORY [IN-DIRECTORY TMP-DIRECTORY OUT-DIRECTORY] from SpArcFiRe. \
+                                    SpArcFiRe directories should follow -in, -tmp, -out."
+                       )
+    
+    
+    args              = parser.parse_args() # Using vars(args) will call produce the args as a dict
+    #parallel          = args.parallel
+    basename          = args.basename
+    
+    scatter_plot      = args.scatter
+    validation_plot   = args.overlay
+    
+    cleanup           = args.cleanup
+    verbose           = args.verbose
+    #capture_output    = not args.verbose
+    
+    if len(args.paths) == 1:
+        cwd     = args.paths[0]
+        in_dir  = pj(cwd, "sparcfire-in")
+        tmp_dir = pj(cwd, "sparcfire-tmp")
+        out_dir = pj(cwd, "sparcfire-out")
+
+    elif len(args.paths) == 3:
+        in_dir, tmp_dir, out_dir = args.paths[0], args.paths[1], args.paths[2]
+        #print(f"Paths are, {in_dir}, {tmp_dir}, {out_dir}")
+
+    elif len(args.paths) == 4:
+        cwd, in_dir, tmp_dir, out_dir = args.paths[0], args.paths[1], args.paths[2], args.paths[3]
+        #print(f"Paths are, {in_dir}, {tmp_dir}, {out_dir}")
+
+    else:
+        in_dir  = pj(cwd, "sparcfire-in")
+        tmp_dir = pj(cwd, "sparcfire-tmp")
+        out_dir = pj(cwd, "sparcfire-out")
+        print(f"Paths incorrectly specified, defaulting to {cwd} (-in, -tmp, -out)...")
+        print(f"{in_dir}\n{tmp_dir}\n{out_dir}")
+        print()
         
     if not exists(in_dir) or not exists(out_dir):
-        raise(f"Cannot find input/output directories {in_dir} {out_dir}.")
+        raise(f"Cannot find input/output directories: {in_dir} {out_dir}.")
         
-    model_dir = pj(out_dir, "tmp_galfit_models")
+    basename_dir = pj(out_dir, basename)
+    if not exists(basename_dir):
+        raise(f"Cannot find directory designated for output: {basename_dir}.")
+        
+    model_dir = pj(tmp_dir, "tmp_galfit_models")
     
-    pitch_angle_info = main(in_dir, out_dir, scatter_plot = scatter_plot, validation_plot = validation_plot, model_dir = model_dir)
+    pitch_angle_info = main(
+        in_dir, 
+        out_dir, 
+        scatter_plot    = scatter_plot, 
+        validation_plot = validation_plot,
+        model_dir = model_dir,
+        verbose   = verbose
+    )
     
-    filename = pj(out_dir, "pitch-angle_info.pkl")
+    filename = pj(basename_dir, f"{basename}_pitch_angle_info.pkl")
     pitch_angle_info.to_pickle(filename)
     #pd.dump(pa_rgrid_theta, open(filename, 'wb'))
     if cleanup:
-        sp(f"rm -rf {model_dir}")
+        shutil.rmtree(model_dir)
+    #    sp(f"rm -rf {model_dir}")
     
