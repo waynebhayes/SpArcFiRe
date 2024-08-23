@@ -28,15 +28,16 @@ if [[ ! $in_dir || ! $tmp_dir || ! $out_dir ]]; then
     fi
 fi
 
-pre_galfit_in=$in_dir
-pre_galfit_out=$out_dir
-
-basename_dir="$pre_galfit_out"/"$basename"
+basename_dir="$out_dir"/"$basename"
 
 if [[ ! -d $basename_dir ]]; then 
     echo "Cannot find $basename_dir. Did you specify the right name? Quitting."
     exit
 fi
+
+# TODO: consider alternative name such as pre_sparcfire_rerun-in
+pre_galfit_in="pre_galfit-in" 
+pre_galfit_out="pre_galfit-out"
 
 post_galfit_in="post_galfit-in"
 post_galfit_out="post_galfit-out"
@@ -53,11 +54,14 @@ if [[ -d $post_galfit_out ]]; then
     rm -rf $post_galfit_out
 fi
 
-# Assume galaxy.csv corresponds to the results that were just used to create models
+# Be careful about restarting
+mv $in_dir $pre_galfit_in
+mv $out_dir $pre_galfit_out
+
 cp $pre_galfit_out/"galaxy.csv" $pre_galfit_out/"${basename}"/"${basename}_pre_galfit_galaxy.csv"
 cp $pre_galfit_out/"galaxy_arcs.csv" $pre_galfit_out/"${basename}"/"${basename}_pre_galfit_galaxy_arcs.csv"
 
-mkdir -p $post_galfit_in $post_galfit_out
+mkdir -p $default_in $default_tmp $default_out
 
 # Populate input folder with models
 # True indicates to flip u/d the models to keep consistent with SpArcFiRe's processing
@@ -65,24 +69,11 @@ mkdir -p $post_galfit_in $post_galfit_out
 echo "Populating new input folder with arm-only models... (this may take awhile)"
 for gfits in "$tmp_dir"/"galfits"/*"_for_sparcfire.fits"; do   
     gfits_base="${gfits##*/}"
-    cp $gfits "$post_galfit_in"/"${gfits_base/_for_sparcfire/}"
+    cp $gfits $default_in/"${gfits_base/_for_sparcfire/}"
 done
 
-# Set up additional command line inputs to SpArcFiRe
 ext="*.fits"
 conv_fits="-convert-FITS "
-elps_dir="$(pwd)"/"elps-dir"
-elps=""
-# if [[ -d $elps_dir ]]; then
-#    elps="-elps_dir $elps_dir "
-    
-    # Since the GALFIT files are already cropped, we don't want 
-    # SpArcFiRe to re-crop them.
-    # Don't need this after all
-    # for efile in "$elps_dir"/*"_elps.txt"; do
-    #     sed -i s/"cropRad=[0-9]*"/"cropRad=0"/g "$efile"
-    # done
-# fi
 #img_standardize="1"
 
 # if [ -x "`/bin/which fitspng 2>/dev/null`" ]; then
@@ -129,10 +120,9 @@ elps=""
 # fi
 
 # Prep for parallel
-# Determine how to split up input for processing
 echo "Preparing to run SpArcFiRe with distributed computing"
 #input_arr=($(ls "$default_in/"*".fits"))
-input_arr=($(find "$post_galfit_in" -name "$ext"))
+input_arr=($(find "$default_in" -name "$ext"))
 input_count="${#input_arr[@]}"
 cpu_count=$(nproc --all)
 cpu_count=$((cpu_count / 4)) # Since MATLAB uses multithreading (3)
@@ -140,7 +130,6 @@ cpu_count=$(( cpu_count < input_count ? cpu_count : input_count ))
 
 parallel_file="send_to_parallel_sparcfire"
 
-# Make directories for parallelizing and write calls to SpArcFiRe to file
 # Ceiling division
 per_cpu=$(( (input_count/cpu_count)+(input_count%cpu_count>0) ))
 for (( cpu_num=0; cpu_num<$cpu_count; ++cpu_num )); do
@@ -150,9 +139,8 @@ for (( cpu_num=0; cpu_num<$cpu_count; ++cpu_num )); do
     # Run sparcfire with defaults on assuming it has already been setup
     # Also no need for star masking
     # Pad images to even so that we can turn off image standardization
-    # elps and conv_fits have spaces in them already
     if [[ $arr_start -lt $input_count ]]; then
-        echo "${SPARCFIRE_HOME}/scripts/SpArcFiRe ${conv_fits}-compute-starmask false -ignore-starmask ${elps}$new_dir $default_tmp $post_galfit_out -generateFitQuality 0 -allowArcBeyond2pi 0 -unsharpMaskAmt 8 -unsharpMaskSigma 25 -useDeProjectStretch 0 -fixToCenter 1 -medFiltRad 0 -useImageStandardization 1 -errRatioThres 2.8"
+        echo "${SPARCFIRE_HOME}/scripts/SpArcFiRe ${conv_fits}-compute-starmask false -ignore-starmask $new_dir $default_tmp $default_out -generateFitQuality 0 -writeBulgeMask 1 -allowArcBeyond2pi 0 -unsharpMaskAmt 8 -useDeProjectStretch 1 -fixToCenter 0 -medFiltRad 0 -useImageStandardization 1 -errRatioThres 2.8"
     fi
     
     arr_start=$(( $cpu_num*$per_cpu  ))
@@ -174,18 +162,25 @@ parallel_script="${SPARCFIRE_HOME}/GalfitModule/ParallelDrivers/parallel"
 
 # RUN SPARCFIRE
 echo "Running SpArcFiRe (again) with $cpu_count nodes"
-#cat "$parallel_file" | "nice" "-19" "$parallel_script" "SPARCFIRE_ON_GALFIT" "-M" "all"
 cat "$parallel_file" | "nice" "-19" "$parallel_script" "$cpu_count"
 
-# Rename results to include basename
+mv $in_dir $post_galfit_in
+mv $out_dir $post_galfit_out
+
 cp $post_galfit_out/"galaxy.csv" $post_galfit_out/"${basename}_post_galfit_galaxy.csv"
 cp $post_galfit_out/"galaxy_arcs.csv" $post_galfit_out/"${basename}_post_galfit_galaxy_arcs.csv"
 
-# Copy results to basename output directory
+mv $pre_galfit_in $in_dir
+mv $pre_galfit_out $out_dir
+
 cp $post_galfit_out/"${basename}_post_galfit_galaxy.csv" "$basename_dir"/"${basename}_post_galfit_galaxy.csv"
 cp $post_galfit_out/"${basename}_post_galfit_galaxy_arcs.csv" "$basename_dir"/"${basename}_post_galfit_galaxy_arcs.csv"
 
+# Now that everything has run, let's populate the final results directory
+# mv $tmp_dir/"galfits" "$basename_dir"/"${basename}_galfits"
+# mv $out_dir/"galfit_png" "$basename_dir"/"${basename}_galfit_png"
+
 # Cleanup
-rm -rf "$parallel_file" "${default_in}_"*
+rm -rf "$parallel_file" "sparcfire-in_"*
 # Sparcfire junk
 rm -rf "a" "not" "tty" "SpArcFiRe-stdin.stdin.txt" *"_settings.txt"

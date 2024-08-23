@@ -39,7 +39,7 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 # Component number: 1
  0) sersic              # Component type
  1) 48.9445 49.6255 0  0 # Position x, y
- 3) 12.0        1       # Integrated magnitude
+ 3) 14.0        1       # Integrated magnitude
  4) 2.7439      1       # R_e (effective radius)   [pix]
  5) 4.0         1       # Sersic index n (de Vaucouleurs n=4)
  9) 0.9409      1       # Axis ratio (b/a)
@@ -49,14 +49,14 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 # Component number: 2
  0) sersic              # Component type
  1) 48.9445 49.6255 0  0 # Position x, y
- 3) 12.0        1       # Integrated magnitude
- 4) 7.5869      1       # R_e (effective radius)   [pix]
+ 3) 14.0        1       # Integrated magnitude
+ 4) 10.1159     1       # R_e (effective radius)   [pix]
  5) 1.0         1       # Sersic index n (de Vaucouleurs n=4)
  9) 0.8065      1       # Axis ratio (b/a)
  10) 137.8168   1       # Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
-# Component number: 4
+# Component number: 3
  0) sky                 # Component type
  1) 1000.0      1       # Sky background at center of fitting region [ADUs]
  2) 0.0         1       # dsky/dx (sky gradient in x)     [ADUs/pix]

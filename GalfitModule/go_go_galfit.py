@@ -32,7 +32,7 @@ from Classes.FitsHandlers import *
 from Functions.helper_functions import *
 #from Utilities.parallel_residual_calc import fill_objects #, parallel_wrapper
 
-import StarRemoval.no_log_remove_stars_with_sextractor as remove_stars_with_sextractor
+import star_removal.no_log_remove_stars_with_sextractor as remove_stars_with_sextractor
 
 # ns2_component_switches = nt("component_switches", ["bulge", "disk_for_arms", "arms", "fourier", "sky"])
 
@@ -87,14 +87,7 @@ def check_success(in_fits, previous_state = False):
     
     return (previous_state or False)
 
-def generate_model_for_sparcfire(
-    gfits, 
-    base_galfit_cmd, 
-    in_dir, 
-    tmp_fits_dir = "",
-    output_dir   = "",
-    rad          = (None, None)
-):
+def generate_model_for_sparcfire(gfits, base_galfit_cmd, tmp_fits_dir = ""):
     gname  = os.path.basename(gfits).replace("_galfit_out.fits", "")
     suffix = "for_sparcfire"
     if not tmp_fits_dir:
@@ -103,42 +96,11 @@ def generate_model_for_sparcfire(
     fits_file = OutputFits(gfits, load_default = False)
     feedme = fits_file.feedme
     
-    feedme.header.input_image.value   = pj(in_dir, f"{gname}.fits")
-    feedme.header.output_image.value  = pj(tmp_fits_dir, f"{gname}_{suffix}.fits")
-    if output_dir:
-        feedme.header.output_image.value  = pj(output_dir, f"{gname}_{suffix}.fits")
-
-    center = feedme.sersic_0.position
-    # In an attempt to avoid more I/O...
-    # Alas I don't think I can use this
-    rad_x  = rad[0]
-    rad_y  = rad[1]
-    
-    if not all(rad):
-        # No crop to allow SpArcFiRe to use its autocrop routine 
-        # without issue
-        with fits.open(pj(in_dir, f"{gname}.fits")) as in_fits:
-            input_file_shape = np.shape(in_fits[0].data)
-            rad_x, rad_y = input_file_shape[0] // 2, input_file_shape[1] // 2
-
-    feedme.header.region_to_fit.value = (
-        center.x - rad_x, 
-        center.x + rad_x, 
-        center.y - rad_y, 
-        center.y + rad_y
-    )
-    feedme.header.optimize.value      = 1
+    feedme.header.output_image.value = pj(tmp_fits_dir, f"{gname}_{suffix}.fits")
+    feedme.header.optimize.value     = 1
     
     if "power_0" in feedme.components: #or "arms" in feedme.components:
         power_comp_number = feedme.power_0.component_number
-        # Strongly detuning the arms to give SpArcFiRe the best chance of success
-        rot_comp = [
-            name for name, comp in feedme.components.items()
-            if  comp.component_number == power_comp_number
-            and comp.component_type   == "sersic"
-        ][0]
-        
-        feedme.components[rot_comp].axis_ratio.value = 0.15
         
         # Set all other sersic components to 0 to just keep the disk being rotated
         # and the header and sky
@@ -282,10 +244,6 @@ async def run_galfit(
         cname : galfit_output.components[cname] for cname, switch in component_switches.items() if switch[0]
     }
     
-    # This doesn't seem to help :(
-    # At least not on the set of 14
-    #comps_to_file["bulge"].sersic_index.value = 4
-    
     # to_file no arguments uses the feedme path attribute for location
     # and uses all the components in the container object (in whatever order they're in)
     header.to_file(filepath_in, *comps_to_file.values())
@@ -365,8 +323,7 @@ async def parameter_search_fit(
     
     header = initial_components.header
     
-    initial_components.bulge.magnitude.value += bulge_magnitude
-    #initial_components.bulge.magnitude.value = bulge_magnitude
+    initial_components.bulge.magnitude.value = bulge_magnitude
     #initial_components.disk.magnitude.value  = disk_magnitude
     
     #if use_spiral:
@@ -378,7 +335,7 @@ async def parameter_search_fit(
     # And the input dict is *before* output but will be updated *by* output
     # ---------------------------------------------------------------------
     
-    bulge_str = f"m{10*bulge_magnitude:.0f}"
+    bulge_str = f"m{bulge_magnitude}"
     #disk_str  = f"m{disk_magnitude}"
     #disk_str  = "m" + str(bulge_sersic).replace(".", "")
                 
@@ -402,7 +359,6 @@ async def parameter_search_fit(
     
     # first number is switch for using bulge, disk_for_arms, arms, fourier, sky
     # second is switch for taking from original feedme or previous output... TODO: remove?
-
     # Starting choices
     if num_steps == 1:
         component_switches = {cname : [1,0] for cname in initial_components.components.keys()}
@@ -782,7 +738,7 @@ def main(**kwargs):
         
         if galaxies_to_mask:
             # I think we have to change path for source extractor
-            star_removal_path = pj(_MODULE_DIR, "StarRemoval")
+            star_removal_path = pj(_MODULE_DIR, "star_removal")
             os.chdir(star_removal_path)
             remove_stars_with_sextractor.main(in_dir, tmp_masks_dir, galaxies_to_mask)
             os.chdir(cwd)
@@ -804,7 +760,7 @@ def main(**kwargs):
         galaxies_to_mask = check_for_starmasks(galaxy_names, sf_masks_dir)
         
         if galaxies_to_mask:
-            star_removal_path = pj(_MODULE_DIR, "StarRemoval")
+            star_removal_path = pj(_MODULE_DIR, "star_removal")
             os.chdir(star_removal_path)
             remove_stars_with_sextractor.main(sf_in_dir, sf_masks_dir, galaxies_to_mask)
             os.chdir(cwd)
@@ -830,8 +786,7 @@ def main(**kwargs):
     # Non-inclusive of end
     # I keep b_d_magnitudes even though I fix the disk for ease of modification
     # in the future
-    b_d_magnitudes = [(b, 15) for b in np.linspace(-2, 2, num = 5)]
-    # b_d_magnitudes = [(b, 15) for b in range(12, 17)]
+    b_d_magnitudes = [(b, 15) for b in range(12, 17)] #for d in range(12, 16)]
     #b_magnitudes = range(12, 17)
     #b_d_magnitudes = [(b, d) for b in range(12, 17) for d in range(13, 17)]
     #[(b, d*0.1) for b in range(12, 17) for d in range(5, 41, 5)]
@@ -986,12 +941,8 @@ def main(**kwargs):
                                 out_png_dir   = out_png_dir
                                 #cleanup = False # TEMPORARY UNTIL IMAGEMAGICK WORKS AGAIN
                                )
-            try:
-                shutil.copy2(f"{pj(out_png_dir, gname)}_combined.png", pj(out_dir, gname))
-                
-            except Exception as e:
-                print(f"Something went wrong copying the final combined png to the output galaxy directory for {gname}...")
-                print(e)
+
+            shutil.copy2(f"{pj(out_png_dir, gname)}_combined.png", pj(out_dir, gname))
 
         # No point in doing this in parallel because race conditions
         if not parallel and not use_async:
@@ -1010,11 +961,7 @@ def main(**kwargs):
         
         # Creating a version of the galaxy for SpArcFiRe to use
         # Do this last just in case there's an issue
-        _ = generate_model_for_sparcfire(
-            tmp_fits_path_gname, 
-            base_galfit_cmd, 
-            in_dir
-        )
+        _ = generate_model_for_sparcfire(tmp_fits_path_gname, base_galfit_cmd)
         
         print()
         
@@ -1030,7 +977,7 @@ def main(**kwargs):
         for (b,d) in b_d_magnitudes:
         #for b in b_magnitudes:
             #prefix = f"m{b}m{d}"
-            prefix = f"m{10*b:.0f}"
+            prefix = f"m{b}"
             
             # Parameter Search outputs
             to_del.extend([

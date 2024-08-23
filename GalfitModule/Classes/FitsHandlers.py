@@ -19,9 +19,6 @@ import numpy as np
 import scipy.linalg as slg
 from scipy.stats import norm, kstest
 from skimage.draw import disk, ellipse
-
-import imageio.v3 as iio
-
 import matplotlib.pyplot as plt
 
 
@@ -246,93 +243,38 @@ class FitsFile:
         tmp_png_path   = pj(tmp_png_dir, gname)
         tmp_png_path   = kwargs.get("tmp_png_path", tmp_png_path)
         
-        # TODO: Add starmask into output fits file as an image block
-#         with fits.open(starmask_path) as sm:
-#                 starmask_HDU = fits.ImageHDU(data = sm.data, header = sm.header, name = "STARMASK")
-                
-#         with fits.open(fits_path, mode='update', output_verify='ignore') as fits_hdu:
-#             fits_hdu.append(starmask_HDU)
-            
-        starmask_dir  = kwargs.get("starmask_dir", "./")
-        # Temporarily hardcoding the suffix here
-        starmask_path = pj(starmask_dir, f"{gname}_star-rm.fits")
-                           
-        out_png_dir   = kwargs.get("out_png_dir", "./")
+        out_png_dir    = kwargs.get("out_png_dir", "./")
         
         capture_output = bool(kwargs.get("silent", False))
         
-        combined_suffix = kwargs.get("combined_suffix", "combined")
-        primary_img_num = kwargs.get("primary_img_num", 1)
-        
-        fitspng_param       = "0.25,1" #1,150"
-        fitspng_param_model = "0.25,0.75"
-            
-        # Different conventions... 0 is used for model/observation only
-        if self.num_imgs == 1:
-            primary_img_num = 0
-            
-        else:
-            if exists(starmask_path):
-                # copied from below
-                # ASSUME (for now) that this is doable
-                # TODO: remove this when starmask is incorporated into fits files
-                feedme = FeedmeContainer(path_to_feedme = fits_path, header = GalfitHeader())
-                feedme.from_file(list(self.all_hdu.values())[1].header)
-                
-                crop_box = feedme.header.region_to_fit.value
-                # To adjust for python indexing
-                # Also, reminder, non-inclusive of end
-                xbox_min, xbox_max, ybox_min, ybox_max = crop_box[0] - 1, crop_box[1], crop_box[2] - 1, crop_box[3]
-                
-                with fits.open(starmask_path) as fits_starmask:
-                    # masked pixels have value 1, other pixels 0
-                    # so invert those with a bit of quick math
-                    starmask_data = np.abs(fits_starmask[0].data - 1)
-                    starmask_data = starmask_data[xbox_min : xbox_max, ybox_min : ybox_max]
-
-                with fits.open(fits_path, mode='update', output_verify='ignore') as fits_hdu:
-                    try:
-                        fits_hdu[primary_img_num + 2].data *= starmask_data
-                    except ValueError:
-                        print("Broadcasting issue when attempting to mask the residual array.")
-                        print("Leaving it alone")
-                
-        im1 = f"{tmp_png_path}_observation.png"
-        im2 = f"{tmp_png_path}_out.png"
-        im3 = f"{tmp_png_path}_residual.png"
+        fitspng_param  = "0.25,1" #1,150"
         
         # run_fitspng from helper_functions, string path to fitspng program
-        fitspng_cmd1   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {im1} {fits_path}[{primary_img_num}]"
-        fitspng_cmd2   = f"{run_fitspng} -fr \"{fitspng_param_model}\" -o {im2} {fits_path}[{primary_img_num + 1}]"            
-        fitspng_cmd3   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {im3} {fits_path}[{primary_img_num + 2}]"
+        fitspng_cmd1   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}.png {fits_path}[1]"
         
-        cmds             = [fitspng_cmd1, fitspng_cmd2, fitspng_cmd3]
-        output_png_files = [im1, im2, im3]
+        fitspng_cmd2   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}_out.png {fits_path}[2]"
         
-        # for n-images
-        for i in range(primary_img_num + 3, self.num_imgs):
-            png_name = f"{tmp_png_path}_image{i}.png"
-            
-            output_png_files.append(png_name)
-            
-            cmds.append(
-                f"{run_fitspng} -fr \"{fitspng_param}\" -o {png_name} {fits_path}[{i}]"
-            )
-            
+        fitspng_cmd3   = f"{run_fitspng} -fr \"{fitspng_param}\" -o {tmp_png_path}_residual.png {fits_path}[3]"
+        
+        cmds = [fitspng_cmd1, fitspng_cmd2, fitspng_cmd3]
         
         # sp is from helper_functions, subprocess.run call
         for cmd in cmds[:self.num_imgs]:
             # We must capture this call to check if the conversion worked
             fitspng_out = sp(cmd, capture_output = True)
             
-            if "error" in fitspng_out.stderr.lower():
+            if "error" in fitspng_out.stderr:
                 print("Skipping fitspng conversion... there is likely a library (libcfitsio) issue.")
-                print(f"Error is:\n{fitspng_out.stderr}")
                 self.combined_png = ""
                 return
         
-        if self.num_imgs == 1:
-            combined_suffix = ""
+        im1 = f"{tmp_png_path}.png"
+        im2 = f"{tmp_png_path}_out.png"
+        im3 = f"{tmp_png_path}_residual.png"
+        
+        combined = ""
+        if self.num_imgs > 1:
+            combined = "_combined"
         
         # Adding 'magick' to use the portable version in the GalfitModule
         run_montage     = shutil.which("magick")
@@ -348,30 +290,28 @@ class FitsFile:
             run_montage += " montage"
             
         montage_cmd = run_montage + " " + \
-                      " ".join(im_cmd for idx, im_cmd in enumerate(output_png_files)
-                               if idx + 1 <= self.num_imgs)
+                      " ".join(im_cmd for idx, im_cmd in enumerate([im1, im2, im3]) 
+                               if idx <= self.num_imgs)
         
         tiling = f"1x{self.num_imgs}"
         if kwargs.get("horizontal", None):
-            tiling           = f"{self.num_imgs}x1"
-            combined_suffix += "_horizontal"
+            tiling = tiling = f"{self.num_imgs}x1"            
             
         # Combining the images using ImageMagick
         # If this is a single image, it'll also resize for me so that's why I leave it in
-        montage_cmd += f" -tile {tiling} -geometry \"175x175+2+2\" " \
-                       f"{pj(out_png_dir, gname)}_{combined_suffix}.png"
+        montage_cmd += f" -tile {tiling} -geometry \"175x175+2+2\" \
+                        {pj(out_png_dir, gname)}{combined}.png"
         
         if run_montage:
             _ = sp(montage_cmd, capture_output = capture_output)
-            self.combined_png    = f"{pj(out_png_dir, gname)}_{combined_suffix}.png"
+            self.combined_png    = f"{pj(out_png_dir, gname)}{combined}.png"
         
         if cleanup:
-            _ = rm_files(*output_png_files)
+            _ = rm_files(im1, im2, im3)
         else:
             self.observation_png = im1
             self.model_png       = im2
             self.residual_png    = im3
-            self.all_png         = output_png_files
 
 # ==========================================================================================================
 
@@ -542,38 +482,7 @@ class OutputFits(FitsFile):
     
 # ==========================================================================================================
         
-    def generate_cluster_mask(self, cluster_mask_png, crop_box):
-        # 1237668297135030610-D_clusMask.png
-
-        cluster_mask = None
-        try:
-            cluster_img = iio.imread(cluster_mask_png, mode = "L")
-        except FileNotFoundError as fe:
-            print(fe)
-            return cluster_mask
-
-        xbox_min, xbox_max, ybox_min, ybox_max = crop_box[0] - 1, crop_box[1], crop_box[2] - 1, crop_box[3]
-        cluster_img = cluster_img[xbox_min:xbox_max, ybox_min:ybox_max]
-        
-        cluster_mask = deepcopy(cluster_img)
-        # Mask non-clusters
-        cluster_mask[cluster_img == 0] = 1
-        # Leave clusters alone
-        cluster_mask[cluster_img != 0] = 0
-        
-        self.cluster_mask = cluster_mask
-        
-        return cluster_mask
-    
-# ==========================================================================================================
-        
-    def generate_masked_residual(
-        self, 
-        mask, 
-        use_bulge_mask = False,
-        use_cluster_mask = False,
-        update_fits_header = True
-    ):
+    def generate_masked_residual(self, mask, use_bulge_mask = True, update_fits_header = True):
 
         small_number = 1e-8
         
@@ -618,8 +527,9 @@ class OutputFits(FitsFile):
                 
             crop_mask = 1 - cropped_mask
             
-        feedme_dir, feedme_file = os.path.split(self.feedme.path_to_feedme)
         if use_bulge_mask:
+            feedme_dir, feedme_file = os.path.split(self.feedme.path_to_feedme)
+            
             if exists(pj(feedme_dir, f"{self.gname}.csv")):
                 crop_mask = self.generate_bulge_mask(pj(feedme_dir, f"{self.gname}.csv")) * crop_mask
             else:
@@ -631,21 +541,6 @@ class OutputFits(FitsFile):
                 except ValueError:
                     print(f"Could not generate bulge mask for {self.gname}. There may be an issue with sparcfire output (broadcast issue).")
         
-        if use_cluster_mask:
-            # Use reprojected mask
-            cmask_filename = pj(feedme_dir, f"{self.gname}-K_clusMask-reprojected.png")
-            
-            if exists(cmask_filename):
-                crop_mask = self.generate_cluster_mask(cmask_filename, crop_box) * crop_mask
-            else:
-                # REQUIRES GENERATE_CLUSTER_MASK TO BE RUN SEPARATE WITH CSV FILE SPECIFIED 
-                try:
-                    crop_mask = self.cluster_mask * crop_mask
-                except AttributeError:
-                    print(f"Could not generate cluster mask for {self.gname}. Check location of csv or run generate_bulge_mask with a specified csv file.")
-                except ValueError:
-                    print(f"Could not generate cluster mask for {self.gname}. There may be an issue with sparcfire output (broadcast issue).")
-            
         try:
             # compare to gaussian with same mean, std via kstest
             # if p value high, not that different
@@ -811,8 +706,7 @@ if __name__ == "__main__":
     model_to_update = pj(TEST_OUTPUT_DIR, f"temp_galfit_out.fits")
     
     if exists(model_to_update):
-        #sp(f"rm -f {model_to_update}")
-        rm_files(model_to_update)
+        sp(f"rm -f {model_to_update}")
         
     _ = sp(f"cp {model} {model_to_update}")
 
@@ -823,16 +717,12 @@ if __name__ == "__main__":
     keys_to_check = ("NMR", "KS_P", "W_NMR")
     
     # TODO: replace fits file with one without those header options
-    # Expect False
     print("Before... (expect False)", all(k in test_model.header for k in keys_to_check))
-    assert not all(k in test_model.header for k in keys_to_check), "Expected False."
-    
     
     _ = test_model.generate_masked_residual(test_mask)
     test_model = OutputFits(model_to_update)
 
     print("After...", all(k in test_model.header for k in keys_to_check))
-    assert all(k in test_model.header for k in keys_to_check), "Expected True."
 
 
 # In[11]:
@@ -841,10 +731,9 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     print("Checking if all FITS files are closed...")
     print("Expect True:", not any("fits" in pof.path for pof in psutil.Process().open_files()))
-    assert not any("fits" in pof.path for pof in psutil.Process().open_files()), "Expected True."
 
 
-# In[12]:
+# In[ ]:
 
 
 if __name__ == "__main__":

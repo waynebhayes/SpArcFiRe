@@ -21,11 +21,10 @@
 # image in the set, then 'prev' to view the first before proceeding onwards.
 # This is not a high priority but will be fixed eventually.
 
-from glob import glob
+import glob
 import PySimpleGUI as sg
 from shutil import move
 from os.path import exists
-from os.path import basename as bn
 from os.path import join as pj
 import sys
 
@@ -33,7 +32,7 @@ from PIL import Image, ImageTk
 
 
 def parse_folder(path):
-    images = glob(f'{path}/*.jpg')# + glob.glob(f'{path}/*.png')
+    images = glob.glob(f'{path}/*.jpg')# + glob.glob(f'{path}/*.png')
     return images
 
 def load_image(path, window):
@@ -64,8 +63,8 @@ def main():
         #],
         [
             sg.Button("Prev"),
-            sg.Button("Success"),
-            sg.Button("Not Success")
+            sg.Button("Next"),
+            sg.Button("Mislabeled")
             #sg.Button("Non-Spiral")
         ]
     ]
@@ -76,32 +75,21 @@ def main():
     # Vertical
     window = sg.Window("Image Viewer", elements, size=(400, 900))
     
-    images   = []
+    images = []
     location = 0
-    count    = 0
 
-    basename     = sys.argv[1]
-    img_path     = sys.argv[2]
-    failure_path = sys.argv[3]
-
+    img_path        = sys.argv[1]
+    failure_path    = sys.argv[2] #pj(values["file"], "false_positive")
+#    non_spiral_path = pj(basepath, sys.argv[3]) #pj(values["file"], "false_positive")
     images = parse_folder(img_path)#values["file"])
     while images:
-        if not count % 100:
-            print(count)
-        
-        try:
-            gfile = images[location]
-        except:
-            break
-        
-        load_image(gfile, window)
+        load_image(images[location], window)
         event, _ = window.read()
 
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
 
-        if event == "Success" and images:
-            count += 1
+        if event == "Next" and images:
             if location == len(images) - 1:
                 break
             else:
@@ -119,28 +107,37 @@ def main():
             #load_image(images[location], window)
             continue
 
-        if event == "Not Success" and images:
-            count += 1
-            
-            if exists(gfile):
-                print(f"Moving {gfile} to {failure_path}")
-                move(gfile, failure_path)
+        if event == "Mislabeled" and images:
+            if exists(images[location]):
+                print(f"Moving {images[location]} to {failure_path}")
+                move(images[location], failure_path)
                 images.pop(location)
             else:
                 print("image has already been moved... continuing")
 
             if location == len(images) - 1:
                 break
+            #else:
+            #    location += 1
+
+            #load_image(images[location], window)
+
+#        if event == "Non-Spiral" and images:
+#            if exists(images[location]):
+#                print(f"Moving {images[location]} to {non_spiral_path}")
+#                move(images[location], non_spiral_path)
+#                images.pop(location)
+#            else:
+#                print("image has already been moved... continuing")
+
+#            if location == len(images) - 1:
+#                break
+#            else:
+#                location += 1
+
+#            load_image(images[location], window)
 
     window.close()
-    
-    print(f"Outputting success and not success text files with galaxy IDs only to current working directory.")
-    # Re-find galaxies in case a mistake was made and a galaxy had to be manually moved
-    with open(f"{basename}_by-eye_success.txt", "w") as f:
-        f.write("\n".join([bn(i).replace("_combined.jpg", "") for i in parse_folder(img_path)]))
-        
-    with open(f"{basename}_by-eye_not_success.txt", "w") as f:
-        f.write("\n".join([bn(i).replace("_combined.jpg", "") for i in parse_folder(failure_path)]))
 
 
 if __name__ == "__main__":

@@ -3,8 +3,6 @@ USAGE="USAGE: $0 [-use-git-at]  [ list of tests to run, defaults to regression-t
 NL='
 '
 die() { echo "$USAGE${NL}FATAL ERROR: $@" >&2; exit 1;}
-TestGawk(){ echo hello | gawk '{++array[$1][$1]}' || die "Upgrade to a [g]awk that supports multi-dimensional arrays"; }
-TestGawk
 
 while [ "X$1" != X ]; do
     case "$1" in

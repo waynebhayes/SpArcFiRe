@@ -54,10 +54,10 @@ def fill_objects(
     out_dir = "", 
     to_png = True, 
     parallel = True,
-    use_bulge_mask = False,
-    use_cluster_mask = False
+    use_bulge_mask = True
 ):
     
+    use_bulge_mask = False
     output_df = pd.DataFrame()
     
     report_num = 1000
@@ -81,6 +81,9 @@ def fill_objects(
         #return gname, None, None, None
         return None
     
+    #last_feedme_file = pj(out_dir, gname, f"{gname}.in")
+    #if not exists(last_feedme_file):
+    #feedme_files = glob(pj(out_dir, gname, f"*.in"))
     if galfit_mask_path.endswith(".fits"):
         mask_fits_name = galfit_mask_path
     else:
@@ -113,30 +116,15 @@ def fill_objects(
     
     # If skip is enabled then arms are not fit so bulge masking doesn't make sense
     c_types = [comp.component_type for comp in fits_file.feedme.components.values()]
-    
-    # BULGE MASK
     if use_bulge_mask and out_dir and ("power" in c_types):
-        _ = fits_file.generate_bulge_mask(
-            pj(out_dir, gname, f"{gname}.csv")
-        )
+    #if out_dir and "power" in c_types:
+        _ = fits_file.generate_bulge_mask(pj(out_dir, gname, f"{gname}.csv"))
+        #use_bulge_mask = True
     else:
         use_bulge_mask = False
         
-    # CLUSTER MASK
-    if use_cluster_mask and out_dir and ("power" in c_types):
-        crop_box = fits_file.feedme.header.region_to_fit.value
-        _ = fits_file.generate_cluster_mask(
-            pj(out_dir, gname, f"{gname}-K_clusMask-reprojected.png"), crop_box
-        )
-    else:
-        use_cluster_mask = False
-        
-    masked_residual_normalized = fits_file.generate_masked_residual(
-        mask_fits_file, 
-        use_bulge_mask = use_bulge_mask, 
-        use_cluster_mask = use_cluster_mask
-        #update_fits_header = True
-    )
+    #masked_residual_normalized = fits_file.generate_masked_residual(mask_fits_file, use_bulge_mask = use_bulge_mask)
+    masked_residual_normalized = fits_file.generate_masked_residual(mask_fits_file, use_bulge_mask = use_bulge_mask)
     if masked_residual_normalized is None:
         print(f"Could not calculate nmr for galaxy {gname}. Continuing...")
         #return gname, None, None, None
@@ -209,12 +197,7 @@ def main(**kwargs):
     verbose        = kwargs.get("verbose", False)
     capture_output = kwargs.get("capture_output", True)
     
-    basename_dir = pj(out_dir, basename)
-    if not exists(basename_dir):
-        os.mkdir(basename_dir)
-        
-    final_pkl_file = f'{pj(basename_dir, basename)}_{pkl_end_str}.pkl'
-    
+    final_pkl_file = f'{pj(out_dir, basename)}_{pkl_end_str}.pkl'
     if not parallel and exists(final_pkl_file):
         ans = input(f"Do you wish to delete the current final output nmr pickle file? Y/N\n{final_pkl_file}\n")
         if ans.upper() == "Y":

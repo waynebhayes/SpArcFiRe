@@ -56,16 +56,6 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
  10) 90.0       1       # Position angle (PA) [deg: Up=0, Left=90]
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
-# Component number: 3
- 0) sersic              # Component type
- 1) 25 25       0  0    # Position x, y
- 3) 16.0        1       # Integrated magnitude
- 4) 10.0        1       # R_e (effective radius)   [pix]
- 5) 1.0         1       # Sersic index n (de Vaucouleurs n=4)
- 9) 0.5         1       # Axis ratio (b/a)
- 10) 90.0       1       # Position angle (PA) [deg: Up=0, Left=90]
- Z) 0                   # Skip this model in output image?  (yes=1, no=0)
-
 R0) power               # Component type
 R1) 0.0         0       # Spiral inner radius [pixels]
 R2) 10.0        0       # Spiral outer radius [pixels]
@@ -77,7 +67,7 @@ F1) 0.0500 45   1  1    # Azim. Fourier mode 1, amplitude, & phase angle
 F3) 0.0500 25   1  1    # Azim. Fourier mode 3, amplitude, & phase angle
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
-# Component number: 4
+# Component number: 3
  0) sky                 # Component type
  1) 1000.0      1       # Sky background at center of fitting region [ADUs]
  2) 0.0         1       # dsky/dx (sky gradient in x)     [ADUs/pix]

@@ -39,7 +39,7 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 # Component number: 1
  0) sersic              # Component type
  1) 47.5102 47.1619 0  0 # Position x, y
- 3) 12.0        1       # Integrated magnitude
+ 3) 14.0        1       # Integrated magnitude
  4) 3.2715      1       # R_e (effective radius)   [pix]
  5) 4.0         1       # Sersic index n (de Vaucouleurs n=4)
  9) 0.8971      1       # Axis ratio (b/a)
@@ -49,17 +49,7 @@ P) 0                    # Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps
 # Component number: 2
  0) sersic              # Component type
  1) 47.5102 47.1619 0  0 # Position x, y
- 3) 12.0        1       # Integrated magnitude
- 4) 9.9269      1       # R_e (effective radius)   [pix]
- 5) 1.0         1       # Sersic index n (de Vaucouleurs n=4)
- 9) 0.7564      1       # Axis ratio (b/a)
- 10) 119.1664   1       # Position angle (PA) [deg: Up=0, Left=90]
- Z) 0                   # Skip this model in output image?  (yes=1, no=0)
-
-# Component number: 3
- 0) sersic              # Component type
- 1) 47.5102 47.1619 0  0 # Position x, y
- 3) 12.0        1       # Integrated magnitude
+ 3) 14.0        1       # Integrated magnitude
  4) 13.2358     1       # R_e (effective radius)   [pix]
  5) 1.0         1       # Sersic index n (de Vaucouleurs n=4)
  9) 0.7564      1       # Axis ratio (b/a)
@@ -70,14 +60,14 @@ R0) power               # Component type
 R1) 0.0         0       # Spiral inner radius [pixels]
 R2) 5.8504      0       # Spiral outer radius [pixels]
 R3) 35.9728     1       # Cumul. rotation out to outer radius [degrees]
-R4) 1.1         1       # Asymptotic spiral powerlaw
+R4) 1.4523      1       # Asymptotic spiral powerlaw
 R9) -40.8498    1       # Inclination to L.o.S. [degrees]
 R10) 31.6672    1       # Sky position angle
 F1) 0.0500 45   1  1    # Azim. Fourier mode 1, amplitude, & phase angle
 F3) 0.0500 25   1  1    # Azim. Fourier mode 3, amplitude, & phase angle
  Z) 0                   # Skip this model in output image?  (yes=1, no=0)
 
-# Component number: 4
+# Component number: 3
  0) sky                 # Component type
  1) 1000.0      1       # Sky background at center of fitting region [ADUs]
  2) 0.0         1       # dsky/dx (sky gradient in x)     [ADUs/pix]

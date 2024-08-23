@@ -23,32 +23,13 @@ from Classes.Containers import *
 from Classes.FitsHandlers import *
 from Functions.helper_functions import *
 
-
-def wrapper(
-    gfits, 
-    out_png_dir,
-    starmask_dir = "./",
-    single_image = False, 
-    hoirzontal   = False, 
-    cleanup      = True
-):
-    
+def wrapper(gfits, out_png_dir, hoirzontal = False):
     if os.stat(gfits).st_size == 0:
         print(f"{os.path.basename(gfits)} is empty!!!")
         return
 
-    if not single_image:
-        output = OutputFits(gfits)
-    else:
-        output = FitsFile(gfits)
-        output.gname = os.path.basename(gfits).split(".fits")[0]
-        
-    output.to_png(
-        out_png_dir   = out_png_dir,
-        starmask_dir  = starmask_dir,
-        horizontal    = horizontal, 
-        cleanup       = cleanup
-    )
+    output = OutputFits(gfits)
+    output.to_png(out_png_dir = out_png_dir, horizontal = horizontal)
 
 
 if __name__ == "__main__":
@@ -57,13 +38,10 @@ if __name__ == "__main__":
 
     python3 ./{sys.argv[0]} [OPTION] PNG-OUT-DIRECTORY [FITS-DIRECTORY | SPACE SEPARATED FITS FILES]
     
-    OPTIONS =>[-h   | --help]
-              [-smd | --starmask-directory]
-              [-s   | --single-image]
-              [-nc  | --no-cleanup]
-              [-H   | --horizontal]
-              [-v   | --verbose]
-              [-ff  | --from-file]
+    OPTIONS =>[-h  | --help]
+              [-H  | --horizontal]
+              [-v  | --verbose]
+              [-ff | --from-file]
 
     This script is a utility to generate images from output GALFIT FITS files using the to_png 
     functionality of the OutputFits class.
@@ -71,35 +49,12 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description = USAGE)
     
-    parser.add_argument('-smd', '--starmask-directory',
-                        dest     = 'starmask_dir',
-                        action   = 'store',
-                        default  = "./",
-                        help     = 'Specify the directory which contains the starmasks to be used to generated masked residuals.'
-                       )
-    
-    parser.add_argument('-s', '--single-image',
-                        dest     = 'single_image',
-                        action   = 'store_const',
-                        const    = True,
-                        default  = False,
-                        help     = 'Specify that the FITS files being read in are only a single image data block, i.e. model or observation only.'
-                       )
-    
     parser.add_argument('-H', '--horizontal',
                         dest     = 'horizontal',
                         action   = 'store_const',
                         const    = True,
                         default  = False,
                         help     = 'Choose to orient the output images from GALFIT horizontally as opposed to vertically (better for papers).'
-                       )
-    
-    parser.add_argument('-nc', '--no-cleanup',
-                        dest     = 'cleanup',
-                        action   = 'store_const',
-                        const    = False,
-                        default  = True,
-                        help     = 'Do not cleanup the individual pngs which are combined into the final montage\'d image.'
                        )
     
     parser.add_argument('-ff', '--from-file',
@@ -131,11 +86,7 @@ if __name__ == "__main__":
     out_png_dir    = args.out_png_dir
     list_o_fits    = args.list_o_fits
     
-    starmask_dir   = args.starmask_dir
-    single_image   = args.single_image
     horizontal     = args.horizontal
-    cleanup        = args.cleanup
-    
     from_file      = args.from_file
     
     verbose        = args.verbose
@@ -164,8 +115,8 @@ if __name__ == "__main__":
             
     #if "bayonet" in sp(f"hostname").stdout.split(".")[0]:
     if len(list_o_fits) > 500:
-        Parallel(n_jobs = -2)(delayed(wrapper)(gfits, out_png_dir, starmask_dir, single_image, horizontal, cleanup) for gfits in list_o_fits)
+        Parallel(n_jobs = -2)(delayed(wrapper)(gfits, out_png_dir, horizontal) for gfits in list_o_fits)
     else:
-        _ = [wrapper(gfits, out_png_dir, starmask_dir, single_image, horizontal, cleanup) for gfits in list_o_fits]
+        _ = [wrapper(gfits, out_png_dir, horizontal) for gfits in list_o_fits]
     #else:
     #    print("Not on bayonet, can't generate galaxies.")

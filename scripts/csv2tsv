@@ -1,15 +1,15 @@
 #!/bin/sh
 DIR="`dirname $0`"
 PATH="$PATH:$SPARCFIRE_HOME/scripts:$DIR"
-export PATH
+export path
 TAB='	'
 for i
 do
     b=`echo "$i" | sed 's/\.csv//'`
-    # The purpose of all these contortions are to ensure that in the header line of a TSV file, all header
-    # names are valid AWK variable names. We also try to remove extraneous spaces and DOS/Windoze carriage
-    # returns, replace entirely empty columns with an underscore, among other things.
-    sed 's///' "$i" | delete-commas-inside-quotes | sed \
+    # The purpose of all these contortions are to ensure that in the header line of a TSV file,
+    # all header names are valid AWK variable names. We also try to remove extraneous spaces,
+    # replace entirely empty columns with an underscore, among other things.
+    cat "$i" | delete-commas-inside-quotes | sed \
 	-e 's/ ,/,/g' -e 's/, /,/g' \
 	-e 's;^\([0-9][0-9]\)/\([0-9][0-9]\)/\([0-9]*\);\3-\1-\2;' \
 	-e 's;^\([0-9][0-9]\)/\([0-9]\)/\([0-9]*\);\3-\1-0\2;' \
