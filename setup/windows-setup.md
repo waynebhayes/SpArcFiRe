@@ -123,15 +123,15 @@ If you want to run SpArcFiRe with different command line arguments, please see o
 ## Section 5: Install package needed for GALFIT
 All the effort above is to make sure you can run the basic function of SpArcFiRe, and if you want to run GALFIT module, these following packages are needed for python3
 
-Install numpy,if you haven't, by using Command `python3 -m pip instal1 numpy`
-Install scipy,if you haven't, by using Command `python3 -m pip instal1 scipy`
-Install astropyif you haven't, by using Command `python3 -m pip install astropy`
-Install pandas if you haven't, by using Command `python3 -m pip install pandas`
-Install lpython if you haven't, by using Command `python3 -m pip instal1 Ipython`
-Install skimage if you haven't, by using Command `python3 -m pip install scikit-image`
-Install matplotlib if you haven't, by using Command `python3 -m pip instal1 matplotlib`
-Install pickle if you haven't by using Command `python3 -m pip install pickle-mixin`
-Install joblib if you haven't, by using Command `python3 -m pip install joblib`
+Install numpy,if you haven't, by using Command `sudo apt install python3-numpy`
+Install scipy,if you haven't, by using Command `sudo apt install python3-scipy`
+Install astropyif you haven't, by using Command `sudo apt install python3-astropy`
+Install pandas if you haven't, by using Command `sudo apt install python3-pandas`
+Install lpython if you haven't, by using Command `sudo apt install python3-ipython`
+Install skimage if you haven't, by using Command `sudo apt install python3-skimage`
+Install matplotlib if you haven't, by using Command `sudo apt install python3-matplotlib`
+Install pickle if you haven't (though it should have been installed with python) by using Command `sudo apt install python3-pickle-mixin`
+Install joblib if you haven't, by using Command `sudo apt install python3-joblib`
 
 By the way, we also need to install GALFIT, if you want to learn more about it, click [here](https://users.obs.carnegiescience.edu/peng/work/galfit/galfit.html) to get more information. Here are instructions about how to install galfit.
 
