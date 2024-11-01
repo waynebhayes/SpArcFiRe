@@ -130,8 +130,11 @@ Install pandas if you haven't, by using Command `python3 -m pip install pandas`
 Install lpython if you haven't, by using Command `python3 -m pip instal1 Ipython`
 Install skimage if you haven't, by using Command `python3 -m pip install scikit-image`
 Install matplotlib if you haven't, by using Command `python3 -m pip instal1 matplotlib`
-Install pickle if you haven't by using Command `python3 -m pip install pickle-mixin`
+Install pickle if you haven't by using Command `python3 -m pip install pickle-mixin` (should be installed with python by default)
 Install joblib if you haven't, by using Command `python3 -m pip install joblib`
+
+*Note that when using WSL, there might be issues when using 'python3 pip install'. In those cases, use 'sudo apt install-[package name]'
+Also note that when using 'sudo apt install', the package name might be different from the package name when using 'python3 pip install'. 
 
 By the way, we also need to install GALFIT, if you want to learn more about it, click [here](https://users.obs.carnegiescience.edu/peng/work/galfit/galfit.html) to get more information. Here are instructions about how to install galfit.
 
