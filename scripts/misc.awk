@@ -792,7 +792,7 @@ function AUPR_FPR(name,  FP, TN){FP=_AUPR_FP[name];TN=_AUPR_TN[name]; return FP/
 # Converted to awk: Wayne Hayes (2020-March-09)
 
 function LS_Reset(name) {_LS_valid[name]=_LS_SUMx[name]=_LS_SUMy[name]=_LS_SUMxy[name]=_LS_SUMxx[name]=_LS_n[name]=0; delete _LS_x[name]; delete _LS_y[name]}
-function LS_Sample(name,x,y) {_LS_valid[name]=0;_LS_SUMx[name]+=x;_LS_SUMy[name]+=y;_LS_SUMxy[name]+=x*y;_LS_SUMxx[name]+=x*x;_LS_x[name][_LS_n]=x;_LS_y[name][_LS_n]=y;++_LS_n[name]}
+function LS_Sample(name,x,y) {_LS_valid[name]=0;_LS_SUMx[name]+=x;_LS_SUMy[name]+=y;_LS_SUMxy[name]+=x*y;_LS_SUMxx[name]+=x*x;_LS_x[name][_LS_n[name]]=x;_LS_y[name][_LS_n[name]]=y;++_LS_n[name]}
 function LS_Slope(name){_LS_slope[name]=(_LS_SUMx[name]*_LS_SUMy[name] - _LS_n[name]*_LS_SUMxy[name] )/( _LS_SUMx[name]*_LS_SUMx[name] - _LS_n[name]*_LS_SUMxx[name])
     return _LS_slope[name]
 }
