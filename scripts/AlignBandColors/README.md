@@ -2,28 +2,28 @@
 
 ## About
 
-AlignBandColors is a program that aligns inter-waveband images of the same galaxy to a 1/30th of a pixel accuracy.  A detailed analysis of this program was published in the Journal of Astronomy and Computing [link tbd].  
+AlignBandColors is a program that aligns inter-waveband images of the same galaxy to a 1/30th of a pixel accuracy.  A detailed analysis of this program was published in the [Journal of Astronomy and Computing](https://www.sciencedirect.com/science/article/pii/S2213133722000415).  
 
 ## Requirements
 
 - Using a x86 Linux based operating system
+- Python 3.10 environment outlined below
+- (Recommended) 16GB of memory or more
+    - If running into memory limitations, turn `-runInParallel` off, this will process only a single image at a time.
+    - If still running into issues then lower `-upscaleFactor` (this will lead to lower accuracy if less than 100).
 
-- Python 3.10
-   - astropy        (5.0.4)
-   - matplotlib     (3.5.1)
-   - numpy          (1.22.3)
-   - Pillow         (9.1.0)
-   - psutil         (5.9.0)
-   - scipy          (1.8.0)
+## Environment Setup
+Install Python 3.10 and the included pip packages requirements.txt.  This can be done globally or use through pyenv as outlined below.
 
-- [Recommended] 16GB of memory or more
-    - If running into memory limitations, turn `-runInParallel` off
-    - If still running into issues then lower `-upscaleFactor` (this will lead to lower accuracy if less than 100)
+### Pyenv Setup
+1. Follow [this link](https://realpython.com/intro-to-pyenv/) for instructions on setting up pyenv.  Be sure to install all system packages listed and add the required changes to your shell profile.
+2. Install Python 3.10 with the following `
+pyenv install 3.10`
+3. Confirm it is available with `pyenv versions`
+4. Navigate to the `AlignBandColors` directory and set the local python version using `pyenv local 3.10`, verify it is selected by `pyenv versions`
+5. Install the required packages using `python -m pip install -r requirements.txt`
 
-## Setup
-
-Install Python 3.10 and run `setup.sh` to install all of the above libraries.
-
+## Image Setup
 Before running AlignBandColors on images, make sure to have your input images organized as follows:
 
 InputDirectory/  
@@ -42,7 +42,6 @@ The fits image names must contain a '_color' in the filename, otherwise the prog
 For documentation on command line options, run 
 >./abc.sh -h
 
-
 ## Version History
 - July 2021
     - Initial release
@@ -52,4 +51,8 @@ For documentation on command line options, run
     - Added option for waveband labels (-colorsToProcess [COLORS]) 
     - Fixed issue with updating non-SDSS FITS headers
     - Updated output data to be stored in a CSV
+
+- November 2025
+    - Fix file loading path issue
+    - Update README and environment setup
 

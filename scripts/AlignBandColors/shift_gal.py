@@ -313,7 +313,6 @@ def shift_wavebands(galaxy : "Galaxy", shift_vectors : dict, template_color : st
     
     else:
         needed_memory = galaxy.width * galaxy.height * upscale_factor**2 * 8
-        print(galaxy.width, galaxy.images('g').shape)
         if needed_memory > max_memory:
             raise NotEnoughMemoryError(needed_memory)
 
