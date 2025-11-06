@@ -54,5 +54,6 @@ For documentation on command line options, run
 
 - November 2025
     - Fix file loading path issue
+    - Fix g-band needing to be present
     - Update README and environment setup
 
