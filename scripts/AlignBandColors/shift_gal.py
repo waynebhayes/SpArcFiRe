@@ -187,7 +187,7 @@ def average_vector(m_src : "[Star]", m_trg : "[Star]", maxsigma : float = 2) -> 
 
 def shift_img(gal : "ndarray", vector : "[x, y]", upscale_factor : int, gal_dict : dict = dict(), color : str = "NoColor", check_count : bool = True):
     """
-    Shifts the image by the given vector using Lanczos interoplation, updates the image in gal_dict
+    Shifts the image by the given vector using Lanczos interpolation, updates the image in gal_dict
 
     Arguments:
         gal            (ndarray) : Image to apply the shift to
@@ -236,7 +236,7 @@ def get_galaxy_vectors(galaxy : "Galaxy", template_color : str, min_stars_all : 
         galaxy         (Galaxy) : Galaxy object with images present
         template_color (str)    : Color to shift all other wavebands too match
         min_stars_all  (int)    : Minimum number of stars needed in all wavebands
-        max_star_dist  (float)  : Maximums distance betwen pairs of source and target stars
+        max_star_dist  (float)  : Maximums distance between pairs of source and target stars
         ignore_sigma   (bool)   : Whether to ignore calculated shifts of individual
                                   stars that are too far from the mean 
 
@@ -290,7 +290,7 @@ def shift_wavebands(galaxy : "Galaxy", shift_vectors : dict, template_color : st
     
     Arguments:
         galaxy          (Galaxy) : Galaxy object with input images
-        shift_vecors    (dict)   : Mapping of color to needed shift for alignment
+        shift_vectors   (dict)   : Mapping of color to needed shift for alignment
         template_color  (str)    : Color that all other wavebands are aligning to
         upscale_factor  (int)    : Amount of times each input image is upscaled for shifted
         run_in_parallel (bool)   : Whether to shift all wavebands in parallel
