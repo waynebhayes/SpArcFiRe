@@ -1,4 +1,4 @@
-astropy==5.0.4
+astropy==5.3.3
 cycler==0.12.1
 fonttools==4.60.1
 kiwisolver==1.4.9
