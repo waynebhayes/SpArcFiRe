@@ -1,6 +1,6 @@
 astropy==5.3.3
 cycler==0.12.1
-fonttools==4.60.1
+fonttools==4.61.0
 kiwisolver==1.4.9
 matplotlib==3.5.1
 numpy==1.22.3
