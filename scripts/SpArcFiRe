@@ -32,7 +32,13 @@ COMMAND_LINE="$0 $@"
 [ $# -eq 0 ] && die "Expecting at least 3 arguments"
 
 # find a tmp directory with lots of space
-TMPDIR=`df -m /tmp /scratch/ /preserve 2>/dev/null | tail -n +2 | sort -k 4nr | awk '{print $NF; exit}'`
+
+if grep -qi "microsoft" /proc/version 2>/dev/null || grep -qi "wsl" /proc/version 2>/dev/null; then
+    TMPDIR="/tmp"
+    echo "WSL detected: Setting TMPDIR to $TMPDIR"
+else 
+    TMPDIR=`df -m /tmp /scratch/ /preserve 2>/dev/null | tail -n +2 | sort -k 4nr | awk '{print $NF; exit}'`
+fi
 export TMPDIR
 
 #Define custom functions for error/warning handling
@@ -122,8 +128,16 @@ esac
 # Make csv2tsv and any other files that may need compiling
 (cd $SPARCFIRE_HOME && make all) || die "could not compile files via 'make'. Is 'SPARCFIRE_HOME' correctly set?"
 
+#check that none of the input files have more than one "." in filename
+if (cd "$inDir" && ls | fgrep -v -f "$SKIP" | grep -q "\..*\."); then
+    BAD_FILES=$(cd "$inDir" && ls | fgrep -v -f "$SKIP" | grep "\..*\.")
+    die "There are files in the input directory that contain more than one '.'.
+SpArcFiRe will not read these files correctly:
+$BAD_FILES"
+fi
+
 # Check to ensure NONE of the output directories exist
-(cd "$inDir" && ls | fgrep -v -f "$SKIP") | (cd "$outDir" && while read gal; do [ -d "$gal" ] && die "Cowardly refusing to run ANY galaxy because its output directory '$outDir/$gal' already exists"; done) || die "Cowardly refusing to run because a galaxy output dir already exists"
+((ls "$inDir" | fgrep -v -f "$SKIP") | while read gal; do if [ -d "$outDir/${gal%.*}" ]; then die "Cowardly refusing to run ANY galaxy because its output directory '$outDir/$gal' already exists"; fi; done) || die  "Cowardly refusing to run ANY galaxy because its output directory '$outDir/$gal' already exists"
 
 # copy only the necessary (non-skip) files to sfDir
 (cd "$inDir" && (ls | fgrep -v -f "$SKIP" | xargs --no-run-if-empty $SPARCFIRE_HOME/scripts/reverse-cp.sh $sfDir)) || die "could not copy files from '$inDir' to $sfDir"
@@ -193,6 +207,7 @@ if "$WEB"; then  # don't allow huge images
 fi
 
 # Finally, run SpArcFiRe itself
+echo "Log going to $outDir/SpArcFiRe.log"
 ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\.[Ff][Ii][Tt][Ss]*$//' | fgrep -v -f "$SKIP" |
     (   while read f; do
 	if [ -f "$pngDir/${f}_starmask.png" ]; then
@@ -214,7 +229,7 @@ ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\
 	    fi
 	fi
 	echo $pngDir $f .png $SM $EF $GUIDE_DIR $outDir; done | randomizeLines; echo exit) | tee $TTY |
-    echo "Log going to $outDir/SpArcFiRe.log"
+    
     $SPARCFIRE_HOME/scripts/SpArcFiRe-stdin.sh -lookForBulge 1 -writeSettingsForEveryImage 1 -generateOrientationFieldPdf 1 "$@" > $outDir/SpArcFiRe.log
 ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\.[Ff][Ii][Tt][Ss]$//' | fgrep -v -f "$SKIP"
 
