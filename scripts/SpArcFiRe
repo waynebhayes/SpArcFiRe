@@ -60,6 +60,7 @@ SKIP="/dev/null"
 CONVERT_ARGS=""
 TTY=`tty || echo /dev/null`
 
+SURVEY_ARGS=''
 #Handle Sparcfire input arguments
 for i in "$@"
 do
@@ -83,6 +84,15 @@ do
 	[ -f "$SKIP" ] || die "skip file '$SKIP' must be a file containing, line-by-line, names of galaxies to skip"
 	;;
     -web) WEB=true; shift;;
+    -hubble|-hst)
+	[ "$SURVEY_ARGS" = "" ] || die "can't specify survey-specific args '$1' more than once"
+	SURVEY_ARGS="-unsharpMaskSigma 40 -unsharpMaskAmt 9 -numOrientationFieldLevels 4 -allowArcBeyond2pi 0 -clusSizeCutoff 230"
+	;;
+    -jwst)
+	[ "$SURVEY_ARGS" = "" ] || die "can't specify survey-specific args '$1' more than once"
+	die "Vatsa hasn't yet provide explicit JWST survey args"
+	SURVEY_ARGS=""
+	;;
     -*) die "put [other SpArcFiRe options] AFTER the three directory names";;
     *) break;;
     esac
@@ -230,7 +240,7 @@ ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\
 	fi
 	echo $pngDir $f .png $SM $EF $GUIDE_DIR $outDir; done | randomizeLines; echo exit) | tee $TTY |
     
-    $SPARCFIRE_HOME/scripts/SpArcFiRe-stdin.sh -lookForBulge 1 -writeSettingsForEveryImage 1 -generateOrientationFieldPdf 1 "$@" > $outDir/SpArcFiRe.log
+    $SPARCFIRE_HOME/scripts/SpArcFiRe-stdin.sh $SURVEY_ARGS -lookForBulge 1 -writeSettingsForEveryImage 1 -generateOrientationFieldPdf 1 "$@" > $outDir/SpArcFiRe.log
 ls "$sfDir" | sed -e 's/\.[Pp][Nn][Gg]$//' -e 's/\.[Jj][Pp][Ee]*[Gg]$//' -e 's/\.[Ff][Ii][Tt][Ss]$//' | fgrep -v -f "$SKIP"
 
 # Now extract the CSV files
