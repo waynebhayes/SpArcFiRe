@@ -43,7 +43,7 @@ In order to view a galaxy straight on SpArcFiRe has to warp the original image o
 
 **-skip FILE_DIR**
 
-Using this option you can specify a list of galaxies you don't want to run in the FILE_DIR. Make sure each line contains one galaxy name.
+Using this option you can specify a list of galaxies you don't want to run in the FILE_DIR. Make sure each line contains one galaxy name. Note: the "galaxy" name refers to the directory that SpArcFiRe will create, it is the input filename without the ".fits".
 
 
 ## Required Arguments ##

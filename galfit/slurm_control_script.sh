@@ -264,7 +264,7 @@ done
 if [ ! -z "$slurm" ]; then
     slurm_run_name="GALFITTING"
     echo "Running with slurm"
-    cat $slurm_file | ~wayne/bin/distrib_slurm $slurm_run_name -M all
+    cat $slurm_file | /home/sana/bin/distrib_slurm $slurm_run_name -M all
     #TODO: Modify png_fix to take in, tmp, out dir as args
     png_fix.sh
     rm -r "$HOME/SLURM_turds/$slurm_run_name"

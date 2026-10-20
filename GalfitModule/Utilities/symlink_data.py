@@ -55,11 +55,11 @@ if __name__ == "__main__":
     NEW_BASE_DIR = sys.argv[2] #/extra/wayne_scratch0/preserve/portman/29k_galaxies_gband
     #SDSS_filepath = "/home/wayne/research/drdavis/SDSS/FITS/2015/color/r"
     COLOR    = sys.argv[3]
-    DATA_DIR = f"/extra/wayne1/research/drdavis/SDSS/SpArcFiRe/2016-09/{COLOR}/"
+    DATA_DIR = f"/extra/wayne2/research/drdavis/SDSS/SpArcFiRe/2016-09/{COLOR}/"
 
     NEW_SPARC_IN  = pj(NEW_BASE_DIR, "sparcfire-in") 
     NEW_SPARC_TMP = pj(NEW_BASE_DIR, "sparcfire-tmp") 
-    NEW_SPARC_OUT = pj(NEW_BASE_DIR, "sparcfire-out") #"/extra/wayne1/preserve/portmanm/sparcfire-out"
+    NEW_SPARC_OUT = pj(NEW_BASE_DIR, "sparcfire-out") #"/extra/wayne2/preserve/portmanm/sparcfire-out"
 
     # Make sparcfire-in if not found
     # No need to do this for sparcfire-out, I use makedirs to cover that later
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     slurm2 = False
     if slurm2:
         _ = sp(f"chmod a+rx {copy_filename}")
-        _ = sp(f"cat {copy_filename} | ~wayne/bin/distrib_slurm {DUMP_NAME} -M all", capture_output = False)
+        _ = sp(f"cat {copy_filename} | ~sana/bin/distrib_slurm {DUMP_NAME} -M all", capture_output = False)
 
     cleanup = False
     if cleanup:

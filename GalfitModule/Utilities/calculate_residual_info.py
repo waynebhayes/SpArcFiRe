@@ -261,7 +261,7 @@ def main(**kwargs):
             
         elif parallel == 2:
             # TODO: Add check if not on Slurm capable machine
-            run_parallel      = "~wayne/bin/distrib_slurm"
+            run_parallel      = "~sana/bin/distrib_slurm"
             parallel_run_name = "CALCULATE_COMBINE_GALFIT_RESULTS"
             parallel_options  = "-M all"
             

@@ -9,17 +9,20 @@ import load_gals
 # Exception is raised when a waveband color is requested that is not present
 class InvalidGalColorError(Exception): pass
 
-# Exception is raised when an error is encoutered when cropping the images
+# Exception is raised when an error is encountered when cropping the images
 class CroppingError(Exception): pass
 
 # Exception is raised when creating a galaxy and wavebands do not match
 class GalsAndStarsDoNotContainTheSameWavebandsError(Exception): pass
 
+# Exception is raised when image dimensions are not the same across all wavebands loaded
+class ImageDimensionsInconsistentError(Exception): pass
+
 
 class Galaxy:
     """ Class that stores all information about a galaxy in all wavebands """
     def __init__(self, gal_dict, stars_dict, star_class_perc, name):
-        # It is exptected that gal_dict and stars_dict contain the same
+        # It is expected that gal_dict and stars_dict contain the same
         #    wavebands in the same order.
 
         if gal_dict.keys() != stars_dict.keys():
@@ -34,9 +37,15 @@ class Galaxy:
             self.stars_dict.update({color: [s for s in stars_dict[color] if s.class_prob >= star_class_perc]})
 
         self.name = name
-        if 'g' in self.gal_dict.keys():
-            self.width = self.gal_dict['g'][0].data.shape[1]
-            self.height = self.gal_dict['g'][0].data.shape[0]
+
+        # Check all dimensions are the same
+        widths  = {gal[0].data.shape[1] for gal in self.gal_dict.values()}
+        heights = {gal[0].data.shape[0] for gal in self.gal_dict.values()}
+        if len(widths) != 1 or len(heights) != 1:
+            raise ImageDimensionsInconsistentError
+        
+        self.width  = widths.pop()
+        self.height = heights.pop()
         self.num_wb = len(self.gal_dict)
         
     

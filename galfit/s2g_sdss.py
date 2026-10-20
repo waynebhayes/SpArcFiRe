@@ -62,8 +62,8 @@ def s2g_sdss(sdssOutDir, sdssIds, galfitInDir, useHash, quantity, steps):
 			compare.compare_images('galfit_out/' + objId + '-out.fits', os.path.join(objIdPath, objId + '-K_clusMask-reprojected.png'), os.path.join(objIdPath, objId + '.csv'), os.path.join('fit_logs', objId + '-fit.log'), 'compare_out', objId) 
 			
 def read_SpiralsIDS():
-	sdssOutDir = '/extra/wayne1/research/drdavis/SDSS/SpArcFiRe/r'
-	sdssIdFile = '/extra/wayne1/research/drdavis/SDSS/SpiralsIDS.csv'
+	sdssOutDir = '/extra/wayne2/research/drdavis/SDSS/SpArcFiRe/r'
+	sdssIdFile = '/extra/wayne2/research/drdavis/SDSS/SpiralsIDS.csv'
 	sdssIds = read_csv(sdssIdFile)['objID']
 	galfitInDir = 'galfit_in'
 	useHash = True 

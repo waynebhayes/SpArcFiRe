@@ -8,7 +8,7 @@ from astropy.io import fits
 from galaxy import *
 
 
-# Exception that is raised if an issue is encountered with Sourece Extractor
+# Exception that is raised if an issue is encountered with Source Extractor
 class SextractorError(Exception): pass
 
 
@@ -28,7 +28,8 @@ def get_sextractor_points(fits_path : str) -> "[Star]":
         source_path = os.path.join(abc_path, os.pardir, "sex")
         tmp_path    = os.path.join(abc_path, "tmp")
         txt_path    = os.path.join(tmp_path, f"{os.path.basename(fits_path)}_star_out_{time.time()}.txt")
-        
+        fits_path   = os.path.abspath(fits_path)
+
         # In case this is called from not the root directory, use absolute paths
         prev_cwd = os.getcwd()
         os.chdir(os.path.join(abc_path, "SourceExtractor"))
@@ -57,7 +58,7 @@ def get_sextractor_points(fits_path : str) -> "[Star]":
 
 def get_seg_img(img : "ndarray") -> "ndarray":
     """
-    Runs Source Extractor on the given FITS image to get a segmenation image
+    Runs Source Extractor on the given FITS image to get a segmentation image
     
     Arguments:
         img (ndarray) : 2D array of image
@@ -150,7 +151,7 @@ def load_galaxy(galpath : str, galname : str, star_class_perc : float, colors : 
     """
     Loads the galaxy loacated at galpath and returns a Galaxy object
 
-    Argumnets:
+    Arguments:
         galpath         (str)   : Path of galaxy image
         galname         (str)   : Name of the galaxy
         star_class_perc (float) : Minimum star class probability in order to be counted as a star
@@ -217,7 +218,7 @@ def load_galaxies(in_dir : str, star_class_perc : float, outdir : str, colors : 
         colors          (tuple) : Colors to look for (i.e. 'u', 'g', etc...  
 
     Returns:
-        Galaxy object if sucessfull, the galaxy name if unsucessful
+        Galaxy object if successful, the galaxy name if unsuccessful
     """
     
     outnames = os.listdir(outdir)
@@ -256,7 +257,8 @@ def load_galaxies(in_dir : str, star_class_perc : float, outdir : str, colors : 
             else: 
                 yield load_galaxy(os.path.join(in_dir, galname), galname, star_class_perc, colors)
 
-        except:
+        except Exception as e:
+            print(f'Exception encountered: {type(e).__name__}')
             yield galname
         
         finally:

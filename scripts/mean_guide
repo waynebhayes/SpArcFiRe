@@ -14,8 +14,8 @@ die() { echo "$USAGE${NL}FATAL ERROR: $@" >&2; exit 1;}
 
 
 
-ALIGPATH="/extra/wayne1/research/drdavis/SDSS/FITS/2020/SDSS_DR12_Aligned/ByColor"
-MEANPATH="/extra/wayne1/research/drdavis/SDSS/FITS/2020/SDSS_DR12_Aligned/AllColorsSummed"
+ALIGPATH="/extra/wayne2/research/drdavis/SDSS/FITS/2020/SDSS_DR12_Aligned/ByColor"
+MEANPATH="/extra/wayne2/research/drdavis/SDSS/FITS/2020/SDSS_DR12_Aligned/AllColorsSummed"
 
 
 
@@ -58,7 +58,7 @@ cp -r ${ALIGPATH}/${HASH}/"$1" $TMP/"$1"
 
 unxz $TMP/"$1"/*
 mkdir $TMP/meanFITS/
-#/extra/wayne1/preserve/skylarjh/skylars_guided_runs/mean/createMeans $TMP/meanFITS/"$1".fits $TMP/"$1"/"$1"_r.fits $TMP/"$1"/"$1"_g.fits $TMP/"$1"/"$1"_i.fits $TMP/"$1"/"$1"_u.fits $TMP/"$1"/"$1"_z.fits
+#/extra/wayne2/preserve/skylarjh/skylars_guided_runs/mean/createMeans $TMP/meanFITS/"$1".fits $TMP/"$1"/"$1"_r.fits $TMP/"$1"/"$1"_g.fits $TMP/"$1"/"$1"_i.fits $TMP/"$1"/"$1"_u.fits $TMP/"$1"/"$1"_z.fits
 
 
 
@@ -73,7 +73,7 @@ mkdir $TMP/SDSS/G.out
 mkdir $TMP/SDSS/G.tmp
 mkdir $TMP/guide
 cp -r $TMP/meanFITS/"$1".fits $TMP/SDSS/G.in/
-/extra/wayne1/preserve/skylarjh/SpArcFiRe/scripts/SpArcFiRe -convert-FITS $TMP/SDSS/G.in $TMP/SDSS/G.tmp $TMP/SDSS/G.out -writeBulgeMask 1
+/extra/wayne2/preserve/skylarjh/SpArcFiRe/scripts/SpArcFiRe -convert-FITS $TMP/SDSS/G.in $TMP/SDSS/G.tmp $TMP/SDSS/G.out -writeBulgeMask 1
 cp -r $TMP/SDSS/G.out $TMP/guide/
 
 
